@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import numpy as np
 
+
 @dataclass
 class SimConfig:
     freqs: np.ndarray
@@ -10,6 +11,7 @@ class SimConfig:
     nside: int = 128
     site: str = "lusee"
     faraday: bool = True
+
 
 class Simulator(self, beam, sky, grid):
     def __init__(self, beam, sky, grid):
@@ -30,7 +32,7 @@ class Simulator(self, beam, sky, grid):
         -------
         np.ndarray
             Simulated visibilities for Rxx, Ryy, and Rxy.
-        
+
         """
         w = self.beam.weights
         m = self.grid.mask
@@ -57,18 +59,18 @@ class Simulator(self, beam, sky, grid):
         -------
         np.ndarray
             Stokes parameters I, Q, U.
-        
+
         """
         Rxx, Ryy, Rxy = Rmat
 
-        I = 1/2 * (Rxx + Ryy)
-        Q = 1/2 * (Rxx - Ryy)
+        I = 1 / 2 * (Rxx + Ryy)
+        Q = 1 / 2 * (Rxx - Ryy)
         U = 2 * np.real(Rxy)
 
         return np.array([I, Q, U])
 
     def simulate(self, cfg):
-        #XXX figure shapes
+        # XXX figure shapes
         res = np.empty((cfg.freqs.size, cfg.times.size, 3, 3))
         for t in times:
             I_t, Q_t, U_t = sky.to_topocentric(

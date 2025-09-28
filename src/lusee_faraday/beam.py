@@ -1,14 +1,17 @@
 from astropy.io import fits
 import numpy as np
 
+from . import HealpixGrid
+
 def rotate_beam(jones, angle):
     """
-    Rotate the beam by a given angle.
+    Rotate the beam by a given angle, counter-clockwise about the z-axis.
 
     Parameters
     ----------
     jones : np.ndarray
-        The Jones matrix. First axis is (Eth, Eph).
+        The Jones matrix. Shape is (2, ntheta, nphi); first axis is
+        (Eth, Eph).
 
     angle : float
         Angle to rotate the beam by in degrees, counter-clockwise.
@@ -17,12 +20,29 @@ def rotate_beam(jones, angle):
     -------
     np.ndarray
         The rotated Jones matrix.
-    
+
     """
-    raise NotImplementedError 
+    raise NotImplementedError
+
 
 class Beam:
     def __init__(self, jones_x, jones_y):
+        """
+        Initialize the Beam object.
+
+        Parameters
+        ----------
+        jones_x : np.ndarray
+            The Jones matrix for the X polarization.
+        jones_y : np.ndarray
+            The Jones matrix for the Y polarization.
+
+        Notes
+        -----
+        The Jones matrices should have shape (2, npix), where the first axis
+        corresponds to (Eth, Eph) and npix is the number of HEALPix pixels.
+
+        """
         self.jones_x = jones_x
         self.jones_y = jones_y
 
@@ -41,7 +61,7 @@ class Beam:
             HEALPix nside parameter for the output beam map.
         orientation : str
             Orientation of the beam, either "x" or "y".
-        
+
         Returns
         -------
         Beam
@@ -51,7 +71,7 @@ class Beam:
         ------
         ValueError
             If the orientation is not "x" or "y".
-        
+
         """
         with fits.open(path) as f:
             # shape is freq, theta, phi
@@ -61,8 +81,8 @@ class Beam:
             Eth = Eth[freq_ix]
             Eph = Eph[freq_ix]
             # remove phi = 360 deg duplicate
-            Eth = Eth[.., :-1]
-            Eph = Eph[.., :-1]
+            Eth = Eth[..., :-1]
+            Eph = Eph[..., :-1]
 
         jones = np.array([Eth, Eph])
         # add lower hempisphere but cut off one theta pixel
@@ -74,8 +94,8 @@ class Beam:
         jones180 = rotate_beam(jones, 180)
         jones270 = rotate_beam(jones, 270)
 
-        pseudo_dipole0 = 1/np.sqrt(2) * (jones - jones180)
-        pseudo_dipole90 = 1/np.sqrt(2) * (jones90 - jones270)
+        pseudo_dipole0 = 1 / np.sqrt(2) * (jones - jones180)
+        pseudo_dipole90 = 1 / np.sqrt(2) * (jones90 - jones270)
 
         if orientation == "y":
             jones_x = pseudo_dipole90
@@ -95,7 +115,7 @@ class Beam:
         jones_x_hp = grid.bin(jones_x, theta=th, phi=ph)
         jones_y_hp = grid.bin(jones_y, theta=th, phi=ph)
 
-        return cls(jones_x_hp, jones_y_hp) 
+        return cls(jones_x_hp, jones_y_hp)
 
     @classmethod
     def short_dipole(cls, nside=128):
@@ -106,12 +126,12 @@ class Beam:
         ----------
         nside : int
             HEALPix nside parameter for the output beam map.
-        
+
         Returns
         -------
         Beam
             An instance of the Beam class with the short dipole beam data.
-        
+
         """
         grid = HealpixGrid(nside=nside, horizon=True)
         # X beam
@@ -129,5 +149,39 @@ class Beam:
         """
         Precompute the weights needed for convolution with the sky.
 
+        Returns
+        -------
+        weights : dict
+            A dictionary containing the precomputed weights. The keys
+            are 'wI_x', 'wQ_x', 'wU_x', 'wI_y', 'wQ_y', 'wU_y',
+            'wI_xy', 'wQ_xy', 'wU_xy'. Values are np.ndarrays of shape
+            (npix,).
+
+        Notes
+        -----
+        Weights get multiplied with the sky Stokes parameters I, Q, U.
+        V is taken to be zero.
+
         """
-        pass
+        Ex_th = self.jones_x[0]
+        Ex_ph = self.jones_x[1]
+        Ey_th = self.jones_y[0]
+        Ey_ph = self.jones_y[1]
+
+        weights = {}
+        weights["wI_x"] = 1 / 2 * (np.abs(Ex_th) ** 2 + np.abs(Ex_ph) ** 2)
+        weights["wQ_x"] = 1 / 2 * (np.abs(Ex_th) ** 2 - np.abs(Ex_ph) ** 2)
+        weights["wU_x"] = np.real(Ex_th * np.conj(Ex_ph))
+        weights["wI_y"] = 1 / 2 * (np.abs(Ey_th) ** 2 + np.abs(Ey_ph) ** 2)
+        weights["wQ_y"] = 1 / 2 * (np.abs(Ey_th) ** 2 - np.abs(Ey_ph) ** 2)
+        weights["wU_y"] = np.real(Ey_th * np.conj(Ey_ph))
+        weights["wI_xy"] = (
+            1 / 2 * (Ex_th * np.conj(Ey_th) + Ex_ph * np.conj(Ey_ph))
+        )
+        weights["wQ_xy"] = (
+            1 / 2 * (Ex_th * np.conj(Ey_th) - Ex_ph * np.conj(Ey_ph))
+        )
+        weights["wU_xy"] = (
+            1 / 2 * (Ex_th * np.conj(Ey_ph) + Ex_ph * np.conj(Ey_th))
+        )
+        return weights
