@@ -21,6 +21,7 @@ dependencies = [
   "scipy",
   "astropy",
   "healpy",
+  "h5py",
   "lunarsky",
 ]
 
