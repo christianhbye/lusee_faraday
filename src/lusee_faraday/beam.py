@@ -3,9 +3,12 @@ import numpy as np
 
 from . import HealpixGrid
 
+
 def rotate_beam(jones, angle):
     """
     Rotate the beam by a given angle, counter-clockwise about the z-axis.
+    The function assumes that the beam is defined on regular 1-degree
+    intervals in theta and phi and that `angle` is an integer.
 
     Parameters
     ----------
@@ -13,7 +16,7 @@ def rotate_beam(jones, angle):
         The Jones matrix. Shape is (2, ntheta, nphi); first axis is
         (Eth, Eph).
 
-    angle : float
+    angle : int
         Angle to rotate the beam by in degrees, counter-clockwise.
 
     Returns
@@ -22,7 +25,11 @@ def rotate_beam(jones, angle):
         The rotated Jones matrix.
 
     """
-    raise NotImplementedError
+    Eth, Eph = jones
+    Eth_roll = np.roll(Eth, angle, axis=-1)
+    Eph_roll = np.roll(Eph, angle, axis=-1)
+    jones_rot = np.array([Eth_roll, Eph_roll])
+    return jones_rot
 
 
 class Beam:
@@ -45,6 +52,7 @@ class Beam:
         """
         self.jones_x = jones_x
         self.jones_y = jones_y
+        self.weights = None
 
     @classmethod
     def from_file(cls, path, frequency=30, nside=128, orientation="y"):
@@ -72,6 +80,10 @@ class Beam:
         ValueError
             If the orientation is not "x" or "y".
 
+        Notes
+        -----
+        Horizon cut is applied in the simulator.
+
         """
         with fits.open(path) as f:
             # shape is freq, theta, phi
@@ -89,31 +101,22 @@ class Beam:
         lower_hemi = np.zeros_like(jones)[:, :-1, :]
         jones = np.concatenate([jones, lower_hemi], axis=1)
 
-        # rotate the beam 90, 180, and 270 deg to get all 4 monopoles
-        jones90 = rotate_beam(jones, 90)
-        jones180 = rotate_beam(jones, 180)
-        jones270 = rotate_beam(jones, 270)
-
-        pseudo_dipole0 = 1 / np.sqrt(2) * (jones - jones180)
-        pseudo_dipole90 = 1 / np.sqrt(2) * (jones90 - jones270)
-
+        # rotate the beam to get the other pseudo-dipole
         if orientation == "y":
-            jones_x = pseudo_dipole90
-            jones_y = pseudo_dipole0
-
+            jones_x = rotate_beam(jones, 270)
+            jones_y = jones
         elif orientation == "x":
-            jones_x = pseudo_dipole0
-            jones_y = pseudo_dipole90
-
+            jones_x = jones
+            jones_y = rotate_beam(jones, 90)
         else:
             raise ValueError("Orientation must be either 'x' or 'y'")
 
-        grid = HealpixGrid(nside=nside, horizon=True)
+        grid = HealpixGrid(nside=nside, horizon=False)
         # the lusee beam is defined on 1deg resolution grid
         th = np.radians(np.linspace(0, 180, num=181))
         ph = np.radians(np.linspace(0, 359, num=360))
-        jones_x_hp = grid.bin(jones_x, theta=th, phi=ph)
-        jones_y_hp = grid.bin(jones_y, theta=th, phi=ph)
+        jones_x_hp = grid.interp_hp(jones_x, th, ph)
+        jones_y_hp = grid.interp_hp(jones_y, th, ph)
 
         return cls(jones_x_hp, jones_y_hp)
 
@@ -130,32 +133,33 @@ class Beam:
         Returns
         -------
         Beam
-            An instance of the Beam class with the short dipole beam data.
+            An instance of the Beam class with the short dipole beam
+            data.
+
+        Notes
+        -----
+        Horizon cut is applied in the simulator.
 
         """
-        grid = HealpixGrid(nside=nside, horizon=True)
+        grid = HealpixGrid(nside=nside, horizon=False)
         # X beam
         Eth = -np.cos(grid.theta) * np.cos(grid.phi)
         Eph = np.sin(grid.phi)
-        jones_x = np.array([Eth, Eph]) * grid.mask[None]
+        jones_x = np.array([Eth, Eph])
         # Y beam
         Eth = -np.cos(grid.theta) * np.sin(grid.phi)
         Eph = -np.cos(grid.phi)
-        jones_y = np.array([Eth, Eph]) * grid.mask[None]
+        jones_y = np.array([Eth, Eph])
 
         return cls(jones_x, jones_y)
 
     def precompute_weights(self):
         """
-        Precompute the weights needed for convolution with the sky.
-
-        Returns
-        -------
-        weights : dict
-            A dictionary containing the precomputed weights. The keys
-            are 'wI_x', 'wQ_x', 'wU_x', 'wI_y', 'wQ_y', 'wU_y',
-            'wI_xy', 'wQ_xy', 'wU_xy'. Values are np.ndarrays of shape
-            (npix,).
+        Precompute the weights needed for convolution with the sky and
+        store them in the `weights` attribute, which is a dictionary
+        containing the precomputed weights. The keys are 'wI_x',
+        'wQ_x', 'wU_x', 'wI_y', 'wQ_y', 'wU_y', 'wI_xy', 'wQ_xy',
+        'wU_xy'. Values are np.ndarrays of shape (npix,).
 
         Notes
         -----
@@ -163,6 +167,9 @@ class Beam:
         V is taken to be zero.
 
         """
+        if self.weights is not None:
+            return
+
         Ex_th = self.jones_x[0]
         Ex_ph = self.jones_x[1]
         Ey_th = self.jones_y[0]
@@ -184,4 +191,5 @@ class Beam:
         weights["wU_xy"] = (
             1 / 2 * (Ex_th * np.conj(Ey_ph) + Ex_ph * np.conj(Ey_th))
         )
-        return weights
+
+        self.weights = weights

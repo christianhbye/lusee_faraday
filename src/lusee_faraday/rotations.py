@@ -105,5 +105,5 @@ def gal2topo(I_map, Q_map, U_map, topo_frame=None, euler=None):
     n_maps = I_map.shape[0]
     for i in range(n_maps):
         stokes = np.array([I_map[i], Q_map[i], U_map[i]])
-        I_topo[i], Q_topo[i], U_topo[i] = rot.rotate_map_alm(stokes)
-    return I_topo.squeeze(), Q_topo.squeeze(), U_topo.squeeze()
+        I_topo[i], Q_topo[i], U_topo[i] = rot.rotate_map_alms(stokes)
+    return I_topo, Q_topo, U_topo

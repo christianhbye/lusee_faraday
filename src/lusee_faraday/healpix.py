@@ -1,6 +1,6 @@
 import healpy as hp
 import numpy as np
-from scipy.interpolate import RectBivariateSpline
+from scipy.interpolate import RectSphereBivariateSpline
 
 
 class HealpixGrid:
@@ -39,6 +39,12 @@ class HealpixGrid:
             The interpolated healpix map. Has shape (..., npix).
 
         """
+        # break into real and imaginary parts if complex
+        if np.any(np.iscomplex(arr)):
+            real_part = self.interp_hp(np.real(arr), theta, phi)
+            imag_part = self.interp_hp(np.imag(arr), theta, phi)
+            return real_part + 1j * imag_part
+
         theta = np.array(theta)
         phi = np.array(phi)
         pix_theta, pix_phi = hp.pix2ang(self.nside, np.arange(self.npix))
@@ -59,7 +65,7 @@ class HealpixGrid:
         # interpolate
         interp_data = np.empty((len(arr), self.npix))
         for i, a in enumerate(arr):
-            spline = RectBivariateSpline(
+            spline = RectSphereBivariateSpline(
                 theta, phi, a, pole_values=pole_values[i]
             )
             interp_data[i] = spline(pix_theta, pix_phi, grid=False)
