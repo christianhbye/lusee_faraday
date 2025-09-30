@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from .healpix import HealpixGrid
+from . import Beam, SkyModel
 
 
 @dataclass
@@ -57,13 +58,23 @@ def beam_sky_multiply(beam_weights, sky_stokes):
 
 class Simulator:
     def __init__(self, cfg):
+        self.cfg = cfg
         self.beam = cfg.beam
         self.sky = cfg.sky
         self.grid = HealpixGrid(nside=cfg.nside, horizon=True)
 
-    def simulate_step(self):
+    def simulate_step(self, I_map, Q_map, U_map):
         """
         Simulate the visibilities given the beam, sky, and grid.
+
+        Parameters
+        ----------
+        I_map : np.ndarray
+            Stokes I map in topocentric coordinates. Shape is (nfreqs, npix).
+        Q_map : np.ndarray
+            Stokes Q map in topocentric coordinates. Shape is (nfreqs, npix).
+        U_map : np.ndarray
+            Stokes U map in topocentric coordinates. Shape is (nfreqs, npix).
 
         Returns
         -------
@@ -73,15 +84,18 @@ class Simulator:
 
         """
         w = self.beam.weights
-        dOmega = self.grid.pix_area
-        m = self.grid.mask
+        m = self.grid.mask.astype(int)  # npix
 
-        sky_stokes = np.array(
-            [self.sky.I_map[m], self.sky.Q_map[m], self.sky.U_map[m]]
-        )
+        sky_stokes = np.array([I_map, Q_map, U_map])  #(3, nfreqs, npix)
+        sky_stokes = sky_stokes * m[None, None, :]  # horizon mask
         Rxx, Ryy, Rxy = beam_sky_multiply(w, sky_stokes)
 
-        return dOmega * np.array([Rxx.real, Ryy.real, Rxy])
+        # compute normalization: beam above horizon
+        # factors of dOmega cancel out
+        norm = np.sum(w["wI_x"] * m) + np.sum(w["wI_y"] * m)
+        vis = np.array([Rxx, Ryy, Rxy]) / norm
+
+        return vis
 
     @staticmethod
     def compute_stokes(Rmat):
@@ -91,24 +105,35 @@ class Simulator:
         Parameters
         ----------
         Rmat : np.ndarray
+           Shape is (ntimes, 3, nfreqs) containing Rxx, Ryy, Rxy.
 
         Returns
         -------
-        np.ndarray
-            Stokes parameters I, Q, U.
+        tuple of np.ndarray
+            Stokes parameters I, Q, U. Each has shape (ntimes, nfreqs).
 
         """
-        Rxx, Ryy, Rxy = Rmat
+        Rxx = Rmat[:, 0, :]
+        Ryy = Rmat[:, 1, :]
+        Rxy = Rmat[:, 2, :]
 
-        I = 1 / 2 * (Rxx + Ryy)
-        Q = 1 / 2 * (Rxx - Ryy)
+        I = Rxx + Ryy
+        Q = Rxx - Ryy
         U = 2 * np.real(Rxy)
 
-        return np.array([I, Q, U])
+        return I, Q, U
 
-    def simulate(self):
+    def simulate(self, in_topo=False):
         """
         Simulate the visibilities over all times and frequencies.
+
+        Parameters
+        ----------
+        in_topo : bool, optional
+            If True, the sky model is assumed to be already in
+            topocentric coordinates. Otherwise, it is converted for
+            each time step. This only makes sense for one time step,
+            as we are not evolving the topocentric sky model over time.
 
         Returns
         -------
@@ -119,9 +144,20 @@ class Simulator:
         """
         if self.cfg.faraday:
             self.sky.apply_fd()
+        if in_topo:
+            if self.cfg.times.size != 1:
+                raise ValueError(
+                    "in_topo=True only makes sense for one time step."
+                )
+            return self.simulate_step(
+                self.cfg.sky.I_map,
+                self.cfg.sky.Q_map,
+                self.cfg.sky.U_map,
+            )[None, ...]
         res = np.empty((self.cfg.times.size, 3, self.cfg.freqs.size))
-        for i, t in enumerate(times):
-            I_t, Q_t, U_t = sky.to_topocentric(t, loc=self.cfg.site)
+        for i, t in enumerate(self.cfg.times):
+            print("Simulating time step", i + 1, "of", self.cfg.times.size)
+            I_t, Q_t, U_t = self.sky.to_topocentric(t, loc=self.cfg.site)
             R_t = self.simulate_step(I_t, Q_t, U_t)
             res[i] = R_t
         return res

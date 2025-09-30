@@ -56,6 +56,79 @@ def load_rm(path, nside=128):
     return RM_map
 
 
+def power_law(sky_maps, freqs, ref_freq, beta=-2.5):
+    """
+    Parameters
+    ----------
+    sky_maps : shape (Nmaps, npix)
+    freqs : float or array of shape (nfreq,)
+    ref_freq : float, same units as freqs
+    beta : float
+
+    Returns
+    -------
+    ndarray : shape (nfreq, Nmaps, npix)
+    """
+    base = np.atleast_1d(freqs) / ref_freq
+    factor = base[:, None, None] ** beta
+    return sky_maps[None] * factor
+
+
+def point_src(lat_center=90, lon_center=0, extent=1, nside=128, nfreqs=64):
+    """
+    Create a point source map, with a linearly polarized source.
+
+    Parameters
+    ----------
+    lat_center : float
+        Latitude of the point source in degrees.
+    lon_center : float
+        Longitude of the point source in degrees.
+    extent : float
+        Extent of the point source in number of pixels.
+    nside : int
+        HEALPix nside parameter.
+    nfreqs : int
+        Number of frequency channels. The spectrum is flat.
+
+    Returns
+    -------
+    stokes_I : ndarray
+        Stokes I map with a point source.
+    stokes_Q : ndarray
+        Stokes Q map for the point source.
+    stokes_U : ndarray
+        Stokes U map for the point source.
+    """
+    npix = hp.nside2npix(nside)
+    stokes_I = np.zeros(npix)
+    stokes_Q = np.zeros(npix)
+    stokes_U = np.zeros(npix)
+    if extent != 1:
+        raise NotImplementedError("Only extent=1 is implemented.")
+
+    # define in zenith first
+    stokes_I[0] = 1.0
+    stokes_Q[0] = -1.0
+    stokes_U[0] = 0.0
+
+    if lat_center == 90 and lon_center == 0:
+        stokes_I = np.repeat(stokes_I[None, :], nfreqs, axis=0)
+        stokes_Q = np.repeat(stokes_Q[None, :], nfreqs, axis=0)
+        stokes_U = np.repeat(stokes_U[None, :], nfreqs, axis=0)
+        return stokes_I, stokes_Q, stokes_U
+
+    rot = hp.Rotator(
+        deg=True, rot=[lon_center, lat_center, 0], eulertype="ZYZ"
+    )
+    Ir, Qr, Ur = rot.rotate_map_pixel([stokes_I, stokes_Q, stokes_U])
+    Ir = np.repeat(Ir[None, :], nfreqs, axis=0)
+    Qr = np.repeat(Qr[None, :], nfreqs, axis=0)
+    Ur = np.repeat(Ur[None, :], nfreqs, axis=0)
+
+    return Ir, Qr, Ur
+
+
 class SkyModel:
     def __init__(
         self,
@@ -115,19 +188,19 @@ class SkyModel:
             (I, Q, U).
 
         """
-        if loc == "lusee":
-            loc = LUSEE_LOC
-        else:
-            raise ValueError(f"Location {loc} not supported.")
         if self.frame != "galactic":
             raise ValueError(
                 "Current frame must be 'galactic' to convert to topocentric."
             )
+        if loc == "lusee":
+            loc = LUSEE_LOC
+        else:
+            raise ValueError(f"Location {loc} not supported.")
         topo = LunarTopo(location=loc, obstime=time)
-        Itopo, QTopo, Utopo = gal2topo(
+        Itopo, Qtopo, Utopo = gal2topo(
             self.I_map, self.Q_map, self.U_map, topo_frame=topo
         )
-        return np.array([Itopo, QTopo, Utopo])
+        return np.array([Itopo, Qtopo, Utopo])
 
     def apply_fd(self):
         """
