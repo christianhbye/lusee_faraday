@@ -6,12 +6,12 @@ def freqs_lusee():
     """
     return np.linspace(0, 51.2, num=2048, endpoint=False)
 
-def freqs_zoom(center=30):
+def freqs_zoom(center=30, num=64):
     """
-    Split a channel into 64 sub-channels.
+    Split a channel into sub-channels.
     """
     f = freqs_lusee()
     idx = np.argmin(np.abs(f - center))
     fmin = f[idx]
     fmax = f[idx + 1]
-    return np.linspace(fmin, fmax, num=64, endpoint=False)
+    return np.linspace(fmin, fmax, num=num, endpoint=False)
