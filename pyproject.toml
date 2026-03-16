@@ -23,6 +23,9 @@ dependencies = [
   "healpy",
   "h5py",
   "lunarsky",
+  "jupyterlab>=4.5.5",
+  "ipympl>=0.10.0",
+  "jupyterlab-vim>=4.1.4",
 ]
 
 [project.optional-dependencies]
