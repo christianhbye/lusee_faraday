@@ -9,3 +9,4 @@ from .healpix import HealpixGrid
 from .beam import Beam
 from .sky import SkyModel
 from .sim import SimConfig, Simulator
+from .spectrometer import SpectrometerResponse
