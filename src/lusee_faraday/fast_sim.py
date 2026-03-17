@@ -68,7 +68,7 @@ def precompute_rotated_maps(
     rm_topo = np.zeros((ntimes, npix))
 
     for i, t in enumerate(times):
-        if (i + 1) % 20 == 0 or i == 0:
+        if (i + 1) % 10 == 0 or i == 0:
             print(
                 f"  Rotating time step {i + 1}/{ntimes}"
             )
@@ -174,7 +174,7 @@ def compute_vis_fast(
     pols = ("x", "y", "xy")
 
     for i in range(ntimes):
-        if (i + 1) % 20 == 0 or i == 0:
+        if (i + 1) % 10 == 0 or i == 0:
             print(
                 f"  Visibilities: time step {i + 1}/{ntimes}"
             )
