@@ -1,5 +1,6 @@
 junit.xml
 data/
+notebooks/results/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
