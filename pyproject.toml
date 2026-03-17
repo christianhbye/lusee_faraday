@@ -26,6 +26,7 @@ dependencies = [
   "jupyterlab>=4.5.5",
   "ipympl>=0.10.0",
   "jupyterlab-vim>=4.1.4",
+  "pytest>=8.4.2",
 ]
 
 [project.optional-dependencies]
