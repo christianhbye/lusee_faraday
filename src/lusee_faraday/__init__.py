@@ -4,6 +4,7 @@ __version__ = "0.0.1"
 from . import rotations
 from . import plot
 from . import utils
+from . import fast_sim
 
 from .healpix import HealpixGrid
 from .beam import Beam
