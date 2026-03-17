@@ -73,6 +73,30 @@ def power_law(sky_maps, freqs, ref_freq, beta=-2.5):
     factor = base[:, None, None] ** beta
     return sky_maps[None] * factor
 
+def scale_haslam(sky_map, freqs):
+    """
+    Scale Haslam map to given frequencies using a power law with spectral
+    index -2.55. The haslam_galactic.npz has been scaled from 408MHz to 50
+    MHz using this power law so we can't deviate from it.
+
+    Parameters
+    ----------
+    sky_map : shape (npix,)
+    freqs : float or array of shape (nfreq,)
+
+    Returns
+    -------
+    ndarray : shape (nfreq, npix)
+    """
+    ref_freq = 50  # MHz
+    beta = -2.55
+    tcmb = 2.725  # K
+    base = np.atleast_1d(freqs) / ref_freq
+    factor = base[:, None] ** beta
+    mscale = sky_map - tcmb
+    scaled = mscale[None] * factor + tcmb
+    return scaled
+
 
 def point_src(lat_center=90, lon_center=0, extent=1, nside=128, nfreqs=64):
     """
