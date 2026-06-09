@@ -21,6 +21,7 @@ wQ_x*U_topo are precomputed per time step.  The dot products are
 evaluated as BLAS matrix-vector products in frequency batches.
 """
 
+import multiprocessing
 from concurrent.futures import ProcessPoolExecutor
 
 import healpy as hp
@@ -176,6 +177,7 @@ def compute_vis_fast(
     pols = ("x", "y", "xy")
 
     keep = mask.astype(bool)
+    nkeep = int(keep.sum())
 
     for i in range(ntimes):
         if (i + 1) % 10 == 0 or i == 0:
@@ -195,8 +197,9 @@ def compute_vis_fast(
 
         # A, B only over above-horizon pixels (below-horizon are zero)
         rm_i = rm_topo[i][keep]
-        A = np.zeros((3, keep.sum()), dtype=complex)
-        B = np.zeros((3, keep.sum()), dtype=complex)
+        # complex: the xy cross-pol weights (wQ_xy, wU_xy) are complex
+        A = np.zeros((3, nkeep), dtype=complex)
+        B = np.zeros((3, nkeep), dtype=complex)
         for k, pol in enumerate(pols):
             wQ = w[f"wQ_{pol}"][keep]
             wU = w[f"wU_{pol}"][keep]
@@ -221,6 +224,7 @@ def compute_vis_fast(
 
 
 def _vis_chunk(args):
+    # ProcessPoolExecutor worker target; must stay module-level (picklable)
     I_t, Q_t, U_t, rm_t, beam, freqs, mask, kwargs = args
     return compute_vis_fast(
         I_t, Q_t, U_t, rm_t, beam, freqs, mask, **kwargs
@@ -259,6 +263,9 @@ def compute_vis_fast_parallel(
         for c in chunks
         if c.size
     ]
-    with ProcessPoolExecutor(max_workers=nproc) as ex:
+    # forkserver: plain fork of the multi-threaded numpy/healpy process
+    # can deadlock the workers
+    ctx = multiprocessing.get_context("forkserver")
+    with ProcessPoolExecutor(max_workers=nproc, mp_context=ctx) as ex:
         results = list(ex.map(_vis_chunk, args))
     return np.concatenate(results, axis=0)
