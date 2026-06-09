@@ -43,3 +43,18 @@ def test_sigma_scaling():
     F1 = fisher_matrix([signal], np.ones((1, n)))
     F2 = fisher_matrix([signal], 2 * np.ones((1, n)))
     assert np.isclose(marginal_error(F2, 0), 2 * marginal_error(F1, 0))
+
+
+def test_marginal_differs_from_conditional():
+    # Off-diagonal but well-conditioned F: marginalizing a correlated
+    # nuisance must inflate the error above the conditional 1/sqrt(F[ii]).
+    # A conditional implementation (1/sqrt(F[0,0])) would fail this.
+    n = 16
+    sig = np.ones((1, n))
+    signal = np.ones((1, n), dtype=complex)
+    nuisance = (0.5 + 0.5j) * np.ones((1, n), dtype=complex)
+    F = fisher_matrix([signal, nuisance], sig)
+    conditional = 1.0 / np.sqrt(F[0, 0])
+    marg = marginal_error(F, 0)
+    assert marg > conditional * (1 + 1e-6)
+    np.testing.assert_allclose(marg, np.sqrt(2.0 / n), rtol=1e-9)

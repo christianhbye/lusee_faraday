@@ -34,7 +34,14 @@ def fisher_matrix(columns, sigma):
 
 
 def marginal_error(F, idx, rcond=1e-12):
-    """Marginalized 1-sigma error on parameter idx (others free)."""
+    """Marginalized 1-sigma error on parameter idx (others free).
+
+    Uses a pseudo-inverse so a rank-deficient (degenerate) Fisher matrix
+    does not raise: singular values below rcond * max(sv) are dropped,
+    yielding a finite pseudo-inverse value rather than signalling
+    non-identifiability. rcond=1e-12 is deliberately looser than numpy's
+    default so near-degenerate parameter pairs read as unconstrained.
+    """
     Cinv = np.linalg.pinv(F, rcond=rcond)
     return float(np.sqrt(Cinv[idx, idx]))
 
