@@ -97,3 +97,11 @@ def test_run_forecast_marginalized_le_fixed():
     # marginalizing the sky+tau cannot increase the SNR
     assert out["snr"] <= out["snr_opt"] * (1 + 1e-9)
     assert out["n_modes"] == 2
+
+
+def test_package_exposes_modules():
+    import lusee_faraday as ld
+
+    assert hasattr(ld, "forward")
+    assert hasattr(ld, "skybasis")
+    assert hasattr(ld, "fisher")

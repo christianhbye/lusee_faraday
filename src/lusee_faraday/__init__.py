@@ -15,3 +15,7 @@ from .sky import SkyModel
 from .sim import SimConfig, Simulator
 from .spectrometer import SpectrometerResponse
 from .freqplan import FrequencyPlan
+
+from . import forward
+from . import skybasis
+from . import fisher
