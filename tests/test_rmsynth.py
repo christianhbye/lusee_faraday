@@ -43,3 +43,23 @@ def test_phi_grid_default_dphi_oversamples_resolution():
     lam2 = rmsynth.lambda2(np.linspace(10, 50, 200))
     phi = rmsynth.phi_grid(lam2, phi_max=10.0, oversample=3)
     assert np.median(np.diff(phi)) <= rmsynth.faraday_resolution(lam2) / 3
+
+
+def test_rmsf_peak_at_zero_is_unity():
+    lam2 = rmsynth.lambda2(np.linspace(10, 50, 200))
+    R = rmsynth.rmsf(lam2, np.array([0.0]))
+    assert np.isclose(np.abs(R[0]), 1.0)
+
+
+def test_rmsf_single_channel_is_flat():
+    lam2 = np.array([100.0])
+    phi = np.linspace(-50, 50, 101)
+    R = rmsynth.rmsf(lam2, phi)
+    np.testing.assert_allclose(np.abs(R), 1.0)
+
+
+def test_rmsf_weights_normalized():
+    lam2 = rmsynth.lambda2(np.linspace(10, 50, 200))
+    w = np.random.default_rng(0).uniform(0.1, 1.0, lam2.size)
+    R = rmsynth.rmsf(lam2, np.array([0.0]), weights=w)
+    assert np.isclose(np.abs(R[0]), 1.0)

@@ -40,3 +40,23 @@ def phi_grid(lam2, phi_max, dphi=None, oversample=3):
     # round up so the actual linspace spacing never exceeds dphi
     n = int(np.ceil(2 * phi_max / dphi)) + 1
     return np.linspace(-phi_max, phi_max, n)
+
+
+def _normalized_weights(lam2, weights):
+    if weights is None:
+        weights = np.ones_like(lam2)
+    weights = np.asarray(weights, dtype=float)
+    return weights / weights.sum()
+
+
+def rmsf(lam2, phi, weights=None):
+    """Rotation-measure spread function R(phi).
+
+    R(phi) = sum_k w_k exp(-2i phi (lam2_k - lam2_ref)) / sum_k w_k
+    """
+    lam2 = np.asarray(lam2, dtype=float)
+    phi = np.asarray(phi, dtype=float)
+    w = _normalized_weights(lam2, weights)
+    lam2_ref = np.sum(w * lam2)
+    kernel = np.exp(-2j * np.outer(phi, lam2 - lam2_ref))
+    return kernel @ w
