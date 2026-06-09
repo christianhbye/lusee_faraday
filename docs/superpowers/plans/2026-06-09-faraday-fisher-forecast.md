@@ -591,7 +591,12 @@ git commit -m "feat: expose forward/skybasis/fisher in package init"
 **Files:**
 - Create: `notebooks/fisher_forecast.py`
 
-This is a driver script (no unit test; validated by running). It reconstructs the same inputs as `notebooks/faraday_fullband_sim.py`, reuses `results/faraday_fullband.npz` for the channel table + `pI_FR` (≈ T_sys), rotates the fiducial sky and each basis mode, and runs `run_forecast` per integration time.
+This is a driver script (no unit test; validated by running). It reconstructs the same inputs as `notebooks/faraday_fullband_sim.py`, reuses `results/faraday_fullband.npz` for the channel table + `pI_FR` (≈ T_sys), rotates the fiducial sky and each basis mode, and runs `run_forecast`.
+
+**Implementation notes (deviations from the draft below, applied during execution for tractability/correctness):**
+- **`NSIDE = 64`** forward-model resolution (a documented knob), not 128 — at 128 each `pol_response` pass was ~minutes and the held basis maps thrashed memory; 1° pixels resolve the beam + low-ℓ modes fine. All sky inputs load/`ud_grade` at `NSIDE` (incl. `load_rm(..., nside=NSIDE)`).
+- **Exact `√dt` noise scaling**, not a per-dt rebuild: the Jacobian is integration-time-independent and radiometer noise gives `F ∝ dt` exactly, so `run_forecast` runs **once** at a reference time and `SNR(dt) = SNR_ref·√(dt/dt_ref)`. Eliminates a 3× redundant Jacobian build with zero approximation.
+- **Figure is local-only** (`results/` is gitignored repo-wide; no figures are tracked) — commit the driver only; the script regenerates `fisher_forecast.png`.
 
 - [ ] **Step 1: Write the driver**
 
