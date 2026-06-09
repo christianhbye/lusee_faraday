@@ -7,6 +7,15 @@ Galactic->topocentric Euler angles (LST), and saves one npz for
 Step-3 RM synthesis.
 """
 
+import os
+
+# Pin each process to a single BLAS/OpenMP thread BEFORE numpy imports.
+# This driver parallelizes over time with one process per physical core;
+# per-process BLAS threading would oversubscribe the cores and thrash.
+for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
+           "NUMEXPR_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"):
+    os.environ.setdefault(_v, "1")
+
 import time as pytime
 from pathlib import Path
 
@@ -27,7 +36,8 @@ RES = Path(__file__).resolve().parent / "results"
 RES.mkdir(exist_ok=True)
 NSIDE = 128
 N_TIMES = 100
-NPROC = 8
+# one single-threaded process per physical core (2 logical/core here)
+NPROC = max(1, (os.cpu_count() or 2) // 2)
 BEAM_FILE = DATA / "hfss_lbl_3m_75deg.2port.fits"
 
 
