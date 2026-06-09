@@ -7,6 +7,7 @@ from . import utils
 from . import fast_sim
 from . import rmsynth
 from . import noise
+from . import detection
 
 from .healpix import HealpixGrid
 from .beam import Beam
