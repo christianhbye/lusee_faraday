@@ -23,21 +23,34 @@ def _snap_to_lusee(center_mhz):
 
 
 class FrequencyPlan:
-    def __init__(self, response, specs, decimation=1):
+    def __init__(self, response, specs, decimation=1, support=1.0):
         """response: SpectrometerResponse. specs: list of
-        (center_mhz, mode) with mode in {"zoom", "wide"}.
-        decimation: subsample the raw response grid."""
-        self.response = (
-            response.decimate(decimation) if decimation > 1 else response
-        )
+        (center_mhz, mode), mode in {"zoom", "wide"}.
+        decimation: int applied to all specs, or a dict keyed by mode.
+        support: if < 1, truncate the response to that weight fraction.
+        """
+        base = response.truncate(support) if support < 1.0 else response
         self.specs = [(_snap_to_lusee(c), m) for c, m in specs]
-        self._off_hz = np.round(self.response.freq_offset_hz).astype(np.int64)
-        abs_hz = [
-            np.round(c * 1e6).astype(np.int64) + self._off_hz
-            for c, _ in self.specs
-        ]
+        self._resp = []
+        self._off_hz = []
+        abs_hz = []
+        for c, mode in self.specs:
+            dec = (
+                decimation[mode]
+                if isinstance(decimation, dict)
+                else decimation
+            )
+            r = base.decimate(dec) if dec > 1 else base
+            off = np.round(r.freq_offset_hz).astype(np.int64)
+            self._resp.append(r)
+            self._off_hz.append(off)
+            abs_hz.append(
+                np.round(c * 1e6).astype(np.int64) + off
+            )
         self._grid_hz = np.unique(np.concatenate(abs_hz))
-        self._idx = [np.searchsorted(self._grid_hz, a) for a in abs_hz]
+        self._idx = [
+            np.searchsorted(self._grid_hz, a) for a in abs_hz
+        ]
 
     def sim_freqs(self):
         """Sorted unique absolute frequencies to simulate (MHz)."""
@@ -47,12 +60,12 @@ class FrequencyPlan:
         """Map a raw spectrum (..., nraw) aligned with sim_freqs() to
         the spectrometer channels (..., nchan)."""
         out = []
-        for (_, mode), idx in zip(self.specs, self._idx):
+        for (_, mode), r, idx in zip(self.specs, self._resp, self._idx):
             window = raw[..., idx]
             if mode == "wide":
-                out.append(self.response.apply_wide(window)[..., None])
+                out.append(r.apply_wide(window)[..., None])
             else:
-                out.append(self.response.apply_narrow(window))
+                out.append(r.apply_narrow(window))
         return np.concatenate(out, axis=-1)
 
     @property

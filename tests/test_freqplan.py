@@ -84,3 +84,36 @@ def test_channel_table_lambda2_consistent(spec):
     plan = FrequencyPlan(spec, [(30.0, "zoom"), (40.0, "wide")])
     t = plan.channel_table
     assert np.allclose(t["lambda2"], rmsynth.lambda2(t["nu"]))
+
+
+def test_per_mode_decimation(spec):
+    plan = FrequencyPlan(
+        spec, [(30.0, "zoom"), (40.0, "wide")],
+        decimation={"zoom": 10, "wide": 250},
+    )
+    raw = np.ones(plan.sim_freqs().size)
+    assert plan.channelize(raw).shape == (65,)
+    t = plan.channel_table
+    assert t["nu"].shape == (65,)
+
+
+def test_support_truncation_shrinks_sim_grid(spec):
+    full = FrequencyPlan(spec, [(10.0, "zoom")])
+    trunc = FrequencyPlan(spec, [(10.0, "zoom")], support=0.999)
+    assert trunc.sim_freqs().size < full.sim_freqs().size
+
+
+def test_truncated_channelize_matches_full_on_faraday(spec):
+    c = 3e8
+    full = FrequencyPlan(spec, [(30.0, "wide")])
+    trunc = FrequencyPlan(spec, [(30.0, "wide")], support=0.999)
+    Pf = np.exp(2j * 20.0 * (c / (full.sim_freqs() * 1e6)) ** 2)
+    Pt = np.exp(2j * 20.0 * (c / (trunc.sim_freqs() * 1e6)) ** 2)
+    assert np.allclose(
+        np.abs(full.channelize(Pf)), np.abs(trunc.channelize(Pt)), atol=1e-3
+    )
+
+
+def test_int_decimation_still_supported(spec):
+    plan = FrequencyPlan(spec, [(30.0, "zoom")], decimation=10)
+    assert plan.channel_table["nu"].shape == (64,)
