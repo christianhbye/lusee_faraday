@@ -21,6 +21,9 @@ wQ_x*U_topo are precomputed per time step.  The dot products are
 evaluated as BLAS matrix-vector products in frequency batches.
 """
 
+import multiprocessing
+from concurrent.futures import ProcessPoolExecutor
+
 import healpy as hp
 import numpy as np
 from lunarsky import LunarTopo
@@ -173,50 +176,96 @@ def compute_vis_fast(
     vis = np.zeros((ntimes, 3, nfreq))
     pols = ("x", "y", "xy")
 
+    keep = mask.astype(bool)
+    nkeep = int(keep.sum())
+
     for i in range(ntimes):
         if (i + 1) % 10 == 0 or i == 0:
-            print(
-                f"  Visibilities: time step {i + 1}/{ntimes}"
-            )
+            print(f"  Visibilities: time step {i + 1}/{ntimes}")
 
-        # Masked reference maps
         I_m = (I_topo[i] - cmb) * m
         Q_m = Q_topo[i] * m
         U_m = U_topo[i] * m
-        rm_i = rm_topo[i]
         cmb_m = cmb * m
 
-        # I contribution (analytical, frequency-independent shape)
+        # I contribution (frequency-independent shape; full-pixel sums)
         I_contrib = np.zeros((3, nfreq), dtype=complex)
         for k, pol in enumerate(pols):
             sII = np.sum(w[f"wI_{pol}"] * I_m)
             sIc = np.sum(w[f"wI_{pol}"] * cmb_m)
             I_contrib[k] = scale_I * sII + sIc
 
-        # Precompute A, B vectors for each visibility type
-        A = np.zeros((3, len(m)), dtype=complex)
-        B = np.zeros((3, len(m)), dtype=complex)
+        # A, B only over above-horizon pixels (below-horizon are zero)
+        rm_i = rm_topo[i][keep]
+        # complex: the xy cross-pol weights (wQ_xy, wU_xy) are complex
+        A = np.zeros((3, nkeep), dtype=complex)
+        B = np.zeros((3, nkeep), dtype=complex)
         for k, pol in enumerate(pols):
-            wQ = w[f"wQ_{pol}"]
-            wU = w[f"wU_{pol}"]
-            A[k] = wQ * Q_m + wU * U_m
-            B[k] = wU * Q_m - wQ * U_m
+            wQ = w[f"wQ_{pol}"][keep]
+            wU = w[f"wU_{pol}"][keep]
+            Qk = Q_m[keep]
+            Uk = U_m[keep]
+            A[k] = wQ * Qk + wU * Uk
+            B[k] = wU * Qk - wQ * Uk
 
-        # Batch over frequencies: BLAS mat-vec products
         for f0 in range(0, nfreq, batch_size):
             f1 = min(f0 + batch_size, nfreq)
             lsq = lambda_sq[f0:f1]
             phase = 2 * rm_i[None, :] * lsq[:, None]
             cos_p = np.cos(phase)
             sin_p = np.sin(phase)
-
             for k in range(3):
                 pol_contrib = cos_p @ A[k] + sin_p @ B[k]
-                I_contrib[k, f0:f1] += (
-                    scale_QU[f0:f1] * pol_contrib
-                )
+                I_contrib[k, f0:f1] += scale_QU[f0:f1] * pol_contrib
 
-        # Store real part (discards Im(Rxy), matching Simulator)
         vis[i] = np.real(I_contrib) / norm
 
     return vis
+
+
+def _vis_chunk(args):
+    # ProcessPoolExecutor worker target; must stay module-level (picklable)
+    I_t, Q_t, U_t, rm_t, beam, freqs, mask, kwargs = args
+    return compute_vis_fast(
+        I_t, Q_t, U_t, rm_t, beam, freqs, mask, **kwargs
+    )
+
+
+def compute_vis_fast_parallel(
+    I_topo,
+    Q_topo,
+    U_topo,
+    rm_topo,
+    beam,
+    freqs,
+    mask,
+    nproc=None,
+    **kwargs,
+):
+    """Parallel ``compute_vis_fast`` over the time axis.
+
+    Splits the ntimes axis into ``nproc`` chunks run in separate
+    processes and concatenates the results.  nproc=None or 1 runs
+    serially.  Extra kwargs are forwarded to compute_vis_fast.
+    """
+    ntimes = I_topo.shape[0]
+    if nproc in (None, 1) or ntimes < 2:
+        return compute_vis_fast(
+            I_topo, Q_topo, U_topo, rm_topo,
+            beam, freqs, mask, **kwargs,
+        )
+    chunks = np.array_split(np.arange(ntimes), nproc)
+    args = [
+        (
+            I_topo[c], Q_topo[c], U_topo[c], rm_topo[c],
+            beam, freqs, mask, kwargs,
+        )
+        for c in chunks
+        if c.size
+    ]
+    # forkserver: plain fork of the multi-threaded numpy/healpy process
+    # can deadlock the workers
+    ctx = multiprocessing.get_context("forkserver")
+    with ProcessPoolExecutor(max_workers=nproc, mp_context=ctx) as ex:
+        results = list(ex.map(_vis_chunk, args))
+    return np.concatenate(results, axis=0)

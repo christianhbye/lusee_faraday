@@ -135,3 +135,27 @@ class SpectrometerResponse:
 
         """
         return np.tensordot(spectrum, self._narrow_norm, axes=([-1], [0]))
+
+    def truncate(self, support=0.999):
+        """Drop response wings, keeping the smallest symmetric offset
+        window that retains `support` of every channel's weight.
+
+        Returns a new SpectrometerResponse (re-normalized in __init__).
+        """
+        cols = np.column_stack([self._wide_norm, self._narrow_norm])
+        order = np.argsort(np.abs(self.freq_offset_hz))
+        half_width = 0.0
+        for k in range(cols.shape[1]):
+            cum = np.cumsum(cols[order, k])
+            idx = min(
+                int(np.searchsorted(cum, support)), order.size - 1
+            )
+            half_width = max(
+                half_width, abs(self.freq_offset_hz[order][idx])
+            )
+        keep = np.abs(self.freq_offset_hz) <= half_width
+        return SpectrometerResponse(
+            self.freq_offset_hz[keep],
+            self.wide[keep],
+            self.narrow[keep],
+        )

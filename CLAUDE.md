@@ -40,6 +40,19 @@ The simulation pipeline flows: **Sky → Faraday rotation → Coordinate rotatio
 - **`SpectrometerResponse`** (`spectrometer.py`): Loads the spectrometer bin response and convolves simulated spectra with either the wide (parent, 25 kHz) or narrow (zoom, 64 sub-bins) channel response. Zoom bins use FFT-style ordering (bin 0 = center, 1-32 positive offsets, 33-63 negative offsets).
 - **`utils.py`**: LuSEE frequency channel definitions (2048 channels, 0–51.2 MHz) and zoom-bin helpers.
 
+### RM-synthesis detection layer
+
+A second pipeline forecasts detectability of the Faraday signal via rotation-measure (RM) synthesis on channelized spectra. Flow: **full-band sim → channelize → RM synthesis → detection significance**.
+
+- **`fast_sim.py`**: Optimized FR visibilities. `precompute_rotated_maps()` rotates sky+RM to topocentric once per time; `compute_vis_fast()` applies the per-frequency Faraday rotation factorized as `A·cos(2·RM·λ²) + B·sin(...)`, over above-horizon pixels only; `compute_vis_fast_parallel()` splits the time axis across processes. It is single-threaded per process by design — when parallelizing, pin BLAS threads (`OMP_NUM_THREADS=1`, etc.) and use one process per *physical* core, or the cos/sin-heavy workers oversubscribe and thrash (the `faraday_fullband_sim.py` driver does this).
+- **`FrequencyPlan`** (`freqplan.py`): A list of `(center_mhz, mode)` specs (mode ∈ {zoom, wide}). Builds the minimal deduplicated raw sim grid (`sim_freqs()`) and channelizes a raw spectrum to spectrometer channels (`channelize()`), reusing `SpectrometerResponse`. `channel_table` gives per-channel `nu`/`lambda2`/`dnu`, where `nu` is the response-weighted effective frequency. Supports per-mode `decimation` and response `support` truncation.
+- **`pipeline.py`**: `simulate_channelized()` runs the FR sim on the plan grid and channelizes it (captures bandwidth depolarization), and evaluates the no-FR baseline at channel centers (smooth → cheaper).
+- **`rmsynth.py`**: RM synthesis — `lambda2`, `faraday_resolution`, `max_scale`, `phi_grid`, `rmsf` (rotation-measure spread function), `faraday_spectrum` (`F(φ) = Σ w (Q+iU) e^{-2iφλ²}`). For wide λ² coverage the RMSF resolution is ~milli-rad/m², so pass an explicit `dphi` to `phi_grid` (the default oversampled grid is otherwise enormous).
+- **`noise.py`**: Radiometer noise — `radiometer_sigma(T_sys, dnu, dt)`, `add_noise`.
+- **`detection.py`**: `faraday_noise_std` (analytic Faraday-spectrum noise level) and `faraday_snr` (peak SNR).
+
+Analysis scripts: `notebooks/grid_design.py` (builds/validates the full-band grid via the cheap RMSF; defines `fullband_specs()`), `notebooks/faraday_fullband_sim.py` (curated full-band sim driver → `results/faraday_fullband.npz`), `notebooks/rmsynth_analysis.py` (RM synthesis + detection significance), `notebooks/rmsynth_calibration.py` (calibration on the legacy 3-band sims).
+
 ## Key Conventions
 
 - All sky maps use HEALPix RING ordering with default `nside=128`.
@@ -48,6 +61,8 @@ The simulation pipeline flows: **Sky → Faraday rotation → Coordinate rotatio
 - Stokes maps have shape `(nfreq, npix)` or `(npix,)`.
 - The LuSEE landing site is hardcoded at lat=-23.813°, lon=182.258° in `sky.py`.
 - Beam FITS files are in `data/`; the beam is defined on a 1° theta/phi grid and interpolated to HEALPix.
+- Zoom-bin channels are **FFT-ordered, not monotonic in frequency**; pair λ²/Stokes with channels via `FrequencyPlan.channel_table` (response-weighted `nu`), never `utils.freqs_zoom`.
+- For the parallel full-band sim, pin BLAS threads (`OMP_NUM_THREADS=1`, etc.) and use one process per physical core (the driver sets this); otherwise the cos/sin-bound workers thrash.
 - Black formatting with line-length 79.
 
 ## Data Files

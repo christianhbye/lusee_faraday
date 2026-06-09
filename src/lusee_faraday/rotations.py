@@ -1,6 +1,7 @@
 import numpy as np
 import healpy as hp
 from astropy.coordinates import SkyCoord
+from lunarsky import LunarTopo
 
 
 def get_rot_mat(topo_frame):
@@ -107,3 +108,30 @@ def gal2topo(I_map, Q_map, U_map, topo_frame=None, euler=None):
         stokes = np.array([I_map[i], Q_map[i], U_map[i]])
         I_topo[i], Q_topo[i], U_topo[i] = rot.rotate_map_alms(stokes)
     return I_topo, Q_topo, U_topo
+
+
+def topo_euler_angles(times, location):
+    """
+    Galactic-to-topocentric ZYX Euler angles for each observation time.
+
+    The angles track the sky orientation versus lunar sidereal time and
+    serve as the LST tag for later per-orientation coadd.
+
+    Parameters
+    ----------
+    times : array_like of lunarsky.Time
+        Observation times.
+    location : lunarsky.MoonLocation
+        Observer location on the lunar surface.
+
+    Returns
+    -------
+    angles : ndarray
+        Euler angles (alpha, beta, gamma) in radians, shape (ntimes, 3).
+
+    """
+    angles = np.empty((len(times), 3))
+    for i, t in enumerate(times):
+        topo = LunarTopo(location=location, obstime=t)
+        angles[i] = rotmat_to_eulerZYX(get_rot_mat(topo))
+    return angles

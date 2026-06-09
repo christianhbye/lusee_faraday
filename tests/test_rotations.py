@@ -2,8 +2,22 @@
 
 import numpy as np
 import pytest
+import astropy.units as u
+from lunarsky import Time, MoonLocation
 
+from lusee_faraday import rotations
 from lusee_faraday.rotations import get_rot_mat, rotmat_to_eulerZYX, gal2topo
+from lusee_faraday.sky import LUSEE_LOC
+
+
+def _times(n):
+    t0 = Time(
+        "2027-01-01T09:00:00",
+        location=MoonLocation(lat=-23.813, lon=182.258),
+    )
+    return np.linspace(
+        t0, t0 + 655.720 * 3600 * u.s, num=n, endpoint=False
+    )
 
 
 class TestRotationMatrix:
@@ -108,3 +122,13 @@ class TestGal2Topo:
         assert I_t.shape == (nfreq, npix)
         assert Q_t.shape == (nfreq, npix)
         assert U_t.shape == (nfreq, npix)
+
+
+def test_topo_euler_angles_shape():
+    ang = rotations.topo_euler_angles(_times(3), LUSEE_LOC)
+    assert ang.shape == (3, 3)
+
+
+def test_topo_euler_angles_changes_with_time():
+    ang = rotations.topo_euler_angles(_times(3), LUSEE_LOC)
+    assert not np.allclose(ang[0], ang[-1])

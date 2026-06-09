@@ -211,3 +211,51 @@ class TestNarrowBinOrdering:
         spacings = np.diff(peaks)
         expected = sr.BIN_WIDTH_HZ / sr.N_ZOOM
         np.testing.assert_allclose(spacings, expected, rtol=0.1)
+
+
+# ---------------------------------------------------------------------------
+# Truncate tests
+# ---------------------------------------------------------------------------
+
+SPEC_PATH = "data/spectrometer_bin_response.txt"
+
+
+def _spec():
+    return ld.SpectrometerResponse.from_file(SPEC_PATH)
+
+
+def test_truncate_reduces_points_and_is_symmetric():
+    s = _spec()
+    t = s.truncate(0.999)
+    assert t.freq_offset_hz.size < s.freq_offset_hz.size
+    assert 0.3 < t.freq_offset_hz.size / s.freq_offset_hz.size < 0.45
+    assert np.isclose(t.freq_offset_hz.min(), -t.freq_offset_hz.max())
+
+
+def test_truncate_renormalizes():
+    t = _spec().truncate(0.999)
+    assert np.isclose(t._wide_norm.sum(), 1.0)
+    np.testing.assert_allclose(t._narrow_norm.sum(axis=0), 1.0)
+
+
+def test_truncate_preserves_channelization_on_smooth_spectrum():
+    s = _spec()
+    t = s.truncate(0.999)
+    full = 100.0 + 2.0 * s.freq_offset_mhz
+    trunc = 100.0 + 2.0 * t.freq_offset_mhz
+    assert np.isclose(s.apply_wide(full), t.apply_wide(trunc), atol=1e-3)
+    np.testing.assert_allclose(
+        s.apply_narrow(full), t.apply_narrow(trunc), atol=1e-3
+    )
+
+
+def test_truncate_preserves_faraday_depolarization():
+    s = _spec()
+    t = s.truncate(0.999)
+    c = 3e8
+    for center, rm in [(30.0, 20.0), (50.0, 20.0)]:
+        nuf = (center + s.freq_offset_mhz) * 1e6
+        nut = (center + t.freq_offset_mhz) * 1e6
+        Pf = np.exp(2j * rm * (c / nuf) ** 2)
+        Pt = np.exp(2j * rm * (c / nut) ** 2)
+        assert abs(abs(s.apply_wide(Pf)) - abs(t.apply_wide(Pt))) < 1e-3
