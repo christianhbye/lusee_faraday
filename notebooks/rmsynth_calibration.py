@@ -18,7 +18,7 @@ from lusee_faraday import rmsynth
 
 RES = Path(__file__).resolve().parent / "results"
 BANDS = [10, 30, 50]
-PHI_MAX = 100.0
+PHI_MAX = 100.0  # large: the sparse 3-band comb has RMSF sidelobes out to ~100
 
 
 def load_comb():
@@ -31,7 +31,10 @@ def load_comb():
         U.append(d["pU_FR_zoom"])
         Qn.append(d["pQ_noFR_zoom"])
         Un.append(d["pU_noFR_zoom"])
-        i_gal = int(d["i_gal"])
+        # galaxy-up index is estimated per band; use the lowest band
+        # (10 MHz, strongest polarized signal) for the time-slice plot
+        if cf == BANDS[0]:
+            i_gal = int(d["i_gal"])
     freqs = np.concatenate(freqs)
     Q = np.concatenate(Q, axis=1)
     U = np.concatenate(U, axis=1)
