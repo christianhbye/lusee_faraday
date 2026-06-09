@@ -633,15 +633,21 @@ DATA = Path(__file__).resolve().parents[1] / "data"
 RES = Path(__file__).resolve().parent / "results"
 NSIDE = 128
 N_TIMES = 100
-LMAX = 4
+LMAX = 3            # spin-2 sky-nuisance bandlimit (24 modes)
+DECIM = 8           # forecast channel decimation; DECIM=1 = full 4047
 DT_CASES = [(40.0, "40 s"), (600.0, "10 min"), (3600.0, "1 h")]
 BEAM_FILE = DATA / "hfss_lbl_3m_75deg.2port.fits"
 
 
 def main():
     d = np.load(RES / "faraday_fullband.npz")
-    nu, lam2, dnu = d["nu"], d["lambda2"], d["dnu"]
-    pI_FR = d["pI_FR"]  # (ntimes, nchan), used as T_sys
+    # Decimate channels for the forecast: ~28 channel-center pol_response
+    # evals over all 4047 channels is ~30 min; a strided subset spans the
+    # same lambda^2 range and keeps the forecast tractable. DECIM=1 runs
+    # the full channel set.
+    sl = slice(None, None, DECIM)
+    nu, lam2, dnu = d["nu"][sl], d["lambda2"][sl], d["dnu"][sl]
+    pI_FR = d["pI_FR"][:, sl]  # (ntimes, nchan), used as T_sys
 
     loc = MoonLocation(lat=-23.813, lon=182.258)
     t0 = Time("2027-01-01T09:00:00", location=loc)
