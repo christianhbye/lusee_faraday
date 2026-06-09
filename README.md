@@ -31,6 +31,21 @@ parallel FR path used for full-band runs.
 - `rmsynth.py` — `faraday_spectrum`, `rmsf`, `phi_grid`, resolution helpers.
 - `noise.py` / `detection.py` — radiometer noise and Faraday detection SNR.
 
+**3. Fisher-forecast detection** — answers: *can LuSEE detect the Faraday
+rotation amplitude once the unknown intrinsic polarized sky is marginalized?*
+The data are linear in the intrinsic (Q,U) sky given known beam+RM+rotation
+operators, so the Fisher matrix `F = JᵀN⁻¹J` can be built with an analytic
+Jacobian. Marginalizing over low-ℓ spin-2 sky modes + an effective
+Faraday-dispersion variance τ gives the realistic `sigma(alpha)` and
+`SNR = alpha_fid / sigma(alpha)`.
+
+- `forward.py` — `pol_response(...)`: linear forward operator → complex
+  `pQ + i*pU` per (time, channel); `alpha` scales the RM map.
+- `skybasis.py` — `spin2_basis(nside, lmax)`: low-ℓ spin-2 (Q,U) basis for
+  the marginalized sky nuisance.
+- `fisher.py` — `run_forecast(...)`: assembles the Fisher matrix, returns
+  sky-marginalized `sigma(alpha)` and `SNR`.
+
 ## Workflow scripts (`notebooks/`)
 
 | Script | Purpose |
@@ -39,18 +54,26 @@ parallel FR path used for full-band runs.
 | `faraday_fullband_sim.py` | Curated full-band sim → `results/faraday_fullband.npz` (~2 h on 4 cores) |
 | `rmsynth_analysis.py` | RM synthesis + Faraday detection significance vs integration time |
 | `rmsynth_calibration.py` | Calibration on the legacy 3-band sims |
+| `fisher_forecast.py` | Fisher-matrix forecast of Faraday-amplitude detectability after marginalizing sky nuisance → `results/fisher_forecast.png` |
 
 Design docs and implementation plans live in `docs/superpowers/`.
 
-## Key result
+## Key results
 
 Combining the ~4000 spectrometer channels, the Faraday-induced signal
 (~22% median depolarization) sits far above the radiometer noise — LuSEE is
 **not noise-limited** for Faraday rotation. The limitation is the degeneracy
 with the unknown intrinsic polarized sky (the beam-averaged RM is ≈0, so there
 is no clean RM-synthesis peak — only depolarization and spectral structure).
-Breaking that degeneracy with the known Galactic RM map (a matched filter) is
-the natural next step.
+
+The Fisher forecast answers whether that degeneracy is broken by the known RM
+map. Marginalizing the low-ℓ spin-2 sky modes + Faraday-dispersion variance τ
+reduces the Faraday-amplitude SNR by **<0.5%** vs the fixed-sky bound — the
+smooth sky nuisance does not span the λ²-winding Faraday signature, confirming
+that a matched-filter detection is not degeneracy-limited by these modes.
+**Caveat:** the absolute SNR is an *optimistic upper bound* — the nuisance
+basis is restricted (low-ℓ, fixed spectral index) and nside=64 smooths
+small-scale RM; per-mode spectral freedom and higher ℓ are deferred.
 
 ## Conventions
 

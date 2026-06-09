@@ -53,6 +53,18 @@ A second pipeline forecasts detectability of the Faraday signal via rotation-mea
 
 Analysis scripts: `notebooks/grid_design.py` (builds/validates the full-band grid via the cheap RMSF; defines `fullband_specs()`), `notebooks/faraday_fullband_sim.py` (curated full-band sim driver → `results/faraday_fullband.npz`), `notebooks/rmsynth_analysis.py` (RM synthesis + detection significance), `notebooks/rmsynth_calibration.py` (calibration on the legacy 3-band sims).
 
+### Fisher-forecast detection layer
+
+A third pipeline answers whether LuSEE can detect the Faraday-rotation amplitude after marginalizing over the unknown intrinsic polarized sky. It builds a Fisher matrix `F = JᵀN⁻¹J` over (Faraday amplitude α, effective Faraday-dispersion variance τ, and low-ℓ sky modes), then returns the sky-marginalized `sigma(alpha)` and `SNR = alpha_fid / sigma(alpha)`. The data are *linear in the intrinsic (Q,U) sky* given known beam+RM+rotation operators, which makes the analytic-Jacobian approach exact.
+
+- **`forward.py`**: `pol_response(I_topo, Q_topo, U_topo, rm_topo, beam, mask, freqs, alpha=1.0)` — reusable linear forward operator wrapping `compute_vis_fast`, returning complex `pQ + i*pU` per (time, channel). `alpha` scales the RM map (Faraday amplitude). Also `rotate_pol_maps` helper.
+- **`skybasis.py`**: `spin2_basis(nside, lmax)` / `n_modes(lmax)` — low-ℓ spin-2 (Q,U) spherical-harmonic basis used as the marginalized intrinsic-polarized-sky nuisance.
+- **`fisher.py`**: `run_forecast(...)` assembles the Fisher matrix. Jacobian columns: sky modes via the linear forward operator; α column via finite difference; τ column analytic (`-2λ²²·P_pol`). Helpers: `faraday_column`, `dispersion_column`, `fisher_matrix`, `marginal_error`, `detection_snr`, `stack_real`.
+
+Driver `notebooks/fisher_forecast.py`: reuses `results/faraday_fullband.npz` (channel table + pI_FR as T_sys proxy), reconstructs sim inputs at **nside=64** (documented resolution knob), rotates the WMAP fiducial sky and the spin-2 basis to topocentric, calls `run_forecast` once, then scales SNR by `sqrt(dt)` across integration times (exact: radiometer noise gives F ∝ dt). Runs at channel centers with channel decimation (DECIM). Saves `results/fisher_forecast.png` (gitignored).
+
+Headline result: marginalizing the low-ℓ spin-2 sky modes + τ reduces the Faraday-amplitude SNR by **<0.5%** vs the fixed-sky bound — the smooth sky nuisance does not span the λ²-winding Faraday signature. **Caveat:** the absolute SNR is an *optimistic upper bound* — the nuisance basis is restricted (low-ℓ, fixed spectral index per mode) and nside=64 smooths small-scale RM; per-mode spectral freedom and higher ℓ are deferred and would lower the SNR.
+
 ## Key Conventions
 
 - All sky maps use HEALPix RING ordering with default `nside=128`.
