@@ -60,3 +60,21 @@ def rmsf(lam2, phi, weights=None):
     lam2_ref = np.sum(w * lam2)
     kernel = np.exp(-2j * np.outer(phi, lam2 - lam2_ref))
     return kernel @ w
+
+
+def faraday_spectrum(Q, U, lam2, phi, weights=None):
+    """Complex Faraday spectrum F(phi, t) from Stokes Q, U.
+
+    Q, U have shape (nchan,) or (ntimes, nchan). Returns shape
+    (ntimes, nphi). F(phi) = sum_k w_k (Q+iU)_k
+    exp(-2i phi (lam2_k - lam2_ref)) / sum_k w_k.
+    """
+    Q = np.atleast_2d(np.asarray(Q, dtype=float))
+    U = np.atleast_2d(np.asarray(U, dtype=float))
+    lam2 = np.asarray(lam2, dtype=float)
+    phi = np.asarray(phi, dtype=float)
+    w = _normalized_weights(lam2, weights)
+    lam2_ref = np.sum(w * lam2)
+    kernel = np.exp(-2j * np.outer(phi, lam2 - lam2_ref))  # (nphi, nchan)
+    P = (Q + 1j * U) * w  # (ntimes, nchan)
+    return P @ kernel.T  # (ntimes, nphi)

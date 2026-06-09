@@ -63,3 +63,45 @@ def test_rmsf_weights_normalized():
     w = np.random.default_rng(0).uniform(0.1, 1.0, lam2.size)
     R = rmsynth.rmsf(lam2, np.array([0.0]), weights=w)
     assert np.isclose(np.abs(R[0]), 1.0)
+
+
+def _synthetic_pol(lam2, rm, chi0=0.3, amp=1.0):
+    p = amp * np.exp(2j * (chi0 + rm * lam2))
+    return p.real, p.imag
+
+
+def test_faraday_spectrum_recovers_positive_rm():
+    lam2 = rmsynth.lambda2(np.linspace(10, 50, 400))
+    rm_true = 8.0
+    Q, U = _synthetic_pol(lam2, rm_true)
+    phi = rmsynth.phi_grid(lam2, phi_max=50.0)
+    F = rmsynth.faraday_spectrum(Q, U, lam2, phi)
+    peak = phi[np.argmax(np.abs(F[0]))]
+    assert abs(peak - rm_true) < rmsynth.faraday_resolution(lam2) * 3
+
+
+def test_faraday_spectrum_recovers_negative_rm():
+    lam2 = rmsynth.lambda2(np.linspace(10, 50, 400))
+    rm_true = -12.0
+    Q, U = _synthetic_pol(lam2, rm_true)
+    phi = rmsynth.phi_grid(lam2, phi_max=50.0)
+    F = rmsynth.faraday_spectrum(Q, U, lam2, phi)
+    peak = phi[np.argmax(np.abs(F[0]))]
+    assert abs(peak - rm_true) < rmsynth.faraday_resolution(lam2) * 3
+
+
+def test_faraday_spectrum_zero_rm_peaks_at_zero():
+    lam2 = rmsynth.lambda2(np.linspace(10, 50, 400))
+    Q, U = _synthetic_pol(lam2, 0.0)
+    phi = rmsynth.phi_grid(lam2, phi_max=50.0)
+    F = rmsynth.faraday_spectrum(Q, U, lam2, phi)
+    assert abs(phi[np.argmax(np.abs(F[0]))]) < rmsynth.faraday_resolution(lam2) * 3
+
+
+def test_faraday_spectrum_shape_multi_time():
+    lam2 = rmsynth.lambda2(np.linspace(10, 50, 100))
+    Q = np.zeros((3, lam2.size))
+    U = np.zeros((3, lam2.size))
+    phi = rmsynth.phi_grid(lam2, phi_max=10.0)
+    F = rmsynth.faraday_spectrum(Q, U, lam2, phi)
+    assert F.shape == (3, phi.size)
