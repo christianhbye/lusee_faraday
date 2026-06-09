@@ -76,7 +76,11 @@ def _toy(nside=8, ntimes=2, nfreq=3, seed=1):
     mask = np.ones(npix, dtype=bool)
     freqs = np.linspace(10.0, 50.0, nfreq)
     lam2 = (3e8 / (freqs * 1e6)) ** 2
-    basis = [(rng.normal(size=npix), rng.normal(size=npix)) for _ in range(2)]
+    # basis maps are rotated (ntimes, npix), matching rotate_pol_maps
+    basis = [
+        (rng.normal(size=(ntimes, npix)), rng.normal(size=(ntimes, npix)))
+        for _ in range(2)
+    ]
     return I, Q, U, rm, beam, mask, freqs, lam2, basis
 
 

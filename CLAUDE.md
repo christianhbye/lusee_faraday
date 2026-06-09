@@ -82,5 +82,6 @@ Headline result: marginalizing the low-ℓ spin-2 sky modes + τ reduces the Far
 Files in `data/` are required for realistic simulations but not tracked fully in git (large FITS/HDF5). Key files:
 - `feko_bnl_3m_75deg.2port.fits`, `hfss_lbl_3m_75deg.2port.fits` — LuSEE beam models
 - `wmap_band_iqumap_r9_9yr_K_v5.fits` — WMAP K-band polarization maps
+- `haslam_galactic.npz` — Haslam 408 MHz total-intensity map (Stokes I source for the sims/forecast)
 - `faraday2020v2.hdf5` — Faraday rotation measure sky map
 - `spectrometer_bin_response.txt` — spectrometer channel response
