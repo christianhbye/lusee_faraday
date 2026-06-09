@@ -13,6 +13,8 @@ moderate/high FR angles are dominated by SHT truncation in the
 brute-force result, and the optimized result is actually more accurate.
 """
 
+import types
+
 import healpy as hp
 import numpy as np
 import pytest
@@ -261,3 +263,76 @@ def test_stokes_output(beam, times):
     np.testing.assert_allclose(sI_f, sI_b, rtol=1e-5)
     np.testing.assert_allclose(sQ_f, sQ_b, rtol=1e-5)
     np.testing.assert_allclose(sU_f, sU_b, rtol=1e-5)
+
+
+# ------------------------------------------------------------------
+# Unit tests for horizon-mask optimisation (Task 1)
+# ------------------------------------------------------------------
+
+
+def _stub(npix, ntimes, seed=0):
+    rng = np.random.default_rng(seed)
+    keys = [
+        f"w{s}_{p}" for s in "IQU" for p in ("x", "y", "xy")
+    ]
+    weights = {k: rng.normal(size=npix) for k in keys}
+    beam = types.SimpleNamespace(weights=weights)
+    I = rng.uniform(50, 100, (ntimes, npix))
+    Q = rng.normal(size=(ntimes, npix))
+    U = rng.normal(size=(ntimes, npix))
+    rm = rng.normal(scale=10, size=(ntimes, npix))
+    mask = rng.random(npix) > 0.4
+    freqs = np.array([10.0, 30.0, 50.0])
+    return beam, I, Q, U, rm, mask, freqs
+
+
+def _ref_vis(
+    beam, I, Q, U, rm, mask, freqs,
+    freq_ref_I=50, beta_I=-2.55,
+    freq_ref_QU=23e3, beta_QU=-2.8, cmb=2.725,
+):
+    w = beam.weights
+    m = mask.astype(float)
+    norm = np.sum(w["wI_x"] * m) + np.sum(w["wI_y"] * m)
+    sI = (freqs / freq_ref_I) ** beta_I
+    sQU = (freqs / freq_ref_QU) ** beta_QU
+    l2 = (3e8 / (freqs * 1e6)) ** 2
+    nt = I.shape[0]
+    vis = np.zeros((nt, 3, len(freqs)))
+    for i in range(nt):
+        Im = (I[i] - cmb) * m
+        Qm = Q[i] * m
+        Um = U[i] * m
+        for k, pol in enumerate(("x", "y", "xy")):
+            sII = np.sum(w[f"wI_{pol}"] * Im)
+            sIc = np.sum(w[f"wI_{pol}"] * cmb * m)
+            A = w[f"wQ_{pol}"] * Qm + w[f"wU_{pol}"] * Um
+            B = w[f"wU_{pol}"] * Qm - w[f"wQ_{pol}"] * Um
+            ph = 2 * np.outer(l2, rm[i])
+            pol_c = np.cos(ph) @ A + np.sin(ph) @ B
+            vis[i, k] = (
+                sI * sII + sIc + sQU * np.real(pol_c)
+            ) / norm
+    return vis
+
+
+def test_compute_vis_fast_matches_reference():
+    beam, I, Q, U, rm, mask, freqs = _stub(48, 4)
+    got = compute_vis_fast(I, Q, U, rm, beam, freqs, mask)
+    exp = _ref_vis(beam, I, Q, U, rm, mask, freqs)
+    np.testing.assert_allclose(got, exp, rtol=1e-10, atol=1e-10)
+
+
+def test_below_horizon_pixels_do_not_affect_output():
+    beam, I, Q, U, rm, mask, freqs = _stub(48, 4)
+    v1 = compute_vis_fast(I, Q, U, rm, beam, freqs, mask)
+    below = ~mask
+    I2, Q2, U2, rm2 = (
+        I.copy(), Q.copy(), U.copy(), rm.copy()
+    )
+    I2[:, below] += 1e3
+    Q2[:, below] += 5.0
+    U2[:, below] -= 3.0
+    rm2[:, below] += 100.0
+    v2 = compute_vis_fast(I2, Q2, U2, rm2, beam, freqs, mask)
+    np.testing.assert_allclose(v1, v2, rtol=1e-12, atol=1e-12)
