@@ -49,3 +49,137 @@ def marginal_error(F, idx, rcond=1e-12):
 def detection_snr(F, idx, alpha_fid=1.0, rcond=1e-12):
     """Detection SNR = alpha_fid / marginalized sigma(alpha)."""
     return alpha_fid / marginal_error(F, idx, rcond=rcond)
+
+
+def faraday_column(
+    I_topo,
+    Q_topo,
+    U_topo,
+    rm_topo,
+    beam,
+    mask,
+    freqs,
+    alpha_fid=1.0,
+    dalpha=1e-3,
+    **kwargs,
+):
+    """dP/dalpha via central finite difference at alpha_fid."""
+    Pp = pol_response(
+        I_topo,
+        Q_topo,
+        U_topo,
+        rm_topo,
+        beam,
+        mask,
+        freqs,
+        alpha=alpha_fid + dalpha,
+        **kwargs,
+    )
+    Pm = pol_response(
+        I_topo,
+        Q_topo,
+        U_topo,
+        rm_topo,
+        beam,
+        mask,
+        freqs,
+        alpha=alpha_fid - dalpha,
+        **kwargs,
+    )
+    return (Pp - Pm) / (2 * dalpha)
+
+
+def dispersion_column(P_pol_fid, lam2):
+    """dP/dtau at tau=0 for depolarization exp(-2 tau lam2^2):
+    -2 (lam2)^2 * P_pol_fid (tau is the Faraday variance)."""
+    lam2 = np.asarray(lam2, dtype=float)
+    return -2.0 * lam2[None, :] ** 2 * P_pol_fid
+
+
+def run_forecast(
+    I_topo,
+    Q_topo,
+    U_topo,
+    rm_topo,
+    basis_topo,
+    beam,
+    mask,
+    freqs,
+    lam2,
+    sigma,
+    alpha_fid=1.0,
+    dalpha=1e-3,
+    **kwargs,
+):
+    """Sky-marginalized Faraday detection forecast.
+
+    basis_topo: list of (Q_basis_topo, U_basis_topo) rotated nuisance
+    maps. Returns dict with sigma_alpha / snr (sky+tau marginalized) and
+    sigma_alpha_opt / snr_opt (sky+tau fixed -> optimistic bound).
+    """
+    zeroQ = np.zeros_like(Q_topo)
+    P0 = pol_response(
+        I_topo,
+        zeroQ,
+        zeroQ,
+        rm_topo,
+        beam,
+        mask,
+        freqs,
+        alpha=alpha_fid,
+        **kwargs,
+    )
+    P_fid = pol_response(
+        I_topo,
+        Q_topo,
+        U_topo,
+        rm_topo,
+        beam,
+        mask,
+        freqs,
+        alpha=alpha_fid,
+        **kwargs,
+    )
+    P_pol_fid = P_fid - P0  # polarized sky part only (I-leakage removed)
+
+    a_col = faraday_column(
+        I_topo,
+        Q_topo,
+        U_topo,
+        rm_topo,
+        beam,
+        mask,
+        freqs,
+        alpha_fid=alpha_fid,
+        dalpha=dalpha,
+        **kwargs,
+    )
+    t_col = dispersion_column(P_pol_fid, lam2)
+    mode_cols = [
+        pol_response(
+            I_topo,
+            Qb,
+            Ub,
+            rm_topo,
+            beam,
+            mask,
+            freqs,
+            alpha=alpha_fid,
+            **kwargs,
+        )
+        - P0
+        for Qb, Ub in basis_topo
+    ]
+
+    cols = [a_col, t_col] + mode_cols  # alpha is index 0
+    F = fisher_matrix(cols, sigma)
+    F_opt = fisher_matrix([a_col], sigma)
+    sig_a = marginal_error(F, 0)
+    sig_a_opt = marginal_error(F_opt, 0)
+    return {
+        "sigma_alpha": sig_a,
+        "snr": alpha_fid / sig_a,
+        "sigma_alpha_opt": sig_a_opt,
+        "snr_opt": alpha_fid / sig_a_opt,
+        "n_modes": len(basis_topo),
+    }
