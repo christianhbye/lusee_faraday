@@ -27,3 +27,16 @@ def max_scale(lam2):
     """Largest recoverable Faraday-thick scale (rad/m^2)."""
     lam2 = np.asarray(lam2, dtype=float)
     return np.pi / lam2.min()
+
+
+def phi_grid(lam2, phi_max, dphi=None, oversample=3):
+    """Symmetric Faraday-depth grid on [-phi_max, phi_max].
+
+    If dphi is None it defaults to faraday_resolution / oversample.
+    """
+    lam2 = np.asarray(lam2, dtype=float)
+    if dphi is None:
+        dphi = faraday_resolution(lam2) / oversample
+    # round up so the actual linspace spacing never exceeds dphi
+    n = int(np.ceil(2 * phi_max / dphi)) + 1
+    return np.linspace(-phi_max, phi_max, n)

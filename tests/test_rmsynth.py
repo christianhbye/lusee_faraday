@@ -23,3 +23,23 @@ def test_faraday_resolution():
 def test_max_scale():
     lam2 = np.array([1.0, 2.0, 3.0])
     assert np.isclose(rmsynth.max_scale(lam2), np.pi)
+
+
+def test_phi_grid_range_and_symmetry():
+    lam2 = rmsynth.lambda2(np.linspace(10, 50, 200))
+    phi = rmsynth.phi_grid(lam2, phi_max=100.0, dphi=1.0)
+    assert np.isclose(phi[0], -100.0)
+    assert np.isclose(phi[-1], 100.0)
+    assert np.isclose(phi[len(phi) // 2], 0.0)
+
+
+def test_phi_grid_spacing_respects_dphi():
+    lam2 = rmsynth.lambda2(np.linspace(10, 50, 200))
+    phi = rmsynth.phi_grid(lam2, phi_max=50.0, dphi=0.5)
+    assert np.all(np.diff(phi) <= 0.5 + 1e-9)
+
+
+def test_phi_grid_default_dphi_oversamples_resolution():
+    lam2 = rmsynth.lambda2(np.linspace(10, 50, 200))
+    phi = rmsynth.phi_grid(lam2, phi_max=10.0, oversample=3)
+    assert np.median(np.diff(phi)) <= rmsynth.faraday_resolution(lam2) / 3
