@@ -27,6 +27,7 @@ import lusee_faraday as ld
 from lusee_faraday.fast_sim import (
     precompute_rotated_maps,
     compute_vis_fast,
+    compute_vis_fast_parallel,
 )
 from lusee_faraday.sim import Simulator, SimConfig
 from lusee_faraday.sky import LUSEE_LOC
@@ -336,3 +337,26 @@ def test_below_horizon_pixels_do_not_affect_output():
     rm2[:, below] += 100.0
     v2 = compute_vis_fast(I2, Q2, U2, rm2, beam, freqs, mask)
     np.testing.assert_allclose(v1, v2, rtol=1e-12, atol=1e-12)
+
+
+# ------------------------------------------------------------------
+# Unit tests for time-parallel compute_vis_fast_parallel (Task 4)
+# ------------------------------------------------------------------
+
+
+def test_parallel_matches_serial():
+    beam, I, Q, U, rm, mask, freqs = _stub(48, 6)
+    serial = compute_vis_fast(I, Q, U, rm, beam, freqs, mask)
+    par = compute_vis_fast_parallel(
+        I, Q, U, rm, beam, freqs, mask, nproc=2
+    )
+    np.testing.assert_allclose(serial, par, rtol=1e-12, atol=1e-12)
+
+
+def test_parallel_nproc_one_is_serial():
+    beam, I, Q, U, rm, mask, freqs = _stub(48, 3)
+    serial = compute_vis_fast(I, Q, U, rm, beam, freqs, mask)
+    par = compute_vis_fast_parallel(
+        I, Q, U, rm, beam, freqs, mask, nproc=1
+    )
+    np.testing.assert_allclose(serial, par, rtol=1e-12, atol=1e-12)

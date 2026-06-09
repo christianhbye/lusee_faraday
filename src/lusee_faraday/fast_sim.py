@@ -21,6 +21,8 @@ wQ_x*U_topo are precomputed per time step.  The dot products are
 evaluated as BLAS matrix-vector products in frequency batches.
 """
 
+from concurrent.futures import ProcessPoolExecutor
+
 import healpy as hp
 import numpy as np
 from lunarsky import LunarTopo
@@ -216,3 +218,47 @@ def compute_vis_fast(
         vis[i] = np.real(I_contrib) / norm
 
     return vis
+
+
+def _vis_chunk(args):
+    I_t, Q_t, U_t, rm_t, beam, freqs, mask, kwargs = args
+    return compute_vis_fast(
+        I_t, Q_t, U_t, rm_t, beam, freqs, mask, **kwargs
+    )
+
+
+def compute_vis_fast_parallel(
+    I_topo,
+    Q_topo,
+    U_topo,
+    rm_topo,
+    beam,
+    freqs,
+    mask,
+    nproc=None,
+    **kwargs,
+):
+    """Parallel ``compute_vis_fast`` over the time axis.
+
+    Splits the ntimes axis into ``nproc`` chunks run in separate
+    processes and concatenates the results.  nproc=None or 1 runs
+    serially.  Extra kwargs are forwarded to compute_vis_fast.
+    """
+    ntimes = I_topo.shape[0]
+    if nproc in (None, 1) or ntimes < 2:
+        return compute_vis_fast(
+            I_topo, Q_topo, U_topo, rm_topo,
+            beam, freqs, mask, **kwargs,
+        )
+    chunks = np.array_split(np.arange(ntimes), nproc)
+    args = [
+        (
+            I_topo[c], Q_topo[c], U_topo[c], rm_topo[c],
+            beam, freqs, mask, kwargs,
+        )
+        for c in chunks
+        if c.size
+    ]
+    with ProcessPoolExecutor(max_workers=nproc) as ex:
+        results = list(ex.map(_vis_chunk, args))
+    return np.concatenate(results, axis=0)
