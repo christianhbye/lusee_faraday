@@ -90,8 +90,12 @@ def faraday_column(
 
 
 def dispersion_column(P_pol_fid, lam2):
-    """dP/dtau at tau=0 for depolarization exp(-2 tau lam2^2):
-    -2 (lam2)^2 * P_pol_fid (tau is the Faraday variance)."""
+    """dP/dtau at tau=0 for Burn depolarization exp(-2 tau lam^4).
+
+    Returns -2 (lam2)**2 * P_pol_fid, where lam^4 = (lam2)**2 and
+    tau = sigma_RM**2 is the Faraday variance (parameterizing by the
+    variance, not sigma_RM, keeps the derivative non-zero at tau=0).
+    """
     lam2 = np.asarray(lam2, dtype=float)
     return -2.0 * lam2[None, :] ** 2 * P_pol_fid
 
@@ -109,13 +113,16 @@ def run_forecast(
     sigma,
     alpha_fid=1.0,
     dalpha=1e-3,
+    rcond=1e-12,
     **kwargs,
 ):
     """Sky-marginalized Faraday detection forecast.
 
     basis_topo: list of (Q_basis_topo, U_basis_topo) rotated nuisance
-    maps. Returns dict with sigma_alpha / snr (sky+tau marginalized) and
-    sigma_alpha_opt / snr_opt (sky+tau fixed -> optimistic bound).
+    maps. rcond is forwarded to the pseudo-inverse for ill-conditioned
+    Fisher matrices. Returns dict with sigma_alpha / snr (sky+tau
+    marginalized) and sigma_alpha_opt / snr_opt (sky+tau fixed ->
+    optimistic bound).
     """
     zeroQ = np.zeros_like(Q_topo)
     P0 = pol_response(
@@ -174,8 +181,8 @@ def run_forecast(
     cols = [a_col, t_col] + mode_cols  # alpha is index 0
     F = fisher_matrix(cols, sigma)
     F_opt = fisher_matrix([a_col], sigma)
-    sig_a = marginal_error(F, 0)
-    sig_a_opt = marginal_error(F_opt, 0)
+    sig_a = marginal_error(F, 0, rcond=rcond)
+    sig_a_opt = marginal_error(F_opt, 0, rcond=rcond)
     return {
         "sigma_alpha": sig_a,
         "snr": alpha_fid / sig_a,
