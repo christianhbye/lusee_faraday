@@ -6,6 +6,7 @@ from . import plot
 from . import utils
 from . import fast_sim
 from . import rmsynth
+from . import freqfft
 from . import noise
 from . import detection
 

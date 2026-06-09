@@ -13,10 +13,26 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from lusee_faraday import rmsynth, noise, detection
+from lusee_faraday import rmsynth, noise, detection, freqfft
 
 RES = Path(__file__).resolve().parent / "results"
 DT_CASES = [(40.0, "40 s"), (600.0, "10 min"), (3600.0, "1 h")]
+
+
+def _to_uniform(nu, Q, U, n):
+    """Resample P = Q + iU onto an n-point uniform nu grid (FFT needs it).
+
+    The full-band channel table is non-uniform (mixed wide/zoom,
+    FFT-ordered), so average duplicate channels, sort, then linearly
+    interpolate onto a uniform grid before taking the nu-FFT.
+    """
+    order = np.argsort(nu)
+    u, inv = np.unique(nu[order], return_inverse=True)
+    cnt = np.bincount(inv)
+    Qu = np.bincount(inv, Q[order]) / cnt
+    Uu = np.bincount(inv, U[order]) / cnt
+    grid = np.linspace(u[0], u[-1], n)
+    return grid, np.interp(grid, u, Qu), np.interp(grid, u, Uu)
 
 
 def main():
@@ -39,9 +55,20 @@ def main():
     F_fr = rmsynth.faraday_spectrum(pQ_FR[i_gal], pU_FR[i_gal], lam2, phi, w_iv)[0]
     F_nf = rmsynth.faraday_spectrum(pQ_nf[i_gal], pU_nf[i_gal], lam2, phi, w_iv)[0]
 
+    # nu-FFT alternative: plain FFT of P on a uniform nu grid. Conjugate
+    # axis is a delay tau (us), NOT Faraday depth -- P(nu) is a chirp in
+    # nu (phase winds as lambda^2 ~ 1/nu^2), so the FFT does not localize
+    # RM. Shown for interpretability, side by side with the lambda^2 FDF.
+    nu_u, Qf_u, Uf_u = _to_uniform(nu, pQ_FR[i_gal], pU_FR[i_gal], 4096)
+    _, Qn_u, Un_u = _to_uniform(nu, pQ_nf[i_gal], pU_nf[i_gal], 4096)
+    tau = freqfft.delay_grid(nu_u) * 1e6  # microseconds
+    G_fr = freqfft.faraday_fft(Qf_u, Uf_u, nu_u)[0]
+    G_nf = freqfft.faraday_fft(Qn_u, Un_u, nu_u)[0]
+
     print(f"galaxy-up t={i_gal}")
     print(f"  FR Faraday peak at phi={phi[np.argmax(np.abs(F_fr))]:.3f} rad/m^2")
     print(f"  noFR peak at phi={phi[np.argmax(np.abs(F_nf))]:.3f} rad/m^2")
+    print(f"  FR nu-FFT peak at tau={tau[np.argmax(np.abs(G_fr))]:.3f} us")
     p_fr_all = np.hypot(pQ_FR, pU_FR)
     p_nf_all = np.hypot(pQ_nf, pU_nf)
     msk = p_nf_all > 0
@@ -73,10 +100,10 @@ def main():
               f"SNR_far(invvar)={snr_far_iv:7.1f}  "
               f"SNR_far(sigaware)={snr_far_sa:7.1f}")
 
-    fig, ax = plt.subplots(3, 1, figsize=(8, 11))
+    fig, ax = plt.subplots(4, 1, figsize=(8, 14))
     ax[0].plot(phi, np.abs(F_fr), label="FR")
     ax[0].plot(phi, np.abs(F_nf), label="no FR", ls="--")
-    ax[0].set(title=f"Faraday spectrum (galaxy-up t={i_gal})",
+    ax[0].set(title=f"lambda^2 RM-synthesis FDF (galaxy-up t={i_gal})",
               xlabel="phi [rad/m^2]", ylabel="|F|", yscale="log")
     ax[0].legend()
 
@@ -98,6 +125,12 @@ def main():
     ax[2].plot(nu, np.nanmedian(ratio, axis=0), ".", ms=2)
     ax[2].set(title="median depolarization P_FR/P_noFR vs frequency",
               xlabel="nu [MHz]", ylabel="P_FR/P_noFR")
+
+    ax[3].plot(tau, np.abs(G_fr), label="FR")
+    ax[3].plot(tau, np.abs(G_nf), label="no FR", ls="--")
+    ax[3].set(title="nu-FFT delay spectrum (same P; tau is delay, NOT RM)",
+              xlabel="delay tau [us]", ylabel="|FFT(Q+iU)|", yscale="log")
+    ax[3].legend()
 
     fig.tight_layout()
     out = RES / "rmsynth_analysis.png"
