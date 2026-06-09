@@ -77,7 +77,7 @@ def test_faraday_spectrum_recovers_positive_rm():
     phi = rmsynth.phi_grid(lam2, phi_max=50.0)
     F = rmsynth.faraday_spectrum(Q, U, lam2, phi)
     peak = phi[np.argmax(np.abs(F[0]))]
-    assert abs(peak - rm_true) < rmsynth.faraday_resolution(lam2) * 3
+    assert abs(peak - rm_true) < rmsynth.faraday_resolution(lam2) * 0.5
 
 
 def test_faraday_spectrum_recovers_negative_rm():
@@ -87,7 +87,7 @@ def test_faraday_spectrum_recovers_negative_rm():
     phi = rmsynth.phi_grid(lam2, phi_max=50.0)
     F = rmsynth.faraday_spectrum(Q, U, lam2, phi)
     peak = phi[np.argmax(np.abs(F[0]))]
-    assert abs(peak - rm_true) < rmsynth.faraday_resolution(lam2) * 3
+    assert abs(peak - rm_true) < rmsynth.faraday_resolution(lam2) * 0.5
 
 
 def test_faraday_spectrum_zero_rm_peaks_at_zero():
@@ -95,7 +95,7 @@ def test_faraday_spectrum_zero_rm_peaks_at_zero():
     Q, U = _synthetic_pol(lam2, 0.0)
     phi = rmsynth.phi_grid(lam2, phi_max=50.0)
     F = rmsynth.faraday_spectrum(Q, U, lam2, phi)
-    assert abs(phi[np.argmax(np.abs(F[0]))]) < rmsynth.faraday_resolution(lam2) * 3
+    assert abs(phi[np.argmax(np.abs(F[0]))]) < rmsynth.faraday_resolution(lam2) * 0.5
 
 
 def test_faraday_spectrum_shape_multi_time():
@@ -105,3 +105,32 @@ def test_faraday_spectrum_shape_multi_time():
     phi = rmsynth.phi_grid(lam2, phi_max=10.0)
     F = rmsynth.faraday_spectrum(Q, U, lam2, phi)
     assert F.shape == (3, phi.size)
+
+
+def test_faraday_resolution_zero_span_raises():
+    with pytest.raises(ValueError):
+        rmsynth.faraday_resolution(np.array([5.0, 5.0]))
+
+
+def test_normalized_weights_zero_sum_raises():
+    lam2 = rmsynth.lambda2(np.linspace(10, 50, 10))
+    with pytest.raises(ValueError):
+        rmsynth.rmsf(lam2, np.array([0.0]), weights=np.zeros(lam2.size))
+
+
+def test_faraday_spectrum_1d_input_returns_2d():
+    lam2 = rmsynth.lambda2(np.linspace(10, 50, 100))
+    Q, U = _synthetic_pol(lam2, 5.0)
+    phi = rmsynth.phi_grid(lam2, phi_max=10.0)
+    F = rmsynth.faraday_spectrum(Q, U, lam2, phi)
+    assert F.shape == (1, phi.size)
+
+
+def test_faraday_spectrum_accepts_weights():
+    lam2 = rmsynth.lambda2(np.linspace(10, 50, 100))
+    Q, U = _synthetic_pol(lam2, 5.0)
+    phi = rmsynth.phi_grid(lam2, phi_max=20.0)
+    w = np.linspace(0.5, 1.0, lam2.size)
+    F = rmsynth.faraday_spectrum(Q, U, lam2, phi, weights=w)
+    peak = phi[np.argmax(np.abs(F[0]))]
+    assert abs(peak - 5.0) < rmsynth.faraday_resolution(lam2) * 2

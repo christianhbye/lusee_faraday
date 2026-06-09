@@ -20,7 +20,10 @@ def lambda2(nu_mhz):
 def faraday_resolution(lam2):
     """FWHM of the RMSF main lobe (rad/m^2), set by lambda^2 coverage."""
     lam2 = np.asarray(lam2, dtype=float)
-    return 2 * np.sqrt(3) / (lam2.max() - lam2.min())
+    span = lam2.max() - lam2.min()
+    if span == 0:
+        raise ValueError("lam2 must span a non-zero range")
+    return 2 * np.sqrt(3) / span
 
 
 def max_scale(lam2):
@@ -30,23 +33,27 @@ def max_scale(lam2):
 
 
 def phi_grid(lam2, phi_max, dphi=None, oversample=3):
-    """Symmetric Faraday-depth grid on [-phi_max, phi_max].
+    """Symmetric Faraday-depth grid on [-phi_max, phi_max], including 0.
 
-    If dphi is None it defaults to faraday_resolution / oversample.
+    If dphi is None it defaults to faraday_resolution / oversample. The
+    grid always has an odd number of points so phi = 0 is sampled, and
+    the spacing never exceeds dphi.
     """
     lam2 = np.asarray(lam2, dtype=float)
     if dphi is None:
         dphi = faraday_resolution(lam2) / oversample
-    # round up so the actual linspace spacing never exceeds dphi
-    n = int(np.ceil(2 * phi_max / dphi)) + 1
-    return np.linspace(-phi_max, phi_max, n)
+    n_half = int(np.ceil(phi_max / dphi))
+    return np.linspace(-phi_max, phi_max, 2 * n_half + 1)
 
 
 def _normalized_weights(lam2, weights):
     if weights is None:
         weights = np.ones_like(lam2)
     weights = np.asarray(weights, dtype=float)
-    return weights / weights.sum()
+    total = weights.sum()
+    if total == 0:
+        raise ValueError("weights must have a non-zero sum")
+    return weights / total
 
 
 def rmsf(lam2, phi, weights=None):
@@ -63,7 +70,7 @@ def rmsf(lam2, phi, weights=None):
 
 
 def faraday_spectrum(Q, U, lam2, phi, weights=None):
-    """Complex Faraday spectrum F(phi, t) from Stokes Q, U.
+    """Complex Faraday spectrum F(t, phi) from Stokes Q, U.
 
     Q, U have shape (nchan,) or (ntimes, nchan). Returns shape
     (ntimes, nphi). F(phi) = sum_k w_k (Q+iU)_k
