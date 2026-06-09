@@ -5,6 +5,7 @@ from . import rotations
 from . import plot
 from . import utils
 from . import fast_sim
+from . import rmsynth
 
 from .healpix import HealpixGrid
 from .beam import Beam
