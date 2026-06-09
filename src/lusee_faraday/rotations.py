@@ -111,11 +111,24 @@ def gal2topo(I_map, Q_map, U_map, topo_frame=None, euler=None):
 
 
 def topo_euler_angles(times, location):
-    """Galactic->topocentric ZYX Euler angles for each observation time.
+    """
+    Galactic-to-topocentric ZYX Euler angles for each observation time.
 
-    Returns an (ntimes, 3) array of (alpha, beta, gamma). The angles
-    track the sky orientation versus lunar sidereal time and serve as
-    the LST tag for later per-orientation coadd.
+    The angles track the sky orientation versus lunar sidereal time and
+    serve as the LST tag for later per-orientation coadd.
+
+    Parameters
+    ----------
+    times : array_like of lunarsky.Time
+        Observation times.
+    location : lunarsky.MoonLocation
+        Observer location on the lunar surface.
+
+    Returns
+    -------
+    angles : ndarray
+        Euler angles (alpha, beta, gamma) in radians, shape (ntimes, 3).
+
     """
     angles = np.empty((len(times), 3))
     for i, t in enumerate(times):
