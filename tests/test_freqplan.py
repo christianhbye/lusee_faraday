@@ -92,7 +92,10 @@ def test_per_mode_decimation(spec):
         decimation={"zoom": 10, "wide": 250},
     )
     raw = np.ones(plan.sim_freqs().size)
-    assert plan.channelize(raw).shape == (65,)
+    ch = plan.channelize(raw)
+    assert ch.shape == (65,)
+    # normalized responses: a flat unit spectrum channelizes to 1.0
+    assert np.allclose(ch, 1.0)
     t = plan.channel_table
     assert t["nu"].shape == (65,)
 

@@ -26,7 +26,8 @@ class FrequencyPlan:
     def __init__(self, response, specs, decimation=1, support=1.0):
         """response: SpectrometerResponse. specs: list of
         (center_mhz, mode), mode in {"zoom", "wide"}.
-        decimation: int applied to all specs, or a dict keyed by mode.
+        decimation: int applied to all specs, or a dict keyed by mode
+        (must include every mode present in specs).
         support: if < 1, truncate the response to that weight fraction.
         """
         base = response.truncate(support) if support < 1.0 else response
