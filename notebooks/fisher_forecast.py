@@ -52,6 +52,9 @@ BEAM_FILE = DATA / "hfss_lbl_3m_75deg.2port.fits"
 
 def main():
     d = np.load(RES / "faraday_fullband.npz")
+    assert (
+        d["pI_FR"].shape[0] >= N_TIMES
+    ), "npz has fewer LST steps than N_TIMES"
     # Decimate channels for the forecast: ~28 channel-center pol_response
     # evals over all 4047 channels is too slow; a strided subset spans the
     # same lambda^2 range and keeps the forecast tractable. DECIM=1 runs
@@ -117,8 +120,14 @@ def main():
             f"  {lbl:>7}: SNR(marginalized)={s:8.2f}  "
             f"SNR(fixed-sky)={so:8.2f}"
         )
+    print(
+        "  NOTE: optimistic upper bound -- low-l fixed-spectrum sky "
+        "nuisance\n  + nside=64 (RM small-scale variance smoothed); a "
+        "fuller nuisance\n  (per-mode spectral freedom, higher l) would "
+        "lower these."
+    )
 
-    labels = [l for _, l in DT_CASES]
+    labels = [lbl for _, lbl in DT_CASES]
     x = np.arange(len(labels))
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.bar(x - 0.2, snr_opt, 0.4, label="fixed sky (optimistic)")
@@ -133,6 +142,7 @@ def main():
     )
     ax.legend()
     fig.tight_layout()
+    RES.mkdir(exist_ok=True)
     out_png = RES / "fisher_forecast.png"
     fig.savefig(out_png, dpi=120)
     print(f"saved {out_png}")
