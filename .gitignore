@@ -209,3 +209,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# lusee_faraday analysis outputs (regenerable; multi-GB waterfalls)
+generated_data/
+
+# LaTeX build artifacts
+report/*.aux
+report/*.log
+report/*.out
+report/*.synctex.gz
+report/latex.log
