@@ -262,30 +262,39 @@ def fig_leakage_vs_azimuth(main, ab, alt_deg=30.0):
         )
 
 
-def fig_spectrum(main, ab, phi_fd, fname, center=30.0, nfine=512):
-    """Polarized source across one parent bin, with or without Faraday."""
-    import matplotlib.pyplot as plt
+def fig_position(main, ab, alt, az, label, fname, phi_fd=250.0,
+                 center=30.0, nfine=512):
+    """One source position, Faraday off (left) vs on (right).
 
-    # show a quarter of the 25 kHz parent bin: enough Faraday cycles to
-    # read the period, few enough to see the curves on a slide
+    Pairing the control with the effect makes the mechanism readable in
+    one glance: the instrumental leakage is a constant offset with the
+    screen off, and the *same* leakage becomes a spectral oscillation
+    with the screen on, because it then multiplies a rotating (Q, U).
+    """
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+
+    # a quarter of the 25 kHz parent bin: enough Faraday cycles to read
+    # the period, few enough to see the curves on a slide
     span_mhz = 25e-3 / 4
     freqs = center + (np.arange(nfine) - nfine // 2) * (span_mhz / nfine)
     lam2 = (C_LIGHT / (freqs * 1e6)) ** 2
-    # intrinsic source: 100% polarized along local e_theta -> (I,Q,U)=(1,-1,0)
-    P = (-1.0 + 0.0j) * np.exp(2j * phi_fd * lam2)
-    I = np.ones_like(freqs)
-    Q, U = P.real, P.imag
+    foff = (freqs - center) * 1e3
+    th = np.full_like(freqs, np.radians(90.0 - alt))
+    ph = np.full_like(freqs, np.radians(az))
 
-    tag = (rf"$\phi_{{\rm FD}} = {phi_fd:g}$ rad m$^{{-2}}$" if phi_fd
-           else "no Faraday rotation")
-    cases = [("zenith", 90.0, 0.0), (r"alt $60^\circ$, az $20^\circ$", 60.0, 20.0)]
     fig, axes = plt.subplots(1, 2, figsize=(12, 4), sharey=True)
-    for ax, (label, alt, az) in zip(axes, cases):
-        th = np.full_like(freqs, np.radians(90.0 - alt))
-        ph = np.full_like(freqs, np.radians(az))
+    states = [
+        (0.0, "no Faraday rotation"),
+        (phi_fd, rf"$\phi_{{\rm FD}} = {phi_fd:g}$ rad m$^{{-2}}$"),
+    ]
+    for ax, (fd, tag) in zip(axes, states):
+        # intrinsic source: 100% polarized along local e_theta
+        P = (-1.0 + 0.0j) * np.exp(2j * fd * lam2)
+        I = np.ones_like(freqs)
+        Q, U = P.real, P.imag
         mI, mQ, mU = main.pstokes(th, ph, I, Q, U)
         aI, aQ, aU, aV = ab.pstokes(th, ph, I, Q, U)
-        foff = (freqs - center) * 1e3
         for arr, c in ((mI, "C0"), (mQ, "C1"), (mU, "C2")):
             ax.plot(foff, arr, color=c, lw=1.5)
         for arr, c in ((aI, "C0"), (aQ, "C1"), (aU, "C2")):
@@ -294,18 +303,18 @@ def fig_spectrum(main, ab, phi_fd, fname, center=30.0, nfine=512):
         ax.set_title(f"{label} — {tag}", fontsize=10)
         if ax is axes[0]:
             ax.set_ylabel("normalised pseudo-Stokes")
-        # pointwise fractional polarization; PSD-ness of J T J^H bounds
-        # sqrt(Q^2+U^2+V^2) <= I, so these must not exceed 1.
+        # PSD-ness of J T J^H bounds sqrt(Q^2+U^2+V^2) <= I
         p_m = np.hypot(mQ, mU) / mI
         p_a = np.sqrt(aQ**2 + aU**2 + aV**2) / aI
         print(
-            f"  {label:26s} main   p in [{p_m.min():.3f}, {p_m.max():.3f}]"
-            f"   as-built p in [{p_a.min():.3f}, {p_a.max():.3f}]"
+            f"  {label:14s} {tag[:22]:24s} symmetric I in "
+            f"[{mI.min():.4f}, {mI.max():.4f}]   4-port I in "
+            f"[{aI.min():.4f}, {aI.max():.4f}]"
         )
-        for nm, pp in (("main", p_m), ("as-built", p_a)):
+        for nm, pp in (("symmetric", p_m), ("4-port", p_a)):
             if pp.max() > 1.0 + 1e-3:
                 print(f"    WARNING {nm}: p = {pp.max():.4f} > 1 -> not PSD")
-    from matplotlib.lines import Line2D
+
     handles = [
         Line2D([], [], color="C0", label="$I$"),
         Line2D([], [], color="C1", label="$Q$"),
@@ -321,8 +330,8 @@ def fig_spectrum(main, ab, phi_fd, fname, center=30.0, nfine=512):
         fontsize=9,
         frameon=False,
     )
-    plt.savefig(FIG_DIR / fname, dpi=150)
-    plt.close()
+    fig.savefig(FIG_DIR / fname, dpi=150)
+    plt.close(fig)
     print(f"  -> {fname}")
 
 
@@ -341,8 +350,11 @@ if __name__ == "__main__":
     fig_leakage_vs_altitude(main, ab)
     print("\n[2] unpolarized source, leakage vs azimuth")
     fig_leakage_vs_azimuth(main, ab)
-    print(f"\n[3] polarized source, phi_FD = {args.phi_fd:g} rad/m^2")
-    fig_spectrum(main, ab, args.phi_fd, "cmp_faraday_spectrum.png", args.freq)
-    print("\n[4] same source, Faraday OFF (control)")
-    fig_spectrum(main, ab, 0.0, "cmp_faraday_off.png", args.freq)
+    print(f"\n[3] polarized source at zenith, phi_FD = {args.phi_fd:g}")
+    fig_position(main, ab, 90.0, 0.0, "zenith",
+                 "cmp_zenith.png", args.phi_fd, args.freq)
+    print(f"\n[4] polarized source off zenith, phi_FD = {args.phi_fd:g}")
+    fig_position(main, ab, 60.0, 20.0,
+                 r"altitude $60^\circ$, azimuth $20^\circ$",
+                 "cmp_offzenith.png", args.phi_fd, args.freq)
     print(f"\nfigures -> {FIG_DIR}")
