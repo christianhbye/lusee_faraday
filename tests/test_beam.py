@@ -105,3 +105,44 @@ class TestRotateBeam:
         rotated = rotate_beam(jones, 45)
         power_after = np.sum(np.abs(rotated) ** 2)
         assert power_after == pytest.approx(power_before, rel=1e-12)
+
+
+class TestInterpJonesPole:
+    """The pole must not zero out the beam.
+
+    E_theta and E_phi carry a pure m=1 azimuthal phase at a pole, so
+    their azimuthal mean -- which is what RectSphereBivariateSpline
+    receives as its pole value -- vanishes. Interpolating them directly
+    therefore drove the beam to zero at zenith. interp_jones goes via the
+    Cartesian components, which are m=0 at the pole.
+    """
+
+    def _analytic_dipole_grid(self, ntheta=181, nphi=360):
+        """Short dipole along x on a 1 deg (theta, phi) grid."""
+        theta = np.radians(np.linspace(0, 180, num=ntheta))
+        phi = np.radians(np.arange(nphi))
+        th, ph = np.meshgrid(theta, phi, indexing="ij")
+        Eth = -np.cos(th) * np.cos(ph)
+        Eph = np.sin(ph)
+        return np.array([Eth, Eph]), theta, phi
+
+    def test_pole_value_is_not_zeroed(self):
+        jones, theta, phi = self._analytic_dipole_grid()
+        grid = ld.HealpixGrid(nside=NSIDE, horizon=False)
+        got = ld.beam.interp_jones(grid, jones, theta, phi)
+        power = np.sum(np.abs(got) ** 2, axis=0)
+        # analytic short dipole: |E|^2 = cos^2(th)cos^2(ph) + sin^2(ph),
+        # which equals 1 at the pole for every phi
+        near_pole = grid.theta < np.radians(2.0)
+        assert near_pole.any()
+        np.testing.assert_allclose(power[near_pole], 1.0, rtol=2e-3)
+
+    def test_matches_analytic_away_from_pole(self):
+        jones, theta, phi = self._analytic_dipole_grid()
+        grid = ld.HealpixGrid(nside=NSIDE, horizon=False)
+        got = ld.beam.interp_jones(grid, jones, theta, phi)
+        want_th = -np.cos(grid.theta) * np.cos(grid.phi)
+        want_ph = np.sin(grid.phi)
+        mid = np.abs(np.degrees(grid.theta) - 90) > 5
+        np.testing.assert_allclose(got[0][mid], want_th[mid], atol=2e-3)
+        np.testing.assert_allclose(got[1][mid], want_ph[mid], atol=2e-3)
