@@ -44,6 +44,16 @@ Faraday rotation multiplies the polarized sky by `exp(2i φ(n̂) λ²)`. On
 
 Nyquist needs less than π per pixel. We are over by ~550×.
 
+![phase maps](faraday_phase_maps.png)
+
+*What the sky is actually multiplied by.* The RM map is smooth and structured,
+which is how it is normally displayed. The quantity the simulation applies is
+`exp(2i RM λ²)`, and its phase — wrapped into `[−π, π)` — is the speckle in the
+other three panels. Nothing survives of the structure on the left: at 30 MHz the
+phase turns **275 times** across a single nside-512 pixel, and **2475 times** at
+10 MHz. The lower panel is the same statement quantitatively — every band
+crosses `π` two to three decades finer than the grid it is evaluated on.
+
 In delay space: the RMSF of the ±0.1 MHz band has FWHM
 `δφ = 2√3/Δλ² = 2.60 rad m⁻²`, and a delay cell of that width corresponds to a
 level set of the RM map about **1 arcmin thick** — against 7 arcmin pixels at
@@ -402,6 +412,7 @@ ulimit -v 13000000
 | `hist_overlay.py` | Panel A data | 2 min |
 | `inputs.py` | §5 input-uncertainty numbers | 1 min |
 | `make_fig.py` | `faraday_evidence.png` (needs the two above) | 5 s |
+| `phase_maps.py` | `faraday_phase_maps.png` (standalone) | 40 s |
 
 Every test is a null test with its own control, so a disagreement points at a
 specific step rather than at the conclusion as a whole.
