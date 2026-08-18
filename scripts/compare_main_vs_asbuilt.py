@@ -262,8 +262,8 @@ def fig_leakage_vs_azimuth(main, ab, alt_deg=30.0):
         )
 
 
-def fig_faraday_spectrum(main, ab, phi_fd=250.0, center=30.0, nfine=512):
-    """Polarized source through a Faraday screen, across one parent bin."""
+def fig_spectrum(main, ab, phi_fd, fname, center=30.0, nfine=512):
+    """Polarized source across one parent bin, with or without Faraday."""
     import matplotlib.pyplot as plt
 
     # show a quarter of the 25 kHz parent bin: enough Faraday cycles to
@@ -276,6 +276,8 @@ def fig_faraday_spectrum(main, ab, phi_fd=250.0, center=30.0, nfine=512):
     I = np.ones_like(freqs)
     Q, U = P.real, P.imag
 
+    tag = (rf"$\phi_{{\rm FD}} = {phi_fd:g}$ rad m$^{{-2}}$" if phi_fd
+           else "no Faraday rotation")
     cases = [("zenith", 90.0, 0.0), (r"alt $60^\circ$, az $20^\circ$", 60.0, 20.0)]
     fig, axes = plt.subplots(1, 2, figsize=(11, 4))
     for ax, (label, alt, az) in zip(axes, cases):
@@ -290,7 +292,7 @@ def fig_faraday_spectrum(main, ab, phi_fd=250.0, center=30.0, nfine=512):
             ax.plot(foff, arr, color=c, lw=1.5, ls="--")
         ax.set_xlabel(f"frequency offset from {center:g} MHz [kHz]")
         ax.set_ylabel("normalised pseudo-Stokes")
-        ax.text(0.02, 0.97, label, transform=ax.transAxes, va="top")
+        ax.set_title(f"{label} — {tag}", fontsize=10)
         # pointwise fractional polarization; PSD-ness of J T J^H bounds
         # sqrt(Q^2+U^2+V^2) <= I, so these must not exceed 1.
         p_m = np.hypot(mQ, mU) / mI
@@ -312,8 +314,9 @@ def fig_faraday_spectrum(main, ab, phi_fd=250.0, center=30.0, nfine=512):
     ]
     axes[0].legend(handles=handles, ncol=2, fontsize=8, loc="lower center")
     plt.tight_layout()
-    plt.savefig(FIG_DIR / "cmp_faraday_spectrum.png", dpi=150)
+    plt.savefig(FIG_DIR / fname, dpi=150)
     plt.close()
+    print(f"  -> {fname}")
 
 
 if __name__ == "__main__":
@@ -332,5 +335,7 @@ if __name__ == "__main__":
     print("\n[2] unpolarized source, leakage vs azimuth")
     fig_leakage_vs_azimuth(main, ab)
     print(f"\n[3] polarized source, phi_FD = {args.phi_fd:g} rad/m^2")
-    fig_faraday_spectrum(main, ab, args.phi_fd, args.freq)
+    fig_spectrum(main, ab, args.phi_fd, "cmp_faraday_spectrum.png", args.freq)
+    print("\n[4] same source, Faraday OFF (control)")
+    fig_spectrum(main, ab, 0.0, "cmp_faraday_off.png", args.freq)
     print(f"\nfigures -> {FIG_DIR}")
