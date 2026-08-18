@@ -1,13 +1,15 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
-Updated: 2026-08-17 — **all five steps complete + user-driven
+Updated: 2026-08-18 — **all five steps complete + user-driven
 refinements** (zenith-calibrated polarimeter, report restructure,
-zoom deconvolution); report in `report/report.tex` (14 pp, compiles
-clean, all figures referenced in text).
+zoom deconvolution, per-band weight verification + Table 1, Fig 9
+as 2x3 all-band snapshot); report in `report/report.tex` (14 pp,
+compiles clean, all figures referenced in text).
 
 ## Resume state (read this first after /clear)
 
-- Everything is committed on branch `luseepy-version` (not pushed).
+- Everything is committed AND pushed on branch `luseepy-version`
+  (remote: github.com/christianhbye/lusee_faraday).
 - `generated_data/` is gitignored: the 2.1 GB fine waterfalls
   (step1/real30/real10/real50), binned npz files and caches live
   only on disk.  If missing, regenerate with the scripts (see the
@@ -153,6 +155,25 @@ clean, all figures referenced in text).
   (step1w_ionly_polfrac).  Step 1 (polarized source) shows only
   calibrated-polarimeter results.  (Also fixed missing amssymb for
   \lesssim.)
+- [x] **Per-band weights verified + listed; Fig 9 -> 2x3 (user
+  request, 2026-08-18):** force-recomputed zenith weights at 10/30/50
+  (`zenith_weights.py --force`, log
+  generated_data/zenith_weights_recalc.log) — identical to the cached
+  sets already used by all step-2+ analyses (each band's ortho
+  vectors null its own zenith leakage to ~1e-16; the weights differ
+  substantially between bands, e.g. the N auto is smallest of the
+  four at 10 MHz but largest at 30 MHz).  10/50 MHz analyses rerun
+  end-to-end (step2_plots, step_ionly --analyze, step4) — all
+  numbers unchanged, confirming per-band weights were already in
+  effect.  Report now has Table 1 (tab:weights) listing the full
+  calibrated vectors per band.  Fig 9 replaced by
+  `real_spectrum_snapshot_bands` (new `fig_spectrum_snapshot_bands`
+  in step2_plots.py, flag `--snapshot-bands`): 2 rows (Q/I, U/I) x 3
+  columns (10/30/50 MHz), each column with its own weights and its
+  own max-signal time.  Pedagogical payoff visible by eye: 10 MHz
+  hash unresolved, 30 MHz dense stipple, 50 MHz fine grid resolves
+  individual ~10-20 kHz Faraday oscillations that the zoom bins
+  track and even parent bins begin to follow.
 - [x] **Step 5**: coherent story written in `report/report.tex`
   (setup, steps 1-4, practical conclusions on parent vs zoom bins and
   the delay window; figures in `report/figures/`).

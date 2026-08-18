@@ -134,7 +134,38 @@ possible to the E--W / N--S dipoles.  The result,
       - (0.052 - 0.004i)\,W,\nonumber
 \end{align}
 leaves zenith leakage of $(q, u, v) \sim 10^{-16}$ — zero to machine
-precision.  Figure~\ref{fig:ionlycal} repeats the unpolarized track
+precision.
+
+The calibration is a property of the beams at one frequency, so it is
+repeated independently at every band center used in this report: the
+zenith covariance $C_0$, and with it the calibrated vectors, changes
+substantially between 10, 30 and 50\,MHz (even the ordering of the
+port gains flips: at 10\,MHz the N auto is the \emph{smallest} of the
+four, at 30\,MHz the largest).  Table~\ref{tab:weights} lists the
+complete set of calibrated port weights; each set nulls the zenith
+leakage of its own band to $(q, u, v) \sim 10^{-16}$.  All results
+below use, at each band, the weights of that band center.
+
+\begin{table}[htb]
+  \centering
+  \caption{Zenith-calibrated polarimeter weights per band center:
+    $X = \sum_p x_p\, p$, $Y = \sum_p y_p\, p$ over the ports
+    $p \in \{{\rm N, E, S, W}\}$ (L\"owdin-orthonormalized vectors;
+    overall phase fixed by the dominant dipole pair).}
+  \label{tab:weights}
+  \begin{tabular}{clcccc}
+    \hline
+    band & & $N$ & $E$ & $S$ & $W$ \\
+    \hline
+    10\,MHz & $x_p$ & $-0.011 - 0.001i$ & $+0.958$ & $+0.009 + 0.001i$ & $-1.071$ \\
+            & $y_p$ & $+1.089$ & $-0.010 + 0.001i$ & $-0.895$ & $+0.011 - 0.001i$ \\
+    30\,MHz & $x_p$ & $+0.046 + 0.004i$ & $+1.023$ & $-0.046 - 0.004i$ & $-1.082$ \\
+            & $y_p$ & $+0.955$ & $+0.049 - 0.004i$ & $-0.959$ & $-0.052 + 0.004i$ \\
+    50\,MHz & $x_p$ & $-0.060 - 0.001i$ & $+0.965$ & $+0.057 + 0.001i$ & $-1.041$ \\
+            & $y_p$ & $+1.037$ & $-0.056 + 0.001i$ & $-0.979$ & $+0.061 - 0.001i$ \\
+    \hline
+  \end{tabular}
+\end{table}  Figure~\ref{fig:ionlycal} repeats the unpolarized track
 with these vectors: the transit leakage collapses from 0.134 to
 $7\times10^{-4}$ (set only by the source culminating $0.6^\circ$ off
 exact zenith).  Away from zenith the leakage is essentially
@@ -283,17 +314,25 @@ center.
 
 \begin{figure}[htb]
   \centering
-  \includegraphics[width=0.9\textwidth]{real30_spectrum_snapshot}
-  \caption{Beam-integrated $\Qobs/\Iobs$, $\Uobs/\Iobs$ across the
-    $\pm 100$\,kHz window at the time of maximum sky signal, with the
-    y-range zoomed onto the fine-grid structure (the Faraday-free
-    level lies far off scale).  The smooth mean level is almost
-    entirely instrumental leakage of the \emph{unpolarized} emission
-    (Sec.~\ref{sec:ionly}); the fast ``hash'' riding on it, at the
-    few$\times10^{-3}$ relative level, is the surviving sky
-    polarization scrambled by the many rotation measures within the
-    beam.  The zoom bins trace a smoothed version of the hash while
-    the parent bins average over it.}
+  \includegraphics[width=\textwidth]{real_spectrum_snapshot_bands}
+  \caption{Beam-integrated $\Qobs/\Iobs$ (top) and $\Uobs/\Iobs$
+    (bottom) across the $\pm 100$\,kHz window at the time of maximum
+    sky signal, for the three band centers (columns; each with its
+    own calibrated weights), with the y-range zoomed onto the
+    fine-grid structure (the Faraday-free level lies far off scale).
+    The smooth mean level is almost entirely instrumental leakage of
+    the \emph{unpolarized} emission (Sec.~\ref{sec:ionly}); the fast
+    ``hash'' riding on it, at the few$\times10^{-3}$ relative level,
+    is the surviving sky polarization scrambled by the many rotation
+    measures within the beam.  The frequency scale of the hash
+    stretches as $\nu^3$: at 10\,MHz it is unresolved on this plot,
+    at 30\,MHz it is a dense stipple, while at 50\,MHz the fine grid
+    (blue) visibly resolves the individual Faraday oscillations of
+    the dominant rotation measures, with coherence lengths of tens of
+    kHz.  Correspondingly, the zoom bins trace a smoothed version of
+    the hash and the parent bins average over it at 10--30\,MHz, but
+    at 50\,MHz even the 25\,kHz parent bins begin to follow the true
+    spectral structure.}
   \label{fig:realsnapshot}
 \end{figure}
 

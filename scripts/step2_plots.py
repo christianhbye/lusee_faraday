@@ -137,6 +137,68 @@ def fig_spectrum_snapshot(center, tag, meta, binned, wf, it=None):
     savefig(fig, f"{tag}_spectrum_snapshot")
 
 
+def fig_spectrum_snapshot_bands(centers=(10.0, 30.0, 50.0)):
+    """Combined snapshot: Q/I (top) and U/I (bottom) at every band.
+
+    Each column uses the zenith-calibrated weights of its own band
+    center and its own time of maximum sky signal.
+    """
+    from zenith_weights import get_weights
+
+    fig, axes = plt.subplots(
+        2, len(centers), figsize=(4.4 * len(centers), 5.4),
+        sharex="col",
+    )
+    for ic, center in enumerate(centers):
+        xv, yv = get_weights(center)
+        tag, meta, binned, wf = load(center)
+        S0_all = fp.polarimeter_from_channels(meta["nofaraday"], xv, yv)
+        it = int(np.argmax(S0_all[:, 0]))
+        S = fp.polarimeter_from_channels(np.asarray(wf[it]), xv, yv)
+        Sp = fp.polarimeter_from_channels(binned["parent"][it], xv, yv)
+        Sz = fp.polarimeter_from_channels(binned["zoom"][it], xv, yv)
+        zf, order = fp.zoom_frequency_grid(binned["parent_centers_mhz"])
+        Sz_sorted = np.array([Sz[p, k] for p, k in order])
+        ff = meta["fine_freqs_mhz"]
+        off = (ff - center) * 1e3
+        zoff = (zf - center) * 1e3
+        scale = 1.0 / np.abs(S0_all[it, 0])
+        for ir, (comp, name) in enumerate(zip((1, 2), ("Q", "U"))):
+            ax = axes[ir, ic]
+            y_fine = S[:, comp] * scale
+            ax.plot(off, y_fine, lw=0.4, color="C0", label="fine grid")
+            ax.plot(
+                zoff,
+                Sz_sorted[:, comp] * scale,
+                ".",
+                ms=3.0,
+                color="C1",
+                label="zoom bins",
+            )
+            ax.plot(
+                (binned["parent_centers_mhz"] - center) * 1e3,
+                Sp[:, comp] * scale,
+                "s",
+                ms=6,
+                color="C3",
+                label="parent bins",
+            )
+            lo, hi = y_fine.min(), y_fine.max()
+            pad = 0.15 * (hi - lo)
+            ax.set_ylim(lo - pad, hi + pad)
+            if ic == 0:
+                ax.set_ylabel(
+                    rf"${name}_{{\rm obs}}/I_{{\rm obs}}$(no FD)"
+                )
+        axes[0, ic].set_title(f"{center:g} MHz")
+        axes[1, ic].set_xlabel(
+            f"offset from {center:g} MHz  [kHz]"
+        )
+    axes[0, 0].legend(fontsize=8, ncol=1, loc="upper right")
+    fig.tight_layout()
+    savefig(fig, "real_spectrum_snapshot_bands")
+
+
 def fig_waterfall_QU(center, tag, meta, binned, wf):
     """Fine-grid waterfall of Q/I and U/I over time and frequency."""
     ff = meta["fine_freqs_mhz"]
@@ -233,12 +295,21 @@ def main():
     global X_VEC_P, Y_VEC_P
     ap = argparse.ArgumentParser()
     ap.add_argument("--center", type=float, default=30.0)
+    ap.add_argument(
+        "--snapshot-bands",
+        action="store_true",
+        help="only make the combined 2x3 spectrum snapshot "
+        "(10/30/50 MHz)",
+    )
     args = ap.parse_args()
+    FIG_DIR.mkdir(parents=True, exist_ok=True)
+    if args.snapshot_bands:
+        fig_spectrum_snapshot_bands()
+        return
     center = args.center
     from zenith_weights import get_weights
 
     X_VEC_P, Y_VEC_P = get_weights(center)
-    FIG_DIR.mkdir(parents=True, exist_ok=True)
     fig_sky_model(center)
     tag, meta, binned, wf = load(center)
     it_snap = int(np.argmax(stokes(meta["nofaraday"])[:, 0]))
