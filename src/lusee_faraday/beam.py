@@ -32,6 +32,63 @@ def rotate_beam(jones, angle):
     return jones_rot
 
 
+def interp_jones(grid, jones, theta, phi):
+    """
+    Interpolate a Jones matrix from a theta/phi grid to a HEALPix map.
+
+    Parameters
+    ----------
+    grid : HealpixGrid
+        Target grid.
+    jones : np.ndarray
+        Jones matrix on the source grid, shape (2, ntheta, nphi); first
+        axis is (Eth, Eph).
+    theta, phi : np.ndarray
+        Source grid coordinates in radians.
+
+    Returns
+    -------
+    np.ndarray
+        The interpolated Jones matrix, shape (2, npix).
+
+    Notes
+    -----
+    ``Eth`` and ``Eph`` must not be interpolated directly. At a pole the
+    (theta-hat, phi-hat) basis is degenerate, so the components of a field
+    that is smooth through the pole carry a pure m=1 azimuthal phase. Their
+    azimuthal mean therefore vanishes, and that mean is exactly what
+    ``HealpixGrid.interp_hp`` hands to ``RectSphereBivariateSpline`` as the
+    pole value -- which would zero the beam at zenith.
+
+    The Cartesian components of the same field are ordinary scalars with a
+    single well-defined value at the pole (m=0), so we rotate into the
+    Cartesian basis, interpolate there, and project back onto the target
+    grid's tangent basis.
+
+    """
+    Eth, Eph = jones
+    th_g, ph_g = np.meshgrid(theta, phi, indexing="ij")
+    st, ct = np.sin(th_g), np.cos(th_g)
+    sp, cp = np.sin(ph_g), np.cos(ph_g)
+
+    # (Eth, Eph) -> (Ex, Ey, Ez) on the source grid
+    cart = np.array(
+        [
+            Eth * ct * cp - Eph * sp,
+            Eth * ct * sp + Eph * cp,
+            -Eth * st,
+        ]
+    )
+    cart_hp = grid.interp_hp(cart, theta, phi)  # (3, npix)
+
+    # project back onto the tangent basis at the HEALPix pixel centres
+    st, ct = np.sin(grid.theta), np.cos(grid.theta)
+    sp, cp = np.sin(grid.phi), np.cos(grid.phi)
+    Eth_hp = cart_hp[0] * ct * cp + cart_hp[1] * ct * sp - cart_hp[2] * st
+    Eph_hp = -cart_hp[0] * sp + cart_hp[1] * cp
+    return np.array([Eth_hp, Eph_hp])
+
+
 class Beam:
     def __init__(self, jones_x, jones_y):
         """
@@ -115,8 +172,8 @@ class Beam:
         # the lusee beam is defined on 1deg resolution grid
         th = np.radians(np.linspace(0, 180, num=181))
         ph = np.radians(np.linspace(0, 359, num=360))
-        jones_x_hp = grid.interp_hp(jones_x, th, ph)
-        jones_y_hp = grid.interp_hp(jones_y, th, ph)
+        jones_x_hp = interp_jones(grid, jones_x, th, ph)
+        jones_y_hp = interp_jones(grid, jones_y, th, ph)
 
         return cls(jones_x_hp, jones_y_hp)
 
