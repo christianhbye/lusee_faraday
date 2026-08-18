@@ -62,13 +62,27 @@ class MainBeam:
         assert jones.shape[1] == 181, jones.shape
         self._grid_theta = np.radians(np.linspace(0.0, 180.0, 181))
         self._grid_phi = np.radians(np.arange(360))
-        self._splines = self._build(jones)
+        # Interpolate the CARTESIAN components, not (Eth, Eph): the latter
+        # carry a pure m=1 phase at the pole, so their azimuthal mean --
+        # the spline's pole value -- vanishes and zeroes the beam at
+        # zenith.  Mirrors beam.interp_jones on main.
+        th, ph = np.meshgrid(self._grid_theta, self._grid_phi, indexing="ij")
+        st, ct, sp, cp = np.sin(th), np.cos(th), np.sin(ph), np.cos(ph)
+        Eth, Eph = jones
+        cart = np.array(
+            [
+                Eth * ct * cp - Eph * sp,
+                Eth * ct * sp + Eph * cp,
+                -Eth * st,
+            ]
+        )
+        self._splines = self._build(cart)
 
     def _build(self, jones):
         out = []
         th, ph = self._grid_theta, self._grid_phi
         # strip the pole row(s) the way interp_hp does
-        for comp in jones:                                  # Eth, Eph
+        for comp in jones:                                  # Ex, Ey, Ez
             per_part = []
             for part in (comp.real, comp.imag):
                 t, a = th, part
@@ -89,15 +103,29 @@ class MainBeam:
         return out
 
     def _eval(self, theta, phi):
-        """Jones (Eth, Eph) of the file's dipole at (theta, phi)."""
+        """Jones (Eth, Eph) of the file's dipole at (theta, phi).
+
+        Rotating the antenna by alpha about z translates the tangent-basis
+        components in phi (main's `rotate_beam`), because e_theta and
+        e_phi rotate with the direction.  So evaluating here at a shifted
+        phi and projecting onto the tangent basis *at that shifted
+        direction* reproduces the roll exactly.
+        """
+        theta = np.asarray(theta)
         phi = np.asarray(phi) % (2 * np.pi)
-        vals = []
-        for re_sp, im_sp in self._splines:
-            vals.append(
+        cart = np.array(
+            [
                 re_sp(theta, phi, grid=False)
                 + 1j * im_sp(theta, phi, grid=False)
-            )
-        return np.array(vals)                               # (2, N)
+                for re_sp, im_sp in self._splines
+            ]
+        )                                                   # (3, N)
+        st, ct, sp, cp = (
+            np.sin(theta), np.cos(theta), np.sin(phi), np.cos(phi)
+        )
+        Eth = cart[0] * ct * cp + cart[1] * ct * sp - cart[2] * st
+        Eph = -cart[0] * sp + cart[1] * cp
+        return np.array([Eth, Eph])                         # (2, N)
 
     def weights(self, theta, phi):
         """main's 9 Stokes weights at (theta, phi)."""
@@ -170,7 +198,7 @@ def fig_leakage_vs_altitude(main, ab, az_deg=0.0):
     # the pole row of E_theta/E_phi, which cancels), and suppressed
     # below ~1 deg.  Stop at 88 deg so both arms are evaluated where
     # main's interpolation is valid.
-    alt = np.linspace(3.0, 88.0, 400)
+    alt = np.linspace(3.0, 90.0, 400)
     th = np.radians(90.0 - alt)
     ph = np.full_like(th, np.radians(az_deg))
     one = np.ones_like(th)
@@ -192,7 +220,7 @@ def fig_leakage_vs_altitude(main, ab, az_deg=0.0):
     plt.savefig(FIG_DIR / "cmp_leakage_vs_altitude.png", dpi=150)
     plt.close()
     print(
-        f"  leakage at alt 88 deg : main {p_main[-1]:.3e}   as-built {p_ab[-1]:.3e}"
+        f"  leakage at zenith : main {p_main[-1]:.3e}   as-built {p_ab[-1]:.3e}"
     )
     print(
         f"  leakage max       : main {p_main.max():.3f} @ {alt[p_main.argmax()]:.0f} deg"
@@ -248,7 +276,7 @@ def fig_faraday_spectrum(main, ab, phi_fd=250.0, center=30.0, nfine=512):
     I = np.ones_like(freqs)
     Q, U = P.real, P.imag
 
-    cases = [("near zenith (alt $88^\\circ$)", 88.0, 0.0), (r"alt $60^\circ$, az $20^\circ$", 60.0, 20.0)]
+    cases = [("zenith", 90.0, 0.0), (r"alt $60^\circ$, az $20^\circ$", 60.0, 20.0)]
     fig, axes = plt.subplots(1, 2, figsize=(11, 4))
     for ax, (label, alt, az) in zip(axes, cases):
         th = np.full_like(freqs, np.radians(90.0 - alt))
