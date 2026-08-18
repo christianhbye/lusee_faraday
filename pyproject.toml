@@ -9,7 +9,7 @@ description = "Simulator of LUSEE Faraday rotation observations."
 readme = "README.md"
 license = {text = "MIT"}
 authors = [{ name="Christian Hellum Bye", email="cbh@berkeley.edu" }]
-requires-python = ">=3.9"
+requires-python = ">=3.12,<3.13"
 classifiers = [
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: MIT License",
@@ -27,6 +27,11 @@ dependencies = [
   "ipympl>=0.10.0",
   "jupyterlab-vim>=4.1.4",
   "pytest>=8.4.2",
+  "lusee",
+  "croissant-sim",
+  "finufft",
+  "fitsio",
+  "matplotlib",
 ]
 
 [project.optional-dependencies]
@@ -53,3 +58,14 @@ addopts = [
 
 [tool.black]
 line-length = 79
+
+[tool.uv.sources]
+lusee = { path = "../luseepy", editable = true }
+croissant-sim = { path = "/home/christian/Documents/projects/croissant-main", editable = true }
+
+[tool.uv]
+# luseepy main pins croissant-sim to a git rev; we deliberately use our
+# local checkout, which is 6 commits ahead of that pin.
+override-dependencies = [
+  "croissant-sim",
+]

@@ -1,5 +1,6 @@
 """Shared configuration for the four-port Faraday analysis."""
 
+import os
 import sys
 from pathlib import Path
 
@@ -15,9 +16,15 @@ FIG_DIR = REPO / "report" / "figures"
 for _d in (GEN_DIR, CACHE_DIR, FIG_DIR):
     _d.mkdir(parents=True, exist_ok=True)
 
-RESPONSE_PATH = (
-    "/home/anze/work/lusee/Drive/Simulations/BeamModels/BGL_v16/"
-    "lusee_bgl_v16_response_v3.fits"
+# Four-port response artifact.  Defaults to the as-built (asymmetric,
+# fully coupled) BGL_v16 model -- the same file the luseepy-version
+# branch used.  Override with LUSEE_RESPONSE to run the ablations:
+#   _c4sym.fits  -> C4 group-averaged (the paper's 90deg-rotation
+#                   assumption made self-consistent)
+#   _diagza.fits -> ZA-diagonalised (inter-port coupling removed)
+RESPONSE_DIR = DATA_DIR / "BGL_v16"
+RESPONSE_PATH = os.environ.get(
+    "LUSEE_RESPONSE", str(RESPONSE_DIR / "lusee_bgl_v16_response_v3.fits")
 )
 
 # LuSEE-Night landing site = lusee.Observation defaults
