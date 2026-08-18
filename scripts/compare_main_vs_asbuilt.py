@@ -279,7 +279,7 @@ def fig_spectrum(main, ab, phi_fd, fname, center=30.0, nfine=512):
     tag = (rf"$\phi_{{\rm FD}} = {phi_fd:g}$ rad m$^{{-2}}$" if phi_fd
            else "no Faraday rotation")
     cases = [("zenith", 90.0, 0.0), (r"alt $60^\circ$, az $20^\circ$", 60.0, 20.0)]
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4), sharey=True)
     for ax, (label, alt, az) in zip(axes, cases):
         th = np.full_like(freqs, np.radians(90.0 - alt))
         ph = np.full_like(freqs, np.radians(az))
@@ -291,8 +291,9 @@ def fig_spectrum(main, ab, phi_fd, fname, center=30.0, nfine=512):
         for arr, c in ((aI, "C0"), (aQ, "C1"), (aU, "C2")):
             ax.plot(foff, arr, color=c, lw=1.5, ls="--")
         ax.set_xlabel(f"frequency offset from {center:g} MHz [kHz]")
-        ax.set_ylabel("normalised pseudo-Stokes")
         ax.set_title(f"{label} — {tag}", fontsize=10)
+        if ax is axes[0]:
+            ax.set_ylabel("normalised pseudo-Stokes")
         # pointwise fractional polarization; PSD-ness of J T J^H bounds
         # sqrt(Q^2+U^2+V^2) <= I, so these must not exceed 1.
         p_m = np.hypot(mQ, mU) / mI
@@ -312,8 +313,14 @@ def fig_spectrum(main, ab, phi_fd, fname, center=30.0, nfine=512):
         Line2D([], [], color="0.35", ls="-", label="symmetric pseudo-dipoles"),
         Line2D([], [], color="0.35", ls="--", label="4-port BGL v16"),
     ]
-    axes[0].legend(handles=handles, ncol=2, fontsize=8, loc="lower center")
-    plt.tight_layout()
+    fig.tight_layout(rect=[0, 0, 0.80, 1])
+    fig.legend(
+        handles=handles,
+        loc="center left",
+        bbox_to_anchor=(0.805, 0.5),
+        fontsize=9,
+        frameon=False,
+    )
     plt.savefig(FIG_DIR / fname, dpi=150)
     plt.close()
     print(f"  -> {fname}")
