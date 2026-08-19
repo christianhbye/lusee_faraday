@@ -26,18 +26,29 @@ RESPONSE_PATH = os.environ.get(
     "data/BGL_v16/lusee_bgl_v16_response_v3.fits",
 )
 FREQ_MHZ = 30.0
-NSIDE = 64
-LMAX = 30
+# validate_engine.py's diffuse-sky check records 1.1e-2 at
+# nside=32/lmax=48; override with LUSEE_CROSSCHECK_NSIDE/_LMAX to
+# reproduce that configuration for a like-for-like comparison.
+NSIDE = int(os.environ.get("LUSEE_CROSSCHECK_NSIDE", "64"))
+LMAX = int(os.environ.get("LUSEE_CROSSCHECK_LMAX", "30"))
 N_TIMES = 4
 
 
 def band_limited_sky(rng, nside, lmax):
-    """A smooth IQUV sky the beam's band-limit can actually represent."""
+    """A smooth IQUV sky the beam's band-limit can actually represent.
+
+    ``hp.synalm`` takes no seed of its own and draws from numpy's
+    legacy global RNG state, so each channel reseeds that state from
+    ``rng`` -- the only source of randomness threaded through this
+    script -- to make the sky (and hence the reported disagreement)
+    reproducible run to run.
+    """
     import healpy as hp
 
     npix = hp.nside2npix(nside)
     maps = np.empty((4, npix))
     for i in range(4):
+        np.random.seed(rng.integers(0, 2**32 - 1))
         alm = hp.synalm(
             np.exp(-np.arange(3 * nside) / 6.0), lmax=lmax, new=True
         )
