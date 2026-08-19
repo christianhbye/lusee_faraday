@@ -17,9 +17,13 @@ which is what :func:`lusee_faraday.conventions.dual_block_phase` was
 derived against.
 """
 
+import logging
+
 import numpy as np
 
 from .conventions import dual_block_phase
+
+logger = logging.getLogger(__name__)
 
 STOKES_IQUV = ("I", "Q", "U", "V")
 
@@ -43,7 +47,59 @@ def _component_alm(I, Q, U, lmax, coord):  # noqa: E741
         coord=coord,
         convention="COSMO",
     )
+    logger.info(
+        "component transform engines: %s (%s)",
+        sky.engine,
+        sky.engine_reason,
+    )
     return np.asarray(sky.compute_alm(lmax=int(lmax)))[0]
+
+
+AUDIT_REFERENCE = (
+    "see the 2026-08-18 audit (commit 4b401c5): the diffuse-sky Faraday "
+    "signature is HEALPix shot noise when the screen is unresolved"
+)
+
+
+def spectral_component_count(phi_min, phi_max, freqs_mhz):
+    """Constant-depth components needed to resolve the phase in-band.
+
+    The Faraday phase turns by ``2 * phi * lambda^2``, so across a band
+    spanning ``d(lambda^2)`` two depths differing by more than
+    ``pi / (2 d(lambda^2))`` are no longer coherent and need separate
+    components.  This governs cost, not validity.
+    """
+    from .conventions import lambda_squared
+
+    lam2 = lambda_squared(freqs_mhz)
+    span = float(lam2.max() - lam2.min())
+    width = float(phi_max) - float(phi_min)
+    if span <= 0 or width <= 0:
+        return 1
+    return int(np.ceil(width / (np.pi / (2 * span))))
+
+
+def nyquist_nside(rm_map, freq_mhz, percentile=99.9):
+    """The nside at which the screen is resolved between adjacent pixels.
+
+    This is the audit's criterion.  At 30 MHz the real Hutschenreuter map
+    returns of order 3e5, i.e. ~1e12 pixels: the input does not determine
+    the answer at any computable resolution, and no engine choice
+    rescues it.
+    """
+    import healpy as hp
+
+    from .conventions import lambda_squared
+
+    rm = np.asarray(rm_map, dtype=float)
+    nside0 = hp.npix2nside(rm.size)
+    neighbours = hp.get_all_neighbours(nside0, np.arange(rm.size))
+    valid = neighbours >= 0
+    diffs = np.abs(rm[np.where(valid, neighbours, 0)] - rm[None, :])
+    step = float(np.percentile(diffs[valid], percentile))
+    lam2 = float(lambda_squared(freq_mhz).max())
+    phase_step = 2.0 * step * lam2
+    return nside0 * max(1.0, phase_step / np.pi)
 
 
 class FaradaySky:
@@ -261,3 +317,53 @@ class FaradaySky:
             )
             depths.append(float(rm[mask].mean()))
         return cls(np.stack(alms), depths, beta, ref_freq_mhz, coord)
+
+    @classmethod
+    def from_rm_map(
+        cls,
+        I,  # noqa: E741
+        Q,
+        U,
+        rm_map,
+        freqs_mhz,
+        lmax,
+        allow_pixelwise=False,
+        max_components=4096,
+        beta=None,
+        ref_freq_mhz=None,
+        coord="galactic",
+    ):
+        """Build a binned screen, refusing an unresolved one.
+
+        Reports both audit criteria and raises unless the caller has
+        explicitly opted in to a screen the map cannot resolve.
+        """
+        import healpy as hp
+
+        from .conventions import lambda_squared
+
+        rm = np.asarray(rm_map, dtype=float)
+        used_nside = hp.npix2nside(rm.size)
+        needed_nside = nyquist_nside(rm, np.min(freqs_mhz))
+        n_needed = spectral_component_count(
+            float(rm.min()), float(rm.max()), freqs_mhz
+        )
+        if needed_nside > used_nside and not allow_pixelwise:
+            raise ValueError(
+                f"Faraday screen is not resolved: nside={used_nside} used, "
+                f"nside~{needed_nside:.3g} needed at "
+                f"{np.min(freqs_mhz):g} MHz. The pixel sum is a random "
+                f"walk, not a quadrature ({AUDIT_REFERENCE}). Pass "
+                "allow_pixelwise=True to build it anyway."
+            )
+        if n_needed > max_components and not allow_pixelwise:
+            raise ValueError(
+                f"screen needs {n_needed} components across the band "
+                f"(cap {max_components}); pass allow_pixelwise=True or "
+                "narrow the band."
+            )
+        span = float(np.ptp(lambda_squared(freqs_mhz)))
+        dphi = np.pi / (2 * span) if span > 0 else (np.ptp(rm) or 1.0)
+        return cls.binned_screen(
+            I, Q, U, rm, dphi, lmax, beta, ref_freq_mhz, coord
+        )
