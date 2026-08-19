@@ -109,3 +109,64 @@ def four_port_pair_alms(resp, freq_mhz, lmax):
     freq = np.asarray(resp.freq, dtype=float)
     alms, _ = resp.pair_stokes_alms(int(lmax), np.array([freq[idx]]))
     return np.asarray(alms)[:, 0]
+
+
+TWO_PORT_PAIRS = ((0, 0), (0, 1), (1, 1))
+
+
+def two_port_jones_from_fits(path, freq_mhz, orientation="y"):
+    """Load a 2-port Jones FITS and build the orthogonal pseudo-dipole.
+
+    The file stores only the upper hemisphere on a 1-degree grid with a
+    duplicated ``phi = 360`` column.  The lower hemisphere is zero-filled.
+    Rotating the antenna about z translates the tangent-basis components
+    in phi, so the partner dipole is a roll of the phi axis.
+    """
+    from astropy.io import fits
+
+    with fits.open(str(path)) as f:
+        e_theta = f["Etheta_real"].data + 1j * f["Etheta_imag"].data
+        e_phi = f["Ephi_real"].data + 1j * f["Ephi_imag"].data
+        idx = int(np.argwhere(f["freq"].data == freq_mhz)[0, 0])
+    e_theta = e_theta[idx][..., :-1]
+    e_phi = e_phi[idx][..., :-1]
+    lower = np.zeros_like(e_theta)[:-1, :]
+    e_theta = np.concatenate([e_theta, lower], axis=0)
+    e_phi = np.concatenate([e_phi, lower], axis=0)
+
+    if orientation == "y":
+        rolls = (270, 0)
+    elif orientation == "x":
+        rolls = (0, 90)
+    else:
+        raise ValueError("orientation must be 'x' or 'y'")
+    h_theta = np.stack([np.roll(e_theta, r, axis=-1) for r in rolls])
+    h_phi = np.stack([np.roll(e_phi, r, axis=-1) for r in rolls])
+    return h_theta, h_phi
+
+
+def two_port_pair_alms(h_theta, h_phi, theta_deg, phi_deg, lmax):
+    """Pair-Stokes alms for two pseudo-dipoles -> (3, 4, L, 2L-1).
+
+    Unitless: this arm has no impedance model and no receiver loading,
+    so it is the direct analogue of the paper's Fig 4 pipeline rather
+    than of the as-built four-port instrument.
+    """
+    import croissant as cro
+
+    # pair_stokes_from_jones expects a leading frequency axis (it
+    # mirrors luseepy's (port, freq, ...) layout).  This arm's Jones
+    # arrays are (port, ntheta, nphi) with no frequency axis at all, so
+    # a singleton one is inserted here -- at the call site, not inside
+    # the shared helper, which the four-port arm also relies on.
+    maps = pair_stokes_from_jones(
+        h_theta[:, None], h_phi[:, None], TWO_PORT_PAIRS
+    )  # -> (3, 1, 4, ntheta, nphi)
+    beam = cro.PairStokesBeam(
+        maps,
+        np.array([1.0]),
+        TWO_PORT_PAIRS,
+        sampling="mwss",
+        frame="topo",
+    )
+    return np.asarray(beam.compute_alm(lmax=int(lmax)))[:, 0]
