@@ -34,3 +34,18 @@ def test_ortho_weights_null_zenith_polarization(center):
     stokes = pol.pseudo_stokes(C0, x, y)
     residual = np.abs(stokes[1:]).max() / stokes[0]
     assert residual < 10 * BASELINES["zenith_null_ortho_max"]["value"]
+
+    # Pin against the published Table 1 (report.tex) values themselves,
+    # not just the residual: a Loewdin G^{-1/2} transform nulls the
+    # zenith leakage of *any* Hermitian positive-definite C0, so the
+    # residual check above cannot detect a wrong response file, a wrong
+    # receiver model, or mislabelled/sign-flipped ports.  This
+    # comparison would catch all of those, plus a change in the
+    # dominant-dipole phase convention Table 1's caption describes.
+    table = BASELINES["zenith_ortho_vectors_table1"]
+    band = table["bands"][f"{center:g}"]
+    atol = table["atol"]
+    expected_x = np.array([complex(re, im) for re, im in band["x_p"]])
+    expected_y = np.array([complex(re, im) for re, im in band["y_p"]])
+    np.testing.assert_allclose(x, expected_x, atol=atol)
+    np.testing.assert_allclose(y, expected_y, atol=atol)
