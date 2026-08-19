@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from scipy.constants import c as C_LIGHT
 
 from lusee_faraday import conventions as cv
 
@@ -47,10 +48,14 @@ def test_dual_block_phase_is_conjugate_on_p_blocks():
     assert blocks.shape == (2, 4)
     assert np.allclose(blocks[:, 0], 1.0)  # I
     assert np.allclose(blocks[:, 1], 1.0)  # V
+    # Compute expected phase independently (not calling module functions)
+    lam2 = (C_LIGHT / (freq * 1e6)) ** 2
+    expected_p_plus = np.exp(2j * phi * lam2)
+    expected_p_minus = np.conj(expected_p_plus)
+    assert np.allclose(blocks[:, 3], expected_p_plus)  # P+ == +2i phase
+    assert np.allclose(blocks[:, 2], expected_p_minus)  # P- == -2i phase
+    # Verify the conjugacy relationship
     assert np.allclose(blocks[:, 2], np.conj(blocks[:, 3]))
-    cosmo = cv.faraday_phase_cosmo(phi, freq)
-    assert np.allclose(blocks[:, 3], cosmo)  # P+ == COSMO phase
-    assert np.allclose(blocks[:, 2], np.conj(cosmo))
 
 
 def test_dual_block_phase_agrees_with_rotating_maps_first():
