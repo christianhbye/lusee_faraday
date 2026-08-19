@@ -2,14 +2,26 @@
 
 Runs the real-sky simulation with Q = U = 0 — the limiting case in
 which Faraday rotation has completely depolarized the sky at the band
-center.  With the fixed-beam approximation and no polarization there
-is no frequency dependence at all, so one evaluation per time step
-suffices and the result is exactly the same in every fine channel,
-zoom bin and parent bin.
+center.  With no polarized power anywhere the Faraday phase cannot
+reach the products at all, so one evaluation per time step suffices
+and the result is the same in every fine channel, zoom bin and parent
+bin.
 
-Only the I part of the pair-Stokes kernel is sampled (4x cheaper than
-the full run).  Output: generated_data/real{C}_ionly.npz with the
-(1024, 16) products.
+Two engines compute that same quantity two different ways:
+
+  --engine harmonic (default)
+      one contraction of the sky's component alms against the
+      response's pair-Stokes alms
+      -> generated_data/real{C}_ionly.npz
+  --engine legacy
+      the pixel quadrature: one sum over the native nside=512 HEALPix
+      grid per time step
+      -> generated_data/real{C}_ionly_legacy.npz
+
+Both arms use the same response sampling (response.FixedChannelKernel
+/ response.four_port_pair_alms) and the same covariance assembly
+(instrument.covariance), so the only thing that differs between them
+is the quadrature.
 
 With --analyze, compares the full-sky binned products (real{C}_binned
 / real{C}_meta) against the I-only reference and prints the
@@ -23,45 +35,179 @@ import time as _time
 import numpy as np
 
 from common import (
-    FIG_DIR, GEN_DIR, MAP_NSIDE, N_TIMES, RESPONSE_PATH,
-    load_sky_maps, rotation_matrices, sky_at_freq,
+    BETA_I,
+    FIG_DIR,
+    FREQ_REF_I,
+    GEN_DIR,
+    MAP_NSIDE,
+    N_TIMES,
+    RESPONSE_PATH,
+    T_CMB,
+    load_sky_maps,
+    moon_location,
+    rotation_matrices,
+    sky_at_freq,
+    times,
 )
+from lusee_faraday import engine, instrument
 from lusee_faraday import fourport as fp
+from lusee_faraday import polarimeter as pol
+from lusee_faraday import response as rsp
+from lusee_faraday.sky import FaradaySky
+
+# The beam is band-limited well below this; AGENTS.md pins lmax ~ 30
+# for every harmonic path.  --lmax overrides it, and anything other
+# than this value writes to its own artifact (see out_path).
+LMAX = 30
 
 
-def compute(center):
+def ionly_sky(i408_map, lmax):
+    """Two spectrally separable I-only components: synchrotron + CMB.
+
+    ``common.load_sky_maps`` returns ``I408`` with ``T_CMB`` already
+    subtracted, and ``common.sky_at_freq`` adds it back *unscaled*,
+    because the CMB is not synchrotron and does not follow
+    ``beta = -2.55``.  A single ``FaradaySky.i_only`` component carries
+    exactly one spectral index, so it cannot hold both: at 30 MHz the
+    CMB is 1.1e-4 of the mean sky, against the 2e-4 agreement this
+    reference is published as reproducing.
+
+    The input is the *raw* map, not ``sky_at_freq(maps, center)``:
+    ``FaradaySky.coeffs`` applies the spectral scaling itself, so
+    pre-scaling as well would scale the sky twice.
+    """
+    sync = FaradaySky.i_only(
+        i408_map, lmax, beta_i=BETA_I, ref_freq_i=FREQ_REF_I
+    )
+    cmb = FaradaySky.i_only(np.full_like(i408_map, T_CMB), lmax)
+    return FaradaySky(
+        np.concatenate([sync.component_alms, cmb.component_alms]),
+        phi_fd=[0.0, 0.0],
+        beta=np.concatenate([sync.beta, cmb.beta]),
+        ref_freq_mhz=np.concatenate([sync.ref_freq_mhz, cmb.ref_freq_mhz]),
+    )
+
+
+def pack_from_pairs(pair, resp, receiver, freqs, center):
+    """Pair integrals -> the 16 real channels, with this run's freeze.
+
+    Both arms funnel through here so the freeze is stated once: the
+    beam and all four impedance matrices sit at the native channel,
+    and there is no Moon or antenna-metal term.
+    ``fourport.assemble_covariance`` — the assembler this replaces, and
+    the one that produced the stored ``real{C}_binned.npz`` that
+    ``--analyze`` compares against — has no Moon term at all, while
+    luseepy's ``T_moon`` default of 250 K moves the answer by 7.4e3
+    relative.
+    """
+    C = instrument.covariance(
+        pair,
+        resp,
+        receiver,
+        freqs,
+        impedance_freq_mhz=center,
+        T_moon=0.0,
+        T_ant=0.0,
+    )
+    return instrument.channels(C)[0]
+
+
+def out_path(center, arm="harmonic", lmax=LMAX):
+    """Where one (band, engine, lmax) combination is stored.
+
+    The harmonic arm at the default lmax owns the canonical name; the
+    legacy arm and any other lmax are suffixed, so an A/B never
+    silently overwrites the primary artifact.
+    """
+    if arm == "legacy":
+        return GEN_DIR / f"real{center:g}_ionly_legacy.npz"
+    if int(lmax) != LMAX:
+        return GEN_DIR / f"real{center:g}_ionly_lmax{int(lmax)}.npz"
+    return GEN_DIR / f"real{center:g}_ionly.npz"
+
+
+def _instrument():
+    import jax
+
+    jax.config.update("jax_enable_x64", True)
     from lusee.ReceiverImpedance import JFETReceiver
 
-    out_path = GEN_DIR / f"real{center:g}_ionly.npz"
-    resp = fp.load_response_fast(RESPONSE_PATH)
-    kern = fp.FixedFreqKernel(resp, center, JFETReceiver())
-    del resp
+    return rsp.load_response(RESPONSE_PATH), JFETReceiver()
+
+
+def compute_harmonic(center, lmax=LMAX):
+    """The whole N_TIMES waterfall as a single harmonic contraction."""
+    resp, receiver = _instrument()
+    t0 = _time.time()
+    beam = rsp.four_port_pair_alms(resp, center, lmax)
+    print(f"  beam alms lmax={lmax}  {_time.time() - t0:.0f} s", flush=True)
+
+    t0 = _time.time()
+    maps = load_sky_maps()
+    sky = ionly_sky(maps["I408"], lmax)
+    del maps
+    print(
+        f"  {sky.n_components} sky components  {_time.time() - t0:.0f} s",
+        flush=True,
+    )
+
+    t0 = _time.time()
+    W = engine.contract(
+        beam, sky.component_alms, times(), moon_location(), lmax
+    )
+    print(f"  contraction {_time.time() - t0:.0f} s", flush=True)
+
+    freqs = np.array([float(center)])
+    pair = engine.expand(W, sky.coeffs(freqs))  # (T, 1, 10)
+    return pack_from_pairs(pair, resp, receiver, freqs, center)[:, 0]
+
+
+def compute_legacy(center):
+    """The pixel quadrature: one HEALPix sum per time step."""
+    resp, receiver = _instrument()
+    kern = rsp.FixedChannelKernel(resp, center)
+    # kern.sample() would interpolate all four Stokes components; only
+    # the I one is ever contracted against an unpolarized sky.  The
+    # kernel already carries eta0 / lambda^2, so the pixel solid angle
+    # is the whole remaining scale.
     KI = np.ascontiguousarray(kern.K[:, 0])  # (10, Ntheta, Nphi)
     maps = load_sky_maps()
     I_map, _, _ = sky_at_freq(maps, center)
+    del maps
     grid = fp.GalacticGrid(MAP_NSIDE)
     R_all = rotation_matrices()
-    scale = kern.prefac * grid.pix_area
 
-    products = np.zeros((N_TIMES, 16))
+    # The covariance is assembled once at the end rather than inside
+    # the loop.  It is independent per (time, frequency), so batching
+    # cannot move a value; what the loop measures is the quadrature.
+    pair = np.zeros((N_TIMES, 1, 10), dtype=complex)
     t0 = _time.time()
     for it in range(N_TIMES):
         theta, phi, _, up = fp.transport(R_all[it], grid)
         KIs = fp.sample_periodic_maps(
             KI, kern.theta_deg, kern.phi_deg, theta[up], phi[up]
         )  # (10, Nup)
-        pair = scale * (KIs @ I_map[up])
-        products[it] = fp.pack_products(
-            fp.assemble_covariance(pair, kern.M)
-        )
+        pair[it, 0] = grid.pix_area * (KIs @ I_map[up])
         if (it + 1) % 128 == 0:
             dt = _time.time() - t0
             print(
                 f"  {center:g} MHz  t {it + 1}/{N_TIMES}  {dt:.0f} s",
                 flush=True,
             )
-    np.savez(out_path, products=products, center_mhz=center)
-    print(f"saved {out_path.name}", flush=True)
+    freqs = np.array([float(center)])
+    return pack_from_pairs(pair, resp, receiver, freqs, center)[:, 0]
+
+
+def compute(center, arm="harmonic", lmax=LMAX):
+    path = out_path(center, arm, lmax)
+    if arm == "legacy":
+        products = compute_legacy(center)
+        extra = {}
+    else:
+        products = compute_harmonic(center, lmax)
+        extra = {"lmax": int(lmax)}
+    np.savez(path, products=products, center_mhz=center, engine=arm, **extra)
+    print(f"saved {path.name}", flush=True)
 
 
 def analyze(center):
@@ -74,24 +220,43 @@ def analyze(center):
 
     from zenith_weights import get_weights
 
+    # The LEGACY file on purpose: real{C}_binned.npz comes from
+    # scripts/step2_real_sky.py, which stays on the pixel arm, the
+    # effect measured below is 2e-4, and the harmonic-vs-pixel engine
+    # difference is ~1e-2 (scripts/crosscheck_pixel_arm.py) -- a
+    # hundred times larger than the signal.  Both sides of this
+    # comparison have to come from the same quadrature.
+    ionly_path = out_path(center, "legacy")
+    if not ionly_path.exists():
+        raise FileNotFoundError(
+            f"{ionly_path.name} is missing.  --analyze compares against "
+            f"real{center:g}_binned.npz, a pixel-arm artifact, so the "
+            "I-only side has to be the pixel arm too.  Run "
+            f"`step_ionly.py --engine legacy --centers {center:g}` first."
+        )
+    print(
+        f"  comparing against {ionly_path.name} (pixel arm), since "
+        f"real{center:g}_binned.npz is one too",
+        flush=True,
+    )
     xv, yv = get_weights(center)  # zenith-calibrated polarimeter
-    ionly = np.load(GEN_DIR / f"real{center:g}_ionly.npz")["products"]
+    ionly = np.load(ionly_path)["products"]
     binned = np.load(GEN_DIR / f"real{center:g}_binned.npz")
-    S0 = fp.polarimeter_from_channels(ionly, xv, yv)  # (T, 4)
-    Sp = fp.polarimeter_from_channels(binned["parent"][:, 1], xv, yv)
-    Sz = fp.polarimeter_from_channels(binned["zoom"][:, 1, 0], xv, yv)
+    S0 = pol.pseudo_stokes_from_channels(ionly, xv, yv)  # (T, 4)
+    Sp = pol.pseudo_stokes_from_channels(binned["parent"][:, 1], xv, yv)
+    Sz = pol.pseudo_stokes_from_channels(binned["zoom"][:, 1, 0], xv, yv)
     I0 = S0[:, 0]
 
     def stats(S, name):
         dI = (S[:, 0] - S0[:, 0]) / I0
-        pol = np.hypot(S[:, 1] - S0[:, 1], S[:, 2] - S0[:, 2]) / I0
+        dP = np.hypot(S[:, 1] - S0[:, 1], S[:, 2] - S0[:, 2]) / I0
         print(
             f"  {name:12s}  dI/I: median {np.median(np.abs(dI)):.2e}"
             f"  max {np.abs(dI).max():.2e}   |dP|/I: median"
-            f" {np.median(pol):.2e}  max {pol.max():.2e}",
+            f" {np.median(dP):.2e}  max {dP.max():.2e}",
             flush=True,
         )
-        return dI, pol
+        return dI, dP
 
     print(f"fractional effect of sky polarization at {center:g} MHz "
           "(vs I-only reference):", flush=True)
@@ -126,13 +291,17 @@ def analyze(center):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--centers", type=float, nargs="+", default=[30.0])
+    ap.add_argument(
+        "--engine", choices=("harmonic", "legacy"), default="harmonic"
+    )
+    ap.add_argument("--lmax", type=int, default=LMAX)
     ap.add_argument("--analyze", action="store_true")
     ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
     for center in args.centers:
-        out_path = GEN_DIR / f"real{center:g}_ionly.npz"
-        if not out_path.exists() or args.force:
-            compute(center)
+        path = out_path(center, args.engine, args.lmax)
+        if not path.exists() or args.force:
+            compute(center, args.engine, args.lmax)
         if args.analyze:
             analyze(center)
 
