@@ -8,38 +8,70 @@ shows the harmonic contraction reproduces luseepy's own convolution
 to round-off (6.8e-16) on a synthetic response and a rotation-
 sensitive sky.
 
-Why that gate hits round-off and this script does not, even though
-both exercise the same harmonic beam-alm code: our beam alms
-(``response.four_port_pair_alms``) and luseepy's own
-(``FullStokesSimulatorBase.prepare_pair_alms``) both route through
-``lusee.InstrumentResponse.pair_stokes_alms_native``, which builds a
-``croissant.PairStokesBeam`` with an explicit horizon mask
-(``theta <= 90 deg``) and calls its ``compute_alm`` -- identical
-code, so the gate is a same-library comparison.  The BGL_v16 response
-itself is stored only over the upper hemisphere (theta in [0, 90]
-deg, confirmed against the FITS ``theta`` HDU) and is zero-padded to
-the full sphere before that transform, so the beam fed into
-``compute_alm`` has a genuine step discontinuity at the horizon: real
-antenna gain up to 90 deg, then exactly zero.  A step function is not
-band-limited, so truncating its spherical-harmonic expansion at
-finite lmax discards real power -- Gibbs ringing at the horizon.  The
-pixel arm has no such truncation; it samples the response's native
-grid directly.  So the two arms' beams differ near the horizon by an
-amount set by lmax, not by pixel resolution.
+WHY THE DISAGREEMENT EXISTS HERE IS AN OPEN QUESTION, not a settled
+fact.  Two candidate mechanisms were considered; neither is proven.
 
-That mechanism is consistent with everything measured so far: the
-disagreement is flat in the pixel arm's sky-quadrature resolution
-(2.103e-2 / 2.105e-2 / 2.106e-2 at nside 32/64/128, sky held fixed in
-harmonic space, lmax=30 -- a 4x range in nside moves the result by
-about 0.1% relative, i.e. noise); it moves only weakly with lmax
-(6.49e-2 at lmax=30 vs 6.30e-2 at lmax=48 in one differently-seeded
-run pair -- consistent with a step spectrum's ~1/l decay); and it is
-worse on cross-polarization pairs than on autos, where the beam's
-near-horizon structure matters most. Because our harmonic path uses
-the identical masked-transform code luseepy's own production
-simulator uses, this script's residual reflects a pre-existing
-difference between luseepy's harmonic engine and the legacy pixel
-engine, not a regression from this refactor.
+Leading hypothesis (better supported): the pixel arm's beam sampling
+(``FixedFreqKernel.sample`` / ``sample_periodic_maps``) always
+bilinearly interpolates off the response's fixed, native 1-degree
+theta/phi grid, regardless of the sky's HEALPix resolution.  If that
+interpolation carries a systematic (non-random) error near sharp
+features of the real beam, integrating over more/finer sky pixels
+would not average it away, since the error source itself does not
+shrink with sky resolution.
+
+Alternative hypothesis, considered and judged less likely on
+reflection: a step-discontinuity Gibbs-truncation story. What is
+TRUE and verified: our beam alms (``response.four_port_pair_alms``)
+and luseepy's own (``FullStokesSimulatorBase.prepare_pair_alms``)
+both route through ``lusee.InstrumentResponse.pair_stokes_alms_native``,
+which builds a ``croissant.PairStokesBeam`` with an explicit horizon
+mask (``theta <= 90 deg``) and calls its ``compute_alm`` -- identical
+code on both sides, which is exactly why the gate lands at round-off.
+The BGL_v16 response itself is stored only over the upper hemisphere
+(theta in [0, 90] deg, confirmed against the FITS ``theta`` HDU) and
+is zero-padded to the full sphere before that transform, so the
+masked beam fed into ``compute_alm`` has a genuine step discontinuity
+at the horizon. Those facts are real. What does NOT follow from them:
+that this causes the disagreement measured here. The sky in this
+script is EXACTLY band-limited to LMAX by construction
+(``hp.synalm(..., lmax=LMAX)``). By orthogonality of spherical
+harmonics, the true continuous integral of the beam against that sky
+depends only on the beam's l<=LMAX projection -- whatever power the
+horizon step puts above LMAX cannot enter that integral except
+through second-order effects of the harmonic arm's own quadrature.
+So the horizon truncation should not, on its own, be significantly
+lossy in this comparison, even though the structural facts above are
+correct.
+
+The nside sweep run against this script (2.103e-2 / 2.105e-2 /
+2.106e-2 at pixel-arm nside 32/64/128, sky held fixed in harmonic
+space, lmax=30 -- flat to about 0.1% relative across a 4x range in
+nside) does NOT discriminate between these two hypotheses.
+``GalacticGrid(nside)`` controls the SKY-side quadrature; the beam's
+own source grid (the response's native 1-degree theta/phi grid that
+``FixedFreqKernel.sample`` interpolates off) never changes with the
+sky's nside. Flatness under that sweep rules out sky-side pixel
+quadrature error, but both hypotheses above are equally consistent
+with "it's not sky-side quadrature" -- the sweep does not favor one
+over the other.
+
+Weak lmax sensitivity (6.49e-2 at lmax=30 vs 6.30e-2 at lmax=48, in
+one differently-seeded run pair, measured before the sky-seeding fix
+below) is likewise inconclusive on its own; treat it as suggestive at
+most, not as evidence for either hypothesis. The disagreement was
+also observed worse on cross-polarization pairs than on autos in
+that same early, unseeded run -- interesting, but never independently
+re-checked against the final seeded configurations below, so treat
+that too as suggestive only.
+
+Because our harmonic path uses the identical masked-transform code
+luseepy's own production simulator uses (confirmed above), this
+script's residual reflects a pre-existing difference between
+luseepy's harmonic engine and the legacy pixel engine, not a
+regression from this refactor -- but which part of the legacy pixel
+arm is responsible remains an open question this script does not
+resolve.
 
 Run:
     ulimit -v 16000000
@@ -67,20 +99,27 @@ FREQ_MHZ = 30.0
 #   nside=64, lmax=30 (default here):                    2.678e-02
 #   nside=32, lmax=48 (validate_engine.py's own config):  3.767e-02
 # validate_engine.py's diffuse-sky check records 1.1e-2 for a related
-# but not identical comparison -- see the module docstring for why
-# this script's numbers run higher (mask-induced Gibbs error at the
-# horizon, not round-off).  Override with LUSEE_CROSSCHECK_NSIDE /
-# LUSEE_CROSSCHECK_LMAX to reproduce either configuration above.
+# but not identical comparison.  Why this script's numbers run higher
+# is an OPEN QUESTION -- see the module docstring above; it is not
+# settled to be the horizon-mask/Gibbs mechanism.  Override with
+# LUSEE_CROSSCHECK_NSIDE / LUSEE_CROSSCHECK_LMAX to reproduce either
+# configuration above.
 NSIDE = int(os.environ.get("LUSEE_CROSSCHECK_NSIDE", "64"))
 LMAX = int(os.environ.get("LUSEE_CROSSCHECK_LMAX", "30"))
 N_TIMES = 4
 
-# Empirical expectation band, NOT a correctness bound: both measured
-# configurations above (2.678e-2, 3.767e-2) fall inside it with
-# margin.  Exists to catch a gross change in this comparison -- e.g.
-# a broken convention pushing the disagreement far outside what's
-# been measured -- not to assert that either arm is correct.
-# Correctness is tests/test_engine_gate.py's job.  Recorded 2026-08-18.
+# Empirical expectation band, NOT a correctness bound.  This is two
+# single-seed point measurements (2.678e-2, 3.767e-2 above) plus one
+# precedent -- not a measured distribution across seeds, and it is a
+# coarse gross-regression detector, not a claim that either arm is
+# correct (that's tests/test_engine_gate.py's job).  The strongest
+# evidence for EXPECTED_HIGH is that precedent:
+# scripts/validate_engine.py:163 already asserts
+# `max(errs) < 8e-2  # nside=32 pixelization limits agreement` for
+# materially the same harmonic-vs-pixel-arm comparison on the same
+# real BGL_v16 artifact, and that bound is already-accepted precedent
+# independent of anything measured in this script.  Recorded
+# 2026-08-18.
 EXPECTED_LOW = 1e-2
 EXPECTED_HIGH = 8e-2
 
