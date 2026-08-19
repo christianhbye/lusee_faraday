@@ -83,3 +83,41 @@ def test_mismatched_mwss_grid_is_rejected():
     hp = np.zeros_like(ht)
     with pytest.raises(ValueError, match="mwss sampling relation"):
         rsp.two_port_pair_alms(ht, hp, theta_deg, phi_deg, 8)
+
+
+def test_grid_length_mismatch_is_rejected():
+    """theta_deg/phi_deg must describe h_theta's actual grid, not
+    just satisfy the mwss relation on their own."""
+    pytest.importorskip("croissant")
+
+    theta_deg = np.arange(0.0, 178.0, 2.0)  # 89 points, not 91
+    phi_deg = np.arange(0.0, 360.0, 2.0)  # 180 points, matches data
+    ht = np.zeros((2, 91, len(phi_deg)), dtype=complex)
+    hp = np.zeros_like(ht)
+    with pytest.raises(ValueError, match="do not describe"):
+        rsp.two_port_pair_alms(ht, hp, theta_deg, phi_deg, 8)
+
+
+def test_short_dipole_monopole_matches_measured_reference():
+    """Pin the absolute scale, not just XX == YY.
+
+    The equal-power and vanishing-cross-monopole tests above are both
+    scale-invariant: a uniform normalization bug would multiply every
+    monopole by the same constant and still pass them unchanged. This
+    reference value was measured independently of this test suite
+    before this test was written; it is not read off this module's
+    own output. Do not "refresh" it from a failing run.
+    """
+    pytest.importorskip("croissant")
+    import jax
+
+    jax.config.update("jax_enable_x64", True)
+
+    theta_deg = np.arange(0.0, 181.0, 2.0)
+    phi_deg = np.arange(0.0, 360.0, 2.0)
+    ht, hp = analytic_short_dipoles(theta_deg, phi_deg)
+    lmax = 8
+    alms = rsp.two_port_pair_alms(ht, hp, theta_deg, phi_deg, lmax)
+    xx = alms[0, 0, 0, lmax]
+    reference = 1.1971034513643168
+    assert np.isclose(xx, reference, rtol=1e-9, atol=0.0)
