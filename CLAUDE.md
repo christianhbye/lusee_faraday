@@ -6,13 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Simulator for LuSEE (Lunar Surface Electromagnetics Experiment) Faraday rotation observations. Computes the four-port covariance seen from the lunar surface, including Faraday rotation of synchrotron emission through the ionosphere and the Galactic screen.
 
-The physics is **not** owned here. Instrument response, impedances, receiver loading, covariance assembly and channel packing all come from `luseepy`; spherical transforms and the polarized harmonic dual come from `croissant`. This repository owns the layer above: how a Faraday-rotated sky enters that formalism, and how the results are channelized and read out. Read `docs/measurement-model.md` first — it is the conceptual overview and the reason the 16,384-channel fine grid is affordable.
+The physics is **not** owned here. Instrument response, impedances, receiver loading and covariance assembly all come from `luseepy`; the 16-channel packing is a local loop over `PORT_PAIRS` that is pinned to `lusee.Covariance.pack_covariance` by test rather than delegated to it (the two differ only in where the channel axis sits); spherical transforms and the polarized harmonic dual come from `croissant`. This repository owns the layer above: how a Faraday-rotated sky enters that formalism, and how the results are channelized and read out. Read `docs/measurement-model.md` first — it is the conceptual overview and the reason the 16,384-channel fine grid is affordable.
 
 ## Setup & Commands
 
 ```bash
 # Install (uses uv with a .venv already present)
-uv sync                      # editable luseepy + croissant via [tool.uv.sources]
+uv sync --extra dev          # editable luseepy + croissant via [tool.uv.sources]
+                             # the extra is NOT optional: plain `uv sync` prunes
+                             # pytest-cov, and addopts passes --cov=src always
 uv add <package>             # NEVER `uv pip install`
 
 # Run tests
@@ -29,7 +31,8 @@ uv run flake8 src/
 `JAX_ENABLE_X64=1` must be set **before any jax import**, or croissant and
 luseepy silently drop to complex64. `scripts/common.py` does this with an
 `os.environ.setdefault` above every other import and every script imports it;
-test modules set it themselves at the top.
+test modules set it themselves at the top, and `tests/conftest.py` sets it as a
+backstop.
 
 Heavy jobs run in the background under `ulimit -v 16000000` with **absolute**
 log paths under `generated_data/`. 12 GB is not enough — three of the zenith
@@ -39,10 +42,10 @@ tests OOM inside jax.
 
 The pipeline flows: **Sky components → Faraday coefficients → harmonic contraction → luseepy covariance → polarimeter → channelization**
 
-- **`FaradaySky`** (`sky.py`): the sky as a sum of constant-Faraday-depth components, each a frequency-independent alm plus a per-frequency, per-block coefficient. Constructors: `from_maps`, `uniform_screen`, `point_source`, `i_only` (perfect depolarization). Refuses an unresolved screen unless the caller opts in — the 2026-08-18 pixelization audit lives in the API, not in a paragraph.
+- **`FaradaySky`** (`sky.py`): the sky as a sum of constant-Faraday-depth components, each a frequency-independent alm plus a per-frequency, per-block coefficient. Constructors: `from_maps`, `uniform_screen`, `point_source`, `i_only` (perfect depolarization), `binned_screen` and `from_rm_map`. The last two are the only ones that turn a map of Faraday depths into components, and `binned_screen` — which `from_rm_map` merely wraps — runs `sky.audit_screen`: it logs both audit numbers on every build and refuses an unresolved screen unless the caller passes `allow_pixelwise=True`. The 2026-08-18 pixelization audit lives in the API, not in a paragraph.
 - **`response.py`**: instrument model → pair-Stokes alms. `load_response` reads a BGL_v16 artifact through `lusee.InstrumentResponse`; `four_port_pair_alms` is the as-built arm, `two_port_pair_alms` the symmetric pseudo-dipole (paper Fig. 4) arm through croissant. `FixedChannelKernel` slices ONE native channel and samples many directions out of it — luseepy's `pair_stokes_at` re-materializes all 150 channels (2.94 GB) per call and is scalar-only, so this is a real capability, not a wrapper.
 - **`engine.py`**: the block-resolved contraction of sky duals against response duals, and the spectral expansion onto the fine grid.
-- **`instrument.py`**: covariance assembly, receiver loading, Hermitian projection and 16-channel packing — all luseepy. `impedance_freq_mhz` freezes `Z_A`, `Z_L`, `R_moon`, `R_loss` at one frequency; a Faraday run **must** pass it, and must pass `T_moon=0.0, T_ant=0.0` where the legacy assembler had no thermal terms.
+- **`instrument.py`**: covariance assembly, receiver loading and Hermitian projection — all luseepy. The 16-channel packing is *not*: `channels` is a local loop, and `test_channels_match_luseepy_pack_covariance` pins it elementwise against `lusee.Covariance.pack_covariance` (which stacks the channel axis at `-2`, so the pin transposes). `impedance_freq_mhz` freezes `Z_A`, `Z_L`, `R_moon`, `R_loss` at one frequency; a Faraday run **must** pass it, and must pass `T_moon=0.0, T_ant=0.0` where the legacy assembler had no thermal terms.
 - **`polarimeter.py`**: zenith calibration (`zenith_port_weights`, `orthonormalize_xy`) and pseudo-Stokes. `check_psd` is a runtime invariant, not only a test.
 - **`channelization.py`**: parent (25 kHz) and zoom (64 sub-bin) integration on luseepy's spectrometer response. Zoom bins use FFT ordering (0 = center, 1–32 positive, 33–63 negative).
 - **`conventions.py`**, **`config.py`**: the single source of truth for COSMO/IAU, the Faraday phase, port and channel ordering, the site, the time grid and the fine frequency grid. Do not re-derive any of it inline.

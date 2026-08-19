@@ -119,6 +119,64 @@ def _both_criteria(
     )
 
 
+def audit_screen(
+    rm_map, freqs_mhz, allow_pixelwise=False, max_components=4096
+):
+    """Compute, report and enforce both audit criteria for one screen.
+
+    Every screen built from an RM map goes through here -- it is called
+    by :meth:`FaradaySky.binned_screen`, which is the only constructor
+    that turns a map of Faraday depths into components, and which
+    :meth:`FaradaySky.from_rm_map` delegates to.  Putting the check on
+    the *inner* constructor is deliberate: an earlier arrangement had it
+    on ``from_rm_map`` alone, so calling ``binned_screen`` directly
+    silently built a screen the map could not resolve, which is exactly
+    the regime the 2026-08-18 audit exists to refuse.
+
+    Both numbers are logged at INFO on every build, whether or not
+    either criterion trips, so a successful build reports them too and
+    not only a raising one.  Returns ``(needed_nside, n_needed)``.
+    """
+    import healpy as hp
+
+    rm = np.asarray(rm_map, dtype=float)
+    used_nside = hp.npix2nside(rm.size)
+    freq_mhz = float(np.min(freqs_mhz))
+    needed_nside = nyquist_nside(rm, freq_mhz)
+    n_needed = spectral_component_count(
+        float(rm.min()), float(rm.max()), freqs_mhz
+    )
+    both = _both_criteria(
+        used_nside, needed_nside, freq_mhz, n_needed, max_components
+    )
+    logger.info("Faraday screen audit: %s", both)
+    unresolved = needed_nside > used_nside
+    too_many = n_needed > max_components
+    if allow_pixelwise:
+        if unresolved or too_many:
+            logger.warning(
+                "allow_pixelwise=True: building a screen that fails the "
+                "audit (%s; %s)",
+                both,
+                AUDIT_REFERENCE,
+            )
+        return needed_nside, n_needed
+    if unresolved:
+        raise ValueError(
+            f"Faraday screen is not resolved: {both}. The pixel "
+            f"sum is a random walk, not a quadrature "
+            f"({AUDIT_REFERENCE}). Pass allow_pixelwise=True to "
+            "build it anyway."
+        )
+    if too_many:
+        raise ValueError(
+            f"Faraday screen needs too many spectral components: "
+            f"{both} ({AUDIT_REFERENCE}). Pass allow_pixelwise=True "
+            "to build it anyway or narrow the band."
+        )
+    return needed_nside, n_needed
+
+
 class FaradaySky:
     """A sky whose frequency dependence separates into components."""
 
@@ -317,6 +375,9 @@ class FaradaySky:
         rm_map,
         dphi,
         lmax,
+        freqs_mhz,
+        allow_pixelwise=False,
+        max_components=4096,
         beta=None,
         ref_freq_mhz=None,
         coord="galactic",
@@ -326,10 +387,19 @@ class FaradaySky:
         Each component holds I, Q and U masked to its own bin, so the
         components partition the sky rather than overlapping it:
         summing them reproduces the input maps exactly.
+
+        ``freqs_mhz`` is the observing band.  It is required rather than
+        optional because both audit criteria are band-dependent and a
+        screen cannot be judged without one: this is the constructor
+        that turns an RM map into components, so it is where
+        :func:`audit_screen` runs.  ``allow_pixelwise`` and
+        ``max_components`` mean what they mean in :meth:`from_rm_map`,
+        which is now a thin wrapper that only chooses ``dphi``.
         """
         dphi = float(dphi)
         if dphi <= 0:
             raise ValueError("dphi must be positive")
+        audit_screen(rm_map, freqs_mhz, allow_pixelwise, max_components)
         I = np.asarray(I, dtype=float)  # noqa: E741
         Q = np.asarray(Q, dtype=float)
         U = np.asarray(U, dtype=float)
@@ -359,40 +429,30 @@ class FaradaySky:
         ref_freq_mhz=None,
         coord="galactic",
     ):
-        """Build a binned screen, refusing an unresolved one.
+        """Build a binned screen at the band-matched bin width.
 
-        Reports both audit criteria and raises unless the caller has
-        explicitly opted in to a screen the map cannot resolve.
+        A thin wrapper: it chooses ``dphi`` from the band's
+        ``lambda^2`` span and hands everything to
+        :meth:`binned_screen`, which is where :func:`audit_screen`
+        reports both criteria and refuses an unresolved screen unless
+        the caller has explicitly opted in.
         """
-        import healpy as hp
-
         from .conventions import lambda_squared
 
         rm = np.asarray(rm_map, dtype=float)
-        used_nside = hp.npix2nside(rm.size)
-        freq_mhz = float(np.min(freqs_mhz))
-        needed_nside = nyquist_nside(rm, freq_mhz)
-        n_needed = spectral_component_count(
-            float(rm.min()), float(rm.max()), freqs_mhz
-        )
-        both = _both_criteria(
-            used_nside, needed_nside, freq_mhz, n_needed, max_components
-        )
-        if needed_nside > used_nside and not allow_pixelwise:
-            raise ValueError(
-                f"Faraday screen is not resolved: {both}. The pixel "
-                f"sum is a random walk, not a quadrature "
-                f"({AUDIT_REFERENCE}). Pass allow_pixelwise=True to "
-                "build it anyway."
-            )
-        if n_needed > max_components and not allow_pixelwise:
-            raise ValueError(
-                f"Faraday screen needs too many spectral components: "
-                f"{both} ({AUDIT_REFERENCE}). Pass allow_pixelwise=True "
-                "to build it anyway or narrow the band."
-            )
         span = float(np.ptp(lambda_squared(freqs_mhz)))
         dphi = np.pi / (2 * span) if span > 0 else (np.ptp(rm) or 1.0)
         return cls.binned_screen(
-            I, Q, U, rm, dphi, lmax, beta, ref_freq_mhz, coord
+            I,
+            Q,
+            U,
+            rm,
+            dphi,
+            lmax,
+            freqs_mhz,
+            allow_pixelwise=allow_pixelwise,
+            max_components=max_components,
+            beta=beta,
+            ref_freq_mhz=ref_freq_mhz,
+            coord=coord,
         )

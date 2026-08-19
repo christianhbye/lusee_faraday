@@ -9,6 +9,7 @@ from lusee_faraday.sky import FaradaySky  # noqa: E402
 
 NSIDE = 16
 LMAX = 12
+BAND = np.array([29.9, 30.1])
 
 
 @pytest.fixture(scope="module")
@@ -59,7 +60,20 @@ def test_binned_screen_partitions_the_sky_exactly(hp_module):
     U = rng.normal(size=npix) * 0.1
     rm = rng.uniform(-40.0, 40.0, size=npix)
 
-    sky = FaradaySky.binned_screen(I, Q, U, rm, dphi=10.0, lmax=LMAX)
+    # allow_pixelwise: this screen is deliberately unresolved at
+    # nside=16 (the point here is the partition algebra, not the
+    # physics), and binned_screen now refuses such a screen unless the
+    # caller opts in.  test_sky_diagnostics pins the refusal itself.
+    sky = FaradaySky.binned_screen(
+        I,
+        Q,
+        U,
+        rm,
+        dphi=10.0,
+        lmax=LMAX,
+        freqs_mhz=BAND,
+        allow_pixelwise=True,
+    )
     assert sky.n_components == 8  # (-40, 40) in steps of 10
 
     # With every phi bin forced to zero depth the sum of the components
@@ -77,7 +91,16 @@ def test_binned_screen_assigns_each_component_its_bin_centre(hp_module):
     rm[: npix // 2] = -23.0
     I = np.ones(npix)  # noqa: E741
     z = np.zeros(npix)
-    sky = FaradaySky.binned_screen(I, z, z, rm, dphi=10.0, lmax=LMAX)
+    sky = FaradaySky.binned_screen(
+        I,
+        z,
+        z,
+        rm,
+        dphi=10.0,
+        lmax=LMAX,
+        freqs_mhz=BAND,
+        allow_pixelwise=True,  # a 30 rad/m^2 step between neighbours
+    )
     assert sky.n_components == 2
     assert np.allclose(np.sort(sky.phi_fd), [-23.0, 7.0])
 
@@ -87,4 +110,6 @@ def test_binned_screen_rejects_a_nonpositive_bin_width(hp_module):
     npix = hp.nside2npix(NSIDE)
     ones = np.ones(npix)
     with pytest.raises(ValueError, match="dphi"):
-        FaradaySky.binned_screen(ones, ones, ones, ones, dphi=0.0, lmax=LMAX)
+        FaradaySky.binned_screen(
+            ones, ones, ones, ones, dphi=0.0, lmax=LMAX, freqs_mhz=BAND
+        )

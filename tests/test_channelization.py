@@ -1,7 +1,11 @@
-import numpy as np
-import pytest
+import os
 
-from lusee_faraday import channelization as ch
+os.environ.setdefault("JAX_ENABLE_X64", "1")
+
+import numpy as np  # noqa: E402
+import pytest  # noqa: E402
+
+from lusee_faraday import channelization as ch  # noqa: E402
 
 
 def test_zoom_bin_offsets_use_fft_ordering():

@@ -11,13 +11,23 @@ work now lives on `luseepy-refactor`.
 | Component | Location | Git state |
 |---|---|---|
 | luseepy | `../luseepy` | branch `deps/croissant-v5.3.0.dev1`, `52b96bc` ("deps: bump croissant-sim to v5.3.0.dev1") |
-| croissant | `/home/christian/Documents/projects/croissant-main` (worktree) | branch `main`, `1c4d6c5` ("feat: close out the kernel engine's trace, cache and reality gaps (#143)"), clean |
+| croissant | `/home/christian/Documents/projects/croissant-main` (worktree) | **detached** at `1c4d6c5` = `v5.3.0.dev0-15-g1c4d6c5` ("feat: close out the kernel engine's trace, cache and reality gaps (#143)"), clean |
 | lusee_faraday | this repo | branch `luseepy-refactor` |
 
 Both are **editable** installs wired via `[tool.uv.sources]` in
-`pyproject.toml`.  Reproduce with `uv sync`; add packages with `uv add`.
-Verified 2026-08-19. Earlier revisions of this file recorded luseepy at
-`main`/`61c439a` and croissant at `da01c5a`; both were stale.
+`pyproject.toml`.  Reproduce with `uv sync --extra dev`; add packages with
+`uv add`.  Plain `uv sync` prunes the `dev` extra (black, flake8,
+`pytest-cov`), and `pyproject.toml`'s `addopts` passes `--cov=src`
+unconditionally, so the next command would fail on an unrecognized argument.
+The croissant worktree was created with `git worktree add --detach`, so
+it is **not** on a branch: `git worktree list` shows
+`croissant-main  1c4d6c5 (detached HEAD)` while `main` sits at `0ac2f86`
+in the sibling `croissant` checkout.  Checking out `main` would *not*
+reproduce this environment.  The pinned SHA is the load-bearing half.
+
+Verified 2026-08-19 (final fix round).  Earlier revisions of this file
+recorded luseepy at `main`/`61c439a` and croissant at `da01c5a`, and
+recorded the worktree as being "on `main`"; all were stale.
 
 **Neither checkout may be modified from this repo.**
 
@@ -39,13 +49,27 @@ version string**.
 
 ### croissant vs luseepy's pin
 
-luseepy `main` pins `croissant-sim @ git+...@379496e`.  Our `main` is
-**6 commits ahead** of that pin.  We deliberately override it
-(`[tool.uv] override-dependencies`).  The behaviour-affecting commit in
-that range is `529b874 fix: reject complex input under reality=True and
-default it off` — an API default flip.  The rest add the
-precomputed-kernel SHT engine (`eb392f9`, `da01c5a`) and full-Stokes
-physical-invariant tests (`1c4b59e`).
+The luseepy we actually use is not on `main`.  On branch
+`deps/croissant-v5.3.0.dev1` (`../luseepy/pyproject.toml:26`) it pins
+`croissant-sim @ git+...@v5.3.0.dev1`, and that tag resolves to commit
+`0ac2f86`.  Our worktree is at `1c4d6c5`, i.e. **two commits behind**
+that pin, not ahead of it.  We deliberately override the pin
+(`[tool.uv] override-dependencies`).  The two commits we are behind are
+`ab915fe feat: report polarized visibilities in sky-temperature units
+(#144)` — which adds `polarized_convolve(normalization="auto-I")` and
+explicitly leaves `normalization` at `None` by default, touching no
+existing physics test — and `0ac2f86`, a changelog.  Numerical risk
+today is therefore nil.
+
+*Historical, for the record:* an older luseepy `main` pinned
+`croissant-sim @ git+...@379496e`, and `1c4d6c5` is 7 commits ahead of
+*that*.  The behaviour-affecting commit in that range is `529b874 fix:
+reject complex input under reality=True and default it off` — an API
+default flip.  The rest add the precomputed-kernel SHT engine
+(`eb392f9`, `da01c5a`), an amortisation recalibration (`537d8eb`) and
+full-Stokes physical-invariant tests (`1c4b59e`).  A previous revision
+of this paragraph said "our `main` is 6 commits ahead of that pin",
+which was both miscounted and about the wrong pin.
 
 ### The `engine="auto"` dense-memory trap is closed at `1c4d6c5`
 
@@ -97,7 +121,7 @@ Both codes are right; the paper equation needs the 2.
 
 ## Resource limits hit on this machine
 
-- **Disk `/home` at 97% (12 G free)** — the fine waterfalls are ~2.1 GB
+- **Disk `/home` at 82% (56 G free, 2026-08-19)** — the fine waterfalls are ~2.1 GB
   per band. Check before generating all three bands.
 - **RAM 15 GB total, ~4 GB free** — PROGRESS.md documents the OOM
   killer on the croissant dense transform. Run heavy jobs **serially**.

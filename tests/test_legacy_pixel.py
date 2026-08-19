@@ -8,10 +8,14 @@ the kernel sampler, the synthetic Faraday synthesis via the NUFFT, and
 the spectrometer-bin weight construction.
 """
 
-import numpy as np
-import pytest
+import os
 
-from lusee_faraday import _legacy_pixel as fp
+os.environ.setdefault("JAX_ENABLE_X64", "1")
+
+import numpy as np  # noqa: E402
+import pytest  # noqa: E402
+
+from lusee_faraday import _legacy_pixel as fp  # noqa: E402
 
 
 def random_hermitian(rng, shape=()):

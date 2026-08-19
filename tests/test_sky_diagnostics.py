@@ -137,6 +137,88 @@ def test_from_rm_map_refuses_a_spectrally_expensive_screen():
     assert "screen is not resolved" not in message
 
 
+def test_binned_screen_itself_refuses_an_unresolved_screen():
+    """The guardrail must sit on the inner constructor, not the wrapper.
+
+    ``from_rm_map`` delegates to ``binned_screen``, so a check that
+    lives only in ``from_rm_map`` is bypassed by calling
+    ``binned_screen`` directly -- which silently built 180 components
+    for a screen needing nside ~ 1.5e6.  That is the exact regime the
+    2026-08-18 audit exists to refuse, so the refusal is pinned here on
+    the constructor that actually turns an RM map into components.
+    """
+    pytest.importorskip("croissant")
+    import jax
+
+    jax.config.update("jax_enable_x64", True)
+    import healpy as hp
+
+    rng = np.random.default_rng(1)
+    npix = hp.nside2npix(NSIDE)
+    I = np.abs(rng.normal(size=npix)) + 10.0
+    z = np.zeros(npix)
+    rm = rng.normal(size=npix) * 300.0  # wildly unresolved
+    band = np.array([29.9, 30.1])
+
+    with pytest.raises(ValueError) as excinfo:
+        FaradaySky.binned_screen(
+            I, z, z, rm, dphi=10.0, lmax=LMAX, freqs_mhz=band
+        )
+    message = str(excinfo.value)
+    assert "screen is not resolved" in message
+    assert "allow_pixelwise" in message
+    assert sky_mod.AUDIT_REFERENCE in message
+
+    # And the opt-in still works, so the guardrail is a gate and not a
+    # wall: the same call succeeds when the caller says so explicitly.
+    sky = FaradaySky.binned_screen(
+        I,
+        z,
+        z,
+        rm,
+        dphi=10.0,
+        lmax=LMAX,
+        freqs_mhz=band,
+        allow_pixelwise=True,
+    )
+    assert sky.n_components > 1
+
+
+def test_a_successful_screen_build_reports_both_criteria(caplog):
+    """ "Computed and reported whenever a screen is built" -- reported.
+
+    Before, both numbers appeared only in the text of an exception, so
+    a build that *succeeded* said nothing at all and a reader had no
+    way to see how close to the audit boundary it ran.  Assert the
+    actual values are in the record, not merely that something logged.
+    """
+    pytest.importorskip("croissant")
+    import jax
+
+    jax.config.update("jax_enable_x64", True)
+    import healpy as hp
+
+    rng = np.random.default_rng(2)
+    npix = hp.nside2npix(NSIDE)
+    I = np.abs(rng.normal(size=npix)) + 10.0
+    z = np.zeros(npix)
+    rm = hp.smoothing(rng.normal(size=npix), fwhm=1.0) * 1e-3
+    band = np.array([29.9, 30.1])
+
+    needed_nside = sky_mod.nyquist_nside(rm, band.min())
+    n_needed = sky_mod.spectral_component_count(
+        float(rm.min()), float(rm.max()), band
+    )
+
+    with caplog.at_level("INFO", logger="lusee_faraday.sky"):
+        FaradaySky.from_rm_map(I, z, z, rm, band, lmax=LMAX)
+    audits = [r.message for r in caplog.records if "audit" in r.message]
+    assert len(audits) == 1, audits
+    assert f"nside={NSIDE} used" in audits[0]
+    assert f"nside~{needed_nside:.3g} needed" in audits[0]
+    assert f"{n_needed} spectral components" in audits[0]
+
+
 def test_component_construction_logs_the_resolved_engine(caplog):
     pytest.importorskip("croissant")
     import jax

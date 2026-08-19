@@ -1,5 +1,9 @@
-import json
-from pathlib import Path
+import os
+
+os.environ.setdefault("JAX_ENABLE_X64", "1")
+
+import json  # noqa: E402
+from pathlib import Path  # noqa: E402
 
 FIXTURE = (
     Path(__file__).resolve().parent / "fixtures" / "regression_baselines.json"

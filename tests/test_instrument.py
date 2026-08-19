@@ -30,6 +30,35 @@ def test_channels_roundtrip_through_unpack():
     assert np.allclose(inst.unpack_channels(ch), C)
 
 
+def test_channels_match_luseepy_pack_covariance():
+    """Pin the local packing loop against luseepy's own packer.
+
+    ``instrument.channels`` is a hand-written loop over ``PORT_PAIRS``,
+    not a delegation: ``lusee.Covariance.pack_covariance`` exists and is
+    never called, because it stacks the channel axis at ``-2`` rather
+    than last and returns a jax array.  The values are meant to be
+    identical, so assert that rather than leaving it as a claim in a
+    document -- if either side's ordering or real/imag choice drifts,
+    this goes red.
+    """
+    lusee_cov = pytest.importorskip("lusee.Covariance")
+    import jax
+
+    jax.config.update("jax_enable_x64", True)
+
+    rng = np.random.default_rng(4)
+    A = rng.normal(size=(3, 5, 4, 4)) + 1j * rng.normal(size=(3, 5, 4, 4))
+    C = 0.5 * (A + np.conj(np.swapaxes(A, -1, -2)))
+
+    ours, our_labels = inst.channels(C)
+    theirs, their_labels = lusee_cov.pack_covariance(C)
+    theirs = np.moveaxis(np.asarray(theirs), -2, -1)  # (3,16,5)->(3,5,16)
+
+    assert tuple(our_labels) == tuple(their_labels)
+    assert ours.shape == theirs.shape == (3, 5, 16)
+    np.testing.assert_array_equal(ours, theirs)
+
+
 def test_channel_labels_match_luseepy():
     lusee_cov = pytest.importorskip("lusee.Covariance")
     rng = np.random.default_rng(1)

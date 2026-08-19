@@ -13,11 +13,14 @@ installs through `[tool.uv.sources]` and both are well-controlled source:
 | Component | Path | State |
 |---|---|---|
 | luseepy | `../luseepy` | branch `deps/croissant-v5.3.0.dev1`, `52b96bc` |
-| croissant | `/home/christian/Documents/projects/croissant-main` | worktree on `main`, `1c4d6c5` |
+| croissant | `/home/christian/Documents/projects/croissant-main` | worktree **detached** at `1c4d6c5` (= `v5.3.0.dev0-15-g1c4d6c5`); `main` is `0ac2f86`, two commits ahead |
 
 "Use luseepy infrastructure" means *import* from `lusee`; all code, tests
-and scripts live in this repo. Reproduce the environment with `uv sync`,
-add packages with `uv add` — **never** `uv pip install`.
+and scripts live in this repo. Reproduce the environment with
+`uv sync --extra dev` — plain `uv sync` prunes the dev extra (black,
+flake8, pytest-cov) and `addopts`' unconditional `--cov=src` then makes
+`uv run pytest` fail before collection. Add packages with `uv add` —
+**never** `uv pip install`.
 
 **Memory / OOM:** the "mysterious session kills" were the kernel OOM
 killer (croissant dense spherical transform: ~(lmax+1)^2·npix·16 bytes;
@@ -36,8 +39,9 @@ uv run python scripts/<script>.py     # or .venv/bin/python
 
 Set `JAX_ENABLE_X64=1` **before any jax import**. `scripts/common.py`
 does it with an `os.environ.setdefault` above every other import and
-every script imports `common`, so scripts are covered; test modules set
-it themselves at the top of the file. Without it croissant and luseepy
+every script imports `common`, so scripts are covered.  Test modules
+set it themselves at the top of the file, and `tests/conftest.py` sets
+it as a backstop for anything that forgets. Without it croissant and luseepy
 silently run in complex64 — croissant even says so on stderr.
 
 ## External resources
@@ -128,12 +132,21 @@ re-typing any of the following. Validated in
   polarized one — see `docs/measurement-model.md` §8 before quoting any
   cross-arm number.
 
-## Script inventory (all take `--help`; heavy ones honor caches)
+## Script inventory (most take `--help`; heavy ones honor caches)
+
+`validate_engine.py` and `crosscheck_pixel_arm.py` have no
+`argparse` — invoking either with `--help` starts a multi-minute
+job instead of printing usage.  `probe_toolchain.py` is listed
+below too; it was missing from earlier revisions of this table.
 
 - `scripts/common.py` — shared config (site, grids, sky loading at
   native nside=512, rotation-matrix cache) and the x64 setdefault.
-- `scripts/validate_engine.py` — engine vs luseepy harmonic engines
-  (ALL PASSED: 8.6e-16 / 1.1e-2 / 6.4e-15 / 4.2e-4). *pixel arm*
+- `scripts/validate_engine.py` — engine vs luseepy harmonic engines.
+  Re-run in full 2026-08-19 after the `lam2` shape fix: ALL PASSED,
+  8.645e-16 / 1.082e-2 / 6.445e-15 / 4.177e-4, exit 0 (~6 min).
+  *pixel arm*
+- `scripts/probe_toolchain.py` — croissant engine selection at
+  nside=512 / lmax=30; asserts no dense engine is chosen.
 - `scripts/crosscheck_pixel_arm.py` — harmonic vs pixel characterization
   on the real response. Its [1e-2, 8e-2] band is specific to its own
   polarized test sky.
@@ -168,11 +181,12 @@ re-typing any of the following. Validated in
   so reruns are cheap; the rotation-matrix cache alone takes ~minutes.
   Use ABSOLUTE paths for log redirects (the persistent shell cwd may
   sit in a subdirectory and the job dies instantly on the redirect).
-- `generated_data/` is gitignored (8+ GB of memmapped waterfalls);
+- `generated_data/` is gitignored (2.1 GB of memmapped waterfalls
+  today; it has been 8+ GB with all three bands live);
   everything there is regenerable from the scripts + caches.
 - Style: black, line length 79. `uv run flake8 src/` is clean — keep it
   that way.
 - **Before committing a test, ask whether it would fail if the thing it
-  names were broken.** Six tests in the 2026-08-18 refactor had to be
-  rewritten because the answer was no. Injecting the mistake and
+  names were broken.** Nine tests in the 2026-08-18 refactor had to be
+  rewritten or strengthened because the answer was no. Injecting the mistake and
   watching it go red is the only proof that counts.

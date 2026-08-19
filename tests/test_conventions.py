@@ -1,8 +1,12 @@
-import numpy as np
-import pytest
-from scipy.constants import c as C_LIGHT
+import os
 
-from lusee_faraday import conventions as cv
+os.environ.setdefault("JAX_ENABLE_X64", "1")
+
+import numpy as np  # noqa: E402
+import pytest  # noqa: E402
+from scipy.constants import c as C_LIGHT  # noqa: E402
+
+from lusee_faraday import conventions as cv  # noqa: E402
 
 
 def test_product_labels_match_luseepy():
@@ -15,7 +19,36 @@ def test_product_labels_match_luseepy():
     )
 
 
+def test_cosmo_to_iau_flips_u_and_leaves_q_alone():
+    """Pin *which* Stokes parameter flips, not just that one does.
+
+    A roundtrip cannot see this: ``(Q, -U)`` and ``(-Q, U)`` are both
+    self-inverse.  Neither can
+    ``test_dual_block_phase_agrees_with_rotating_maps_first``, which
+    applies the conversion on both sides of its comparison, where a
+    Q-flip differs from a U-flip only by a global sign that cancels.
+    So assert the literal signs on an input whose two components are
+    distinguishable, in both directions.  ``AGENTS.md`` names this
+    function as the pinned source of truth for ``U_IAU = -U_COSMO``;
+    this is where that is actually pinned.
+    """
+    Q_iau, U_iau = cv.cosmo_to_iau_qu(0.3, -0.7)
+    assert (float(Q_iau), float(U_iau)) == (0.3, 0.7)
+
+    Q_cos, U_cos = cv.iau_to_cosmo_qu(0.3, -0.7)
+    assert (float(Q_cos), float(U_cos)) == (0.3, 0.7)
+
+    # Vector form, and the sign asserted componentwise rather than
+    # through any norm that a Q/U swap could survive.
+    Q = np.array([1.0, -2.0, 0.0, 4.0])
+    U = np.array([5.0, 6.0, -7.0, 0.0])
+    Qi, Ui = cv.cosmo_to_iau_qu(Q, U)
+    np.testing.assert_array_equal(Qi, Q)
+    np.testing.assert_array_equal(Ui, -U)
+
+
 def test_qu_convention_roundtrip_is_identity():
+    """Self-inverseness, which the test above does not cover."""
     rng = np.random.default_rng(0)
     Q, U = rng.normal(size=5), rng.normal(size=5)
     Q2, U2 = cv.iau_to_cosmo_qu(*cv.cosmo_to_iau_qu(Q, U))

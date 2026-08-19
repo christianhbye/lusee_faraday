@@ -24,10 +24,14 @@ V_pq(t, nu) = sum_S  Int  B^S_pq(n) * S(R_t n, nu) dOmega,     S in {I, Q, U, V}
 that carries the sky through the topocentric frame as the Moon turns — one
 lunar sidereal day is the full time axis.
 
-Three things then happen downstream, all of them luseepy's: the open-circuit
-covariance picks up the Moon and antenna-metal thermal terms, the receiver
-loading `M = Z_L (Z_A + Z_L)^-1` is applied, and the result is packed into the
-16 channels the spectrometer actually reports.
+Three things then happen downstream. The first two are luseepy's: the
+open-circuit covariance picks up the Moon and antenna-metal thermal terms, and
+the receiver loading `M = Z_L (Z_A + Z_L)^-1` is applied. The third — packing
+the result into the 16 channels the spectrometer actually reports — is a local
+loop in `instrument.channels`, kept local because luseepy's
+`pack_covariance` puts the channel axis at `-2` rather than last, and pinned
+elementwise against it by `test_channels_match_luseepy_pack_covariance` so the
+two cannot drift apart unnoticed.
 
 ## 2. What Faraday rotation does to the sky
 
@@ -148,9 +152,22 @@ a band-limited beam the harmonic contraction and the pixel sum are the *same*
 HEALPix quadrature, so no engine choice rescues that regime. It is not a
 performance question.
 
-Both numbers are computed and reported whenever a screen is built, and the
-constructor refuses an unresolved one unless the caller opts in explicitly.
-The audit lives in the API rather than in a paragraph someone has to remember.
+Both numbers are computed by `sky.audit_screen`, which runs inside
+`FaradaySky.binned_screen` — the one constructor that turns a map of Faraday
+depths into components, and the one `FaradaySky.from_rm_map` delegates to.
+They are logged at INFO on *every* such build, including a successful one, and
+the constructor refuses an unresolved screen unless the caller passes
+`allow_pixelwise=True` (which then logs a warning instead). The check sits on
+the inner constructor deliberately: it used to live on `from_rm_map` alone, so
+calling `binned_screen` directly silently built 180 components for a screen
+needing `nside ~ 1.5e6` — exactly the regime the audit exists to refuse.
+`tests/test_sky_diagnostics.py` pins both halves.
+
+The other constructors (`from_maps`, `uniform_screen`, `point_source`,
+`i_only`) do not take a Faraday *map* at all: each component carries a single
+depth, so both criteria are satisfied by construction and there is nothing to
+report. The audit lives in the API rather than in a paragraph someone has to
+remember.
 
 ## 6. Conventions, in one place
 
@@ -188,10 +205,10 @@ That was written before the 11% was measured, and it was wrong.)
 |---|---|
 | `conventions.py` | COSMO/IAU, the Faraday phase, port and channel ordering |
 | `config.py` | Site, time grid, fine frequency grid, band centres, sky spectral parameters |
-| `sky.py` | `FaradaySky`: the component decomposition, the coefficients, the two audit criteria |
+| `sky.py` | `FaradaySky`: the component decomposition, the coefficients, and `audit_screen` — the two audit criteria, enforced in `binned_screen` |
 | `response.py` | Instrument -> pair-Stokes alms (four-port via luseepy, two-port via croissant) |
 | `engine.py` | The block-resolved contraction and the spectral expansion |
-| `instrument.py` | Covariance assembly, receiver loading, channel packing — all luseepy |
+| `instrument.py` | Covariance assembly, receiver loading and Hermitian projection (luseepy); the 16-channel packing is local, pinned against `lusee.Covariance.pack_covariance` |
 | `polarimeter.py` | Zenith calibration and pseudo-Stokes |
 | `channelization.py` | Parent and zoom bins on luseepy's spectrometer response |
 

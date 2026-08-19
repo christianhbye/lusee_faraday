@@ -175,8 +175,11 @@ def main():
     U_r = Q_s * np.sin(2 * chi) + U_s * np.cos(2 * chi)
     sky_rot = fp.SkyWaterfallSim(kern, grid, I_s, Q_r, U_r, np.zeros_like(I_s))
     R = topo_rotation_matrix(test_times[1], loc)
-    got = sky_fr.pair_integrals(R, np.array([l2]), faraday=True)[:, 0]
-    ref = sky_rot.pair_integrals(R, np.array([l2]), faraday=False)[:, 0]
+    # ``lam2`` already returns shape (1,): config.lam2 delegates to
+    # conventions.lambda_squared, which applies np.atleast_1d.  Wrapping
+    # it again makes a 2-D array and FINUFFT rejects it.
+    got = sky_fr.pair_integrals(R, l2, faraday=True)[:, 0]
+    ref = sky_rot.pair_integrals(R, l2, faraday=False)[:, 0]
     err = np.abs(got - ref).max() / np.abs(ref).max()
     print(f"[3a] NUFFT vs rotated-maps (internal): {err:.3e}", flush=True)
     assert err < 1e-8

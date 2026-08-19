@@ -151,8 +151,12 @@ enough not to matter.
 
 ### 4.3 The audit as a guardrail
 
-`FaradaySky` computes and reports two diagnostics on every build. They are
-different criteria and both matter:
+`FaradaySky.binned_screen` -- the only constructor that turns a map of Faraday
+depths into components, and the one `from_rm_map` delegates to -- computes and
+reports two diagnostics on every screen build, via `sky.audit_screen`. (As
+implemented at first the check lived on `from_rm_map` alone, so calling
+`binned_screen` directly bypassed it; that was closed in the final fix round.)
+They are different criteria and both matter:
 
 - **Spectral** -- components needed to resolve the Faraday phase across the
   simulated band: `dphi <~ pi / (2 * d(lambda^2))`. At 30 MHz over +-0.1 MHz,
@@ -165,7 +169,10 @@ different criteria and both matter:
   whether the answer means anything.
 
 The pixelwise path raises unless `allow_pixelwise=True` is passed explicitly,
-and the refusal message quotes both numbers with a pointer to the audit. The
+and the refusal message quotes both numbers with a pointer to the audit. A
+build that succeeds logs the same two numbers at INFO, and one that proceeds
+under `allow_pixelwise=True` despite failing a criterion logs a warning, so
+"reported on every build" is true of successes and not only of raises. The
 audit finding thus lives in the API rather than in a paragraph someone has to
 remember.
 

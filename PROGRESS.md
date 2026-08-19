@@ -77,8 +77,16 @@ cross-arm number.
   above.
 
 The published numbers moved by up to 0.6%, so the regeneration is real
-rather than cosmetic; `report/figures/` was regenerated on the new
-stack in the final commit and is now traceable to the committed code.
+rather than cosmetic.  The regeneration covered the **step-1 set only**:
+14 of the 45 tracked figure basenames (28 of 80 files) were rewritten in
+the final commit and are traceable to the committed code.  The
+diffuse-sky figures still carry legacy-pipeline provenance —
+`real*_waterfall_QU`, `real*_spectrum_snapshot*`, `real*_polfrac_track`,
+`real*_sky_model`, `real*_pspec`, `pspec_delay_profile`,
+`real*_ionly_frac`, `beam_ablation_30` and the four `cmp_*` — because
+steps 2 and 4 deliberately still run on `_legacy_pixel`.  Several of
+those are cited in `report.tex`, so the repo is in a *partially* mixed
+state and the distinction matters if figures move to the paper.
 
 ## Resume state (read this first after /clear)
 
@@ -117,11 +125,17 @@ stack in the final commit and is now traceable to the committed code.
   OOM killer (croissant dense spherical transform ~(lmax+1)^2·npix·16
   bytes).  Mitigations: small validation skies, single-channel
   response slices, `ulimit -v` + background for every heavy job.
-- [x] `scripts/validate_engine.py` — ALL VALIDATIONS PASSED:
-  [1] point source vs FullStokesCalibratorSimulator 8.6e-16;
-  [2] diffuse-sky transport vs FullStokesCroSimulator worst 1.1e-2
-  (nside=32/lmax=48 sky); [3a] NUFFT internal 6.4e-15;
-  [3b] Faraday-rotated sky vs CroSimulator 4.2e-4.
+- [x] `scripts/validate_engine.py` — ALL VALIDATIONS PASSED, re-run
+  end to end 2026-08-19 (exit 0):
+  [1] point source vs FullStokesCalibratorSimulator 8.645e-16;
+  [2] diffuse-sky transport vs FullStokesCroSimulator worst 1.082e-2
+  (nside=32/lmax=48 sky); [3a] NUFFT internal 6.445e-15;
+  [3b] Faraday-rotated sky vs CroSimulator 4.177e-4.
+  Checks [3a]/[3b] had been dead since the refactor: `config.lam2`
+  returns shape `(1,)` where `scripts/common.lam2` returned a scalar,
+  so the script's `np.array([l2])` was 2-D and FINUFFT rejected it.
+  Fixed in the final round; the values are unchanged from the ones
+  recorded above.
 - [x] **Step 1** (`step1_point_source.py` + `step1_plots.py`):
   transiting polarized source, phi_FD=250, 1024x16384x16 waterfall,
   binning, 6 figures.  Q oscillation period 1.89 kHz = predicted;

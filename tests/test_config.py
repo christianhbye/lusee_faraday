@@ -1,9 +1,13 @@
-import numpy as np
-import pytest
+import os
 
-from lunarsky.time import Time
+os.environ.setdefault("JAX_ENABLE_X64", "1")
 
-from lusee_faraday import config as cfg
+import numpy as np  # noqa: E402
+import pytest  # noqa: E402
+
+from lunarsky.time import Time  # noqa: E402
+
+from lusee_faraday import config as cfg  # noqa: E402
 
 
 def test_time_grid_spans_exactly_one_lunar_sidereal_day():
