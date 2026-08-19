@@ -37,7 +37,13 @@ def covariance(
     ``R_loss`` at that single frequency and broadcasts them along the
     ``nfreq`` axis: the fixed-beam freeze becomes visible at the call
     site, and it costs one ``target_matrices`` call rather than one over
-    the whole fine grid.
+    the whole fine grid.  An off-native ``impedance_freq_mhz`` is
+    linearly interpolated between the neighbouring native channels
+    rather than rejected.  That differs on purpose from
+    ``response.FixedChannelKernel``, which asserts a native channel:
+    freezing the *loading* somewhere between channels is a legitimate
+    thing to ask for, whereas interpolating the beam would smear the
+    response the fixed-beam approximation is supposed to hold fixed.
     """
     from lusee.Covariance import (
         apply_receiver_loading,
@@ -70,7 +76,15 @@ def covariance(
 
 
 def blackbody_normalization(resp, receiver, freqs_mhz):
-    """Covariance response to a one-kelvin blackbody enclosure."""
+    """Covariance response to a one-kelvin blackbody enclosure.
+
+    There is no ``impedance_freq_mhz`` here: ``Z_A`` and the loading
+    matrix always follow ``freqs_mhz``.  Normalizing a frozen-beam
+    covariance (see :func:`covariance`) by this unfrozen blackbody would
+    put the ~11% chromatic ramp the freeze removed straight back in, so
+    a frozen caller must freeze this grid itself by passing a constant
+    ``freqs_mhz``.
+    """
     from lusee.Covariance import (
         blackbody_normalization as _blackbody,
         loading_matrix,

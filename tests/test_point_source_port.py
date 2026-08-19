@@ -4,6 +4,11 @@ The step-1 scripts freeze the instrument at one native response channel
 and vary only the Faraday phase across the fine grid.  These tests pin
 the three pieces that port had to get right: the explicit impedance
 freeze, the Moon term being off, and the direction-space kernel.
+
+The published-number tests at the bottom read the stored
+``generated_data/`` artifacts rather than running either script, so a
+regression inside a script stays invisible until someone re-runs the
+analyses; and with ``generated_data/`` absent those tests skip silently.
 """
 
 import json
@@ -80,6 +85,33 @@ def test_frozen_impedance_is_not_a_no_op(instrument_pieces):
 
 @pytest.mark.slow
 @needs_artifact
+def test_the_freeze_covers_the_moon_and_loss_matrices(instrument_pieces):
+    """All four matrices are frozen, not just ``Z_A`` and ``Z_L``.
+
+    The step-1 runs pass ``T_moon = T_ant = 0``, which zeroes the
+    ``R_moon``/``R_loss`` contributions and so cannot tell a four-way
+    freeze from a two-way one.  Switching both temperatures on makes
+    them load-bearing: freezing only ``Z_A``/``Z_L`` and letting
+    ``R_moon``/``R_loss`` follow the fine grid then moves the answer by
+    4e-2, far outside this tolerance.
+    """
+    resp, receiver = instrument_pieces
+    pair = random_pair_integrals(3, (2, 8, 10))
+    fine = np.linspace(CENTER_MHZ - 0.1, CENTER_MHZ + 0.1, 8)
+    kw = dict(T_moon=250.0, T_ant=180.0)
+
+    frozen = inst.covariance(
+        pair, resp, receiver, fine, impedance_freq_mhz=CENTER_MHZ, **kw
+    )
+    constant = inst.covariance(
+        pair, resp, receiver, np.full(fine.size, CENTER_MHZ), **kw
+    )
+    rel = np.abs(frozen - constant).max() / np.abs(constant).max()
+    assert rel < 1e-14, f"relative difference {rel:.3e}"
+
+
+@pytest.mark.slow
+@needs_artifact
 def test_covariance_matches_the_legacy_assembler(instrument_pieces):
     """The ported assembly must reproduce the published four-port arm."""
     resp, receiver = instrument_pieces
@@ -108,8 +140,11 @@ def test_moon_term_is_off_for_the_point_source_runs(instrument_pieces):
 
     The legacy assembler had no Moon term at all, so taking luseepy's
     default would move the answer by four orders of magnitude and
-    destroy the rank-1 check.  This is the test that fails if a future
-    edit drops the explicit ``T_moon=0.0``.
+    destroy the rank-1 check.  What this test pins is that default:
+    change ``T_moon=250.0`` in ``instrument.covariance``'s signature and
+    it goes red.  It does not reach the scripts' call sites -- dropping
+    the explicit ``T_moon=0.0`` from either step-1 script leaves this
+    whole file green.
     """
     resp, receiver = instrument_pieces
     kern = fp.FixedFreqKernel(resp, CENTER_MHZ, receiver)
@@ -137,8 +172,10 @@ def test_fixed_channel_kernel_matches_the_legacy_kernel(instrument_pieces):
     legacy = fp.FixedFreqKernel(resp, CENTER_MHZ, receiver)
     ported = rsp.FixedChannelKernel(resp, CENTER_MHZ)
 
-    theta = np.array([0.0, 0.017, 0.4, 1.0, np.pi / 2])
-    phi = np.array([0.0, 1.3, 3.14159, 4.7, 6.2])
+    # The last phi sits in the 359-360 deg wraparound cell, which is
+    # the one branch of sample_periodic_maps the other directions miss.
+    theta = np.array([0.0, 0.017, 0.4, 1.0, np.pi / 2, 0.8])
+    phi = np.array([0.0, 1.3, 3.14159, 4.7, 6.2, 2 * np.pi - 1e-3])
     want = legacy.prefac * legacy.sample(theta, phi)
     got = ported.sample(theta, phi)
 

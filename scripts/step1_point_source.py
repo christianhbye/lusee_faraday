@@ -124,7 +124,10 @@ def make_waterfall(kern, resp, receiver, theta, phi, psi, fd, out_path):
         # ones zeroed afterwards, rather than slicing the array down to
         # the above-horizon count: instrument.covariance runs through
         # @jax.jit, so a shape that tracked that count would recompile
-        # once per distinct value.  With T_moon = T_ant = 0 a zero pair
+        # once per distinct count (three on the paper track, so 6 jit
+        # compilations rather than 2).  The price is that the 13 chunks
+        # that are entirely below the horizon now do full-shape work the
+        # sliced version skipped.  With T_moon = T_ant = 0 a zero pair
         # integral gives an exactly zero covariance and an exactly zero
         # packed block, so the answer is unchanged.
         th = np.where(mask, theta[sl], 0.0)
