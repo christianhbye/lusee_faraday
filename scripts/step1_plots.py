@@ -12,7 +12,8 @@ import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.colors import TwoSlopeNorm  # noqa: E402
 
 from common import FIG_DIR, GEN_DIR, SIDEREAL_DAY_S  # noqa: E402
-from lusee_faraday import fourport as fp  # noqa: E402
+from lusee_faraday import channelization as chan  # noqa: E402
+from lusee_faraday import polarimeter as pol  # noqa: E402
 
 META = np.load(GEN_DIR / "step1_meta.npz")
 BINNED = np.load(GEN_DIR / "step1_binned.npz")
@@ -41,7 +42,7 @@ Y_VEC_P = None
 
 
 def stokes(channels):
-    return fp.polarimeter_from_channels(channels, X_VEC_P, Y_VEC_P)
+    return pol.pseudo_stokes_from_channels(channels, X_VEC_P, Y_VEC_P)
 
 
 def fig_transit_spectrum():
@@ -49,7 +50,7 @@ def fig_transit_spectrum():
     S = stokes(np.asarray(WF[IT_TRANSIT])) * V2HZ  # (F, 4)
     Sp = stokes(BINNED["parent"][IT_TRANSIT]) * V2HZ  # (3, 4)
     Sz = stokes(BINNED["zoom"][IT_TRANSIT]) * V2HZ  # (3, 64, 4)
-    zf, order = fp.zoom_frequency_grid(BINNED["parent_centers_mhz"])
+    zf, order = chan.zoom_frequency_grid(BINNED["parent_centers_mhz"])
     Sz_sorted = np.array([Sz[p, k] for p, k in order])  # (192, 4)
 
     fig, axes = plt.subplots(
@@ -106,7 +107,7 @@ def fig_transit_spectrum_zoomwin():
     S = stokes(np.asarray(WF[IT_TRANSIT])) * V2HZ
     Sz = stokes(BINNED["zoom"][IT_TRANSIT]) * V2HZ
     Si = stokes(BINNED["ideal_zoom"][IT_TRANSIT]) * V2HZ
-    zf, order = fp.zoom_frequency_grid(BINNED["parent_centers_mhz"])
+    zf, order = chan.zoom_frequency_grid(BINNED["parent_centers_mhz"])
     Sz_sorted = np.array([Sz[p, k] for p, k in order])
     Si_sorted = np.array([Si[p, k] for p, k in order])
     off = (FF - 30.0) * 1e3
@@ -243,7 +244,7 @@ def fig_xy_waterfalls():
     the 16 zoom-bin products combined with the polarimeter vectors in
     use (raw dipoles by default, zenith-calibrated with --calibrated).
     """
-    zf, order = fp.zoom_frequency_grid(BINNED["parent_centers_mhz"])
+    zf, order = chan.zoom_frequency_grid(BINNED["parent_centers_mhz"])
     zoom = BINNED["zoom"]  # (T, 3, 64, 16)
     ch = np.stack(
         [zoom[:, p, k, :] for p, k in order], axis=1
@@ -295,7 +296,7 @@ def fig_xy_waterfalls():
 
 def fig_product_waterfalls():
     """All 16 products: altitude-track x zoom-frequency waterfalls."""
-    zf, order = fp.zoom_frequency_grid(BINNED["parent_centers_mhz"])
+    zf, order = chan.zoom_frequency_grid(BINNED["parent_centers_mhz"])
     zoom = BINNED["zoom"]  # (T, 3, 64, 16)
     wf = np.array([zoom[:, p, k, :] for p, k in order])  # (192, T, 16)
     wf = np.moveaxis(wf, 0, 1) * V2HZ  # (T, 192, 16)
@@ -369,7 +370,7 @@ def fig_polfrac_vs_fd():
     Sp = stokes(BINNED["parent"][IT_TRANSIT])
     Sz = stokes(BINNED["zoom"][IT_TRANSIT])
     Si = stokes(BINNED["ideal_zoom"][IT_TRANSIT])
-    zf, order = fp.zoom_frequency_grid(BINNED["parent_centers_mhz"])
+    zf, order = chan.zoom_frequency_grid(BINNED["parent_centers_mhz"])
 
     def pfrac(s):
         return np.hypot(s[..., 1], s[..., 2]) / s[..., 0]

@@ -1,10 +1,18 @@
 """Shared configuration for the four-port Faraday analysis."""
 
 import os
-import sys
-from pathlib import Path
 
-import numpy as np
+# jax reads this at import time, and every script in this directory
+# imports common before it imports anything that pulls jax in.  Without
+# it croissant and luseepy silently drop to complex64 -- croissant even
+# says so on stderr -- and the covariance, the Loewdin G^{-1/2} and the
+# cached zenith weights all come out at ~1e-7 precision.
+os.environ.setdefault("JAX_ENABLE_X64", "1")
+
+import sys  # noqa: E402
+from pathlib import Path  # noqa: E402
+
+import numpy as np  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))

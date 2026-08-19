@@ -9,12 +9,14 @@ Two arms share this module:
 
 Both end up as complex pair-Stokes alms in croissant's harmonic dual, so
 the contraction in :mod:`lusee_faraday.engine` does not know which arm it
-is serving.
+is serving.  The module also serves the direction-space arm, where a
+point source is sampled straight out of the response grid instead of
+being pushed through a band-limited harmonic transform.
 """
 
 import numpy as np
 
-from .conventions import PORT_PAIRS
+from .conventions import PORT_PAIRS, lambda_squared
 
 
 def load_response(path):
@@ -67,6 +69,86 @@ def native_channel_index(resp, freq_mhz):
             f"nearest is {freq[idx]} MHz."
         )
     return idx
+
+
+def sample_periodic_maps(values, theta_deg, phi_deg, theta_rad, phi_rad):
+    """Vectorized bilinear sampling of maps with axes ``(..., theta, phi)``.
+
+    This is the array version of luseepy's
+    ``InstrumentResponse._sample_periodic_maps``, which casts its angles
+    with ``float(theta_rad)`` on entry and is therefore scalar-only.  A
+    1024-point source track needs the vectorized form, which is the only
+    reason this function exists here rather than being imported.
+
+    The phi grid must include the duplicated 0/360 wraparound column.
+    The already-formed kernel is interpolated, never the fields.
+    """
+    theta_rad = np.asarray(theta_rad, dtype=np.float64)
+    phi_rad = np.asarray(phi_rad, dtype=np.float64) % (2 * np.pi)
+    tg = np.radians(np.asarray(theta_deg, dtype=np.float64))
+    pg = np.radians(np.asarray(phi_deg, dtype=np.float64)[:-1])
+    if theta_rad.min() < tg[0] - 1e-12 or theta_rad.max() > tg[-1] + 1e-12:
+        raise ValueError("theta outside the stored response region")
+    theta_rad = np.clip(theta_rad, tg[0], tg[-1])
+
+    ti = np.searchsorted(tg, theta_rad, side="right")
+    thi = np.clip(ti, 1, tg.size - 1)
+    tlo = thi - 1
+    ta = (theta_rad - tg[tlo]) / (tg[thi] - tg[tlo])
+
+    pi_ = np.searchsorted(pg, phi_rad, side="right")
+    plo = (pi_ - 1) % pg.size
+    phid = pi_ % pg.size
+    phi_lo = pg[plo]
+    phi_hi = np.where(phid == 0, pg[phid] + 2 * np.pi, pg[phid])
+    phi_eval = np.where(phi_rad >= phi_lo, phi_rad, phi_rad + 2 * np.pi)
+    pa = (phi_eval - phi_lo) / (phi_hi - phi_lo)
+
+    flat = values.reshape(values.shape[:-2] + (-1,))
+    nphi = len(phi_deg)
+
+    def gather(it, ip):
+        return flat[..., it * nphi + ip]
+
+    low = (1 - pa) * gather(tlo, plo) + pa * gather(tlo, phid)
+    high = (1 - pa) * gather(thi, plo) + pa * gather(thi, phid)
+    return (1 - ta) * low + ta * high
+
+
+class FixedChannelKernel:
+    """Pair-Stokes kernel of a response frozen at ONE native channel.
+
+    luseepy's own direction sampler, ``pair_stokes_at``, re-materializes
+    all 150 native channels (2.94 GB) and re-interpolates them on every
+    call, and it only accepts scalar angles.  Slicing the single native
+    channel once (20 MB), scaling it once and then sampling many
+    directions out of it is the whole point of this class.
+
+    ``sample`` returns the physical W kernel: the ``eta0 / lambda^2``
+    factor luseepy applies inside ``pair_stokes_alms`` is already in
+    there, so callers must not apply a prefactor of their own.  All the
+    instrument physics (Z_A, Z_L, R_moon, R_loss, the loading matrix)
+    lives in :mod:`lusee_faraday.instrument`; this is a pure response
+    sampler.
+    """
+
+    def __init__(self, resp, freq_mhz):
+        from lusee.InstrumentResponse import VACUUM_IMPEDANCE_OHM
+
+        idx = native_channel_index(resp, freq_mhz)
+        self.native_index = idx
+        self.freq_mhz = float(np.asarray(resp.freq, dtype=float)[idx])
+        self.scale = VACUUM_IMPEDANCE_OHM / lambda_squared(self.freq_mhz)[0]
+        bare = np.asarray(resp.all_pair_stokes_maps(freq_ndx=[idx]))
+        self.K = self.scale * bare[:, 0]  # (10, 4, ntheta, nphi)
+        self.theta_deg = np.asarray(resp.theta_deg)
+        self.phi_deg = np.asarray(resp.phi_deg)
+
+    def sample(self, theta_rad, phi_rad):
+        """Physical-W kernel at arbitrary directions -> ``(10, 4, N)``."""
+        return sample_periodic_maps(
+            self.K, self.theta_deg, self.phi_deg, theta_rad, phi_rad
+        )
 
 
 def pair_stokes_from_jones(h_theta, h_phi, pairs=PORT_PAIRS):

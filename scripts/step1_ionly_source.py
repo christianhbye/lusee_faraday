@@ -24,26 +24,42 @@ from common import (  # noqa: E402
     GEN_DIR,
     RESPONSE_PATH,
 )
-from lusee_faraday import fourport as fp  # noqa: E402
+from lusee_faraday import instrument  # noqa: E402
+from lusee_faraday import polarimeter as pol  # noqa: E402
+from lusee_faraday import response as rsp  # noqa: E402
 
 CENTER_MHZ = 30.0
 
 
 def compute():
+    import jax
+
+    jax.config.update("jax_enable_x64", True)
     from lusee.ReceiverImpedance import JFETReceiver
 
     d = np.load(CACHE_DIR / "step1_track.npz")
     theta, phi = d["theta"], d["phi"]
-    resp = fp.load_response_fast(RESPONSE_PATH)
-    kern = fp.FixedFreqKernel(resp, CENTER_MHZ, JFETReceiver())
-    del resp
+    resp = rsp.load_response(RESPONSE_PATH)
+    receiver = JFETReceiver()
+    kern = rsp.FixedChannelKernel(resp, CENTER_MHZ)
 
     up = theta <= np.pi / 2
-    K = kern.sample(theta[up], phi[up])  # (10, 4, Nup)
-    pair = kern.prefac * K[:, 0]  # unpolarized: only the I kernel
-    C = fp.assemble_covariance(pair.T, kern.M)  # (Nup, 4, 4)
+    K = kern.sample(theta[up], phi[up])  # (10, 4, Nup), physical W
+    pair = K[:, 0].T[:, None, :]  # unpolarized: only the I kernel
+    # Same freeze as the polarized run: beam and impedances both at the
+    # native channel, and no Moon or antenna-metal term.
+    C = instrument.covariance(
+        pair,
+        resp,
+        receiver,
+        np.array([CENTER_MHZ]),
+        impedance_freq_mhz=CENTER_MHZ,
+        T_moon=0.0,
+        T_ant=0.0,
+    )
+    C = C[:, 0]  # drop the singleton frequency axis -> (Nup, 4, 4)
     products = np.zeros((theta.size, 16))
-    products[up] = fp.pack_products(C)
+    products[up], _ = instrument.channels(C)
     np.savez(
         GEN_DIR / "step1_ionly_source.npz",
         products=products,
@@ -62,7 +78,7 @@ def plot(theta, products, x_vec=None, y_vec=None, name="step1_ionly_polfrac"):
     alt = 90.0 - np.degrees(theta[track])
     imax = int(alt.argmax())
 
-    S = fp.polarimeter_from_channels(products[track], x_vec, y_vec)
+    S = pol.pseudo_stokes_from_channels(products[track], x_vec, y_vec)
     p = np.hypot(S[:, 1], S[:, 2]) / S[:, 0]
     p_tot = np.sqrt((S[:, 1:] ** 2).sum(-1)) / S[:, 0]
 

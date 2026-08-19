@@ -38,7 +38,11 @@ from common import (
     parent_centers,
     times,
 )
-from lusee_faraday import fourport as fp
+from lusee_faraday import channelization as chan
+from lusee_faraday import instrument
+from lusee_faraday import polarimeter as pol
+from lusee_faraday import response as rsp
+from lusee_faraday.conventions import PRODUCT_LABELS
 
 ECL_LON_DEG = 120.0
 CENTER_MHZ = 30.0
@@ -91,7 +95,7 @@ def source_track(tt, loc, ecl_lat_deg):
     return theta, phi, psi
 
 
-def make_waterfall(kern, theta, phi, psi, fd, out_path):
+def make_waterfall(kern, resp, receiver, theta, phi, psi, fd, out_path):
     """Stream the (T, F, 16) fine waterfall to a memmapped .npy."""
     ff = fine_freqs(CENTER_MHZ)
     l2 = lam2(ff)
@@ -106,46 +110,62 @@ def make_waterfall(kern, theta, phi, psi, fd, out_path):
     # exp(2i chi) with chi = psi + fd * lam2; the frequency factor is
     # shared by all times in the chunk.
     e_freq = np.exp(2j * fd * l2)  # (F,)
+    one = np.array([CENTER_MHZ])
+    # The beam AND the impedances are frozen at the native channel: Z_A
+    # is steep here, so a chromatic Z_A would put an 11% ramp into the
+    # band.  T_moon = T_ant = 0 keeps this the sky-only covariance the
+    # legacy assembler computed.
+    frozen = dict(impedance_freq_mhz=CENTER_MHZ, T_moon=0.0, T_ant=0.0)
     t0 = _time.time()
     for s in range(0, N_TIMES, TIME_CHUNK):
         sl = slice(s, min(s + TIME_CHUNK, N_TIMES))
-        idx = np.nonzero(up[sl])[0]
-        block = np.zeros((sl.stop - sl.start, N_FINE, 16))
-        nf_block = np.zeros((sl.stop - sl.start, 16))
-        if idx.size:
-            th = theta[sl][idx]
-            ph = phi[sl][idx]
-            K = kern.sample(th, ph)  # (10, 4, Nt_up)
-            e_t = np.exp(2j * psi[sl][idx])  # (Nt_up,)
-            # pair integral: K @ (1, cos 2chi, sin 2chi, 0)
-            #   = K_I + 0.5 (K_Q - i K_U) e^{2i chi}
-            #         + 0.5 (K_Q + i K_U) e^{-2i chi}.
-            # K_Q, K_U are complex for cross pairs, so the second
-            # coefficient is NOT conj(first): conjugating it breaks
-            # Hermiticity/PSD and gives pseudo-p > 1.
-            base = kern.prefac * K[:, 0]  # (10, Nt_up)
-            cpol_p = kern.prefac * 0.5 * (K[:, 1] - 1j * K[:, 2])
-            cpol_m = kern.prefac * 0.5 * (K[:, 1] + 1j * K[:, 2])
-            e_tf = e_t[None, :, None] * e_freq[None, None, :]
-            pair = (
-                base[:, :, None]
-                + cpol_p[:, :, None] * e_tf
-                + cpol_m[:, :, None] * np.conj(e_tf)
-            )
-            pair = np.moveaxis(pair, 0, -1)  # (Nt_up, F, 10)
-            C = fp.assemble_covariance(pair, kern.M)
-            block[idx] = fp.pack_products(C)
-            # no-Faraday reference: chi = psi only
-            pair0 = (
-                base
-                + cpol_p * e_t[None, :]
-                + cpol_m * np.conj(e_t)[None, :]
-            ).T  # (Nt_up, 10)
-            nf_block[idx] = fp.pack_products(
-                fp.assemble_covariance(pair0, kern.M)
-            )
+        mask = up[sl]
+        # Every time in the chunk is carried, with the below-horizon
+        # ones zeroed afterwards, rather than slicing the array down to
+        # the above-horizon count: instrument.covariance runs through
+        # @jax.jit, so a shape that tracked that count would recompile
+        # once per distinct value.  With T_moon = T_ant = 0 a zero pair
+        # integral gives an exactly zero covariance and an exactly zero
+        # packed block, so the answer is unchanged.
+        th = np.where(mask, theta[sl], 0.0)
+        K = kern.sample(th, phi[sl])  # (10, 4, Nt), physical W
+        e_t = np.exp(2j * psi[sl])  # (Nt,)
+        # pair integral: K @ (1, cos 2chi, sin 2chi, 0)
+        #   = K_I + 0.5 (K_Q - i K_U) e^{2i chi}
+        #         + 0.5 (K_Q + i K_U) e^{-2i chi}.
+        # K_Q, K_U are complex for cross pairs, so the second
+        # coefficient is NOT conj(first): conjugating it breaks
+        # Hermiticity/PSD and gives pseudo-p > 1.
+        base = K[:, 0]  # (10, Nt)
+        cpol_p = 0.5 * (K[:, 1] - 1j * K[:, 2])
+        cpol_m = 0.5 * (K[:, 1] + 1j * K[:, 2])
+        e_tf = e_t[None, :, None] * e_freq[None, None, :]
+        pair = (
+            base[:, :, None]
+            + cpol_p[:, :, None] * e_tf
+            + cpol_m[:, :, None] * np.conj(e_tf)
+        )
+        pair = np.moveaxis(pair, 0, -1)  # (Nt, F, 10)
+        pair[~mask] = 0.0
+        block, _ = instrument.channels(
+            instrument.covariance(pair, resp, receiver, ff, **frozen)
+        )
+        # Runtime invariant, not just a test: sqrt(Q^2+U^2+V^2) <= I for
+        # any physical covariance.  It caught a real sign bug in the
+        # complex cross-pair decomposition above.
+        pol.check_psd(pol.pseudo_stokes_from_channels(block))
         wf[sl] = block
-        nofar[sl] = nf_block
+        # no-Faraday reference: chi = psi only
+        pair0 = (
+            base + cpol_p * e_t[None, :] + cpol_m * np.conj(e_t)[None, :]
+        ).T  # (Nt, 10)
+        pair0[~mask] = 0.0
+        nf_block, _ = instrument.channels(
+            instrument.covariance(
+                pair0[:, None, :], resp, receiver, one, **frozen
+            )
+        )
+        nofar[sl] = nf_block[:, 0]
         if (sl.stop % 128) < TIME_CHUNK:
             print(
                 f"  waterfall {sl.stop}/{N_TIMES}"
@@ -162,6 +182,9 @@ def main():
     ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
 
+    import jax
+
+    jax.config.update("jax_enable_x64", True)
     from lusee.ReceiverImpedance import JFETReceiver
 
     loc = moon_location()
@@ -179,18 +202,20 @@ def main():
         print("fine waterfall exists; use --force to redo", flush=True)
     else:
         t0 = _time.time()
-        resp = fp.load_response_fast(RESPONSE_PATH)
-        kern = fp.FixedFreqKernel(resp, CENTER_MHZ, JFETReceiver())
-        del resp
+        resp = rsp.load_response(RESPONSE_PATH)
+        receiver = JFETReceiver()
+        kern = rsp.FixedChannelKernel(resp, CENTER_MHZ)
         print(f"kernel ready {_time.time()-t0:.1f} s", flush=True)
-        nofar = make_waterfall(kern, theta, phi, psi, args.fd, wf_path)
+        nofar = make_waterfall(
+            kern, resp, receiver, theta, phi, psi, args.fd, wf_path
+        )
         # PSD / rank-1 sanity: a single fully polarized source gives a
         # rank-1 covariance, so sqrt(Q^2+U^2+V^2)/I must be <= 1
         # (equality up to the tiny mixing of the bilinear kernel
         # interpolation) in every fine channel.
         wf_check = np.load(wf_path, mmap_mode="r")
         it = int(np.argmin(theta))
-        S = fp.polarimeter_from_channels(np.asarray(wf_check[it]))
+        S = pol.pseudo_stokes_from_channels(np.asarray(wf_check[it]))
         ptot = np.sqrt((S[:, 1:] ** 2).sum(-1)) / S[:, 0]
         print(
             f"rank-1 check at transit: sqrt(Q^2+U^2+V^2)/I in "
@@ -207,7 +232,7 @@ def main():
             nofaraday=nofar,
             fd=args.fd,
             center_mhz=CENTER_MHZ,
-            labels=np.array(fp.PRODUCT_LABELS),
+            labels=np.array(PRODUCT_LABELS),
         )
         print(f"saved {wf_path.name}, {meta_path.name}", flush=True)
 
@@ -224,7 +249,7 @@ def main():
     ff = fine_freqs(CENTER_MHZ)
     for s in range(0, N_TIMES, TIME_CHUNK):
         sl = slice(s, min(s + TIME_CHUNK, N_TIMES))
-        out = fp.integrate_spectrometer(np.asarray(wf[sl]), ff, centers)
+        out = chan.integrate(np.asarray(wf[sl]), ff, centers)
         parents[sl] = out["parent"]
         zooms[sl] = out["zoom"]
         ideals[sl] = out["ideal_zoom"]
@@ -234,7 +259,7 @@ def main():
         zoom=zooms,
         ideal_zoom=ideals,
         parent_centers_mhz=centers,
-        zoom_offsets_hz=fp.zoom_bin_offsets_hz(),
+        zoom_offsets_hz=chan.zoom_bin_offsets_hz(),
     )
     print(f"saved {binned_path.name}", flush=True)
 

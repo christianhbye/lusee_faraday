@@ -7,9 +7,14 @@ the receiver loading, project onto the Hermitian part, then pack the 16
 real science channels.
 
 ``Z_A`` and ``Z_L`` are evaluated on whatever frequency grid the caller
-passes, which for a Faraday run is the fine grid.  The fixed-beam
-approximation applies to the response alms only, so receiver loading is
-not smeared along with it.
+passes -- unless ``impedance_freq_mhz`` freezes them at one frequency.
+A Faraday run must freeze them.  The antenna is near resonance at
+30 MHz: one 0.5 MHz native step moves ``Z_A`` by 12%, and letting the
+impedances follow the +-0.1 MHz fine grid moves the loading matrix by
+11% across the band.  That is a smooth chromatic ramp of exactly the
+kind the step-1 delay-space argument asserts is absent, so the
+fixed-beam approximation has to cover the receiver loading too, not
+only the response alms.
 """
 
 import numpy as np
@@ -24,8 +29,16 @@ def covariance(
     freqs_mhz,
     T_moon=250.0,
     T_ant=0.0,
+    impedance_freq_mhz=None,
 ):
-    """Loaded, Hermitian port covariance -> ``(ntime, nfreq, 4, 4)``."""
+    """Loaded, Hermitian port covariance -> ``(ntime, nfreq, 4, 4)``.
+
+    ``impedance_freq_mhz`` evaluates ``Z_A``, ``Z_L``, ``R_moon`` and
+    ``R_loss`` at that single frequency and broadcasts them along the
+    ``nfreq`` axis: the fixed-beam freeze becomes visible at the call
+    site, and it costs one ``target_matrices`` call rather than one over
+    the whole fine grid.
+    """
     from lusee.Covariance import (
         apply_receiver_loading,
         assemble_open_covariance,
@@ -33,7 +46,18 @@ def covariance(
     )
 
     freqs = np.atleast_1d(np.asarray(freqs_mhz, dtype=float))
-    ZA, _, Rmoon, Rloss, _ = resp.target_matrices(freqs)
+    frozen = impedance_freq_mhz is not None
+    grid = (
+        np.array([float(impedance_freq_mhz)], dtype=float) if frozen else freqs
+    )
+    ZA, _, Rmoon, Rloss, _ = resp.target_matrices(grid)
+    ZL = receiver.Z(grid)
+    if frozen:
+        shape = (freqs.size, 4, 4)
+        ZA, Rmoon, Rloss, ZL = (
+            np.broadcast_to(np.asarray(m), shape)
+            for m in (ZA, Rmoon, Rloss, ZL)
+        )
     open_cov = assemble_open_covariance(
         np.asarray(pair_integrals),
         Rmoon,
@@ -41,7 +65,6 @@ def covariance(
         T_moon=T_moon,
         T_ant=T_ant,
     )
-    ZL = receiver.Z(freqs)
     unprojected, _ = apply_receiver_loading(open_cov, ZA, ZL)
     return np.asarray(project_hermitian(unprojected))
 
