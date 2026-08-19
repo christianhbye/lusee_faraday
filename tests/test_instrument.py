@@ -68,3 +68,30 @@ def test_blackbody_normalization_shape(pieces):
     freqs = np.array([10.0, 15.0, 20.0])
     B = inst.blackbody_normalization(resp, receiver, freqs)
     assert B.shape == (3, 4, 4)
+
+
+def test_blackbody_normalization_freezes_like_covariance(pieces):
+    """The blackbody has to be freezable, or the ratio unfreezes.
+
+    ``covariance`` grew ``impedance_freq_mhz`` so a Faraday run could
+    hold ``Z_A`` fixed across the band; dividing such a covariance by a
+    blackbody that still followed the band would reintroduce the same
+    chromatic ramp in the quotient.  Two things have to hold: the
+    keyword must reproduce a constant grid exactly, and it must not be
+    a no-op -- ``Z_A`` really does move across these frequencies.
+    """
+    resp, receiver = pieces
+    freqs = np.array([10.0, 15.0, 20.0])
+
+    frozen = inst.blackbody_normalization(
+        resp, receiver, freqs, impedance_freq_mhz=10.0
+    )
+    constant = inst.blackbody_normalization(
+        resp, receiver, np.full(freqs.size, 10.0)
+    )
+    assert frozen.shape == (3, 4, 4)
+    np.testing.assert_allclose(frozen, constant, rtol=1e-14, atol=0.0)
+
+    chromatic = inst.blackbody_normalization(resp, receiver, freqs)
+    rel = np.abs(chromatic - frozen).max() / np.abs(frozen).max()
+    assert rel > 1e-2, f"freezing the blackbody changed nothing ({rel:.2e})"

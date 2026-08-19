@@ -1,60 +1,94 @@
 # AGENTS.md — working notes for AI agents in this repo
 
-Branch `luseepy-version` redoes the Faraday-paper analysis on the
-luseepy four-port engine. The task spec is `INSTRUCTIONS-LPY.md`;
-running status is `PROGRESS.md`. The original two-port simulator
-(`sky.py`, `beam.py`, `sim.py`) is described in `CLAUDE.md` — leave it
-alone; new work lives in `src/lusee_faraday/fourport.py` and `scripts/`.
+The Faraday analysis runs on **luseepy + croissant**. `CLAUDE.md` describes
+the package; `docs/measurement-model.md` is the model behind it;
+`PROGRESS.md` is running status. The original two-port simulator
+(`sky.py`/`beam.py`/`sim.py` and friends) was retired at the end of the
+2026-08-18 refactor — it no longer exists, and the notebooks that drove it
+are in `notebooks/archive/` with a note.
 
-**NEVER modify the luseepy checkouts** (`~/Dropbox/work/lusee/luseepy`,
-`~/work/lusee/luseepy`) — that is well-controlled source. "Use luseepy
-infrastructure" means *import* from `lusee`; all code, tests and
-scripts live in this repo.
+**NEVER modify the upstream checkouts.** Both are wired as editable
+installs through `[tool.uv.sources]` and both are well-controlled source:
+
+| Component | Path | State |
+|---|---|---|
+| luseepy | `../luseepy` | branch `deps/croissant-v5.3.0.dev1`, `52b96bc` |
+| croissant | `/home/christian/Documents/projects/croissant-main` | worktree on `main`, `1c4d6c5` |
+
+"Use luseepy infrastructure" means *import* from `lusee`; all code, tests
+and scripts live in this repo. Reproduce the environment with `uv sync`,
+add packages with `uv add` — **never** `uv pip install`.
 
 **Memory / OOM:** the "mysterious session kills" were the kernel OOM
 killer (croissant dense spherical transform: ~(lmax+1)^2·npix·16 bytes;
 nside=128 + lmax=128 → 50 GB). Validation uses nside=64/lmax=64 skies
 and single-channel response slices for the harmonic engine. Run every
 heavy job in background under `ulimit -v 16000000` (24 GB if croissant
-dense transforms are involved) with logs in `generated_data/`.
+dense transforms are involved) with **absolute** log paths under
+`generated_data/`. 16 GB is the floor even for the test suite: at
+12 GB three zenith tests OOM inside jax.
 
 ## Environment
 
 ```bash
-.venv/bin/python scripts/<script>.py     # always use the repo .venv
+uv run python scripts/<script>.py     # or .venv/bin/python
 ```
 
-The venv has an editable install of luseepy from
-`/home/anze/Dropbox/work/lusee/luseepy` (four-port branch) plus
-`finufft`, `fitsio`, `croissant`, `jax`, `lunarsky`, `healpy`.
-Set `JAX_ENABLE_X64=1` before importing croissant/jax paths.
+Set `JAX_ENABLE_X64=1` **before any jax import**. `scripts/common.py`
+does it with an `os.environ.setdefault` above every other import and
+every script imports `common`, so scripts are covered; test modules set
+it themselves at the top of the file. Without it croissant and luseepy
+silently run in complex64 — croissant even says so on stderr.
 
 ## External resources
 
-- Paper draft: `/home/anze/latex/LuSEE/Faraday`
-- Response artifact (631 MB, slow to load ~tens of s):
-  `/home/anze/work/lusee/Drive/Simulations/BeamModels/BGL_v16/lusee_bgl_v16_response_v3.fits`
+- Paper draft (do not edit): `/home/anze/latex/LuSEE/Faraday`
+- Response artifact, 631 MB, ~tens of s to load:
+  `data/BGL_v16/lusee_bgl_v16_response_v3.fits`, with `_c4sym` (C4
+  group-averaged = the paper's 90°-rotation assumption made
+  self-consistent) and `_diagza` (inter-port coupling removed)
+  ablation variants. `scripts/common.py:RESPONSE_PATH` defaults to the
+  as-built model and is overridable with `$LUSEE_RESPONSE`.
 - Sky inputs in `data/`: `haslam408_dsds_Remazeilles2014.fits`
   (**RING**, K — check ORDERING headers, an earlier NEST assumption
   scrambled the map), `wmap_band_iqumap_r9_9yr_K_v5.fits` (NESTED, mK
   thermodynamic), `faraday2020v2.hdf5` (`faraday_sky_mean`, RING,
   rad/m²). All nside=512, used at native resolution.
-- Old-vs-new engine comparisons: `/home/anze/work/lusee/big_refactor_delete_when_ready/old_vs_new`
 
-## Pinned conventions (do not re-derive; validated in scripts/validate_engine.py)
+## Pinned conventions
+
+**The single source of truth is `lusee_faraday.conventions` and
+`lusee_faraday.config`** — import from them rather than re-deriving or
+re-typing any of the following. Validated in
+`scripts/validate_engine.py` and `tests/test_conventions.py`.
 
 - Response frame: cartesian x=East, y=North, z=zenith → proper rotation
   from galactic; grid phi = 90° − astronomical azimuth.
+  (`conventions`, `_legacy_pixel.topo_rotation_matrix`)
 - Ports 0,1,2,3 = N,E,S,W. 16 real channels ordered as
-  `lusee.Covariance.default_product_labels()` (autos R, crosses R,I).
+  `lusee.Covariance.default_product_labels()`. (`conventions.PORT_PAIRS`,
+  `conventions.PRODUCT_LABELS`)
 - Sky Q/U are healpy/COSMO; croissant wants IAU (U flips sign).
-- Faraday rotation: (Q+iU) ← (Q+iU)·exp(+2i φ_FD λ²).
+  (`conventions.cosmo_to_iau_qu`)
+- Faraday rotation: (Q+iU) ← (Q+iU)·exp(+2i φ_FD λ²); on the harmonic
+  duals, P_MINUS·exp(−2iφλ²) and P_PLUS·exp(+2iφλ²).
+  (`conventions.faraday_phase_cosmo`, `conventions.dual_block_phase`)
 - Fixed-beam approximation: kernel evaluated at one native response
   channel (30/10/50 MHz); only the Faraday phase is chromatic.
+  (`response.FixedChannelKernel`, which asserts a native channel)
+- **The freeze covers the receiver loading too.** Z_A moves 12% across
+  one 0.5 MHz native step at 30 MHz, and letting the impedances follow
+  the fine grid puts an 11% smooth ramp into the band — exactly the
+  non-Faraday chromatic structure the delay-space argument asserts is
+  absent. Pass `instrument.covariance(..., impedance_freq_mhz=CENTER)`,
+  and `T_moon=0.0, T_ant=0.0` wherever the legacy assembler had no
+  thermal terms (luseepy defaults T_moon to 250 K: a factor 7.4e3).
 - Time axis: 1024 samples over exactly one lunar sidereal day
   (27.321661 d) starting 2027-01-01 09:00 UTC → periodic, FFT-ready.
+  (`config.times`)
 - Fine frequency grid: 16384 × (25 kHz/2048) centered on the band
   center (±0.1 MHz); 3 parent bins + 3×64 zoom bins fit inside.
+  (`config.fine_freqs`, `config.parent_centers`)
 - Real sky maps (Haslam dsds, WMAP K, faraday2020v2) at native
   nside=512 RING, never degraded (per-pixel Faraday phases do not
   commute with ud_grade). Harmonic paths only need lmax≈30 (beam
@@ -63,14 +97,14 @@ Set `JAX_ENABLE_X64=1` before importing croissant/jax paths.
   The zoom FFT runs on the critically sampled 25 kHz parent stream, so
   bins have folded images: the Nyquist bin k=32 is an exact 50/50
   double peak at ±12.5 kHz of its parent; bins 31/33 carry ~42%
-  images. `zoom_frequency_grid` places bins at nominal centers (192
-  distinct contiguous slots, no duplicates); the folding is physical
-  and is removed in post-processing by `zoom_transfer` +
+  images. `channelization.zoom_frequency_grid` places bins at nominal
+  centers (192 distinct contiguous slots, no duplicates); the folding
+  is physical and is removed in post-processing by `zoom_transfer` +
   `zoom_deconvolve` (step4_power_spectra.py; smoothness-regularized —
   a plain min-norm inverse leaves boundary/pad slots degenerate).
 - **Polarimeter:** all pseudo-Stokes use the zenith-calibrated
-  complex four-port X/Y (`fourport.zenith_port_weights` +
-  `fourport.orthonormalize_xy`; cached per band center by
+  complex four-port X/Y (`polarimeter.zenith_port_weights` +
+  `polarimeter.orthonormalize_xy`; cached per band center by
   `scripts/zenith_weights.py`, mode="ortho" default). Zenith
   Q=U=V=0 to machine precision. Raw X=E−W, Y=N−S figures keep the
   `step1_` prefix; calibrated ones `step1w_`.
@@ -79,32 +113,54 @@ Set `JAX_ENABLE_X64=1` before importing croissant/jax paths.
   If pseudo-p > 1 appears it is a BUG (e.g. decomposing
   K@(1,cos2χ,sin2χ,0): the e^{−2iχ} coefficient is 0.5(K_Q+iK_U),
   NOT conj of the e^{+2iχ} one — cross-pair kernels are complex).
-  step1_point_source.py asserts this on every run.
+  `polarimeter.check_psd` runs on every step-1 chunk.
+
+## Two arms, and which is which
+
+- **Harmonic** (`response` + `engine` + `instrument`) is the production
+  path. Its correctness gate is `tests/test_engine_gate.py`: 6.8e-16
+  against luseepy's own convolution.
+- **Pixel** (`_legacy_pixel.py`) is a validation arm.
+  *Production code must not import it.* It survives because an
+  independent quadrature is what makes `scripts/crosscheck_pixel_arm.py`
+  meaningful, and because the diffuse scripts still run on it.
+- The two agree to 3.05e-4 on an unpolarized real sky but only ~3% on a
+  polarized one — see `docs/measurement-model.md` §8 before quoting any
+  cross-arm number.
 
 ## Script inventory (all take `--help`; heavy ones honor caches)
 
 - `scripts/common.py` — shared config (site, grids, sky loading at
-  native nside=512, rotation-matrix cache).
+  native nside=512, rotation-matrix cache) and the x64 setdefault.
 - `scripts/validate_engine.py` — engine vs luseepy harmonic engines
-  (ALL PASSED: 8.6e-16 / 1.1e-2 / 6.4e-15 / 4.2e-4).
+  (ALL PASSED: 8.6e-16 / 1.1e-2 / 6.4e-15 / 4.2e-4). *pixel arm*
+- `scripts/crosscheck_pixel_arm.py` — harmonic vs pixel characterization
+  on the real response. Its [1e-2, 8e-2] band is specific to its own
+  polarized test sky.
 - `scripts/zenith_weights.py` — calibrated polarimeter vectors per
   band center (cache: generated_data/cache/zenith_weights_*.npz).
+  *new stack*
 - `scripts/step1_point_source.py` / `step1_plots.py [--calibrated]`
-  — polarized transiting source; step1_ionly_source.py [--calibrated]
-  — unpolarized (leakage) source.
+  — polarized transiting source; `step1_ionly_source.py [--calibrated]`
+  — unpolarized (leakage) source. *new stack*
+- `scripts/step_ionly.py --centers 30 10 50 [--analyze]
+  [--engine harmonic|legacy]` — perfect depolarization reference +
+  fractional-effect table numbers. *new stack (harmonic default)*
 - `scripts/step2_real_sky.py --center {30,10,50}` — real-sky
   waterfalls (~80 min each); `step2_plots.py --center C` — figures.
-- `scripts/step_ionly.py --centers 30 10 50 [--analyze]` — perfect
-  depolarization reference + fractional-effect table numbers.
+  *deliberately still on `_legacy_pixel`*
 - `scripts/step4_power_spectra.py --centers 30 10 50` — 2D delay
   spectra, delay profiles, zoom deconvolution.
-- `tests/test_fourport.py` — 11 data-free unit tests.
+  *deliberately still on `_legacy_pixel`*
+- `scripts/beam_ablation.py`, `scripts/compare_main_vs_asbuilt.py` —
+  response ablations and the Fig-4 lineage.
+- `tests/test_legacy_pixel.py` — data-free unit tests for the pixel arm.
 - Report: `report/report.tex` (pdflatex twice; needs amssymb).
 
 ## Workflow rules
 
 - Waterfall outputs → `generated_data/` (npz); caches (rotation
-  matrices, degraded sky maps) → `generated_data/cache/`.
+  matrices, degraded sky maps, zenith weights) → `generated_data/cache/`.
 - Figures → `report/figures/`; report LaTeX → `report/`. Do not edit
   the paper itself.
 - Update `PROGRESS.md` after each completed step.
@@ -114,4 +170,9 @@ Set `JAX_ENABLE_X64=1` before importing croissant/jax paths.
   sit in a subdirectory and the job dies instantly on the redirect).
 - `generated_data/` is gitignored (8+ GB of memmapped waterfalls);
   everything there is regenerable from the scripts + caches.
-- Style: black, line length 79 (matches the rest of the repo).
+- Style: black, line length 79. `uv run flake8 src/` is clean — keep it
+  that way.
+- **Before committing a test, ask whether it would fail if the thing it
+  names were broken.** Six tests in the 2026-08-18 refactor had to be
+  rewritten because the answer was no. Injecting the mistake and
+  watching it go red is the only proof that counts.

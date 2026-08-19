@@ -1153,7 +1153,7 @@ provides-extras = ["cuda12", "cuda13", "dev", "ingest"]
 
 [[package]]
 name = "lusee-faraday"
-version = "0.0.1"
+version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "astropy" },

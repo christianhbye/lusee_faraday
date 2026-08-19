@@ -73,6 +73,11 @@ regression from this refactor -- but which part of the legacy pixel
 arm is responsible remains an open question this script does not
 resolve.
 
+The recorded [1e-2, 8e-2] band below was measured on THIS SCRIPT'S
+polarized test sky and applies to no other: with Q = U = 0 the same
+comparison gives 2.687e-05 and correctly prints "OUTSIDE the band".
+See the comment on EXPECTED_LOW/EXPECTED_HIGH.
+
 Run:
     ulimit -v 16000000
     uv run python scripts/crosscheck_pixel_arm.py 2>&1 | tee \
@@ -120,6 +125,17 @@ N_TIMES = 4
 # real BGL_v16 artifact, and that bound is already-accepted precedent
 # independent of anything measured in this script.  Recorded
 # 2026-08-18.
+#
+# THE BAND IS SPECIFIC TO THIS SCRIPT'S OWN POLARIZED TEST SKY and does
+# not transfer to other skies.  Task 17 re-ran exactly this crosscheck
+# with the sky's Q and U set to zero and nothing else changed:
+#   polarized (band_limited_sky as written):  2.678e-02  -- in band
+#   identical run with Q = U = 0:             2.687e-05  -- "OUTSIDE"
+# An unpolarized sky samples only the P^I pair-Stokes kernel; a
+# polarized one additionally samples P^Q and P^U, and the disagreement
+# lives almost entirely there.  So "OUTSIDE the band" printed for an
+# unpolarized sky is the correct answer, not a regression.  See
+# docs/measurement-model.md section 8.
 EXPECTED_LOW = 1e-2
 EXPECTED_HIGH = 8e-2
 

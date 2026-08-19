@@ -22,11 +22,12 @@ from .conventions import PORT_PAIRS, lambda_squared
 def load_response(path):
     """Load a v3 response artifact without re-running slow validation.
 
-    HDU names follow the BGL_v16 artifact layout used by
-    ``_legacy_pixel.load_response_fast`` (``"freq"``, ``"theta"``, ``"phi"``
-    and ``cplx("H_theta")`` etc, producing e.g. ``H_theta_real``) -- not
-    the ``HTHETA``/``HTHETA_REAL`` names a naive reading of the FITS
-    schema might suggest.
+    HDU names follow the BGL_v16 artifact layout: ``"freq"``,
+    ``"theta"``, ``"phi"``, and a real/imag pair per complex block
+    (``"H_theta_real"``/``"H_theta_imag"`` and so on) -- not the
+    ``HTHETA``/``HTHETA_REAL`` names a naive reading of the FITS schema
+    might suggest.  ``_legacy_pixel.load_response_fast`` is an alias for
+    this function; it used to be a second copy of it.
     """
     import fitsio
     from lusee.InstrumentResponse import InstrumentResponse

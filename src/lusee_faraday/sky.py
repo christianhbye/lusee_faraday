@@ -244,12 +244,21 @@ class FaradaySky:
         ref_freq_i=1.0,
         coord="galactic",
     ):
-        """Perfect depolarization: Stokes I only, no polarized blocks."""
+        """Perfect depolarization: Stokes I only, no polarized blocks.
+
+        The explicit zeroing of ``P_MINUS``/``P_PLUS`` is **defensive,
+        not load-bearing**: croissant returns exactly ``0.0`` for the
+        polarized alms of a ``Q = U = 0`` map, so deleting the line
+        fails no test and changes no number.  It is kept because this
+        constructor's entire contract is "no polarized blocks", and it
+        should not silently depend on an external library's exact-zero
+        behaviour to deliver that.
+        """
         zeros = np.zeros_like(np.asarray(I, dtype=float))
         beta = np.array([[beta_i, beta_i, 0.0, 0.0]])
         ref = np.array([[ref_freq_i, ref_freq_i, 1.0, 1.0]])
         sky = cls.from_maps(I, zeros, zeros, 0.0, lmax, beta, ref, coord)
-        sky.component_alms[:, 2:] = 0.0
+        sky.component_alms[:, 2:] = 0.0  # defensive; see the docstring
         return sky
 
     @classmethod

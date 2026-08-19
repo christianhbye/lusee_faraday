@@ -13,6 +13,7 @@ analyses; and with ``generated_data/`` absent those tests skip silently.
 
 import json
 import os
+import sys
 from pathlib import Path
 
 os.environ.setdefault("JAX_ENABLE_X64", "1")
@@ -26,6 +27,8 @@ from lusee_faraday import instrument as inst  # noqa: E402
 from lusee_faraday import response as rsp  # noqa: E402
 
 REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO / "scripts"))
+
 RESPONSE = REPO / "data" / "BGL_v16" / "lusee_bgl_v16_response_v3.fits"
 BASELINES = json.loads(
     (REPO / "tests" / "fixtures" / "regression_baselines.json").read_text()
@@ -37,6 +40,55 @@ AUTO_CHANNELS = [0, 4, 7, 9]  # positions of (a, a) in PORT_PAIRS
 needs_artifact = pytest.mark.skipif(
     not RESPONSE.exists(), reason="BGL_v16 response artifact not present"
 )
+
+
+@pytest.fixture(scope="module")
+def synthetic():
+    """A cheap four-port response with 30 MHz native and bracketed.
+
+    Two departures from a bare ``synthetic_four_port_response``, both
+    needed to make the step-1 wiring test able to fail:
+
+    - Native channels at 29/30/31 MHz rather than 30/60.  The fine grid
+      runs to 30 +- 0.025 MHz, so with 30 MHz as the *lowest* native
+      channel luseepy rejects the grid outright instead of interpolating
+      ``Z_A`` across it, and dropping the impedance freeze would fail
+      loudly for the wrong reason.
+    - A per-port phase ``diag(e^{i alpha})`` applied to the Jones
+      components and, consistently, to ``Z_A``/``R`` as ``U Z U^H``.
+      That is a unitary port gauge transform, so the response stays
+      physical, but it makes the cross-pair ``K_Q``/``K_U`` complex.
+      The stock synthetic response has them *exactly* real, and the
+      historical sign bug this suite guards against -- writing
+      ``cpol_m`` as ``conj(cpol_p)`` -- is then algebraically invisible.
+    """
+    lusee = pytest.importorskip("lusee")
+    import jax
+
+    jax.config.update("jax_enable_x64", True)
+    from lusee.InstrumentResponse import InstrumentResponse
+    from lusee.ReceiverImpedance import JFETReceiver
+
+    base = lusee.synthetic_four_port_response(
+        freq_mhz=(CENTER_MHZ - 1.0, CENTER_MHZ, CENTER_MHZ + 1.0),
+        angular_step_deg=5.0,
+    )
+    u = np.exp(1j * np.array([0.0, 0.7, 1.3, 2.1]))
+    gauge = u[:, None] * np.conj(u)[None, :]  # (4, 4)
+    resp = InstrumentResponse.from_arrays(
+        np.asarray(base.freq),
+        np.asarray(base.theta_deg),
+        np.asarray(base.phi_deg),
+        np.asarray(base.H_theta) * u[:, None, None, None],
+        np.asarray(base.H_phi) * u[:, None, None, None],
+        np.asarray(base.ZA) * gauge,
+        np.asarray(base.Rsky) * gauge,
+        np.asarray(base.Rmoon) * gauge,
+        np.asarray(base.Rloss) * gauge,
+        validated=False,
+        metadata={"VALIDATED": False},
+    )
+    return resp, JFETReceiver()
 
 
 @pytest.fixture(scope="module")
@@ -211,6 +263,140 @@ def test_sampler_rejects_directions_below_the_horizon():
             np.array([0.1, 2.0]),
             np.array([0.0, 0.0]),
         )
+
+
+def test_fine_grid_default_matches_common_fine_freqs():
+    """``step1_point_source.fine_grid()`` is ``common.fine_freqs``.
+
+    ``fine_grid`` exists only so a test can ask for a smaller grid than
+    ``N_FINE``; it duplicates the formula, so something has to pin the
+    duplication.  Bitwise, not approximately: the two arrays index the
+    same fine channels of the same production waterfall.
+    """
+    from common import fine_freqs
+    import step1_point_source as s1
+
+    np.testing.assert_array_equal(s1.fine_grid(), fine_freqs(s1.CENTER_MHZ))
+    assert s1.fine_grid(8).size == 8
+
+
+def test_make_waterfall_wiring_end_to_end(synthetic, tmp_path, monkeypatch):
+    """Run the step-1 waterfall's real physics at a size a test can hold.
+
+    Until ``n_times``/``n_fine`` were added, ``make_waterfall`` was bound
+    to 1024 x 16384 and opened a 2 GB memmap, so nothing in the suite
+    could call it: Task 16's review gutted its physics and every test
+    stayed green.  This is the guard for that, and it is a *wiring*
+    guard -- it re-derives the same numbers by the textbook route and
+    checks the script's optimised one agrees.
+
+    The reference contracts the pair-Stokes kernel with the source's
+    Stokes vector directly, ``K @ (1, cos 2chi, sin 2chi, 0)``, one time
+    and one frequency at a time.  The script instead factorises that
+    into ``K_I + 0.5 (K_Q -+ i K_U) e^{+-2i chi}`` so the frequency axis
+    becomes an outer product, chunks the time axis, carries the
+    below-horizon samples through zeroed, and streams to a memmap.  The
+    two are algebraically identical and structurally nothing alike,
+    which is the point: the historical sign bug (``cpol_m`` written as
+    ``conj(cpol_p)``) lives in exactly that factorisation.
+
+    The reference also spells out ``T_moon = T_ant = 0`` and the
+    impedance freeze, so dropping either from the script's ``frozen``
+    dict turns this red -- the call-site coverage
+    ``test_moon_term_is_off_for_the_point_source_runs`` explicitly does
+    not give.
+
+    Measured RED evidence, six injections, all reverted:
+
+    - ``cpol_m = conj(cpol_p)`` -> ``check_psd`` raises inside the
+      script (the sign bug breaks positive-semidefiniteness, which is
+      how the user originally caught it)
+    - ``T_moon=0.0`` dropped from ``frozen`` -> below-horizon rows stop
+      being zero: with luseepy's 250 K default a zero pair integral no
+      longer gives a zero covariance, so the horizon check is exactly
+      what notices
+    - ``impedance_freq_mhz`` dropped -> 7.111e-05
+    - ``e_freq`` sign flipped -> 9.817e-01
+    - ``nofar`` computed with the Faraday phase left in -> 5.913e-03
+    - ``pair[~mask] = 0.0`` deleted -> below-horizon rows nonzero
+
+    Needs no artifact.
+    """
+    import step1_point_source as s1
+    from lusee_faraday.conventions import lambda_squared
+
+    resp, receiver = synthetic
+    kern = rsp.FixedChannelKernel(resp, CENTER_MHZ)
+
+    # 1e-10 is a roundoff bound, not a fitted one: chi = psi + fd*l2 is
+    # ~2.5e4 rad, so cos/sin argument reduction alone costs ~4 digits.
+    # Clean runs measure 1.4e-12 (2.9e-12 per channel); every injection
+    # below is at least 7 orders of magnitude above it.
+    TOL = 1e-10
+    ntime, nfine, fd = 5, 4096, 250.0
+    # Chunk 0 mixed (up, down), chunk 1 entirely below the horizon,
+    # chunk 2 the ragged tail -- the three cases the loop distinguishes.
+    monkeypatch.setattr(s1, "TIME_CHUNK", 2)
+    theta = np.array([0.20, 2.00, 2.10, 2.20, 1.30])
+    phi = np.array([0.30, 1.10, 2.50, 4.00, 6.28])
+    psi = np.array([0.10, 0.40, 0.90, 1.60, 2.20])
+    up = theta <= np.pi / 2
+
+    out_path = tmp_path / "wf.npy"
+    nofar = s1.make_waterfall(
+        kern,
+        resp,
+        receiver,
+        theta,
+        phi,
+        psi,
+        fd,
+        out_path,
+        n_times=ntime,
+        n_fine=nfine,
+    )
+    got = np.load(out_path)
+    assert got.shape == (ntime, nfine, 16) and got.dtype == np.float64
+    assert nofar.shape == (ntime, 16)
+
+    ff = s1.fine_grid(nfine)
+    l2 = lambda_squared(ff)
+    K = kern.sample(np.where(up, theta, 0.0), phi)  # (10, 4, T)
+    kw = dict(T_moon=0.0, T_ant=0.0, impedance_freq_mhz=CENTER_MHZ)
+    one = np.array([CENTER_MHZ])
+
+    want = np.zeros_like(got)
+    want_nofar = np.zeros_like(nofar)
+    for it in range(ntime):
+        if not up[it]:
+            continue
+        chi = psi[it] + fd * l2  # (F,)
+        stokes = np.stack(
+            [
+                np.ones_like(chi),
+                np.cos(2 * chi),
+                np.sin(2 * chi),
+                np.zeros_like(chi),
+            ]
+        )  # (4, F)
+        pair = np.einsum("ps,sf->fp", K[:, :, it], stokes)[None]
+        want[it] = inst.channels(
+            inst.covariance(pair, resp, receiver, ff, **kw)
+        )[0][0]
+        chi0 = psi[it]
+        stokes0 = np.array([1.0, np.cos(2 * chi0), np.sin(2 * chi0), 0.0])
+        pair0 = (K[:, :, it] @ stokes0)[None, None]
+        want_nofar[it] = inst.channels(
+            inst.covariance(pair0, resp, receiver, one, **kw)
+        )[0][0, 0]
+
+    assert (got[~up] == 0.0).all(), "below-horizon rows are not exactly zero"
+    rel = np.abs(got - want).max() / np.abs(want).max()
+    assert (
+        rel < TOL
+    ), f"waterfall differs from the direct contraction: {rel:.3e}"
+    rel0 = np.abs(nofar - want_nofar).max() / np.abs(want_nofar).max()
+    assert rel0 < TOL, f"no-Faraday reference differs: {rel0:.3e}"
 
 
 def test_channelization_matches_the_legacy_integrator():

@@ -1,14 +1,88 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
-Updated: 2026-08-18 — **all five steps complete + user-driven
-refinements** (zenith-calibrated polarimeter, report restructure,
-zoom deconvolution, per-band weight verification + Table 1, Fig 9
-as 2x3 all-band snapshot); report in `report/report.tex` (14 pp,
-compiles clean, all figures referenced in text).
+Updated: 2026-08-19 — **refactored onto luseepy + croissant** (see the
+section below); the five analysis steps and the report were complete
+before that on the pixel-space engine. Report in `report/report.tex`
+(14 pp, compiles clean, all figures referenced in text).
+
+## Refactor onto luseepy + croissant (2026-08-18 → 2026-08-19)
+
+Eighteen tasks on branch `luseepy-refactor`, plan at
+`docs/superpowers/plans/2026-08-18-luseepy-croissant-refactor.md`,
+ledger at
+`.superpowers/sdd/2026-08-18-luseepy-croissant-refactor/progress.md`.
+
+**What the package is now.** Sky components → Faraday coefficients →
+harmonic contraction → luseepy covariance → polarimeter →
+channelization, in `sky.py`, `response.py`, `engine.py`,
+`instrument.py`, `polarimeter.py`, `channelization.py`, over
+`conventions.py` and `config.py`. `docs/measurement-model.md` is the
+model; `CLAUDE.md` the module tour.
+
+**What was deleted.** The whole original two-port simulator:
+`beam.py`, `sim.py`, `fast_sim.py`, `healpix.py`, `rotations.py`,
+`utils.py`, `plot.py` and their four test files (33 tests). With them
+went the `interp_hp` pole artifact and the `healpy.Rotator` machinery.
+`spectrometer.py` had already been replaced by `channelization.py`.
+
+**What was demoted.** `fourport.py` → `_legacy_pixel.py`, a validation
+arm that production code must not import. It survives because an
+independent quadrature is what makes `scripts/crosscheck_pixel_arm.py`
+meaningful, and because `step2_real_sky.py` and `step4_power_spectra.py`
+still run on it — deliberately, since the 2026-08-18 audit showed their
+diffuse Faraday content is HEALPix shot noise.
+
+**Notebooks.** `notebooks/faraday_sims.{ipynb,py}` drove the paper's
+original figures through the deleted `sim.py` and are archived in
+`notebooks/archive/` with a note; they no longer run. Five more —
+`point_source-LN.ipynb`, `paper_plots.ipynb`, `wmap-time.ipynb`,
+`faraday_analysis.ipynb`, `wmap_one.ipynb` — also reference the retired
+API and were **left in place on purpose**: they are a working record,
+and moving or deleting them is the author's call.
+
+**Cross-arm agreement (harmonic vs pixel).** The correctness gate is
+`tests/test_engine_gate.py` at 6.8e-16 against luseepy's own
+convolution. The pixel cross-check is a characterization and is
+sky-dependent:
+
+| sky | harmonic vs pixel |
+|---|---|
+| polarized synthetic (crosscheck's own test sky) | 2.678e-02 |
+| the same run with Q = U = 0 | 2.687e-05 |
+| real I-only sky, nside 512, lmax 30 | 3.054e-04 |
+
+all global-max-normalised, the estimator `crosscheck_pixel_arm.py` uses.
+Per channel the real-sky worst case is 1.77e-3 (on 02I, whose own scale
+is 17% of the global max; the autos sit at 1.9–2.3e-4). Raising lmax
+from 30 to 48 moves the products by 7.77e-5, so harmonic truncation is
+not the explanation. **The disagreement is entirely a polarized-sky
+phenomenon** — see `docs/measurement-model.md` §8 before quoting any
+cross-arm number.
+
+**Regressions that pinned the refactor.**
+
+- *Zenith polarimeter:* all 24 complex entries of the published Table 1
+  (`report/report.tex`, three bands × four ports × X/Y) reproduced,
+  transcribed from the published table rather than from a log, atol
+  1e-3 against a 3-decimal table.
+- *Step 1, regenerated on the new stack:* raw transit leakage
+  **0.133849** (published 0.134, 0.11%); ortho transit leakage
+  **6.516e-4** (7e-4, 6.9%); zoom recovery real **0.7947** (0.79,
+  0.59%) and ideal **0.8598** (0.86, 0.03%); Q oscillation period
+  **1.8877 kHz** analytic (1.89, 0.12%) and 1.8868 kHz *measured from
+  the regenerated waterfall* (0.17%); gains-mode transit leakage
+  0.09611 (0.096); rank-1 at transit [0.999863, 0.999919].
+- *I-only reference:* the ported harmonic arm reproduces the pre-port
+  pixel artifact to 3.4e-14, and the two arms differ by the 3.054e-4
+  above.
+
+The published numbers moved by up to 0.6%, so the regeneration is real
+rather than cosmetic; `report/figures/` was regenerated on the new
+stack in the final commit and is now traceable to the committed code.
 
 ## Resume state (read this first after /clear)
 
-- Everything is committed AND pushed on branch `luseepy-version`
+- Everything is committed on branch `luseepy-refactor`
   (remote: github.com/christianhbye/lusee_faraday).
 - `generated_data/` is gitignored: the 2.1 GB fine waterfalls
   (step1/real30/real10/real50), binned npz files and caches live
@@ -21,7 +95,8 @@ compiles clean, all figures referenced in text).
   (+`--calibrated`), `step2_plots.py --center {30,10,50}`,
   `step_ionly.py --centers 30 10 50 --analyze`,
   `step4_power_spectra.py --centers 30 10 50`; then pdflatex twice
-  in `report/`.
+  in `report/`.  Run under `ulimit -v 16000000` with absolute log
+  paths; 12 GB is not enough.
 - Read AGENTS.md for pinned conventions, OOM/memory rules, the PSD
   sanity invariant, and the script inventory.
 - Next natural tasks (not started): transfer report content into the
@@ -34,8 +109,10 @@ compiles clean, all figures referenced in text).
 - [x] `src/lusee_faraday/fourport.py` — pixel-space four-port engine
   (kernel, transport, NUFFT Faraday synthesis, covariance/products,
   spectrometer integration).  Luseepy itself is READ-ONLY — never move
-  code there; import from `lusee` only.
+  code there; import from `lusee` only.  *(Now `_legacy_pixel.py`, a
+  validation arm.)*
 - [x] `tests/test_fourport.py` — 10 data-free unit tests; all pass.
+  *(Now `tests/test_legacy_pixel.py`.)*
 - [x] OOM diagnosis: the "mysterious session kills" were the kernel
   OOM killer (croissant dense spherical transform ~(lmax+1)^2·npix·16
   bytes).  Mitigations: small validation skies, single-channel

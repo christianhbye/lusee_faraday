@@ -169,9 +169,18 @@ through `lusee_faraday.conventions`.
 | Response frame | `x = East, y = North, z = zenith`; `phi = 90deg - azimuth` |
 | Channels | 16 real, ordered as `lusee.Covariance.default_product_labels()` |
 
-The fixed-beam approximation applies to the **response** only. `Z_A` and `Z_L`
-are evaluated on the fine frequency grid, so receiver loading is not smeared
-along with the beam.
+The fixed-beam approximation covers the **receiver loading as well as the
+response**. This is not optional: the antenna sits near resonance at 30 MHz,
+where one 0.5 MHz native step moves `Z_A` by 12%, and letting the impedances
+follow the +-0.1 MHz fine grid moves the loading matrix `M` by 11% across the
+band. That is a smooth chromatic ramp of exactly the kind the delay-space
+argument asserts is absent, so it has to be frozen with the beam.
+`instrument.covariance` and `instrument.blackbody_normalization` both take
+`impedance_freq_mhz`, which makes the freeze visible at the call site.
+
+(An earlier version of this paragraph said the opposite -- that `Z_A` and `Z_L`
+follow the fine grid "so receiver loading is not smeared along with the beam".
+That was written before the 11% was measured, and it was wrong.)
 
 ## 7. Where each piece lives
 
@@ -191,6 +200,53 @@ luseepy, which carries the impedance model, the receiver loading and the units.
 The symmetric pseudo-dipoles of the paper's Fig. 4 have no instrument model to
 load, so they go through croissant's `PairStokesBeam` directly and stay
 unitless. Both meet at the same contraction and the same sky.
+
+## 8. How well the two arms agree, and where they do not
+
+The harmonic contraction has an independent quadrature of the same integral
+beside it: the pixel-space engine in `_legacy_pixel.py`, kept for exactly this
+purpose. `scripts/crosscheck_pixel_arm.py` runs them against each other on the
+real BGL_v16 response.
+
+The correctness gate is `tests/test_engine_gate.py`, where the harmonic
+contraction reproduces luseepy's own convolution to 6.8e-16. The cross-check is
+a characterization, and what it characterizes is **sky-dependent**:
+
+| sky | harmonic vs pixel |
+|---|---|
+| polarized (the crosscheck's own test sky) | 2.678e-02 |
+| the same run with `Q = U = 0` | 2.687e-05 |
+| the real I-only sky, nside 512, lmax 30 | 3.054e-04 |
+
+Same seed, same nside, same lmax; the only change between the first two rows is
+zeroing the sky's Q and U. A factor of ~1000.
+
+**The disagreement is entirely a polarized-sky phenomenon.** An unpolarized sky
+samples only the `P^I` pair-Stokes kernel. A polarized sky additionally samples
+`P^Q` and `P^U`, and that is where the difference lives -- consistent with the
+horizon/Gibbs mechanism the crosscheck records as its leading hypothesis, since
+the cross-pol kernels change sign across the beam and so carry far more high-l
+structure near the horizon.
+
+Two consequences, and the second is the one to remember:
+
+- The analysis that reaches the paper is **unpolarized leakage**, where the two
+  arms agree at 2.7e-5 (synthetic sky) and 3.05e-4 (real sky). Those numbers
+  are global-max-normalised, the estimator `crosscheck_pixel_arm.py` uses, so
+  they are directly comparable to the 2.678e-2 above; per channel the real-sky
+  worst case is 1.77e-3.
+- **The two arms are not cross-validated better than ~3% for anything with a
+  polarized sky.** Nothing currently in flight depends on that -- the diffuse
+  Faraday work of steps 2 and 4 was already set aside by the 2026-08-18
+  pixelization audit in section 5 -- but if that work is revived, this is a
+  *second and independent* reason for caution, separate from pixelization.
+
+Harmonic truncation is not the explanation: raising lmax from 30 to 48 moves
+the real-sky products by 7.77e-5.
+
+Evidence:
+`.superpowers/sdd/2026-08-18-luseepy-croissant-refactor/task7_polarization_probe.py`,
+log at `generated_data/task7_polarization_probe.log`.
 
 ## See also
 

@@ -27,6 +27,7 @@ import numpy as np
 
 from common import (
     CACHE_DIR,
+    FINE_STEP_MHZ,
     GEN_DIR,
     N_FINE,
     N_TIMES,
@@ -95,17 +96,46 @@ def source_track(tt, loc, ecl_lat_deg):
     return theta, phi, psi
 
 
-def make_waterfall(kern, resp, receiver, theta, phi, psi, fd, out_path):
-    """Stream the (T, F, 16) fine waterfall to a memmapped .npy."""
-    ff = fine_freqs(CENTER_MHZ)
+def fine_grid(n_fine=N_FINE):
+    """``common.fine_freqs`` with the grid size made explicit.
+
+    ``fine_freqs`` reads ``N_FINE`` off the config module, so nothing can
+    ask it for a smaller grid.  Same formula, same centering, same
+    values at the default -- pinned by
+    ``test_fine_grid_default_matches_common_fine_freqs``.
+    """
+    k = np.arange(n_fine) - n_fine // 2
+    return CENTER_MHZ + k * FINE_STEP_MHZ
+
+
+def make_waterfall(
+    kern,
+    resp,
+    receiver,
+    theta,
+    phi,
+    psi,
+    fd,
+    out_path,
+    n_times=N_TIMES,
+    n_fine=N_FINE,
+):
+    """Stream the (T, F, 16) fine waterfall to a memmapped .npy.
+
+    ``n_times`` and ``n_fine`` exist so a test can run the real physics
+    at a size that fits in a test suite.  At the defaults this is the
+    production run: 1024 x 16384 x 16 float64, a 2 GB memmap, which is
+    why nothing could reach this function before they were added.
+    """
+    ff = fine_grid(n_fine)
     l2 = lam2(ff)
     wf = np.lib.format.open_memmap(
         out_path,
         mode="w+",
         dtype=np.float64,
-        shape=(N_TIMES, N_FINE, 16),
+        shape=(n_times, n_fine, 16),
     )
-    nofar = np.zeros((N_TIMES, 16))
+    nofar = np.zeros((n_times, 16))
     up = theta <= np.pi / 2
     # exp(2i chi) with chi = psi + fd * lam2; the frequency factor is
     # shared by all times in the chunk.
@@ -117,8 +147,8 @@ def make_waterfall(kern, resp, receiver, theta, phi, psi, fd, out_path):
     # legacy assembler computed.
     frozen = dict(impedance_freq_mhz=CENTER_MHZ, T_moon=0.0, T_ant=0.0)
     t0 = _time.time()
-    for s in range(0, N_TIMES, TIME_CHUNK):
-        sl = slice(s, min(s + TIME_CHUNK, N_TIMES))
+    for s in range(0, n_times, TIME_CHUNK):
+        sl = slice(s, min(s + TIME_CHUNK, n_times))
         mask = up[sl]
         # Every time in the chunk is carried, with the below-horizon
         # ones zeroed afterwards, rather than slicing the array down to
@@ -171,7 +201,7 @@ def make_waterfall(kern, resp, receiver, theta, phi, psi, fd, out_path):
         nofar[sl] = nf_block[:, 0]
         if (sl.stop % 128) < TIME_CHUNK:
             print(
-                f"  waterfall {sl.stop}/{N_TIMES}"
+                f"  waterfall {sl.stop}/{n_times}"
                 f"  ({_time.time()-t0:.0f} s)",
                 flush=True,
             )

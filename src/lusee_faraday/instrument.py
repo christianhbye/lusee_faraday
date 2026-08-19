@@ -75,15 +75,19 @@ def covariance(
     return np.asarray(project_hermitian(unprojected))
 
 
-def blackbody_normalization(resp, receiver, freqs_mhz):
+def blackbody_normalization(
+    resp, receiver, freqs_mhz, impedance_freq_mhz=None
+):
     """Covariance response to a one-kelvin blackbody enclosure.
 
-    There is no ``impedance_freq_mhz`` here: ``Z_A`` and the loading
-    matrix always follow ``freqs_mhz``.  Normalizing a frozen-beam
-    covariance (see :func:`covariance`) by this unfrozen blackbody would
-    put the ~11% chromatic ramp the freeze removed straight back in, so
-    a frozen caller must freeze this grid itself by passing a constant
-    ``freqs_mhz``.
+    ``impedance_freq_mhz`` means here exactly what it means in
+    :func:`covariance`, and for the same reason: normalizing a
+    frozen-beam covariance by an *unfrozen* blackbody would put the
+    ~11% chromatic ramp the freeze removed straight back into the
+    ratio.  A caller that froze one must freeze the other.  Passing it
+    is equivalent to passing a constant ``freqs_mhz`` of the same
+    length, which is what a frozen caller had to do before this keyword
+    existed.
     """
     from lusee.Covariance import (
         blackbody_normalization as _blackbody,
@@ -91,9 +95,16 @@ def blackbody_normalization(resp, receiver, freqs_mhz):
     )
 
     freqs = np.atleast_1d(np.asarray(freqs_mhz, dtype=float))
-    ZA, _, _, _, _ = resp.target_matrices(freqs)
-    M = loading_matrix(ZA, receiver.Z(freqs))
-    return np.asarray(_blackbody(ZA, M))
+    frozen = impedance_freq_mhz is not None
+    grid = (
+        np.array([float(impedance_freq_mhz)], dtype=float) if frozen else freqs
+    )
+    ZA, _, _, _, _ = resp.target_matrices(grid)
+    M = loading_matrix(ZA, receiver.Z(grid))
+    out = np.asarray(_blackbody(ZA, M))
+    if frozen:
+        out = np.broadcast_to(out, (freqs.size, 4, 4))
+    return out
 
 
 def channels(covariance_matrix, products="all"):

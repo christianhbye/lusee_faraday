@@ -266,6 +266,15 @@ def fig_polfrac_track(center, tag, meta, binned, wf):
                  label="no Faraday (sky P as modeled)")
     axes[0].plot(t_hr, p_par, lw=1.0, color="C3",
                  label="with Faraday (parent bin)")
+    # MIXED PROVENANCE, deliberately: the parent/zoom curves above come
+    # from real{C}_binned.npz, which step2_real_sky.py produces on the
+    # legacy PIXEL arm, while real{C}_ionly.npz is now the HARMONIC
+    # arm's output (step_ionly.py was ported at Task 17).  The two arms
+    # were measured to agree to 3.05e-4 on this quantity, i.e. invisible
+    # on a log axis -- but the mixing is a fact about this panel, not an
+    # oversight.  step_ionly.py --engine legacy writes the pixel-arm
+    # version as real{C}_ionly_legacy.npz if a same-arm overlay is ever
+    # wanted.
     ionly_path = GEN_DIR / f"real{center:g}_ionly.npz"
     if ionly_path.exists():
         Sio = stokes(np.load(ionly_path)["products"])

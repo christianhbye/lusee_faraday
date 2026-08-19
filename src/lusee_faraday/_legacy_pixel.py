@@ -63,32 +63,19 @@ X_VEC = np.array([0.0, 1.0, 0.0, -1.0])  # X = E - W
 
 
 def load_response_fast(path):
-    """Load a v3 response artifact without re-running the slow validation."""
-    import fitsio
-    from lusee.InstrumentResponse import InstrumentResponse
+    """Load a v3 response artifact without re-running the slow validation.
 
-    f = fitsio.FITS(path, "r")
-    header = dict(f[0].read_header())
+    Kept as a name, not as an implementation: it is an alias for
+    :func:`lusee_faraday.response.load_response`.  The two were separate
+    near-verbatim copies while the harmonic path was being built beside
+    this one, so that a change to either could not perturb the other's
+    validation; with this module demoted to the validation arm that
+    reason is gone, and two copies of a FITS-schema reader is exactly
+    the kind of duplication that drifts silently.
+    """
+    from .response import load_response
 
-    def cplx(name):
-        return f[f"{name}_real"].read() + 1j * f[f"{name}_imag"].read()
-
-    resp = InstrumentResponse.from_arrays(
-        f["freq"].read(),
-        f["theta"].read(),
-        f["phi"].read(),
-        cplx("H_theta"),
-        cplx("H_phi"),
-        cplx("ZA"),
-        cplx("Rsky"),
-        cplx("Rmoon"),
-        cplx("Rloss"),
-        validated=False,
-        metadata={**header, "VALIDATED": False},
-        ZLoad=cplx("ZLoad"),
-    )
-    f.close()
-    return resp
+    return load_response(path)
 
 
 def sample_periodic_maps(values, theta_deg, phi_deg, theta_rad, phi_rad):

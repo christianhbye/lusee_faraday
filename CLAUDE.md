@@ -4,13 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Simulator for LuSEE (Lunar Surface Electromagnetics Experiment) Faraday rotation observations. Computes polarized radio visibilities as seen from the lunar surface, including Faraday rotation of synchrotron emission through the ionosphere.
+Simulator for LuSEE (Lunar Surface Electromagnetics Experiment) Faraday rotation observations. Computes the four-port covariance seen from the lunar surface, including Faraday rotation of synchrotron emission through the ionosphere and the Galactic screen.
+
+The physics is **not** owned here. Instrument response, impedances, receiver loading, covariance assembly and channel packing all come from `luseepy`; spherical transforms and the polarized harmonic dual come from `croissant`. This repository owns the layer above: how a Faraday-rotated sky enters that formalism, and how the results are channelized and read out. Read `docs/measurement-model.md` first — it is the conceptual overview and the reason the 16,384-channel fine grid is affordable.
 
 ## Setup & Commands
 
 ```bash
 # Install (uses uv with a .venv already present)
-uv pip install -e ".[dev]"
+uv sync                      # editable luseepy + croissant via [tool.uv.sources]
+uv add <package>             # NEVER `uv pip install`
 
 # Run tests
 uv run pytest
@@ -18,42 +21,57 @@ uv run pytest
 # Run a single test
 uv run pytest tests/test_foo.py::test_name -v
 
-# Format
-uv run black src/
-
-# Lint
+# Format / lint
+uv run black src/ tests/     # line-length 79
 uv run flake8 src/
-
-# Launch notebooks
-uv run jupyter lab
 ```
+
+`JAX_ENABLE_X64=1` must be set **before any jax import**, or croissant and
+luseepy silently drop to complex64. `scripts/common.py` does this with an
+`os.environ.setdefault` above every other import and every script imports it;
+test modules set it themselves at the top.
+
+Heavy jobs run in the background under `ulimit -v 16000000` with **absolute**
+log paths under `generated_data/`. 12 GB is not enough — three of the zenith
+tests OOM inside jax.
 
 ## Architecture
 
-The simulation pipeline flows: **Sky → Faraday rotation → Coordinate rotation → Beam convolution → Visibilities**
+The pipeline flows: **Sky components → Faraday coefficients → harmonic contraction → luseepy covariance → polarimeter → channelization**
 
-- **`SkyModel`** (`sky.py`): Holds Stokes I/Q/U maps and a rotation measure (RM) map in HEALPix format. Can load WMAP K-band data or synthetic point sources. `apply_fd()` applies Faraday rotation in-place. `to_topocentric()` rotates maps from Galactic to lunar topocentric coordinates.
-- **`Beam`** (`beam.py`): Stores Jones matrices for X and Y dipoles. Can load LuSEE beams from FITS files or create analytic short dipoles. `precompute_weights()` computes the 9 Stokes-weighted beam patterns (wI/wQ/wU for x/y/xy) used in the visibility integral.
-- **`Simulator`** (`sim.py`): Configured via `SimConfig` dataclass. For each time step: rotates sky to topocentric frame, applies horizon mask, performs beam-sky multiplication, and normalizes. `compute_stokes()` converts Rxx/Ryy/Rxy visibilities back to Stokes I/Q/U.
-- **`rotations.py`**: Galactic-to-topocentric coordinate transforms using `lunarsky` for lunar frame definitions and `healpy.Rotator` for polarized map rotation.
-- **`HealpixGrid`** (`healpix.py`): HEALPix grid utilities including horizon masking and interpolation from regular theta/phi grids to HEALPix via `RectSphereBivariateSpline`.
-- **`SpectrometerResponse`** (`spectrometer.py`): Loads the spectrometer bin response and convolves simulated spectra with either the wide (parent, 25 kHz) or narrow (zoom, 64 sub-bins) channel response. Zoom bins use FFT-style ordering (bin 0 = center, 1-32 positive offsets, 33-63 negative offsets).
-- **`utils.py`**: LuSEE frequency channel definitions (2048 channels, 0–51.2 MHz) and zoom-bin helpers.
+- **`FaradaySky`** (`sky.py`): the sky as a sum of constant-Faraday-depth components, each a frequency-independent alm plus a per-frequency, per-block coefficient. Constructors: `from_maps`, `uniform_screen`, `point_source`, `i_only` (perfect depolarization). Refuses an unresolved screen unless the caller opts in — the 2026-08-18 pixelization audit lives in the API, not in a paragraph.
+- **`response.py`**: instrument model → pair-Stokes alms. `load_response` reads a BGL_v16 artifact through `lusee.InstrumentResponse`; `four_port_pair_alms` is the as-built arm, `two_port_pair_alms` the symmetric pseudo-dipole (paper Fig. 4) arm through croissant. `FixedChannelKernel` slices ONE native channel and samples many directions out of it — luseepy's `pair_stokes_at` re-materializes all 150 channels (2.94 GB) per call and is scalar-only, so this is a real capability, not a wrapper.
+- **`engine.py`**: the block-resolved contraction of sky duals against response duals, and the spectral expansion onto the fine grid.
+- **`instrument.py`**: covariance assembly, receiver loading, Hermitian projection and 16-channel packing — all luseepy. `impedance_freq_mhz` freezes `Z_A`, `Z_L`, `R_moon`, `R_loss` at one frequency; a Faraday run **must** pass it, and must pass `T_moon=0.0, T_ant=0.0` where the legacy assembler had no thermal terms.
+- **`polarimeter.py`**: zenith calibration (`zenith_port_weights`, `orthonormalize_xy`) and pseudo-Stokes. `check_psd` is a runtime invariant, not only a test.
+- **`channelization.py`**: parent (25 kHz) and zoom (64 sub-bin) integration on luseepy's spectrometer response. Zoom bins use FFT ordering (0 = center, 1–32 positive, 33–63 negative).
+- **`conventions.py`**, **`config.py`**: the single source of truth for COSMO/IAU, the Faraday phase, port and channel ordering, the site, the time grid and the fine frequency grid. Do not re-derive any of it inline.
+
+**`_legacy_pixel.py` is a validation arm. Production code must not import it.** It is an independent pixel-space quadrature of the same integral, kept because that independence is what makes `scripts/crosscheck_pixel_arm.py` meaningful, and because the diffuse scripts (`step2_real_sky.py`, `step4_power_spectra.py`) still run on it — deliberately, since the audit showed their Faraday content is HEALPix shot noise and they are not headed for the paper.
 
 ## Key Conventions
 
-- All sky maps use HEALPix RING ordering with default `nside=128`.
-- Frequencies are in MHz throughout the codebase.
-- Jones matrices have shape `(2, npix)` with axes `(Eth, Eph)`.
-- Stokes maps have shape `(nfreq, npix)` or `(npix,)`.
-- The LuSEE landing site is hardcoded at lat=-23.813°, lon=182.258° in `sky.py`.
-- Beam FITS files are in `data/`; the beam is defined on a 1° theta/phi grid and interpolated to HEALPix.
+- Frequencies are in MHz throughout.
+- Ports `0, 1, 2, 3 = N, E, S, W`; 16 real channels ordered as `lusee.Covariance.default_product_labels()`.
+- Input sky Q/U are healpy/COSMO; croissant consumes IAU (`U_IAU = -U_COSMO`). Faraday: `(Q + iU)_COSMO * exp(+2i phi lambda^2)`.
+- Response frame: `x = East, y = North, z = zenith`; grid `phi = 90° - azimuth`.
+- Real sky maps are used at native `nside = 512` RING and never degraded: per-pixel Faraday phases do not commute with `ud_grade`.
+- The fixed-beam approximation covers the receiver loading too — see `docs/measurement-model.md` §6.
+- The LuSEE landing site is in `config.py` (`LUN_LAT_DEG`, `LUN_LONG_DEG`).
 - Black formatting with line-length 79.
 
 ## Data Files
 
-Files in `data/` are required for realistic simulations but not tracked fully in git (large FITS/HDF5). Key files:
-- `feko_bnl_3m_75deg.2port.fits`, `hfss_lbl_3m_75deg.2port.fits` — LuSEE beam models
-- `wmap_band_iqumap_r9_9yr_K_v5.fits` — WMAP K-band polarization maps
-- `faraday2020v2.hdf5` — Faraday rotation measure sky map
-- `spectrometer_bin_response.txt` — spectrometer channel response
+Files in `data/` are required for realistic simulations but not tracked in git (large FITS/HDF5). Key files:
+- `BGL_v16/lusee_bgl_v16_response_v3.fits` — the as-built four-port response (631 MB); `_c4sym` and `_diagza` variants for the ablations. Override with `$LUSEE_RESPONSE`.
+- `haslam408_dsds_Remazeilles2014.fits` — RING ordered, K
+- `wmap_band_iqumap_r9_9yr_K_v5.fits` — NESTED, mK thermodynamic
+- `faraday2020v2.hdf5` — Faraday depth map, RING, rad/m²
+
+Tests that need the 631 MB artifact are marked `slow` and skip without it.
+
+## See also
+
+- `docs/measurement-model.md` — what is being computed and why it is cheap
+- `AGENTS.md` — the pinned conventions in operational form, plus the script inventory
+- `PROGRESS.md` — running status

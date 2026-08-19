@@ -1,19 +1,25 @@
-# Cross-check branch setup (`croissant-crosscheck`)
+# Toolchain setup and cross-check notes
 
-Branched from `origin/luseepy-version` (slosar's four-port work) — that
-branch is **purely additive** vs `main` (3807 insertions, 0 deletions,
-no edits to `src/lusee_faraday/*.py`), so there were no conflicts.
+Originally written for the `croissant-crosscheck` branch, which was
+branched from `origin/luseepy-version` (slosar's four-port work) — that
+branch was **purely additive** vs `main` (3807 insertions, 0 deletions,
+no edits to `src/lusee_faraday/*.py`), so there were no conflicts. The
+work now lives on `luseepy-refactor`.
 
 ## Toolchain actually in use
 
 | Component | Location | Git state |
 |---|---|---|
-| luseepy | `../luseepy` | branch `main`, `61c439a` (release 2.0 + four-port refactor) |
-| croissant | `../../../projects/croissant-main` (worktree) | branch `main`, `da01c5a`, clean |
-| lusee_faraday | this repo | branch `croissant-crosscheck` |
+| luseepy | `../luseepy` | branch `deps/croissant-v5.3.0.dev1`, `52b96bc` ("deps: bump croissant-sim to v5.3.0.dev1") |
+| croissant | `/home/christian/Documents/projects/croissant-main` (worktree) | branch `main`, `1c4d6c5` ("feat: close out the kernel engine's trace, cache and reality gaps (#143)"), clean |
+| lusee_faraday | this repo | branch `luseepy-refactor` |
 
 Both are **editable** installs wired via `[tool.uv.sources]` in
-`pyproject.toml`.  Reproduce with `uv sync`.
+`pyproject.toml`.  Reproduce with `uv sync`; add packages with `uv add`.
+Verified 2026-08-19. Earlier revisions of this file recorded luseepy at
+`main`/`61c439a` and croissant at `da01c5a`; both were stale.
+
+**Neither checkout may be modified from this repo.**
 
 ### Why a croissant worktree and not `../../../projects/croissant`
 
@@ -41,6 +47,21 @@ default it off` — an API default flip.  The rest add the
 precomputed-kernel SHT engine (`eb392f9`, `da01c5a`) and full-Stokes
 physical-invariant tests (`1c4b59e`).
 
+### The `engine="auto"` dense-memory trap is closed at `1c4d6c5`
+
+An earlier session recorded that croissant's `engine="auto"` forced the
+dense spherical transform whenever `lmax < 3*nside - 1`, which at
+nside=512 / lmax=30 would build an ~800 GB operator. croissant `1c4d6c5`
+added a memory cap to `_low_pass_in_one_step`
+(`croissant/polarization.py:142`), so the low-lmax / high-nside
+polarized transform now takes the native transform and truncates.
+
+**Confirmed empirically, not assumed** (Task 1 of the 2026-08-18
+refactor, `scripts/probe_toolchain.py`):
+`PolarizedSky(nside=512).compute_alm(lmax=30)` resolves to the `s2fft`
+engine, not `dense`, and peaks at ~3.7 GB — comfortably inside the
+16 GB cap. Re-run the probe if the croissant pin moves.
+
 ## Data
 
 `data/` is gitignored.  Files needed:
@@ -67,8 +88,9 @@ Stokes exactly fixes all normalizations.  With the paper's
 So the paper's `U_obs = Re(V_XY)` (sec:lusee) **is missing a factor 2**;
 it should read `U_obs = 2 Re V_XY`, `V_obs = 2 Im V_XY`.
 
-- `main`'s `sim.py:compute_stokes` already has `U = 2*np.real(Rxy)` ✓
-- `fourport.polarimeter` drops the ½ from its coherency and uses
+- `main`'s `sim.py:compute_stokes` had `U = 2*np.real(Rxy)` ✓ (that
+  module was retired in the 2026-08-18 refactor)
+- `polarimeter.pseudo_stokes` drops the ½ from its coherency and uses
   `I=(XX+YY)/2, Q=(XX−YY)/2, U=Re XY` — self-consistent ✓
 
 Both codes are right; the paper equation needs the 2.
