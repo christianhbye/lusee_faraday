@@ -1,4 +1,7 @@
 import numpy as np
+import pytest
+
+from lunarsky.time import Time
 
 from lusee_faraday import config as cfg
 
@@ -6,6 +9,8 @@ from lusee_faraday import config as cfg
 def test_time_grid_spans_exactly_one_lunar_sidereal_day():
     t = cfg.times()
     assert len(t) == cfg.N_TIMES == 1024
+    # First sample is at the pinned epoch
+    assert abs((t[0] - Time(cfg.T_START_UTC)).sec) < 1e-6
     span = (t[-1] - t[0]).sec
     step = cfg.SIDEREAL_DAY_S / cfg.N_TIMES
     assert np.isclose(span, cfg.SIDEREAL_DAY_S - step, rtol=1e-12)
@@ -25,9 +30,11 @@ def test_fine_grid_is_uniform_and_covers_the_three_parents():
     assert f.max() >= parents.max() + 0.05
 
 
+@pytest.mark.filterwarnings(
+    "ignore::astropy.time.core.TimeDeltaMissingUnitWarning"
+)
 def test_site_matches_luseepy_observation_defaults():
-    import pytest
-
+    # Suppress TimeDeltaMissingUnitWarning originating inside lusee.Observation()
     obs_mod = pytest.importorskip("lusee.Observation")
     obs = obs_mod.Observation()
     assert np.isclose(cfg.LUN_LAT_DEG, obs.default_lun_lat_deg)
