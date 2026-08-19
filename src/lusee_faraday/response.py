@@ -154,6 +154,26 @@ def two_port_pair_alms(h_theta, h_phi, theta_deg, phi_deg, lmax):
     """
     import croissant as cro
 
+    # croissant's PairStokesBeam accepts a mismatched "mwss" grid
+    # without complaint -- it silently uses whatever ntheta/nphi the
+    # data array has and never checks them against a caller-supplied
+    # theta_deg/phi_deg.  This is the only place that mismatch can be
+    # caught, so theta_deg and phi_deg earn their place as a guard
+    # even though nothing downstream reads them again.
+    ntheta, nphi = np.asarray(h_theta).shape[-2:]
+    if len(theta_deg) != ntheta or len(phi_deg) != nphi:
+        raise ValueError(
+            "theta_deg/phi_deg do not describe h_theta's grid: "
+            f"got {len(theta_deg)} theta and {len(phi_deg)} phi "
+            f"points, but h_theta has shape (..., {ntheta}, {nphi})"
+        )
+    if nphi != 2 * (ntheta - 1):
+        raise ValueError(
+            "grid does not satisfy the mwss sampling relation "
+            f"nphi == 2*(ntheta-1): got ntheta={ntheta}, "
+            f"nphi={nphi} (expected nphi={2 * (ntheta - 1)})"
+        )
+
     # pair_stokes_from_jones expects a leading frequency axis (it
     # mirrors luseepy's (port, freq, ...) layout).  This arm's Jones
     # arrays are (port, ntheta, nphi) with no frequency axis at all, so

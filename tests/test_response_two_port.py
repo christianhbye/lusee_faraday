@@ -70,3 +70,16 @@ def test_short_dipole_cross_monopole_vanishes():
     xy = alms[1, 0, 0, lmax]
     xx = alms[0, 0, 0, lmax]
     assert abs(xy) < 1e-8 * abs(xx)
+
+
+def test_mismatched_mwss_grid_is_rejected():
+    """croissant accepts a bad "mwss" grid silently, so response.py
+    must catch nphi != 2*(ntheta - 1) itself."""
+    pytest.importorskip("croissant")
+
+    theta_deg = np.arange(0.0, 181.0, 2.0)  # 91 points
+    phi_deg = np.arange(0.0, 180.0, 2.0)  # 90 points, should be 180
+    ht = np.zeros((2, len(theta_deg), len(phi_deg)), dtype=complex)
+    hp = np.zeros_like(ht)
+    with pytest.raises(ValueError, match="mwss sampling relation"):
+        rsp.two_port_pair_alms(ht, hp, theta_deg, phi_deg, 8)
