@@ -59,6 +59,11 @@ def test_from_rm_map_refuses_an_unresolved_screen():
     message = str(excinfo.value)
     assert "nside" in message
     assert "allow_pixelwise" in message
+    # Discriminates from the spectral-cap refusal below: this one must
+    # fire because the screen is spatially unresolved, not because it
+    # is spectrally expensive.
+    assert "screen is not resolved" in message
+    assert "too many spectral components" not in message
 
 
 def test_from_rm_map_accepts_a_resolved_screen():
@@ -77,6 +82,47 @@ def test_from_rm_map_accepts_a_resolved_screen():
         I, z, z, rm, np.array([29.9, 30.1]), lmax=LMAX
     )
     assert sky.n_components >= 1
+
+
+def test_from_rm_map_refuses_a_spectrally_expensive_screen():
+    """Trips the max_components cap, not the nside check.
+
+    Reuses the same spatially-resolved map as the "accepts" case above
+    -- it builds fine at the default cap -- but passes
+    ``max_components=0``, which ``spectral_component_count`` (always
+    >= 1) is guaranteed to exceed regardless of the map's statistics.
+    This isolates the spectral branch: the nside check must stay
+    satisfied so only the component-count cap can fire.
+    """
+    pytest.importorskip("croissant")
+    import jax
+
+    jax.config.update("jax_enable_x64", True)
+    import healpy as hp
+
+    rng = np.random.default_rng(2)
+    npix = hp.nside2npix(NSIDE)
+    I = np.abs(rng.normal(size=npix)) + 10.0
+    z = np.zeros(npix)
+    rm = hp.smoothing(rng.normal(size=npix), fwhm=1.0) * 1e-3
+    with pytest.raises(ValueError) as excinfo:
+        FaradaySky.from_rm_map(
+            I,
+            z,
+            z,
+            rm,
+            np.array([29.9, 30.1]),
+            lmax=LMAX,
+            max_components=0,
+        )
+    message = str(excinfo.value)
+    assert "allow_pixelwise" in message
+    # Discriminates from the nside refusal above: this one must fire
+    # because the component cap was exceeded, not because the screen
+    # is spatially unresolved.
+    assert "too many spectral components" in message
+    assert "screen is not resolved" not in message
+    assert "cap 0" in message
 
 
 def test_component_construction_logs_the_resolved_engine(caplog):

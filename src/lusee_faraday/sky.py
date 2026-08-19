@@ -102,6 +102,23 @@ def nyquist_nside(rm_map, freq_mhz, percentile=99.9):
     return nside0 * max(1.0, phase_step / np.pi)
 
 
+def _both_criteria(
+    used_nside, needed_nside, freq_mhz, n_needed, max_components
+):
+    """The shared "here are both numbers" clause for both refusals.
+
+    Whichever criterion trips the refusal, the message reports both,
+    since bypassing the one that fired can still leave the other
+    unmet -- the message is how the audit finding reaches a user who
+    never read the audit.
+    """
+    return (
+        f"nside={used_nside} used, nside~{needed_nside:.3g} needed at "
+        f"{freq_mhz:g} MHz; {n_needed} spectral components needed "
+        f"across the band (cap {max_components})"
+    )
+
+
 class FaradaySky:
     """A sky whose frequency dependence separates into components."""
 
@@ -344,23 +361,26 @@ class FaradaySky:
 
         rm = np.asarray(rm_map, dtype=float)
         used_nside = hp.npix2nside(rm.size)
-        needed_nside = nyquist_nside(rm, np.min(freqs_mhz))
+        freq_mhz = float(np.min(freqs_mhz))
+        needed_nside = nyquist_nside(rm, freq_mhz)
         n_needed = spectral_component_count(
             float(rm.min()), float(rm.max()), freqs_mhz
         )
+        both = _both_criteria(
+            used_nside, needed_nside, freq_mhz, n_needed, max_components
+        )
         if needed_nside > used_nside and not allow_pixelwise:
             raise ValueError(
-                f"Faraday screen is not resolved: nside={used_nside} used, "
-                f"nside~{needed_nside:.3g} needed at "
-                f"{np.min(freqs_mhz):g} MHz. The pixel sum is a random "
-                f"walk, not a quadrature ({AUDIT_REFERENCE}). Pass "
-                "allow_pixelwise=True to build it anyway."
+                f"Faraday screen is not resolved: {both}. The pixel "
+                f"sum is a random walk, not a quadrature "
+                f"({AUDIT_REFERENCE}). Pass allow_pixelwise=True to "
+                "build it anyway."
             )
         if n_needed > max_components and not allow_pixelwise:
             raise ValueError(
-                f"screen needs {n_needed} components across the band "
-                f"(cap {max_components}); pass allow_pixelwise=True or "
-                "narrow the band."
+                f"Faraday screen needs too many spectral components: "
+                f"{both} ({AUDIT_REFERENCE}). Pass allow_pixelwise=True "
+                "to build it anyway or narrow the band."
             )
         span = float(np.ptp(lambda_squared(freqs_mhz)))
         dphi = np.pi / (2 * span) if span > 0 else (np.ptp(rm) or 1.0)
