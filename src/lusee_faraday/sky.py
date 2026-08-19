@@ -178,3 +178,86 @@ class FaradaySky:
         sky = cls.from_maps(I, zeros, zeros, 0.0, lmax, beta, ref, coord)
         sky.component_alms[:, 2:] = 0.0
         return sky
+
+    @classmethod
+    def point_source(
+        cls,
+        theta,
+        phi,
+        stokes,
+        phi_fd,
+        nside,
+        lmax,
+        beta=None,
+        ref_freq_mhz=None,
+        coord="galactic",
+    ):
+        """Discrete sources, each with its own Faraday depth.
+
+        Parameters
+        ----------
+        theta, phi : (n_sources,) float
+            Source directions in ``coord``, radians.
+        stokes : (n_sources, 3) float
+            Per-source I, Q, U in the healpy/COSMO convention.  The
+            values land in a single HEALPix pixel each, so they carry
+            the pixel's solid angle.
+        phi_fd : (n_sources,) float
+            Faraday depth per source, rad/m^2.
+        """
+        import healpy as hp
+
+        theta = np.atleast_1d(np.asarray(theta, dtype=float))
+        phi = np.atleast_1d(np.asarray(phi, dtype=float))
+        stokes = np.atleast_2d(np.asarray(stokes, dtype=float))
+        phi_fd = np.atleast_1d(np.asarray(phi_fd, dtype=float))
+        n = theta.size
+        if not (phi.size == n and stokes.shape == (n, 3) and phi_fd.size == n):
+            raise ValueError(
+                "theta, phi, stokes and phi_fd must describe the same "
+                "number of sources"
+            )
+        npix = hp.nside2npix(int(nside))
+        pix = hp.ang2pix(int(nside), theta, phi)
+        alms = []
+        for k in range(n):
+            maps = np.zeros((3, npix))
+            maps[:, pix[k]] = stokes[k]
+            alms.append(_component_alm(*maps, lmax, coord))
+        return cls(np.stack(alms), phi_fd, beta, ref_freq_mhz, coord)
+
+    @classmethod
+    def binned_screen(
+        cls,
+        I,  # noqa: E741
+        Q,
+        U,
+        rm_map,
+        dphi,
+        lmax,
+        beta=None,
+        ref_freq_mhz=None,
+        coord="galactic",
+    ):
+        """Partition a Faraday screen into bins of constant depth.
+
+        Each component holds I, Q and U masked to its own bin, so the
+        components partition the sky rather than overlapping it:
+        summing them reproduces the input maps exactly.
+        """
+        dphi = float(dphi)
+        if dphi <= 0:
+            raise ValueError("dphi must be positive")
+        I = np.asarray(I, dtype=float)  # noqa: E741
+        Q = np.asarray(Q, dtype=float)
+        U = np.asarray(U, dtype=float)
+        rm = np.asarray(rm_map, dtype=float)
+        index = np.floor(rm / dphi).astype(int)
+        alms, depths = [], []
+        for value in np.unique(index):
+            mask = index == value
+            alms.append(
+                _component_alm(I * mask, Q * mask, U * mask, lmax, coord)
+            )
+            depths.append(float(rm[mask].mean()))
+        return cls(np.stack(alms), depths, beta, ref_freq_mhz, coord)
