@@ -1,8 +1,8 @@
-"""Harmonic four-port path vs the pixel-space engine in fourport.py.
+"""Harmonic four-port path vs the pixel-space engine in _legacy_pixel.py.
 
 This script CHARACTERIZES the disagreement between the harmonic
 contraction (``engine.contract``) and the legacy pixel-space engine
-(``fourport.py``) on the real BGL_v16 response.  It is not a
+(``_legacy_pixel.py``) on the real BGL_v16 response.  It is not a
 correctness gate -- the gate is ``tests/test_engine_gate.py``, which
 shows the harmonic contraction reproduces luseepy's own convolution
 to round-off (6.8e-16) on a synthetic response and a rotation-
@@ -87,7 +87,7 @@ import numpy as np  # noqa: E402
 
 from lusee_faraday import config as cfg  # noqa: E402
 from lusee_faraday import engine, response as rsp  # noqa: E402
-from lusee_faraday import fourport as fp  # noqa: E402
+from lusee_faraday import _legacy_pixel as fp  # noqa: E402
 
 RESPONSE_PATH = os.environ.get(
     "LUSEE_RESPONSE",
@@ -178,7 +178,7 @@ def main():
     kern = fp.FixedFreqKernel(resp, FREQ_MHZ, receiver)
     grid = fp.GalacticGrid(NSIDE)
     I_map = data[0, 0]
-    Q_cos, U_cos = data[0, 1], -data[0, 2]  # back to COSMO for fourport
+    Q_cos, U_cos = data[0, 1], -data[0, 2]  # back to COSMO for the pixel arm
     sim = fp.SkyWaterfallSim(
         kern, grid, I_map, Q_cos, U_cos, np.zeros_like(I_map)
     )

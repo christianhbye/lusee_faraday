@@ -22,7 +22,7 @@ from common import (  # noqa: E402
     load_sky_maps,
     sky_at_freq,
 )
-from lusee_faraday import fourport as fp  # noqa: E402
+from lusee_faraday import _legacy_pixel as fp  # noqa: E402
 
 
 def savefig(fig, name):

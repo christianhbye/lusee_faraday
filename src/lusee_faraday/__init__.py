@@ -1,12 +1,22 @@
 __author__ = "Christian Hellum Bye"
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 
-from . import rotations
-from . import plot
-from . import utils
-from . import fast_sim
-
-from .healpix import HealpixGrid
-from .beam import Beam
+from . import channelization
+from . import config
+from . import conventions
+from . import engine
+from . import instrument
+from . import polarimeter
+from . import response
 from .sky import FaradaySky
-from .sim import SimConfig, Simulator
+
+__all__ = [
+    "FaradaySky",
+    "channelization",
+    "config",
+    "conventions",
+    "engine",
+    "instrument",
+    "polarimeter",
+    "response",
+]

@@ -30,7 +30,7 @@ from matplotlib.colors import LogNorm  # noqa: E402
 from scipy.signal.windows import blackmanharris  # noqa: E402
 
 from common import FIG_DIR, GEN_DIR, SIDEREAL_DAY_S  # noqa: E402
-from lusee_faraday import fourport as fp  # noqa: E402
+from lusee_faraday import _legacy_pixel as fp  # noqa: E402
 
 C_LIGHT = 299792458.0
 

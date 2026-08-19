@@ -43,7 +43,7 @@ from common import (
     sky_at_freq,
     times,
 )
-from lusee_faraday import fourport as fp
+from lusee_faraday import _legacy_pixel as fp
 
 TIME_CHUNK = 16  # times per spectrometer-integration chunk
 

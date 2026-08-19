@@ -1,5 +1,5 @@
 """
-Unit tests for lusee_faraday.fourport (data-free parts).
+Unit tests for lusee_faraday._legacy_pixel (data-free parts).
 
 The heavy validation against the luseepy harmonic engines lives in
 scripts/validate_engine.py (needs the 631 MB response artifact); here we
@@ -11,7 +11,7 @@ the spectrometer-bin weight construction.
 import numpy as np
 import pytest
 
-from lusee_faraday import fourport as fp
+from lusee_faraday import _legacy_pixel as fp
 
 
 def random_hermitian(rng, shape=()):

@@ -36,7 +36,7 @@ MODELS = [
 
 def leakage(kern, theta, phi, x_vec=None, y_vec=None):
     """p_leak and pseudo-Stokes for an unpolarized source at (theta, phi)."""
-    from lusee_faraday import fourport as fp
+    from lusee_faraday import _legacy_pixel as fp
 
     K = kern.sample(np.asarray(theta), np.asarray(phi))  # (10, 4, N)
     pair = kern.prefac * K[:, 0, :]                      # unpolarized -> I only
@@ -48,7 +48,7 @@ def leakage(kern, theta, phi, x_vec=None, y_vec=None):
 
 def run(freq_mhz, az_deg, alt_deg):
     from lusee.ReceiverImpedance import JFETReceiver
-    from lusee_faraday import fourport as fp
+    from lusee_faraday import _legacy_pixel as fp
 
     receiver = JFETReceiver()
     alt = np.radians(alt_deg)

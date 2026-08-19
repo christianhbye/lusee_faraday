@@ -1,4 +1,18 @@
-"""Four-port (luseepy new-engine) Faraday waterfall machinery.
+"""LEGACY pixel-space four-port engine -- validation arm only.
+
+Superseded by the harmonic path (``response`` + ``engine`` +
+``instrument``).  Kept because it is an independent quadrature of the
+same integral, which is what makes the cross-check in
+``scripts/crosscheck_pixel_arm.py`` meaningful, and because the diffuse
+scripts (``step2_real_sky.py``, ``step4_power_spectra.py``) still run on
+it -- deliberately, since the 2026-08-18 audit showed their Faraday
+content is HEALPix shot noise and they are not headed for the paper.
+
+Production code must not import this module.
+
+----
+
+Four-port (luseepy new-engine) Faraday waterfall machinery.
 
 This module reimplements the lusee_faraday analysis on top of the
 luseepy four-port instrument response (`lusee.InstrumentResponse`),

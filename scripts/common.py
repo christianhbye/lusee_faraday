@@ -62,7 +62,7 @@ C_LIGHT = 299792458.0
 
 def rotation_matrices(force=False):
     """Cached galactic->response-frame rotation matrices (T, 3, 3)."""
-    from lusee_faraday.fourport import topo_rotation_matrix
+    from lusee_faraday._legacy_pixel import topo_rotation_matrix
 
     cache = CACHE_DIR / "rotation_matrices.npy"
     if cache.exists() and not force:

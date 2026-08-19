@@ -23,7 +23,7 @@ def load_response(path):
     """Load a v3 response artifact without re-running slow validation.
 
     HDU names follow the BGL_v16 artifact layout used by
-    ``fourport.load_response_fast`` (``"freq"``, ``"theta"``, ``"phi"``
+    ``_legacy_pixel.load_response_fast`` (``"freq"``, ``"theta"``, ``"phi"``
     and ``cplx("H_theta")`` etc, producing e.g. ``H_theta_real``) -- not
     the ``HTHETA``/``HTHETA_REAL`` names a naive reading of the FITS
     schema might suggest.

@@ -238,7 +238,7 @@ def test_the_script_wires_both_arms_to_the_same_sky(synthetic, monkeypatch):
     import common as cm
     import step_ionly
 
-    from lusee_faraday import fourport as fp
+    from lusee_faraday import _legacy_pixel as fp
 
     smoke_lmax, ntime = 12, 3
     resp, receiver = synthetic
@@ -350,7 +350,7 @@ def test_analyze_runs_end_to_end(tmp_path, monkeypatch):
 def test_moon_term_is_off():
     """``T_moon`` defaults to 250 K; this run needs it at zero.
 
-    ``fourport.assemble_covariance``, the assembler the ported script
+    ``_legacy_pixel.assemble_covariance``, the assembler the ported script
     replaces, has no Moon term at all, and the stored
     ``real{C}_binned.npz`` that ``--analyze`` compares against was made
     with it.  Taking luseepy's default instead moves the answer by four
