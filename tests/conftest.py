@@ -15,16 +15,6 @@ def data_dir():
 
 
 @pytest.fixture
-def spec_response_path(data_dir):
-    return data_dir / "spectrometer_bin_response.txt"
-
-
-@pytest.fixture
-def spec_response(spec_response_path):
-    return ld.SpectrometerResponse.from_file(spec_response_path)
-
-
-@pytest.fixture
 def short_dipole():
     beam = ld.Beam.short_dipole(nside=NSIDE)
     beam.precompute_weights()
