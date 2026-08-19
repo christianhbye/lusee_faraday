@@ -1,0 +1,45 @@
+{
+  "_comment": "Published numbers the refactor must reproduce. Sources are report/report.tex and PROGRESS.md on branch croissant-crosscheck at commit afb3290. generated_data/ was empty, so these are the committed values, not re-derived.",
+  "point_source_phi_fd": 250.0,
+  "band_centers_mhz": [30.0, 10.0, 50.0],
+  "q_oscillation_period_khz": {
+    "value": 1.89,
+    "rtol": 0.01,
+    "source": "PROGRESS.md Step 1"
+  },
+  "unpolarized_transit_leakage_raw": {
+    "value": 0.134,
+    "rtol": 0.02,
+    "source": "report.tex sec Step 0"
+  },
+  "unpolarized_transit_leakage_gains": {
+    "value": 0.096,
+    "rtol": 0.05,
+    "source": "PROGRESS.md zenith-calibrated polarimeter"
+  },
+  "unpolarized_transit_leakage_ortho": {
+    "value": 7e-4,
+    "rtol": 0.5,
+    "source": "PROGRESS.md zenith-calibrated polarimeter"
+  },
+  "zenith_null_ortho_max": {
+    "value": 1e-15,
+    "source": "PROGRESS.md: ortho nulls zenith Q=U=V to ~1e-16"
+  },
+  "zoom_recovery_real": {
+    "value": 0.79,
+    "rtol": 0.03,
+    "source": "report.tex line 235"
+  },
+  "zoom_recovery_ideal": {
+    "value": 0.86,
+    "rtol": 0.03,
+    "source": "report.tex line 235"
+  },
+  "parent_stokes_over_i_30mhz": {
+    "q": 0.146,
+    "u": -0.032,
+    "atol": 2e-4,
+    "source": "report.tex line 425"
+  }
+}
