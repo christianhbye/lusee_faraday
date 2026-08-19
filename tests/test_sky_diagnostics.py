@@ -59,6 +59,7 @@ def test_from_rm_map_refuses_an_unresolved_screen():
     message = str(excinfo.value)
     assert "nside" in message
     assert "allow_pixelwise" in message
+    assert sky_mod.AUDIT_REFERENCE in message
     # Discriminates from the spectral-cap refusal below: this one must
     # fire because the screen is spatially unresolved, not because it
     # is spectrally expensive.
@@ -85,14 +86,18 @@ def test_from_rm_map_accepts_a_resolved_screen():
 
 
 def test_from_rm_map_refuses_a_spectrally_expensive_screen():
-    """Trips the max_components cap, not the nside check.
+    """Trips the max_components cap on a genuinely resolved screen.
 
-    Reuses the same spatially-resolved map as the "accepts" case above
-    -- it builds fine at the default cap -- but passes
-    ``max_components=0``, which ``spectral_component_count`` (always
-    >= 1) is guaranteed to exceed regardless of the map's statistics.
-    This isolates the spectral branch: the nside check must stay
-    satisfied so only the component-count cap can fire.
+    Scaling a map's amplitude cannot isolate the spectral branch: it
+    scales the RM range and its neighbour differences together, so
+    both criteria move in lock step and the spatial check -- the
+    stricter of the two on a narrow band -- fires first regardless of
+    the cap. A wide band changes that: d(lambda^2)/lambda^2_min is
+    ~0.96 across 10-50 MHz versus ~0.013 across 29.9-30.1 MHz, which
+    makes the spectral count large on this same smooth map while the
+    spatial criterion stays satisfied at nside=64. ``n_needed`` is
+    computed independently here (not read off the exception) so a bug
+    that referenced the wrong count would fail this test.
     """
     pytest.importorskip("croissant")
     import jax
@@ -100,29 +105,36 @@ def test_from_rm_map_refuses_a_spectrally_expensive_screen():
     jax.config.update("jax_enable_x64", True)
     import healpy as hp
 
+    nside = 64
+    npix = hp.nside2npix(nside)
     rng = np.random.default_rng(2)
-    npix = hp.nside2npix(NSIDE)
     I = np.abs(rng.normal(size=npix)) + 10.0
     z = np.zeros(npix)
-    rm = hp.smoothing(rng.normal(size=npix), fwhm=1.0) * 1e-3
+    rm = hp.smoothing(rng.normal(size=npix), fwhm=1.0) * 1.0
+    freqs = np.array([10.0, 50.0])
+
+    needed_nside = sky_mod.nyquist_nside(rm, freqs.min())
+    # Documents why the spatial branch cannot fire first; fails loudly
+    # if that ever stops being true.
+    assert needed_nside <= nside
+    n_needed = sky_mod.spectral_component_count(
+        float(rm.min()), float(rm.max()), freqs
+    )
+
     with pytest.raises(ValueError) as excinfo:
         FaradaySky.from_rm_map(
-            I,
-            z,
-            z,
-            rm,
-            np.array([29.9, 30.1]),
-            lmax=LMAX,
-            max_components=0,
+            I, z, z, rm, freqs, lmax=LMAX, max_components=16
         )
     message = str(excinfo.value)
+    assert f"{n_needed} spectral components" in message
+    assert "cap 16" in message
     assert "allow_pixelwise" in message
+    assert sky_mod.AUDIT_REFERENCE in message
     # Discriminates from the nside refusal above: this one must fire
     # because the component cap was exceeded, not because the screen
     # is spatially unresolved.
     assert "too many spectral components" in message
     assert "screen is not resolved" not in message
-    assert "cap 0" in message
 
 
 def test_component_construction_logs_the_resolved_engine(caplog):
