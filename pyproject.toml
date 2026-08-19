@@ -55,6 +55,7 @@ addopts = [
   "--junitxml=junit.xml",
   "-o junit_family=legacy",
 ]
+markers = ["slow: needs the 631 MB BGL_v16 response artifact"]
 
 [tool.black]
 line-length = 79

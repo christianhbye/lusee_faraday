@@ -8,7 +8,7 @@ calibrated polarimeters from its covariance C0:
   pseudo-Q exactly (real per-port weights; residual u-leakage from
   the inter-port cross-couplings remains).
 - mode="ortho": Loewdin-orthonormalization of the gain-weighted pair
-  in the C0 metric (fourport.orthonormalize_xy): X and Y become
+  in the C0 metric (polarimeter.zenith_vectors): X and Y become
   complex combinations of all four ports and the zenith pseudo-Q, U
   and V are all exactly zero.
 
@@ -21,7 +21,6 @@ import argparse
 import numpy as np
 
 from common import CACHE_DIR, RESPONSE_PATH
-from lusee_faraday import fourport as fp
 
 
 def get_weights(center_mhz, mode="ortho", force=False):
@@ -35,11 +34,14 @@ def get_weights(center_mhz, mode="ortho", force=False):
             return d[f"x_{mode}"], d[f"y_{mode}"]
     from lusee.ReceiverImpedance import JFETReceiver
 
-    resp = fp.load_response_fast(RESPONSE_PATH)
-    kern = fp.FixedFreqKernel(resp, center_mhz, JFETReceiver())
+    from lusee_faraday import polarimeter as pol
+    from lusee_faraday import response as rsp
+
+    resp = rsp.load_response(RESPONSE_PATH)
+    receiver = JFETReceiver()
+    x_g, y_g, C0 = pol.zenith_vectors(resp, receiver, center_mhz, "gains")
+    x_o, y_o, _ = pol.zenith_vectors(resp, receiver, center_mhz, "ortho")
     del resp
-    x_g, y_g, C0 = fp.zenith_port_weights(kern)
-    x_o, y_o = fp.orthonormalize_xy(C0, x_g, y_g)
     np.savez(
         cache,
         x_gains=x_g,
@@ -64,7 +66,7 @@ def get_weights(center_mhz, mode="ortho", force=False):
         ("gains", x_g, y_g),
         ("ortho", x_o, y_o),
     ):
-        S = fp.polarimeter(C0, xv, yv)
+        S = pol.pseudo_stokes(C0, xv, yv)
         print(
             f"  zenith unpolarized [{label:5s}]: "
             f"q={S[1]/S[0]:+.2e} u={S[2]/S[0]:+.2e} "
