@@ -57,11 +57,31 @@ def test_ortho_vectors_null_the_zenith_polarization(pieces):
 def test_gains_mode_nulls_q_but_not_necessarily_u(pieces):
     resp, receiver = pieces
     x, y, C0 = pol.zenith_vectors(resp, receiver, 10.0, mode="gains")
-    I, Q, _, _ = pol.pseudo_stokes(C0, x, y)
+    I, Q, U, _ = pol.pseudo_stokes(C0, x, y)
     assert abs(Q) < 1e-12 * I
+    # Lower bound on U so this test actually distinguishes "gains" from
+    # "ortho" rather than merely repeating the Q assertion both modes
+    # share.  Measured on this synthetic fixture: gains |U|/I = 4.880e-11,
+    # ortho |U|/I = 1.383e-16; 1e-13 sits in between with margin both
+    # ways.  This fixture is close to port-symmetric, which makes the
+    # gap unusually tight -- on the real BGL_v16 instrument the gains
+    # residual is |U|/I = 0.096, so production has enormous headroom.
+    assert abs(U) > 1e-13 * I
 
 
 def test_zenith_vectors_reject_an_unknown_mode(pieces):
     resp, receiver = pieces
     with pytest.raises(ValueError, match="mode"):
         pol.zenith_vectors(resp, receiver, 10.0, mode="magic")
+
+
+def test_pseudo_stokes_from_channels_matches_pseudo_stokes():
+    rng = np.random.default_rng(42)
+    A = rng.normal(size=(4, 4)) + 1j * rng.normal(size=(4, 4))
+    C = 0.5 * (A + np.conj(A.T))
+    from lusee_faraday.instrument import channels
+
+    packed, _ = channels(C)
+    expected = pol.pseudo_stokes(C)
+    actual = pol.pseudo_stokes_from_channels(packed)
+    assert np.allclose(actual, expected)
