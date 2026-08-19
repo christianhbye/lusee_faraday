@@ -2,14 +2,18 @@ from dataclasses import dataclass
 import numpy as np
 
 from .healpix import HealpixGrid
-from . import Beam, SkyModel
+from . import Beam
 
 
 @dataclass
 class SimConfig:
     freqs: np.ndarray
     times: np.ndarray
-    sky: SkyModel
+    # The old SkyModel this field was typed against was removed by the
+    # FaradaySky refactor (Task 8); this whole legacy pipeline goes away
+    # in Task 18, so the annotation is left untyped rather than pointing
+    # at an incompatible replacement.
+    sky: object
     beam: Beam
     nside: int = 128
     site: str = "lusee"

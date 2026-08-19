@@ -27,13 +27,18 @@ from lusee_faraday.fast_sim import (
     compute_vis_fast,
 )
 from lusee_faraday.sim import Simulator, SimConfig
-from lusee_faraday.sky import LUSEE_LOC
+from lusee_faraday import config as _cfg
 from lusee_faraday.rotations import (
     get_rot_mat,
     rotmat_to_eulerZYX,
 )
 
 NSIDE = 32
+
+# sky.py no longer defines this (replaced by FaradaySky in Task 8);
+# this old fast_sim pipeline is retired in Task 18, so restore the
+# constant locally rather than touching sky.py's new public surface.
+LUSEE_LOC = _cfg.moon_location()
 
 
 @pytest.fixture

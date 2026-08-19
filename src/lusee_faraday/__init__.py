@@ -8,6 +8,6 @@ from . import fast_sim
 
 from .healpix import HealpixGrid
 from .beam import Beam
-from .sky import SkyModel
+from .sky import FaradaySky
 from .sim import SimConfig, Simulator
 from .spectrometer import SpectrometerResponse
