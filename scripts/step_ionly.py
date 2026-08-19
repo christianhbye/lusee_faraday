@@ -5,7 +5,13 @@ which Faraday rotation has completely depolarized the sky at the band
 center.  With no polarized power anywhere the Faraday phase cannot
 reach the products at all, so one evaluation per time step suffices
 and the result is the same in every fine channel, zoom bin and parent
-bin.
+bin.  "The result" is the stored artifact, one number per time step:
+both arms freeze the sky at the band centre, exactly as the full run
+does (scripts/step2_real_sky.py evaluates sky_at_freq(maps, center)
+once).  FaradaySky.coeffs on a *fine* grid is not flat -- the
+synchrotron index puts a 1.7e-2 ramp across a parent band, which
+tests/test_ionly_regression.py pins -- but nothing on this path ever
+evaluates it there.
 
 Two engines compute that same quantity two different ways:
 
@@ -126,6 +132,30 @@ def out_path(center, arm="harmonic", lmax=LMAX):
     return GEN_DIR / f"real{center:g}_ionly.npz"
 
 
+def legacy_reference(center):
+    """The pixel-arm I-only artifact ``--analyze`` compares against.
+
+    The LEGACY file on purpose: real{C}_binned.npz comes from
+    scripts/step2_real_sky.py, which stays on the pixel arm, the
+    effect measured by --analyze is 2e-4, and the harmonic-vs-pixel
+    engine difference is ~1e-2 (scripts/crosscheck_pixel_arm.py) -- a
+    hundred times larger than the signal.  Both sides of that
+    comparison have to come from the same quadrature.
+
+    Separate from ``analyze`` so ``main`` can check it *before*
+    spending eight minutes on a harmonic run the user did not ask for.
+    """
+    path = out_path(center, "legacy")
+    if not path.exists():
+        raise FileNotFoundError(
+            f"{path.name} is missing.  --analyze compares against "
+            f"real{center:g}_binned.npz, a pixel-arm artifact, so the "
+            "I-only side has to be the pixel arm too.  Run "
+            f"`step_ionly.py --engine legacy --centers {center:g}` first."
+        )
+    return path
+
+
 def _instrument():
     import jax
 
@@ -220,20 +250,7 @@ def analyze(center):
 
     from zenith_weights import get_weights
 
-    # The LEGACY file on purpose: real{C}_binned.npz comes from
-    # scripts/step2_real_sky.py, which stays on the pixel arm, the
-    # effect measured below is 2e-4, and the harmonic-vs-pixel engine
-    # difference is ~1e-2 (scripts/crosscheck_pixel_arm.py) -- a
-    # hundred times larger than the signal.  Both sides of this
-    # comparison have to come from the same quadrature.
-    ionly_path = out_path(center, "legacy")
-    if not ionly_path.exists():
-        raise FileNotFoundError(
-            f"{ionly_path.name} is missing.  --analyze compares against "
-            f"real{center:g}_binned.npz, a pixel-arm artifact, so the "
-            "I-only side has to be the pixel arm too.  Run "
-            f"`step_ionly.py --engine legacy --centers {center:g}` first."
-        )
+    ionly_path = legacy_reference(center)
     print(
         f"  comparing against {ionly_path.name} (pixel arm), since "
         f"real{center:g}_binned.npz is one too",
@@ -294,14 +311,27 @@ def main():
     ap.add_argument(
         "--engine", choices=("harmonic", "legacy"), default="harmonic"
     )
-    ap.add_argument("--lmax", type=int, default=LMAX)
+    ap.add_argument("--lmax", type=int, default=None)
     ap.add_argument("--analyze", action="store_true")
     ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
+    if args.engine == "legacy" and args.lmax is not None:
+        ap.error(
+            "--lmax applies to the harmonic arm only; the pixel "
+            "quadrature has no band limit.  Passing it here would write "
+            "the plain real{C}_ionly_legacy.npz, which a later run "
+            "would then reuse as an ordinary legacy artifact."
+        )
+    lmax = LMAX if args.lmax is None else args.lmax
+    if args.analyze and args.engine != "legacy":
+        # Up front, not after an eight-minute harmonic run: with
+        # --engine legacy the loop below produces the reference itself.
+        for center in args.centers:
+            legacy_reference(center)
     for center in args.centers:
-        path = out_path(center, args.engine, args.lmax)
+        path = out_path(center, args.engine, lmax)
         if not path.exists() or args.force:
-            compute(center, args.engine, args.lmax)
+            compute(center, args.engine, lmax)
         if args.analyze:
             analyze(center)
 

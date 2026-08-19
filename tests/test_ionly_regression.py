@@ -8,7 +8,7 @@ the full run is reproduced by that reference to within ``2e-4``, which
 is what makes the sky model's 1.1e-4 CMB monopole load-bearing rather
 than a rounding detail.
 
-Three of these tests need nothing but a synthetic response.  The two
+Four of these tests need nothing but a synthetic response.  The two
 at the bottom read ``generated_data/real30_ionly*.npz`` and skip when
 those are absent, which is how a fresh clone sees them; like the step-1
 published-number tests they pin the *artifacts*, so they only turn over
@@ -209,6 +209,67 @@ def test_ionly_products_carry_no_faraday_structure(synthetic, haslam_like):
     ), f"spectral index too steep ({ramp.max():.2e})"
 
 
+def test_the_script_wires_both_arms_to_the_same_sky(synthetic, monkeypatch):
+    """A wiring guard on ``compute_harmonic`` and ``compute_legacy``.
+
+    ``ionly_sky`` and ``pack_from_pairs`` are covered above, but until
+    this test the two functions that *call* them were not.  Injecting
+    the exact mistake the port was written to avoid -- handing
+    ``ionly_sky`` a map already scaled by ``sky_at_freq`` and then
+    letting ``FaradaySky.coeffs`` scale it again, 777x at 30 MHz --
+    left every other test in this file green.  Running both arms end
+    to end against a synthetic response, a smooth nside=16 sky and
+    three time steps catches it: measured 3.252e-4 clean, 7.760e+02
+    with the double scaling, and 3.335e-1 with the pixel arm's
+    quadrature multiplied by 1.5.  (The seed matters only for the
+    clean number: an unseeded draw gave 4.117e-4, and both injections
+    reproduce to four digits regardless.)
+
+    This is a **wiring guard, not a physics pin**.  3e-4 against a
+    0.10 bound is ~300x of headroom by design: the two arms are
+    genuinely different quadratures, and the bound has to survive a
+    resolution change (nside=32 / lmax=16 measured 3.7e-4) without
+    anyone re-measuring it.  The physics pin on the same quantity is
+    ``test_the_two_engines_agree_on_the_real_sky``, at 1.0e-3 on the
+    real nside=512 sky.  Nothing here needs the BGL artifact.
+    """
+    import healpy as hp
+
+    import common as cm
+    import step_ionly
+
+    from lusee_faraday import fourport as fp
+
+    smoke_lmax, ntime = 12, 3
+    resp, receiver = synthetic
+
+    ell = np.arange(smoke_lmax + 1)
+    np.random.seed(17)  # healpy's synfast draws from the global RNG
+    m = hp.synfast(1.0 / (1.0 + ell) ** 3, NSIDE, lmax=smoke_lmax, new=True)
+    i408 = 30.0 + 5.0 * (m - m.min()) / np.ptp(m)  # positive and smooth
+    maps = {
+        "I408": i408,
+        "Q23": np.zeros_like(i408),
+        "U23": np.zeros_like(i408),
+    }
+    tt = cm.times()[:ntime]
+    rot = np.stack(
+        [fp.topo_rotation_matrix(t, cm.moon_location()) for t in tt]
+    )
+
+    monkeypatch.setattr(step_ionly, "_instrument", lambda: (resp, receiver))
+    monkeypatch.setattr(step_ionly, "load_sky_maps", lambda: maps)
+    monkeypatch.setattr(step_ionly, "MAP_NSIDE", NSIDE)
+    monkeypatch.setattr(step_ionly, "N_TIMES", ntime)
+    monkeypatch.setattr(step_ionly, "times", lambda: tt)
+    monkeypatch.setattr(step_ionly, "rotation_matrices", lambda: rot)
+
+    harmonic = step_ionly.compute_harmonic(CENTER_MHZ, smoke_lmax)
+    legacy = step_ionly.compute_legacy(CENTER_MHZ)
+    rel = np.abs(harmonic - legacy).max() / np.abs(legacy).max()
+    assert rel < 0.10, f"the two arms disagree by {rel:.3e}"
+
+
 def test_analyze_refuses_to_fall_back_to_the_harmonic_file(
     tmp_path, monkeypatch
 ):
@@ -300,6 +361,12 @@ def test_moon_term_is_off():
     through ``step_ionly.pack_from_pairs`` -- the single place both arms
     of the script assemble a covariance -- so dropping ``T_moon=0.0``
     from the script itself is what turns it red.
+
+    Only the Moon term.  ``pack_from_pairs`` passes ``T_ant=0.0`` as
+    well, but this test is blind to it and does not claim it:
+    ``instrument.covariance``'s own ``T_ant`` default is already
+    ``0.0``, so dropping that argument from the script is a no-op and
+    no assertion can distinguish it.
     """
     from step_ionly import pack_from_pairs
 
@@ -347,21 +414,36 @@ def test_parent_bin_leakage_matches_the_published_stokes_ratio():
     index choice is worth ~1e-2 in ``u``.
 
     What does not depend on the index is the *track*: the published
-    point has to lie on it, near the sky maximum.  Both assertions
+    point has to lie on it, near the sky maximum.  The assertions
     below are that statement.
 
-    Tolerance arithmetic (measured, Task 17 Step 4 -- re-measure before
-    changing it, do not widen it):
+    Which number does that pin?  The track's unit tangent at the
+    closest approach is ``(0.0899, 0.9959)`` -- almost exactly along
+    ``u``.  A closest-approach statistic constrains only the component
+    of the error *normal* to the track, so this pins ``q``, to about
+    +-0.15%, and only loosely bounds ``u``: ``u += +0.006`` (19% of
+    the published ``u``) passes the distance assertion, as does a
+    +4 degree rotation of the ``(q, u)`` plane, which scores *better*
+    than the truth (6.223e-5).  Do not quote the number below as a
+    two-component agreement.  (The index assertion at the bottom
+    rejects both of those; see the comment there for what it does and
+    does not buy.)
 
-        legacy (pixel-arm) closest approach to published   6.23e-4
-        harmonic minus legacy, in quadrature on (q, u)     8.2e-5
-        sum                                                7.05e-4
-        tolerance below                                    1.0e-3
+    Tolerance arithmetic, budgeted from the published claim rather
+    than fitted to the measurement it bounds (do not widen it):
 
-    The legacy term is itself inside the 7.07e-4 that the published
-    pair's own three-decimal rounding allows (5e-4 in each of q and
-    u), so it is consistent with an exact match, not with a bias.
-    Measured on the harmonic artifact: 6.85e-4, at 0.99892 of peak I.
+        three-decimal rounding of (0.146, -0.032), in
+        quadrature -- 5e-4 allowed in each of q and u       7.07e-4
+        report.tex's own |I-only - full run| claim          2.00e-4
+        budget                                              9.07e-4
+        tolerance below                                     1.0e-3
+
+    A correct I-only track therefore has to pass within 9.07e-4 of the
+    *quoted* pair, and both artifacts do: 6.85e-4 on the harmonic one
+    (at 0.99892 of peak I), 6.23e-4 on the legacy one.  That those are
+    larger than the published 2e-4 is not a discrepancy -- 2e-4 bounds
+    the distance to the full run, while most of this budget is the
+    rounding of the number the full run was quoted to.
 
     The baseline file's ``atol`` of 2e-4 is deliberately *not* used
     here: in report.tex it bounds ``|I-only - full run|``, and the full
@@ -388,6 +470,22 @@ def test_parent_bin_leakage_matches_the_published_stokes_ratio():
     # the time of maximum sky signal -- not somewhere unrelated on the
     # track.  Measured: 0.99892 of the peak.
     assert S[it, 0] / S[:, 0].max() > 0.99
+    # The offset from the sky maximum was *measured, not derived*: it
+    # is +9 on all four artifacts on hand (harmonic lmax=30, ported
+    # legacy, pre-port legacy, harmonic lmax=48), so the bound below
+    # carries slack -- a beam or map update could legitimately move
+    # it.  What it buys is the tangential direction the distance test
+    # is blind to: every (q, u) attack that passes the two assertions
+    # above lands outside this bound -- u += +0.006 -> +4,
+    # u += -0.010 -> +19, and (q, u) rotations of +4, +5 and -2
+    # degrees -> -1, -3 and +14.  It does NOT close the
+    # rigid-time-shift blindness, and nothing index-based can: rolling
+    # q, u and I together moves `it` and `argmax I` by the same
+    # amount, and the published claim is itself index-free.
+    offset = it - int(np.argmax(S[:, 0]))
+    assert (
+        5 <= offset <= 13
+    ), f"closest approach at argmax(I) {offset:+d}, measured +9"
 
 
 @pytest.mark.slow
