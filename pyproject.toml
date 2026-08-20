@@ -22,7 +22,11 @@ dependencies = [
   "astropy",
   "healpy",
   "h5py",
-  "lunarsky",
+  # 0.2.6 and earlier crash on Python 3.14: MoonLocation.__copy__ does
+  # copy.copy(super()), and 3.14 added super to copy._copy_atomic_types,
+  # so the copy returns the proxy itself.  Fixed upstream in 0.2.7; the
+  # lock carries 1.0.1.post2, which is what the suite was validated on.
+  "lunarsky>=0.2.7",
   "jupyterlab>=4.5.5",
   "ipympl>=0.10.0",
   "jupyterlab-vim>=4.1.4",
