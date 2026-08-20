@@ -35,7 +35,7 @@ figures from those modules.
   `I, Q, U, V`.
 - The RM map (`data/faraday2020v2.hdf5`, key `faraday_sky_mean`, RING,
   nside 512) is used at native resolution in production. The nside sweeps in
-  the gate tests (Task 7) are the *test of pixelisation* that spec S6.1
+  the gate tests (Task 3) are the *test of pixelisation* that spec S6.1
   explicitly calls for — the only place regridding it is allowed.
 - Production modules must not import `pixel_arm`.
 - Formatting: `uv run black src/ tests/ scripts/` (line length 79), then
@@ -502,7 +502,227 @@ git commit -m "Add the f^k geometry pushforward, template folding and the knee"
 
 ---
 
-### Task 3: The chirp test — NUFFT vs uniform-grid FFT (S4.5, S6.8) and the BH4 window
+### Task 3: THE ACCEPTANCE GATES — shape invariance under refinement and null rotation (S6.1, S6.2) — **STOP POINT**
+
+**Files:**
+- Test: `tests/test_dispersion_gates.py` (create)
+
+**Interfaces:**
+- Consumes: `dispersion.depth_distribution`, `dispersion.phi_edges`,
+  `dispersion.half_power_knee`, `dispersion.fold_template`;
+  `data/faraday2020v2.hdf5` (skip when absent).
+
+These are the direct rebuttals of the audit's two findings. **If either
+fails, the design is refuted and nothing downstream is worth building
+(spec S7 step 2). Stop and report — do not continue to Task 4.**
+
+- [ ] **Step 1: Write the tests** — `tests/test_dispersion_gates.py`:
+
+```python
+"""Acceptance gates on the real RM map (spec S6.1, S6.2, S6.4, S6.6)."""
+
+import os
+
+os.environ.setdefault("JAX_ENABLE_X64", "1")
+
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from lusee_faraday import dispersion as dsp
+
+DATA = Path(__file__).resolve().parents[1] / "data"
+RM_FILE = DATA / "faraday2020v2.hdf5"
+
+needs_rm = pytest.mark.skipif(
+    not RM_FILE.exists(), reason="needs data/faraday2020v2.hdf5"
+)
+
+
+def _rm_map():
+    import h5py
+
+    with h5py.File(RM_FILE, "r") as f:
+        return np.asarray(f["faraday_sky_mean"][:], dtype=float)
+
+
+def _rm_at_nside(rm512, nside):
+    import healpy as hp
+
+    if nside == 512:
+        return rm512
+    if nside < 512:
+        return hp.ud_grade(rm512, nside)
+    th, ph = hp.pix2ang(nside, np.arange(hp.nside2npix(nside)))
+    return hp.get_interp_val(rm512, th, ph)
+
+
+def _normalized_template(rm, k):
+    edges = dsp.phi_edges(30.0)
+    w2 = np.full(rm.size, 1.0 / rm.size)
+    H = dsp.depth_distribution(rm, w2, edges, k=k)
+    return dsp.phi_centers(edges), H / H.sum()
+
+
+def _cdf_distance(Ha, Hb):
+    return float(np.abs(np.cumsum(Ha) - np.cumsum(Hb)).max())
+
+
+@needs_rm
+@pytest.mark.parametrize("k", [np.inf, 0.0])
+def test_gate1_shape_invariance_under_refinement(k):
+    """S6.1: nside 256/512/1024/2048 templates agree; the old coherent
+    amplitude falls.  Tolerance: 1% Kolmogorov distance, 2% knee shift.
+    """
+    from lusee_faraday.conventions import lambda_squared
+
+    rm512 = _rm_map()
+    lam2_0 = float(np.asarray(lambda_squared(30.0)))
+    templates, knees, coherent = {}, {}, {}
+    for nside in (256, 512, 1024, 2048):
+        rm = _rm_at_nside(rm512, nside)
+        c, H = _normalized_template(rm, k)
+        templates[nside] = H
+        knees[nside] = dsp.half_power_knee(*dsp.fold_template(c, H))
+        # the audit's shot-noise observable: |mean e^{2 i phi lam2}|^2
+        z = np.exp(2j * rm * lam2_0)
+        coherent[nside] = abs(z.mean()) ** 2
+    pairs = [(256, 512), (512, 1024), (1024, 2048)]
+    for a, b in pairs:
+        d = _cdf_distance(templates[a], templates[b])
+        assert d <= 0.01, (a, b, d)
+        rel = abs(knees[a] - knees[b]) / knees[b]
+        assert rel <= 0.02, (a, b, knees)
+    # contrast: the coherent power is NOT invariant (it fell ~1/N_pix)
+    assert coherent[2048] < 0.5 * coherent[256], coherent
+    print(f"\nk={k}: knees {knees}; coherent power {coherent}")
+
+
+@needs_rm
+def test_gate2_shape_invariance_under_null_rotation():
+    """S6.2: a rigid grid rotation is physically null.  It moved the old
+    |P| by 7.2x; the normalised template must be stable.
+    """
+    import healpy as hp
+
+    rm = _rm_map()
+    rot = hp.Rotator(rot=(40.0, 25.0, 10.0), deg=True)
+    rm_rot = rot.rotate_map_pixel(rm)
+    for k in (np.inf, 0.0):
+        c, H = _normalized_template(rm, k)
+        _, Hr = _normalized_template(rm_rot, k)
+        d = _cdf_distance(H, Hr)
+        assert d <= 0.01, (k, d)
+        knee = dsp.half_power_knee(*dsp.fold_template(c, H))
+        knee_r = dsp.half_power_knee(*dsp.fold_template(c, Hr))
+        assert abs(knee - knee_r) / knee <= 0.02
+
+
+@needs_rm
+def test_gate_knee_location_and_extent():
+    """S6.4: knee between p50 and p99 of |RM|; support reaches max."""
+    rm = _rm_map()
+    c, H = _normalized_template(rm, 0.0)
+    phi_abs, Hf = dsp.fold_template(c, H)
+    knee = dsp.half_power_knee(phi_abs, Hf)
+    p50, p99 = np.percentile(np.abs(rm), [50.0, 99.0])
+    assert p50 <= knee <= p99, (knee, p50, p99)
+    # extent: nonzero mass out to the map maximum (lower bound, S4.2)
+    mx = np.abs(rm).max()
+    assert Hf[phi_abs > 0.98 * mx].sum() > 0
+```
+
+- [ ] **Step 2: Run the gates**
+
+Run: `uv run pytest tests/test_dispersion_gates.py -v -s`
+Expected: PASS with the knee and coherent-power sequences printed
+(runtime a few minutes; the nside-2048 interpolation is ~50M points).
+
+- [ ] **Step 3: STOP-POINT review**
+
+If gate 1 or gate 2 FAILS: **stop the plan**. Commit the failing tests with
+an `xfail` marker and a message stating the design is refuted at which gate,
+and report to the user (spec S7 step 2). Do not proceed to Task 4.
+
+- [ ] **Step 4: Commit (gates green)**
+
+```bash
+uv run black tests/test_dispersion_gates.py
+git add tests/test_dispersion_gates.py
+git commit -m "Pass the acceptance gates: shape invariant, amplitude was the shot noise"
+```
+
+---
+
+### Task 4: Converged-regime agreement (S6.6)
+
+**Files:**
+- Test: `tests/test_dispersion_gates.py` (append)
+
+- [ ] **Step 1: Write the test** — append:
+
+```python
+WMAP_FILE = DATA / "wmap_band_iqumap_r9_9yr_K_v5.fits"
+
+needs_wmap = pytest.mark.skipif(
+    not WMAP_FILE.exists(), reason="needs the WMAP K map"
+)
+
+
+def _wmap_qu():
+    import healpy as hp
+    from astropy.io import fits
+
+    from lusee_faraday.config import T_CMB
+
+    x = 6.62607015e-34 * 23e9 / (1.380649e-23 * T_CMB)
+    fconv = x**2 * np.exp(x) / (np.exp(x) - 1) ** 2
+    with fits.open(WMAP_FILE) as h:
+        d = h["Stokes Maps"].data
+        Q = d["Q_POLARISATION"].astype(np.float64) * 1e-3 * fconv
+        U = d["U_POLARISATION"].astype(np.float64) * 1e-3 * fconv
+    return hp.reorder(Q, n2r=True), hp.reorder(U, n2r=True)
+
+
+@needs_rm
+@needs_wmap
+def test_converged_regime_points_match_direct_sum():
+    """S6.6: the RM x 0.02 positive control.  In the converged regime
+    the type-3 NUFFT on raw pixel depths reproduces the direct coherent
+    sum to four digits, with the real polarised sky as weights.
+    """
+    from lusee_faraday.config import fine_freqs
+    from lusee_faraday.conventions import lambda_squared
+
+    rm = 0.02 * _rm_map()
+    Q, U = _wmap_qu()
+    c = (Q + 1j * U) / len(rm)
+    freqs = fine_freqs(30.0)[::256]  # 64 frequencies
+    lam2 = np.asarray(lambda_squared(freqs), dtype=float)
+    # direct chunked sum
+    direct = np.zeros(lam2.size, dtype=complex)
+    for i in range(0, rm.size, 500_000):
+        s = slice(i, i + 500_000)
+        direct += np.exp(2j * np.outer(lam2, rm[s])) @ c[s]
+    nufft = dsp.transform(rm, c, lam2)
+    np.testing.assert_allclose(nufft, direct, rtol=1e-4)
+```
+
+- [ ] **Step 2: Run, then commit**
+
+Run: `uv run pytest tests/test_dispersion_gates.py -v -k converged`
+Expected: PASS (this forces the finufft path: 3.1M x 64 > the direct-sum
+size switch).
+
+```bash
+git add tests/test_dispersion_gates.py
+git commit -m "Reproduce the converged-regime control through the NUFFT point path"
+```
+
+---
+
+### Task 5: The chirp test — NUFFT vs uniform-grid FFT (S4.5, S6.8) and the BH4 window
 
 **Files:**
 - Modify: `src/lusee_faraday/dispersion.py` (add `bh4_window`)
@@ -606,7 +826,7 @@ git commit -m "Pin the chirp as an analysis artifact and the BH4 sidelobe floor"
 
 ---
 
-### Task 4: Channel-response machinery — `zoom_bin_matrix`, `rmsf`, `bin_envelope`, `depth_horizon` (S4.6, S6.7, S6.9 instrument side)
+### Task 6: Channel-response machinery — `zoom_bin_matrix`, `rmsf`, `bin_envelope`, `depth_horizon` (S4.6, S6.7, S6.9 instrument side)
 
 **Files:**
 - Modify: `src/lusee_faraday/dispersion.py`
@@ -782,7 +1002,7 @@ git commit -m "Add the real-response RMSF and the Faraday depth horizon"
 
 ---
 
-### Task 5: The window dynamic-range budget (S4.8, S6.10)
+### Task 7: The window dynamic-range budget (S4.8, S6.10)
 
 **Files:**
 - Test: `tests/test_dispersion.py` (append)
@@ -842,7 +1062,7 @@ git commit -m "Compute the BH4 window budget against the amplitude bracket"
 
 ---
 
-### Task 6: Zoom aliasing (S4.6 item 3, S6.13)
+### Task 8: Zoom aliasing (S4.6 item 3, S6.13)
 
 **Files:**
 - Test: `tests/test_dispersion.py` (append)
@@ -897,226 +1117,6 @@ Expected: PASS (or a reportable finding, see the note).
 ```bash
 git add tests/test_dispersion.py
 git commit -m "Pin the zoom fold: an out-of-range depth images where the response says"
-```
-
----
-
-### Task 7: THE ACCEPTANCE GATES — shape invariance under refinement and null rotation (S6.1, S6.2) — **STOP POINT**
-
-**Files:**
-- Test: `tests/test_dispersion_gates.py` (create)
-
-**Interfaces:**
-- Consumes: `dispersion.depth_distribution`, `dispersion.phi_edges`,
-  `dispersion.half_power_knee`, `dispersion.fold_template`;
-  `data/faraday2020v2.hdf5` (skip when absent).
-
-These are the direct rebuttals of the audit's two findings. **If either
-fails, the design is refuted and nothing downstream is worth building
-(spec S7 step 2). Stop and report — do not continue to Task 8.**
-
-- [ ] **Step 1: Write the tests** — `tests/test_dispersion_gates.py`:
-
-```python
-"""Acceptance gates on the real RM map (spec S6.1, S6.2, S6.4, S6.6)."""
-
-import os
-
-os.environ.setdefault("JAX_ENABLE_X64", "1")
-
-from pathlib import Path
-
-import numpy as np
-import pytest
-
-from lusee_faraday import dispersion as dsp
-
-DATA = Path(__file__).resolve().parents[1] / "data"
-RM_FILE = DATA / "faraday2020v2.hdf5"
-
-needs_rm = pytest.mark.skipif(
-    not RM_FILE.exists(), reason="needs data/faraday2020v2.hdf5"
-)
-
-
-def _rm_map():
-    import h5py
-
-    with h5py.File(RM_FILE, "r") as f:
-        return np.asarray(f["faraday_sky_mean"][:], dtype=float)
-
-
-def _rm_at_nside(rm512, nside):
-    import healpy as hp
-
-    if nside == 512:
-        return rm512
-    if nside < 512:
-        return hp.ud_grade(rm512, nside)
-    th, ph = hp.pix2ang(nside, np.arange(hp.nside2npix(nside)))
-    return hp.get_interp_val(rm512, th, ph)
-
-
-def _normalized_template(rm, k):
-    edges = dsp.phi_edges(30.0)
-    w2 = np.full(rm.size, 1.0 / rm.size)
-    H = dsp.depth_distribution(rm, w2, edges, k=k)
-    return dsp.phi_centers(edges), H / H.sum()
-
-
-def _cdf_distance(Ha, Hb):
-    return float(np.abs(np.cumsum(Ha) - np.cumsum(Hb)).max())
-
-
-@needs_rm
-@pytest.mark.parametrize("k", [np.inf, 0.0])
-def test_gate1_shape_invariance_under_refinement(k):
-    """S6.1: nside 256/512/1024/2048 templates agree; the old coherent
-    amplitude falls.  Tolerance: 1% Kolmogorov distance, 2% knee shift.
-    """
-    from lusee_faraday.conventions import lambda_squared
-
-    rm512 = _rm_map()
-    lam2_0 = float(np.asarray(lambda_squared(30.0)))
-    templates, knees, coherent = {}, {}, {}
-    for nside in (256, 512, 1024, 2048):
-        rm = _rm_at_nside(rm512, nside)
-        c, H = _normalized_template(rm, k)
-        templates[nside] = H
-        knees[nside] = dsp.half_power_knee(*dsp.fold_template(c, H))
-        # the audit's shot-noise observable: |mean e^{2 i phi lam2}|^2
-        z = np.exp(2j * rm * lam2_0)
-        coherent[nside] = abs(z.mean()) ** 2
-    pairs = [(256, 512), (512, 1024), (1024, 2048)]
-    for a, b in pairs:
-        d = _cdf_distance(templates[a], templates[b])
-        assert d <= 0.01, (a, b, d)
-        rel = abs(knees[a] - knees[b]) / knees[b]
-        assert rel <= 0.02, (a, b, knees)
-    # contrast: the coherent power is NOT invariant (it fell ~1/N_pix)
-    assert coherent[2048] < 0.5 * coherent[256], coherent
-    print(f"\nk={k}: knees {knees}; coherent power {coherent}")
-
-
-@needs_rm
-def test_gate2_shape_invariance_under_null_rotation():
-    """S6.2: a rigid grid rotation is physically null.  It moved the old
-    |P| by 7.2x; the normalised template must be stable.
-    """
-    import healpy as hp
-
-    rm = _rm_map()
-    rot = hp.Rotator(rot=(40.0, 25.0, 10.0), deg=True)
-    rm_rot = rot.rotate_map_pixel(rm)
-    for k in (np.inf, 0.0):
-        c, H = _normalized_template(rm, k)
-        _, Hr = _normalized_template(rm_rot, k)
-        d = _cdf_distance(H, Hr)
-        assert d <= 0.01, (k, d)
-        knee = dsp.half_power_knee(*dsp.fold_template(c, H))
-        knee_r = dsp.half_power_knee(*dsp.fold_template(c, Hr))
-        assert abs(knee - knee_r) / knee <= 0.02
-
-
-@needs_rm
-def test_gate_knee_location_and_extent():
-    """S6.4: knee between p50 and p99 of |RM|; support reaches max."""
-    rm = _rm_map()
-    c, H = _normalized_template(rm, 0.0)
-    phi_abs, Hf = dsp.fold_template(c, H)
-    knee = dsp.half_power_knee(phi_abs, Hf)
-    p50, p99 = np.percentile(np.abs(rm), [50.0, 99.0])
-    assert p50 <= knee <= p99, (knee, p50, p99)
-    # extent: nonzero mass out to the map maximum (lower bound, S4.2)
-    mx = np.abs(rm).max()
-    assert Hf[phi_abs > 0.98 * mx].sum() > 0
-```
-
-- [ ] **Step 2: Run the gates**
-
-Run: `uv run pytest tests/test_dispersion_gates.py -v -s`
-Expected: PASS with the knee and coherent-power sequences printed
-(runtime a few minutes; the nside-2048 interpolation is ~50M points).
-
-- [ ] **Step 3: STOP-POINT review**
-
-If gate 1 or gate 2 FAILS: **stop the plan**. Commit the failing tests with
-an `xfail` marker and a message stating the design is refuted at which gate,
-and report to the user (spec S7 step 2). Do not proceed to Task 8.
-
-- [ ] **Step 4: Commit (gates green)**
-
-```bash
-uv run black tests/test_dispersion_gates.py
-git add tests/test_dispersion_gates.py
-git commit -m "Pass the acceptance gates: shape invariant, amplitude was the shot noise"
-```
-
----
-
-### Task 8: Converged-regime agreement (S6.6)
-
-**Files:**
-- Test: `tests/test_dispersion_gates.py` (append)
-
-- [ ] **Step 1: Write the test** — append:
-
-```python
-WMAP_FILE = DATA / "wmap_band_iqumap_r9_9yr_K_v5.fits"
-
-needs_wmap = pytest.mark.skipif(
-    not WMAP_FILE.exists(), reason="needs the WMAP K map"
-)
-
-
-def _wmap_qu():
-    import healpy as hp
-    from astropy.io import fits
-
-    from lusee_faraday.config import T_CMB
-
-    x = 6.62607015e-34 * 23e9 / (1.380649e-23 * T_CMB)
-    fconv = x**2 * np.exp(x) / (np.exp(x) - 1) ** 2
-    with fits.open(WMAP_FILE) as h:
-        d = h["Stokes Maps"].data
-        Q = d["Q_POLARISATION"].astype(np.float64) * 1e-3 * fconv
-        U = d["U_POLARISATION"].astype(np.float64) * 1e-3 * fconv
-    return hp.reorder(Q, n2r=True), hp.reorder(U, n2r=True)
-
-
-@needs_rm
-@needs_wmap
-def test_converged_regime_points_match_direct_sum():
-    """S6.6: the RM x 0.02 positive control.  In the converged regime
-    the type-3 NUFFT on raw pixel depths reproduces the direct coherent
-    sum to four digits, with the real polarised sky as weights.
-    """
-    from lusee_faraday.config import fine_freqs
-    from lusee_faraday.conventions import lambda_squared
-
-    rm = 0.02 * _rm_map()
-    Q, U = _wmap_qu()
-    c = (Q + 1j * U) / len(rm)
-    freqs = fine_freqs(30.0)[::256]  # 64 frequencies
-    lam2 = np.asarray(lambda_squared(freqs), dtype=float)
-    # direct chunked sum
-    direct = np.zeros(lam2.size, dtype=complex)
-    for i in range(0, rm.size, 500_000):
-        s = slice(i, i + 500_000)
-        direct += np.exp(2j * np.outer(lam2, rm[s])) @ c[s]
-    nufft = dsp.transform(rm, c, lam2)
-    np.testing.assert_allclose(nufft, direct, rtol=1e-4)
-```
-
-- [ ] **Step 2: Run, then commit**
-
-Run: `uv run pytest tests/test_dispersion_gates.py -v -k converged`
-Expected: PASS (this forces the finufft path: 3.1M x 64 > the direct-sum
-size switch).
-
-```bash
-git add tests/test_dispersion_gates.py
-git commit -m "Reproduce the converged-regime control through the NUFFT point path"
 ```
 
 ---
@@ -2502,16 +2502,17 @@ git commit -m "Document the delay-template layer and record step 5"
 
 ## Self-Review (performed while writing)
 
-- **Spec coverage:** S3 (Task 1–2), S4.1 (1–4), S4.2/S4.2.1/S4.2.2
-  (2, 13), S4.3 (10, 13), S4.4/S4.4.1 (9), S4.5 (3, 16 §10), S4.6
-  (4, 6, 12, 16 §11), S4.7 (no task — it is a prohibition: nothing here
-  imports the polarimeter into the diffuse path), S4.8 (5), S4.9 (13),
-  S4.10 (11, 14), S5 deliverables (12–16), S6.1/6.2 (7), 6.3 (1), 6.4
-  (7 + 13), 6.5 (13), 6.6 (8), 6.7 (4), 6.8 (3), 6.9 (4 + 12), 6.10 (5),
-  6.11 (13), 6.12 (11), 6.13 (6), 6.14 (13), 6.15 (9 + 13), S7 ordering
-  respected with the stop point at Task 7.
-- **Known open risk carried from the spec:** if Task 6's aliasing peak is
-  not at the wrap-predicted position, or Task 7's gates fail, stop and
+- **Spec coverage:** S3 (Task 1–2), S4.1 (1–2, 5–6), S4.2/S4.2.1/S4.2.2
+  (2, 13), S4.3 (10, 13), S4.4/S4.4.1 (9), S4.5 (5, 16 §10), S4.6
+  (6, 8, 12, 16 §11), S4.7 (no task — it is a prohibition: nothing here
+  imports the polarimeter into the diffuse path), S4.8 (7), S4.9 (13),
+  S4.10 (11, 14), S5 deliverables (12–16), S6.1/6.2 (3), 6.3 (1), 6.4
+  (3 + 13), 6.5 (13), 6.6 (4), 6.7 (6), 6.8 (5), 6.9 (6 + 12), 6.10 (7),
+  6.11 (13), 6.12 (11), 6.13 (8), 6.14 (13), 6.15 (9 + 13), S7's ordering is kept except that the acceptance gates run at Task 3,
+  ahead of the remaining no-map tasks: they are the kill criterion and
+  depend only on Tasks 1–2, so nothing disposable is built before them.
+- **Known open risk carried from the spec:** if Task 8's aliasing peak is
+  not at the wrap-predicted position, or Task 3's gates fail, stop and
   report — those are spec-mandated findings, not bugs to fix silently.
 - **Type consistency:** `depth_distribution(phi_col, w2, edges, k)`,
   `transform(phi, F, lam2_targets)`, `delay_power(spectrum, freqs_mhz,
