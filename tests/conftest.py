@@ -1,41 +1,17 @@
-from pathlib import Path
+"""Shared test configuration.
 
-import numpy as np
-import pytest
+The x64 setdefault is a backstop: pytest imports ``conftest.py`` before
+any test module, so it holds even for a module that forgets its own.
+Each test module still sets it at the top too, because a module run
+directly (``python tests/test_x.py``) never goes through conftest.
 
-import lusee_faraday as ld
+The former ``data_dir`` fixture was removed in the final fix round: no
+test requested it (``grep -rn data_dir tests/`` returned only its own
+definition), and the justification recorded for keeping it -- that
+``test_response_two_port.py`` used it -- was not true; that module
+builds synthetic dipoles.
+"""
 
-DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-NSIDE = 32  # low resolution for fast tests
+import os
 
-
-@pytest.fixture
-def data_dir():
-    return DATA_DIR
-
-
-@pytest.fixture
-def spec_response_path(data_dir):
-    return data_dir / "spectrometer_bin_response.txt"
-
-
-@pytest.fixture
-def spec_response(spec_response_path):
-    return ld.SpectrometerResponse.from_file(spec_response_path)
-
-
-@pytest.fixture
-def short_dipole():
-    beam = ld.Beam.short_dipole(nside=NSIDE)
-    beam.precompute_weights()
-    return beam
-
-
-@pytest.fixture
-def healpix_grid():
-    return ld.HealpixGrid(nside=NSIDE, horizon=True)
-
-
-@pytest.fixture
-def healpix_grid_full():
-    return ld.HealpixGrid(nside=NSIDE, horizon=False)
+os.environ.setdefault("JAX_ENABLE_X64", "1")

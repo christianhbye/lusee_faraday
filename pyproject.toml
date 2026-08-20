@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lusee_faraday"
-version = "0.0.1"
+version = "0.1.0"
 description = "Simulator of LUSEE Faraday rotation observations."
 readme = "README.md"
 license = {text = "MIT"}
 authors = [{ name="Christian Hellum Bye", email="cbh@berkeley.edu" }]
-requires-python = ">=3.9"
+requires-python = ">=3.12,<3.15"
 classifiers = [
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: MIT License",
@@ -22,11 +22,20 @@ dependencies = [
   "astropy",
   "healpy",
   "h5py",
-  "lunarsky",
+  # 0.2.6 and earlier crash on Python 3.14: MoonLocation.__copy__ does
+  # copy.copy(super()), and 3.14 added super to copy._copy_atomic_types,
+  # so the copy returns the proxy itself.  Fixed upstream in 0.2.7; the
+  # lock carries 1.0.1.post2, which is what the suite was validated on.
+  "lunarsky>=0.2.7",
   "jupyterlab>=4.5.5",
   "ipympl>=0.10.0",
   "jupyterlab-vim>=4.1.4",
   "pytest>=8.4.2",
+  "lusee",
+  "croissant-sim",
+  "finufft",
+  "fitsio",
+  "matplotlib",
 ]
 
 [project.optional-dependencies]
@@ -50,6 +59,18 @@ addopts = [
   "--junitxml=junit.xml",
   "-o junit_family=legacy",
 ]
+markers = ["slow: needs the 631 MB BGL_v16 response artifact"]
 
 [tool.black]
 line-length = 79
+
+[tool.uv.sources]
+lusee = { path = "../luseepy", editable = true }
+croissant-sim = { path = "/home/christian/Documents/projects/croissant-main", editable = true }
+
+[tool.uv]
+# luseepy main pins croissant-sim to a git rev; we deliberately use our
+# local checkout, which is 6 commits ahead of that pin.
+override-dependencies = [
+  "croissant-sim",
+]
