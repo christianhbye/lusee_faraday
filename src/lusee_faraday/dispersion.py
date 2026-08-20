@@ -80,3 +80,95 @@ def delay_power(spectrum, freqs_mhz, phi_out, window=None, eps=1e-12):
 
         P = finufft.nufft1d3(x, c, t, isign=-1, eps=eps)
     return np.abs(P / win.sum()) ** 2
+
+
+def _pushforward_onesided(phi_abs, w2, edges_abs, k):
+    """Per-bin mass of the f^k pushforward, all depths > 0.
+
+    CDF_n(e) = min(e / phi_n, 1)^(k+1); the per-bin mass is the CDF
+    difference summed over pixels.  Sorting once gives every edge in
+    O(log N): pixels with phi <= e contribute w2 fully; the rest
+    contribute w2 * (e / phi)^(k+1), whose pixel sum is a suffix sum.
+    """
+    order = np.argsort(phi_abs)
+    p = phi_abs[order]
+    w = w2[order]
+    q = k + 1.0
+    csum_w = np.concatenate([[0.0], np.cumsum(w)])
+    csum_wp = np.concatenate([[0.0], np.cumsum(w * p ** (-q))])
+    total_wp = csum_wp[-1]
+    e = np.clip(np.asarray(edges_abs, dtype=float), 0.0, None)
+    idx = np.searchsorted(p, e, side="right")
+    G = csum_w[idx] + e**q * (total_wp - csum_wp[idx])
+    return np.diff(G)
+
+
+def depth_distribution(phi_col, w2, edges, k=0.0):
+    """|w|^2-weighted pushforward of rho(f) ~ f^k through f*phi_col.
+
+    k = np.inf -> histogram of phi_col (all emission behind the column);
+    k = 0     -> uniform slab, superposition of top-hats [0, phi_col];
+    k = -1    -> all emission local, delta at phi = 0.
+    Requires k > -1 otherwise (the pushforward CDF is (e/phi)^(k+1)).
+    Spec S4.2.  Sums to w2.sum().
+    """
+    phi_col = np.asarray(phi_col, dtype=float).ravel()
+    w2 = np.asarray(w2, dtype=float).ravel()
+    edges = np.asarray(edges, dtype=float)
+    H = np.zeros(edges.size - 1)
+    zero_bin = np.searchsorted(edges, 0.0, side="right") - 1
+    if np.isinf(k):
+        H, _ = np.histogram(phi_col, bins=edges, weights=w2)
+        return H
+    if k <= -1.0:
+        H[zero_bin] = w2.sum()
+        return H
+    pos = phi_col > 1e-12
+    neg = phi_col < -1e-12
+    H[zero_bin] += w2[~(pos | neg)].sum()
+    if pos.any():
+        H += _pushforward_onesided(phi_col[pos], w2[pos], edges, k)
+    if neg.any():
+        e_abs = np.clip(-edges, 0.0, None)[::-1]
+        H += _pushforward_onesided(-phi_col[neg], w2[neg], e_abs, k)[::-1]
+    return H
+
+
+def fold_template(centers, H):
+    """Fold a signed-grid template onto |phi|; same bin width."""
+    centers = np.asarray(centers, dtype=float)
+    H = np.asarray(H, dtype=float)
+    dphi = centers[1] - centers[0]
+    n = int(np.ceil((np.abs(centers).max() + 0.5 * dphi) / dphi))
+    edges = dphi * np.arange(n + 1)
+    Hf, _ = np.histogram(np.abs(centers), bins=edges, weights=H)
+    return 0.5 * (edges[1:] + edges[:-1]), Hf
+
+
+def half_power_knee(phi_abs, H):
+    """The last |phi| where H crosses half its peak (spec S4.2.2)."""
+    phi_abs = np.asarray(phi_abs, dtype=float)
+    H = np.asarray(H, dtype=float)
+    half = 0.5 * H.max()
+    above = np.nonzero(H >= half)[0]
+    i = above[-1]
+    if i + 1 >= H.size or H[i] == H[i + 1]:
+        return float(phi_abs[i])
+    f = (H[i] - half) / (H[i] - H[i + 1])
+    return float(phi_abs[i] + f * (phi_abs[i + 1] - phi_abs[i]))
+
+
+def weighted_percentiles(values, weights, qs):
+    """Weighted percentiles (values at cumulative-weight fractions)."""
+    values = np.asarray(values, dtype=float).ravel()
+    weights = np.asarray(weights, dtype=float).ravel()
+    order = np.argsort(values)
+    v = values[order]
+    cw = np.cumsum(weights[order])
+    cw /= cw[-1]
+    return np.array(
+        [
+            v[np.searchsorted(cw, q / 100.0, side="left")]
+            for q in np.atleast_1d(qs)
+        ]
+    )
