@@ -1,5 +1,5 @@
 {
-  "_comment": "Published numbers the refactor must reproduce. Sources are report/report.tex and PROGRESS.md on branch croissant-crosscheck at commit afb3290. generated_data/ was empty, so these are the committed values, not re-derived.",
+  "_comment": "Prior results the refactor must reproduce, transcribed from report/report.tex and PROGRESS.md at the audit-2026-08-18 tag (afb3290). report.tex is NOT on main -- it is Slosar's write-up, whose diffuse-Faraday sections the audit refutes; every number pinned here is from a section the audit left standing (leakage, zenith calibration, point source). Line numbers below refer to report.tex at that tag. generated_data/ was empty when these were taken, so they are the committed values, not re-derived.",
   "point_source_phi_fd": 250.0,
   "band_centers_mhz": [30.0, 10.0, 50.0],
   "q_oscillation_period_khz": {
@@ -10,7 +10,7 @@
   "unpolarized_transit_leakage_raw": {
     "value": 0.134,
     "rtol": 0.02,
-    "source": "report.tex sec Step 0"
+    "source": "report.tex sec Step 0 @ audit-2026-08-18"
   },
   "unpolarized_transit_leakage_gains": {
     "value": 0.096,
@@ -29,23 +29,23 @@
   "zoom_recovery_real": {
     "value": 0.79,
     "rtol": 0.03,
-    "source": "report.tex line 235"
+    "source": "report.tex line 235 @ audit-2026-08-18"
   },
   "zoom_recovery_ideal": {
     "value": 0.86,
     "rtol": 0.03,
-    "source": "report.tex line 235"
+    "source": "report.tex line 235 @ audit-2026-08-18"
   },
   "parent_stokes_over_i_30mhz": {
     "q": 0.146,
     "u": -0.032,
     "atol": 2e-4,
-    "source": "report.tex line 425"
+    "source": "report.tex line 425 @ audit-2026-08-18"
   },
   "zenith_ortho_vectors_table1": {
     "_comment": "Zenith-calibrated ortho-mode polarimeter vectors x_p, y_p per band, ports [N, E, S, W], each entry [real, imag].",
     "atol": 1e-3,
-    "source": "report.tex Table 1 (tab:weights), lines 160-165",
+    "source": "report.tex Table 1 (tab:weights), lines 160-165 @ audit-2026-08-18",
     "ports": ["N", "E", "S", "W"],
     "bands": {
       "10": {

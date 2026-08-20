@@ -151,7 +151,11 @@ def legacy_reference(center):
             f"{path.name} is missing.  --analyze compares against "
             f"real{center:g}_binned.npz, a pixel-arm artifact, so the "
             "I-only side has to be the pixel arm too.  Run "
-            f"`step_ionly.py --engine legacy --centers {center:g}` first."
+            f"`step_ionly.py --engine legacy --centers {center:g}` first "
+            "-- and note that real{center:g}_binned.npz itself comes from "
+            "scripts/step2_real_sky.py, which is NOT on main: it is one of "
+            "the refuted diffuse analyses, reproducible at the "
+            "audit-2026-08-18 tag."
         )
     return path
 

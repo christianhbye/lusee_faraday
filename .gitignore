@@ -219,3 +219,7 @@ report/*.log
 report/*.out
 report/*.synctex.gz
 report/latex.log
+
+# The report lives on the audit-2026-08-18 tag, not on main; figures
+# here are regenerable output of the analysis scripts.
+report/
