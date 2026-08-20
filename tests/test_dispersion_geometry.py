@@ -5,6 +5,7 @@ import os
 os.environ.setdefault("JAX_ENABLE_X64", "1")
 
 import numpy as np
+import pytest
 
 from lusee_faraday import dispersion as dsp
 
@@ -45,6 +46,19 @@ def test_k_minus_one_is_all_local():
     )
     expected = np.array([0.0, 0.0, 4.0, 0.0])  # bin (0, 1) holds phi=0+
     np.testing.assert_allclose(H, expected)
+
+
+def test_k_below_minus_one_raises_valueerror():
+    """k < -1 is non-integrable; must raise ValueError, not silently wrong."""
+    edges = np.arange(-2.0, 2.5, 1.0)
+    phi_col = np.array([10.0])
+    w2 = np.array([1.0])
+    with pytest.raises(ValueError, match="k must be >= -1"):
+        dsp.depth_distribution(phi_col, w2, edges, k=-1.5)
+    with pytest.raises(ValueError, match="k must be >= -1"):
+        dsp.depth_distribution(phi_col, w2, edges, k=-2.0)
+    with pytest.raises(ValueError, match="k must be >= -1"):
+        dsp.depth_distribution(phi_col, w2, edges, k=-5.0)
 
 
 def test_support_extends_to_phi_col():
