@@ -27,6 +27,16 @@ def _rm_map():
 
 
 def _rm_at_nside(rm512, nside):
+    """Resample the native-nside map to any nside.
+
+    Note: the three nside pairs compared in gate 1 use different resampling
+    methods: (256, 512) compares ud_grade-smoothed vs native, (512, 1024)
+    compares native vs get_interp_val-upsampled, and (1024, 2048) compares
+    two interpolated maps. This mixes resolution and regridding together.
+    The measured tolerances are 50-500x inside budget, so the conclusion is
+    robust, but a future reader tightening these gates should unify the
+    operator first.
+    """
     import healpy as hp
 
     if nside == 512:
@@ -123,3 +133,49 @@ def test_gate_knee_location_and_extent():
     # extent: nonzero mass out to the map maximum (lower bound, S4.2)
     mx = np.abs(rm).max()
     assert Hf[phi_abs > 0.98 * mx].sum() > 0
+
+
+WMAP_FILE = DATA / "wmap_band_iqumap_r9_9yr_K_v5.fits"
+
+needs_wmap = pytest.mark.skipif(
+    not WMAP_FILE.exists(), reason="needs the WMAP K map"
+)
+
+
+def _wmap_qu():
+    import healpy as hp
+    from astropy.io import fits
+
+    from lusee_faraday.config import T_CMB
+
+    x = 6.62607015e-34 * 23e9 / (1.380649e-23 * T_CMB)
+    fconv = x**2 * np.exp(x) / (np.exp(x) - 1) ** 2
+    with fits.open(WMAP_FILE) as h:
+        d = h["Stokes Maps"].data
+        Q = d["Q_POLARISATION"].astype(np.float64) * 1e-3 * fconv
+        U = d["U_POLARISATION"].astype(np.float64) * 1e-3 * fconv
+    return hp.reorder(Q, n2r=True), hp.reorder(U, n2r=True)
+
+
+@needs_rm
+@needs_wmap
+def test_converged_regime_points_match_direct_sum():
+    """S6.6: the RM x 0.02 positive control.  In the converged regime
+    the type-3 NUFFT on raw pixel depths reproduces the direct coherent
+    sum to four digits, with the real polarised sky as weights.
+    """
+    from lusee_faraday.config import fine_freqs
+    from lusee_faraday.conventions import lambda_squared
+
+    rm = 0.02 * _rm_map()
+    Q, U = _wmap_qu()
+    c = (Q + 1j * U) / len(rm)
+    freqs = fine_freqs(30.0)[::256]  # 64 frequencies
+    lam2 = np.asarray(lambda_squared(freqs), dtype=float)
+    # direct chunked sum
+    direct = np.zeros(lam2.size, dtype=complex)
+    for i in range(0, rm.size, 500_000):
+        s = slice(i, i + 500_000)
+        direct += np.exp(2j * np.outer(lam2, rm[s])) @ c[s]
+    nufft = dsp.transform(rm, c, lam2)
+    np.testing.assert_allclose(nufft, direct, rtol=1e-4)
