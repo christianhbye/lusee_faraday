@@ -81,6 +81,30 @@ def test_fold_and_knee():
     assert 3.0 < knee < 4.5
 
 
+def test_mass_quantile_knee_uniform_mass():
+    """Five equal-mass bins: the q-quantile lands at the bin whose
+    cumulative mass first reaches q (Ruling R10)."""
+    phi_abs = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+    H = np.ones(5)  # cumulative fractions 0.2, 0.4, 0.6, 0.8, 1.0
+    assert dsp.mass_quantile_knee(phi_abs, H, q=0.5) == 2.0
+    assert dsp.mass_quantile_knee(phi_abs, H, q=0.9) == 4.0
+    assert dsp.mass_quantile_knee(phi_abs, H) == 4.0  # default q=0.90
+
+
+def test_mass_quantile_knee_ignores_a_narrow_origin_spike():
+    """Unlike half_power_knee, a tall-but-narrow spike that holds only
+    a modest mass fraction does not drag a quantile computed well
+    past it (Ruling R10: half_power_knee is peak-relative and gets
+    pinned to the spike; mass_quantile_knee is cumulative-mass-based
+    and is not)."""
+    phi_abs = np.arange(11.0)  # 0..10
+    H = np.array([100.0] + [1.0] * 10)  # spike holds 100/110 = 90.9%
+    # half_power_knee is dragged to the spike's edge:
+    assert dsp.half_power_knee(phi_abs, H) < 1.0
+    # the 95%-mass quantile lands well past it, in the flat tail
+    assert dsp.mass_quantile_knee(phi_abs, H, q=0.95) == 5.0
+
+
 def test_weighted_percentiles():
     v = np.array([1.0, 2.0, 3.0, 4.0])
     w = np.array([1.0, 1.0, 1.0, 97.0])

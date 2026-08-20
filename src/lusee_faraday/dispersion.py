@@ -163,6 +163,23 @@ def half_power_knee(phi_abs, H):
     return float(phi_abs[i] + f * (phi_abs[i + 1] - phi_abs[i]))
 
 
+def mass_quantile_knee(phi_abs, H, q=0.90):
+    """Depth containing a fraction ``q`` of the folded template's mass.
+
+    The roll-off statistic of spec S4.2.2.  A CDF quantile, not a
+    peak-relative threshold: it never references ``H.max()``, so the
+    spike the k=0 slab piles up at the origin cannot move it, and a
+    rigid map rotation -- which only permutes pixels -- leaves it
+    invariant by construction.  ``half_power_knee`` is the
+    peak-relative statistic this replaced; the gates print both.
+    """
+    phi_abs = np.asarray(phi_abs, dtype=float)
+    H = np.asarray(H, dtype=float)
+    cum = np.cumsum(H)
+    cum = cum / cum[-1]
+    return float(phi_abs[np.searchsorted(cum, float(q))])
+
+
 def weighted_percentiles(values, weights, qs):
     """Weighted percentiles (values at cumulative-weight fractions)."""
     values = np.asarray(values, dtype=float).ravel()
