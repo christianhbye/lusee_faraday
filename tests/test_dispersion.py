@@ -53,8 +53,12 @@ def test_tophat_is_sinc_with_the_right_factor():
 
 
 def test_gaussian_is_burn():
-    """F Gaussian width sigma -> |P| = exp(-2 sigma^2 lam2^2)."""
-    sigma = 0.05
+    """F Gaussian width sigma -> |P| = exp(-2 sigma^2 lam2^2).
+
+    sigma=0.02: the exponent is 2 sigma^2 (lam2)^2 ~ 8.0 (O(1)), keeping
+    expected ~ 3e-04 far above the ~5e-16 floor set by +-8 sigma truncation.
+    """
+    sigma = 0.02
     n = 1 << 15
     phi = np.linspace(-8 * sigma, 8 * sigma, n)
     F = np.exp(-0.5 * (phi / sigma) ** 2)
