@@ -109,7 +109,8 @@ def depth_distribution(phi_col, w2, edges, k=0.0):
     k = np.inf -> histogram of phi_col (all emission behind the column);
     k = 0     -> uniform slab, superposition of top-hats [0, phi_col];
     k = -1    -> all emission local, delta at phi = 0.
-    Requires k > -1 otherwise (the pushforward CDF is (e/phi)^(k+1)).
+    k must be >= -1 (the pushforward CDF is (e/phi)^(k+1), non-integrable
+    at f = 0 for k < -1).
     Spec S4.2.  Sums to w2.sum().
     """
     phi_col = np.asarray(phi_col, dtype=float).ravel()
@@ -120,7 +121,11 @@ def depth_distribution(phi_col, w2, edges, k=0.0):
     if np.isinf(k):
         H, _ = np.histogram(phi_col, bins=edges, weights=w2)
         return H
-    if k <= -1.0:
+    if k < -1.0:
+        raise ValueError(
+            "k must be >= -1: rho ~ f^k is not integrable at f = 0"
+        )
+    if k == -1.0:
         H[zero_bin] = w2.sum()
         return H
     pos = phi_col > 1e-12
