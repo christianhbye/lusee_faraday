@@ -68,7 +68,7 @@ re-typing any of the following. Validated in
 
 - Response frame: cartesian x=East, y=North, z=zenith → proper rotation
   from galactic; grid phi = 90° − astronomical azimuth.
-  (`conventions`, `_legacy_pixel.topo_rotation_matrix`)
+  (`conventions`, `pixel_arm.topo_rotation_matrix`)
 - Ports 0,1,2,3 = N,E,S,W. 16 real channels ordered as
   `lusee.Covariance.default_product_labels()`. (`conventions.PORT_PAIRS`,
   `conventions.PRODUCT_LABELS`)
@@ -124,7 +124,7 @@ re-typing any of the following. Validated in
 - **Harmonic** (`response` + `engine` + `instrument`) is the production
   path. Its correctness gate is `tests/test_engine_gate.py`: 6.8e-16
   against luseepy's own convolution.
-- **Pixel** (`_legacy_pixel.py`) is a validation arm.
+- **Pixel** (`pixel_arm.py`) is a validation arm.
   *Production code must not import it.* It survives because an
   independent quadrature is what makes `scripts/crosscheck_pixel_arm.py`
   meaningful, and because the diffuse scripts still run on it.
@@ -161,13 +161,13 @@ below too; it was missing from earlier revisions of this table.
   fractional-effect table numbers. *new stack (harmonic default)*
 - `scripts/step2_real_sky.py --center {30,10,50}` — real-sky
   waterfalls (~80 min each); `step2_plots.py --center C` — figures.
-  *deliberately still on `_legacy_pixel`*
+  *deliberately still on `pixel_arm`*
 - `scripts/step4_power_spectra.py --centers 30 10 50` — 2D delay
   spectra, delay profiles, zoom deconvolution.
-  *deliberately still on `_legacy_pixel`*
+  *deliberately still on `pixel_arm`*
 - `scripts/beam_ablation.py`, `scripts/compare_main_vs_asbuilt.py` —
   response ablations and the Fig-4 lineage.
-- `tests/test_legacy_pixel.py` — data-free unit tests for the pixel arm.
+- `tests/testpixel_arm.py` — data-free unit tests for the pixel arm.
 - Report: `report/report.tex` (pdflatex twice; needs amssymb).
 
 ## Workflow rules

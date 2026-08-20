@@ -40,7 +40,7 @@
 | `src/lusee_faraday/instrument.py` | NEW. luseepy covariance assembly: open covariance -> loading -> hermitian -> 16 packed channels. |
 | `src/lusee_faraday/polarimeter.py` | NEW. Zenith calibration (gains + Loewdin ortho) and pseudo-Stokes. |
 | `src/lusee_faraday/channelization.py` | NEW. Parent/zoom/ideal bin weights on `lusee.spectrometer_response*`, integration, zoom frequency grid. |
-| `src/lusee_faraday/_legacy_pixel.py` | MOVED from `fourport.py`. Validation arm only; never imported by production code. |
+| `src/lusee_faraday/pixel_arm.py` | MOVED from `fourport.py`. Validation arm only; never imported by production code. |
 | `src/lusee_faraday/__init__.py` | MODIFIED. New public surface. |
 | DELETED | `beam.py`, `sim.py`, `fast_sim.py`, `healpix.py`, `rotations.py`, `spectrometer.py`, `utils.py`, and their tests. |
 
@@ -3730,8 +3730,8 @@ git commit -m "Port the I-only leakage reference onto the new stack"
 **Files:**
 - Delete: `src/lusee_faraday/beam.py`, `sim.py`, `fast_sim.py`, `healpix.py`, `rotations.py`, `utils.py`
 - Delete: `tests/test_beam.py`, `test_sim.py`, `test_fast_sim.py`, `test_healpix.py`, `test_rotations.py`, `test_utils.py`
-- Rename: `src/lusee_faraday/fourport.py` -> `src/lusee_faraday/_legacy_pixel.py`
-- Rename: `tests/test_fourport.py` -> `tests/test_legacy_pixel.py`
+- Rename: `src/lusee_faraday/fourport.py` -> `src/lusee_faraday/pixel_arm.py`
+- Rename: `tests/test_fourport.py` -> `tests/testpixel_arm.py`
 - Move: `notebooks/faraday_sims.py` -> `notebooks/archive/faraday_sims.py`
 - Modify: `src/lusee_faraday/__init__.py`, `tests/conftest.py`
 - Modify: `scripts/step2_real_sky.py`, `step2_plots.py`, `step4_power_spectra.py`, `validate_engine.py`, `beam_ablation.py`, `crosscheck_pixel_arm.py`
@@ -3768,20 +3768,20 @@ git mv notebooks/faraday_sims.py notebooks/archive/faraday_sims.py
 - [ ] **Step 3: Demote the pixel engine to the legacy arm**
 
 ```bash
-git mv src/lusee_faraday/fourport.py src/lusee_faraday/_legacy_pixel.py
-git mv tests/test_fourport.py tests/test_legacy_pixel.py
-sed -i 's/from lusee_faraday import fourport as fp/from lusee_faraday import _legacy_pixel as fp/' \
+git mv src/lusee_faraday/fourport.py src/lusee_faraday/pixel_arm.py
+git mv tests/test_fourport.py tests/testpixel_arm.py
+sed -i 's/from lusee_faraday import fourport as fp/from lusee_faraday import pixel_arm as fp/' \
   scripts/step2_real_sky.py scripts/step2_plots.py \
   scripts/step4_power_spectra.py scripts/validate_engine.py \
   scripts/crosscheck_pixel_arm.py
-sed -i 's/from lusee_faraday import fourport as fp/from lusee_faraday import _legacy_pixel as fp/' \
-  tests/test_legacy_pixel.py
+sed -i 's/from lusee_faraday import fourport as fp/from lusee_faraday import pixel_arm as fp/' \
+  tests/testpixel_arm.py
 grep -rn "fourport" src tests scripts --include=*.py
 ```
 
 Expected: the final grep returns nothing. `scripts/beam_ablation.py` imports `fp` too — check it and update it the same way if the sed missed it.
 
-Add this banner at the top of `src/lusee_faraday/_legacy_pixel.py`, above the existing docstring:
+Add this banner at the top of `src/lusee_faraday/pixel_arm.py`, above the existing docstring:
 
 ```python
 """LEGACY pixel-space four-port engine -- validation arm only.
@@ -3864,8 +3864,8 @@ Expected: green, with the `slow` tests skipped unless the BGL_v16 artifact is pr
 
 - [ ] **Step 7: Update the documentation**
 
-- `CLAUDE.md`: replace the Architecture section. The pipeline is now **Sky components -> Faraday coefficients -> harmonic contraction -> luseepy covariance -> polarimeter -> channelization**. Point the reader at `docs/measurement-model.md` for the model behind it. Describe `FaradaySky`, `response`, `engine`, `instrument`, `polarimeter`, `channelization`; delete `SkyModel`, `Beam`, `Simulator`, `HealpixGrid`, `SpectrometerResponse`, `rotations`. Note that `_legacy_pixel.py` is a validation arm production code must not import.
-- `AGENTS.md`: keep the pinned conventions (they are unchanged) but point them at `lusee_faraday.conventions` and `lusee_faraday.config` as the single source of truth. Update the script inventory: `zenith_weights`, `step1_*` and `step_ionly` are on the new stack; `step2_real_sky` and `step4_power_spectra` are deliberately still on `_legacy_pixel`.
+- `CLAUDE.md`: replace the Architecture section. The pipeline is now **Sky components -> Faraday coefficients -> harmonic contraction -> luseepy covariance -> polarimeter -> channelization**. Point the reader at `docs/measurement-model.md` for the model behind it. Describe `FaradaySky`, `response`, `engine`, `instrument`, `polarimeter`, `channelization`; delete `SkyModel`, `Beam`, `Simulator`, `HealpixGrid`, `SpectrometerResponse`, `rotations`. Note that `pixel_arm.py` is a validation arm production code must not import.
+- `AGENTS.md`: keep the pinned conventions (they are unchanged) but point them at `lusee_faraday.conventions` and `lusee_faraday.config` as the single source of truth. Update the script inventory: `zenith_weights`, `step1_*` and `step_ionly` are on the new stack; `step2_real_sky` and `step4_power_spectra` are deliberately still on `pixel_arm`.
 - `PROGRESS.md`: add a "Refactor onto luseepy + croissant" section recording what moved, what was deleted, the cross-check numbers from Task 7, and the regression results from Tasks 15-17.
 - `SETUP-CROSSCHECK.md`: correct the croissant pin (the worktree is at `1c4d6c5`, not `da01c5a`) and record the Task-1 finding about `_low_pass_in_one_step`.
 
@@ -3877,7 +3877,7 @@ git commit -m "Retire the two-port stack; demote the pixel engine to a validatio
 
 The old simulator (sky/beam/sim/fast_sim/healpix/rotations/utils) is
 gone, along with the interp_hp pole artifact and the healpy.Rotator
-machinery. fourport.py becomes _legacy_pixel.py: an independent
+machinery. fourport.py becomes pixel_arm.py: an independent
 quadrature kept for cross-checks and for the diffuse scripts the audit
 showed are not headed for the paper.
 

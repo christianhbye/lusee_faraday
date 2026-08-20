@@ -22,7 +22,7 @@ import numpy as np  # noqa: E402
 import pytest  # noqa: E402
 
 from lusee_faraday import channelization as chan  # noqa: E402
-from lusee_faraday import _legacy_pixel as fp  # noqa: E402
+from lusee_faraday import pixel_arm as fp  # noqa: E402
 from lusee_faraday import instrument as inst  # noqa: E402
 from lusee_faraday import response as rsp  # noqa: E402
 

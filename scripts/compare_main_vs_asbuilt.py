@@ -159,7 +159,7 @@ class MainBeam:
 class AsBuilt:
     def __init__(self, path, frequency=30.0):
         from lusee.ReceiverImpedance import JFETReceiver
-        from lusee_faraday import _legacy_pixel as fp
+        from lusee_faraday import pixel_arm as fp
 
         self.fp = fp
         resp = fp.load_response_fast(str(path))

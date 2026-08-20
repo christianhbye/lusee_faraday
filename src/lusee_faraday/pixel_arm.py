@@ -1,14 +1,36 @@
-"""LEGACY pixel-space four-port engine -- validation arm only.
+"""The reproduction arm: pixel-space four-port engine.
 
-Superseded by the harmonic path (``response`` + ``engine`` +
-``instrument``).  Kept because it is an independent quadrature of the
-same integral, which is what makes the cross-check in
-``scripts/crosscheck_pixel_arm.py`` meaningful, and because the diffuse
-scripts (``step2_real_sky.py``, ``step4_power_spectra.py``) still run on
-it -- deliberately, since the 2026-08-18 audit showed their Faraday
-content is HEALPix shot noise and they are not headed for the paper.
+Not deprecated, and not transitional.  This module is a deliberately
+*independent* quadrature of the same integral the production path
+computes harmonically (``response`` + ``engine`` + ``instrument``), and
+it exists for two reasons that do not expire:
 
-Production code must not import this module.
+1. **It is what makes the 2026-08-18 audit checkable.**  Claiming that a
+   published diffuse-Faraday result is HEALPix shot noise is only
+   meaningful if the result can still be produced.  The analyses it
+   refutes live at the ``audit-2026-08-18`` tag and run on this module.
+
+2. **It is the correctness evidence for the production path.**  The
+   cross-implementation tests pin the two arms against each other at
+   2.5e-16 (covariance assembly), 0.0e+00 (direction-space kernel),
+   3.4e-14 (the ported pixel arm vs its pre-port artifact) and 3.054e-4
+   (whole-sky engine agreement on the real sky).  Those numbers are the
+   reason to believe the harmonic path is right, and they cease to exist
+   the moment this module is "cleaned up" into calling the new one.
+
+So do not shrink this module toward the production modules, however much
+duplication it looks like: the duplication *is* the independence.  The one
+exception already taken is ``load_response_fast``, a FITS-schema reader
+whose second copy could only drift, never disagree informatively.
+
+New analyses belong on the production path.  Import this module only from
+the reproduction scripts, the cross-check scripts, and tests that compare
+the two arms.
+
+One caveat on that last rule: ``topo_rotation_matrix`` used to live here
+and is now in :mod:`lusee_faraday.conventions`, because it defines the
+response frame rather than either engine's quadrature.  It is re-exported
+above so the reproduction scripts need no edit.
 
 ----
 
@@ -42,6 +64,8 @@ old_vs_new diagnostics):
 
 import numpy as np
 from scipy.constants import Boltzmann, c, physical_constants
+
+from .conventions import topo_rotation_matrix  # noqa: F401  (re-export)
 
 ETA0 = physical_constants["characteristic impedance of vacuum"][0]
 KB = Boltzmann
@@ -159,30 +183,6 @@ class FixedFreqKernel:
         return sample_periodic_maps(
             self.K, self.theta_deg, self.phi_deg, theta_rad, phi_rad
         )
-
-
-def topo_rotation_matrix(time, loc):
-    """R such that n_resp = R @ n_gal (galactic -> response frame).
-
-    The response frame has cartesian basis x = East, y = North,
-    z = zenith (proper rotation, det = +1), so that the polar angles of
-    n_resp are exactly the response grid coordinates (theta, phi).
-    """
-    from astropy.coordinates import SkyCoord
-    from lunarsky import LunarTopo
-
-    topo = LunarTopo(location=loc, obstime=time)
-    # E, N, U expressed in astropy's LunarTopo cartesian basis (x = North,
-    # y = East, z = up).
-    sc = SkyCoord(
-        x=[0.0, 1.0, 0.0],
-        y=[1.0, 0.0, 0.0],
-        z=[0.0, 0.0, 1.0],
-        representation_type="cartesian",
-        frame=topo,
-    )
-    cols = sc.transform_to("galactic").cartesian.xyz.value  # (3, [E N U])
-    return cols.T  # rows are E, N, U in galactic coords
 
 
 class GalacticGrid:

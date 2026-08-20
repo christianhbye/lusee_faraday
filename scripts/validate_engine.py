@@ -25,7 +25,7 @@ from common import (  # noqa: E402
     moon_location,
     times,
 )
-from lusee_faraday import _legacy_pixel as fp  # noqa: E402
+from lusee_faraday import pixel_arm as fp  # noqa: E402
 
 
 def slice_response(resp, keep):
@@ -149,7 +149,7 @@ def main():
 
     grid = fp.GalacticGrid(val_nside)
     sky = fp.SkyWaterfallSim(kern, grid, I_s, Q_s, U_s, np.zeros_like(I_s))
-    from lusee_faraday._legacy_pixel import topo_rotation_matrix
+    from lusee_faraday.conventions import topo_rotation_matrix
 
     loc = moon_location()
     errs = []

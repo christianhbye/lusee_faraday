@@ -6,6 +6,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Simulator for LuSEE (Lunar Surface Electromagnetics Experiment) Faraday rotation observations. Computes the four-port covariance seen from the lunar surface, including Faraday rotation of synchrotron emission through the ionosphere and the Galactic screen.
 
+### What this repository is
+
+Two arms, with different jobs. Confusing them is the main way to go wrong here.
+
+**The production arm** — `sky` + `response` + `engine` + `instrument` +
+`polarimeter` + `channelization`, on luseepy and croissant. This is where new
+work goes. It currently covers instrumental `I -> Q,U` leakage, the zenith
+polarimeter calibration, and the transiting point source; the diffuse sky is
+future work (the ensemble two-point prediction), not a gap to be filled by
+re-running the refuted approach.
+
+**The reproduction arm** — `pixel_arm.py`, an independent pixel-space
+quadrature. Its job is *not* to be superseded code awaiting deletion. It makes
+the 2026-08-18 audit checkable (you cannot show a published result is shot noise
+without being able to produce it) and it is the correctness evidence for the
+production arm, which is pinned against it at 2.5e-16, 0.0e+00 and 3.054e-4.
+**Do not shrink it toward the production modules: the duplication is the
+independence.**
+
+What this repository is *not*: a home for the diffuse-Faraday results the audit
+refutes. Those, and the write-up that reports them, live at the
+`audit-2026-08-18` tag — along with `step2_real_sky.py`, `step4_power_spectra.py`,
+`step2_plots.py` and `report/report.tex`. Cite the tag, not a branch.
+
 The physics is **not** owned here. Instrument response, impedances, receiver loading and covariance assembly all come from `luseepy`; the 16-channel packing is a local loop over `PORT_PAIRS` that is pinned to `lusee.Covariance.pack_covariance` by test rather than delegated to it (the two differ only in where the channel axis sits); spherical transforms and the polarized harmonic dual come from `croissant`. This repository owns the layer above: how a Faraday-rotated sky enters that formalism, and how the results are channelized and read out. Read `docs/measurement-model.md` first — it is the conceptual overview and the reason the 16,384-channel fine grid is affordable.
 
 ## Setup & Commands
@@ -50,7 +74,7 @@ The pipeline flows: **Sky components → Faraday coefficients → harmonic contr
 - **`channelization.py`**: parent (25 kHz) and zoom (64 sub-bin) integration on luseepy's spectrometer response. Zoom bins use FFT ordering (0 = center, 1–32 positive, 33–63 negative).
 - **`conventions.py`**, **`config.py`**: the single source of truth for COSMO/IAU, the Faraday phase, port and channel ordering, the site, the time grid and the fine frequency grid. Do not re-derive any of it inline.
 
-**`_legacy_pixel.py` is a validation arm. Production code must not import it.** It is an independent pixel-space quadrature of the same integral, kept because that independence is what makes `scripts/crosscheck_pixel_arm.py` meaningful, and because the diffuse scripts (`step2_real_sky.py`, `step4_power_spectra.py`) still run on it — deliberately, since the audit showed their Faraday content is HEALPix shot noise and they are not headed for the paper.
+**`pixel_arm.py` is the reproduction arm** (see "What this repository is"). Import it only from the reproduction and cross-check scripts — `crosscheck_pixel_arm.py`, `validate_engine.py`, `beam_ablation.py`, `compare_main_vs_asbuilt.py`, `step_ionly.py --engine legacy` — and from tests that compare the two arms. `scripts/common.py` deliberately does not import it, so an ordinary script does not depend on it transitively; `topo_rotation_matrix` lives in `conventions.py` for that reason, since it defines the response frame rather than either engine's quadrature.
 
 ## Key Conventions
 
@@ -78,3 +102,5 @@ Tests that need the 631 MB artifact are marked `slow` and skip without it.
 - `docs/measurement-model.md` — what is being computed and why it is cheap
 - `AGENTS.md` — the pinned conventions in operational form, plus the script inventory
 - `PROGRESS.md` — running status
+- the `audit-2026-08-18` tag — Slosar's four-port analysis, the diffuse-Faraday
+  results the audit refutes, and `report.tex`. Not carried on `main`.

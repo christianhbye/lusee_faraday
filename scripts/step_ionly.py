@@ -56,7 +56,7 @@ from common import (
     times,
 )
 from lusee_faraday import engine, instrument
-from lusee_faraday import _legacy_pixel as fp
+from lusee_faraday import pixel_arm as fp
 from lusee_faraday import polarimeter as pol
 from lusee_faraday import response as rsp
 from lusee_faraday.sky import FaradaySky
@@ -100,7 +100,7 @@ def pack_from_pairs(pair, resp, receiver, freqs, center):
     Both arms funnel through here so the freeze is stated once: the
     beam and all four impedance matrices sit at the native channel,
     and there is no Moon or antenna-metal term.
-    ``_legacy_pixel.assemble_covariance`` — the assembler this replaces, and
+    ``pixel_arm.assemble_covariance`` — the assembler this replaces, and
     the one that produced the stored ``real{C}_binned.npz`` that
     ``--analyze`` compares against — has no Moon term at all, while
     luseepy's ``T_moon`` default of 250 K moves the answer by 7.4e3

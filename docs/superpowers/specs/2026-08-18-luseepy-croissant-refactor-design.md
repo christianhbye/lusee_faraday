@@ -90,7 +90,7 @@ src/lusee_faraday/
   instrument.py     luseepy covariance assembly (open covariance, loading, packing)
   polarimeter.py    zenith calibration + pseudo-Stokes
   channelization.py parent/zoom bins on lusee.spectrometer_response*, FFT ordering, transfer + deconvolve
-  _legacy_pixel.py  today's fourport.py; validation arm only, never imported by production code
+  pixel_arm.py  today's fourport.py; validation arm only, never imported by production code
 ```
 
 Removed with their tests: `beam.py`, `sim.py`, `fast_sim.py`, `healpix.py`,
@@ -238,7 +238,7 @@ response adapter and the post-contraction assembly differ.
 |---|---|
 | Unit | Data-free tests per module, in the style of today's `tests/test_fourport.py` |
 | Analytic | Rank-1 point source; `phi_FD = 250` at 30 MHz gives the predicted 1.89 kHz Q oscillation period; zenith leakage nulls to ~1e-16 |
-| Cross-engine | New stack vs `_legacy_pixel`, and vs `lusee.FullStokesCalibratorSimulator` (`scripts/validate_engine.py` already reaches 8.6e-16 there) |
+| Cross-engine | New stack vs `pixel_arm`, and vs `lusee.FullStokesCalibratorSimulator` (`scripts/validate_engine.py` already reaches 8.6e-16 there) |
 | Library contract | Summing `engine.contract`'s dual-block axis reproduces `croissant.polarized_convolve` to machine precision |
 | Regression | Parent-bin `Q/I = 0.040` matching I-only to 2e-4; unpolarized-source `p_leak = 0.134` at transit; zoom recovery 0.79 real / 0.86 ideal; per-band zenith weight vectors |
 
@@ -258,7 +258,7 @@ arm so their outputs remain byte-reproducible there.
    committed fixture first.
 1. **`conventions.py`** plus its tests. Nothing else in this phase.
 2. **`response.py` + `engine.py`** at a single frequency, cross-checked on a
-   point source against `_legacy_pixel` and `FullStokesCalibratorSimulator`.
+   point source against `pixel_arm` and `FullStokesCalibratorSimulator`.
    *First real gate: if the contraction does not agree here, nothing later
    will.*
 3. **`sky.py`** component decomposition and spectral expansion. Validate the
@@ -273,7 +273,7 @@ arm so their outputs remain byte-reproducible there.
    `zenith_weights` and their plot scripts. Regenerate those figures and diff
    the numbers against `report/report.tex`.
 7. **Retire.** Delete the old two-port stack and its tests; demote `fourport.py`
-   to `_legacy_pixel.py` with the shared pieces lifted out; update `CLAUDE.md`,
+   to `pixel_arm.py` with the shared pieces lifted out; update `CLAUDE.md`,
    `AGENTS.md`, `PROGRESS.md`, `SETUP-CROSSCHECK.md`.
 
 ## 8. Out of scope

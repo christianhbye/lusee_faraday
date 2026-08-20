@@ -71,3 +71,27 @@ def dual_block_phase(phi_fd, freq_mhz):
     cosmo = faraday_phase_cosmo(phi_fd, freq_mhz)
     ones = np.ones_like(cosmo)
     return np.stack([ones, ones, np.conj(cosmo), cosmo], axis=-1)
+
+
+def topo_rotation_matrix(time, loc):
+    """R such that n_resp = R @ n_gal (galactic -> response frame).
+
+    The response frame has cartesian basis x = East, y = North,
+    z = zenith (proper rotation, det = +1), so that the polar angles of
+    n_resp are exactly the response grid coordinates (theta, phi).
+    """
+    from astropy.coordinates import SkyCoord
+    from lunarsky import LunarTopo
+
+    topo = LunarTopo(location=loc, obstime=time)
+    # E, N, U expressed in astropy's LunarTopo cartesian basis (x = North,
+    # y = East, z = up).
+    sc = SkyCoord(
+        x=[0.0, 1.0, 0.0],
+        y=[1.0, 0.0, 0.0],
+        z=[0.0, 0.0, 1.0],
+        representation_type="cartesian",
+        frame=topo,
+    )
+    cols = sc.transform_to("galactic").cartesian.xyz.value  # (3, [E N U])
+    return cols.T  # rows are E, N, U in galactic coords

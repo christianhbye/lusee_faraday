@@ -25,7 +25,7 @@ model; `CLAUDE.md` the module tour.
 went the `interp_hp` pole artifact and the `healpy.Rotator` machinery.
 `spectrometer.py` had already been replaced by `channelization.py`.
 
-**What was demoted.** `fourport.py` → `_legacy_pixel.py`, a validation
+**What was demoted.** `fourport.py` → `pixel_arm.py`, a validation
 arm that production code must not import. It survives because an
 independent quadrature is what makes `scripts/crosscheck_pixel_arm.py`
 meaningful, and because `step2_real_sky.py` and `step4_power_spectra.py`
@@ -84,7 +84,7 @@ diffuse-sky figures still carry legacy-pipeline provenance —
 `real*_waterfall_QU`, `real*_spectrum_snapshot*`, `real*_polfrac_track`,
 `real*_sky_model`, `real*_pspec`, `pspec_delay_profile`,
 `real*_ionly_frac`, `beam_ablation_30` and the four `cmp_*` — because
-steps 2 and 4 deliberately still run on `_legacy_pixel`.  Several of
+steps 2 and 4 deliberately still run on `pixel_arm`.  Several of
 those are cited in `report.tex`, so the repo is in a *partially* mixed
 state and the distinction matters if figures move to the paper.
 
@@ -117,10 +117,10 @@ state and the distinction matters if figures move to the paper.
 - [x] `src/lusee_faraday/fourport.py` — pixel-space four-port engine
   (kernel, transport, NUFFT Faraday synthesis, covariance/products,
   spectrometer integration).  Luseepy itself is READ-ONLY — never move
-  code there; import from `lusee` only.  *(Now `_legacy_pixel.py`, a
+  code there; import from `lusee` only.  *(Now `pixel_arm.py`, a
   validation arm.)*
 - [x] `tests/test_fourport.py` — 10 data-free unit tests; all pass.
-  *(Now `tests/test_legacy_pixel.py`.)*
+  *(Now `tests/testpixel_arm.py`.)*
 - [x] OOM diagnosis: the "mysterious session kills" were the kernel
   OOM killer (croissant dense spherical transform ~(lmax+1)^2·npix·16
   bytes).  Mitigations: small validation skies, single-channel

@@ -1,5 +1,5 @@
 """
-Unit tests for lusee_faraday._legacy_pixel (data-free parts).
+Unit tests for lusee_faraday.pixel_arm (data-free parts).
 
 The heavy validation against the luseepy harmonic engines lives in
 scripts/validate_engine.py (needs the 631 MB response artifact); here we
@@ -15,7 +15,7 @@ os.environ.setdefault("JAX_ENABLE_X64", "1")
 import numpy as np  # noqa: E402
 import pytest  # noqa: E402
 
-from lusee_faraday import _legacy_pixel as fp  # noqa: E402
+from lusee_faraday import pixel_arm as fp  # noqa: E402
 
 
 def random_hermitian(rng, shape=()):

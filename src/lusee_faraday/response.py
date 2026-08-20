@@ -26,7 +26,7 @@ def load_response(path):
     ``"theta"``, ``"phi"``, and a real/imag pair per complex block
     (``"H_theta_real"``/``"H_theta_imag"`` and so on) -- not the
     ``HTHETA``/``HTHETA_REAL`` names a naive reading of the FITS schema
-    might suggest.  ``_legacy_pixel.load_response_fast`` is an alias for
+    might suggest.  ``pixel_arm.load_response_fast`` is an alias for
     this function; it used to be a second copy of it.
     """
     import fitsio

@@ -1,8 +1,8 @@
-"""Harmonic four-port path vs the pixel-space engine in _legacy_pixel.py.
+"""Harmonic four-port path vs the pixel-space engine in pixel_arm.py.
 
 This script CHARACTERIZES the disagreement between the harmonic
 contraction (``engine.contract``) and the legacy pixel-space engine
-(``_legacy_pixel.py``) on the real BGL_v16 response.  It is not a
+(``pixel_arm.py``) on the real BGL_v16 response.  It is not a
 correctness gate -- the gate is ``tests/test_engine_gate.py``, which
 shows the harmonic contraction reproduces luseepy's own convolution
 to round-off (6.8e-16) on a synthetic response and a rotation-
@@ -92,7 +92,7 @@ import numpy as np  # noqa: E402
 
 from lusee_faraday import config as cfg  # noqa: E402
 from lusee_faraday import engine, response as rsp  # noqa: E402
-from lusee_faraday import _legacy_pixel as fp  # noqa: E402
+from lusee_faraday import pixel_arm as fp  # noqa: E402
 
 RESPONSE_PATH = os.environ.get(
     "LUSEE_RESPONSE",

@@ -221,7 +221,7 @@ unitless. Both meet at the same contraction and the same sky.
 ## 8. How well the two arms agree, and where they do not
 
 The harmonic contraction has an independent quadrature of the same integral
-beside it: the pixel-space engine in `_legacy_pixel.py`, kept for exactly this
+beside it: the pixel-space engine in `pixel_arm.py`, kept for exactly this
 purpose. `scripts/crosscheck_pixel_arm.py` runs them against each other on the
 real BGL_v16 response.
 
