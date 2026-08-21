@@ -29,6 +29,13 @@ class _SyntheticKernel:
 
 
 def test_pair_weight_maps_geometry_and_masking():
+    """Validate geometry, masking, and basis-independent weight formula.
+
+    The synthetic kernel has K_Q = cos(theta), K_U = i*sin(theta).
+    Using weight = sqrt(0.5 * (|K_Q|^2 + |K_U|^2)), the trig identity
+    cos^2 + sin^2 = 1 gives weight = sqrt(0.5) everywhere, independent
+    of basis convention (COSMO vs IAU).
+    """
     import healpy as hp
 
     loc = moon_location()
@@ -43,11 +50,9 @@ def test_pair_weight_maps_geometry_and_masking():
     z = (R @ vec)[2]
     assert np.all(w[0, z <= 0] == 0.0)
     assert np.all(w[0, z > 1e-3] > 0.0)
-    # value check: 0.5 |cos(theta) - i (i sin(theta))| at one pixel
-    up = np.argmax(z)  # the pixel nearest zenith
-    theta = np.arccos(np.clip(z[up], -1, 1))
-    expected = 0.5 * abs(np.cos(theta) - 1j * (1j * np.sin(theta)))
-    assert np.isclose(w[0, up], expected, rtol=1e-12)
+    # value check: every above-horizon pixel equals sqrt(0.5) by trig identity
+    expected = np.sqrt(0.5)
+    assert np.allclose(w[0, z > 0.0], expected, rtol=1e-12)
 
 
 ARTIFACT = Path(
