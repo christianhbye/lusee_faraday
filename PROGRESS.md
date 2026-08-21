@@ -290,6 +290,18 @@ state and the distinction matters if figures move to the paper.
   GC transit lifts it only 2-4x above that floor, not by orders of
   magnitude. Read from `generated_data/step5_template.npz["tail_frac_lst"]`
   and `step5_template_two_port.npz["tail_frac_lst"]`, both shape `(3, 128)`.
+  **Verdict against the S4.10 threshold (`A_mf` at 24 lunations):
+  indeterminate.** The tail amplitude (max tail fraction x bracket level)
+  clears `A_mf` — OPEN, ratio 15-26x — under the bracket's *upper*
+  (incoherent-patch) level at all three bands, but falls short — closed,
+  ratio <=0.7x — under *lower_dispersion* at all three bands, with
+  *lower_slab* split (closed at 30/10 MHz, OPEN at 50 MHz, ratio 3.4x).
+  The call flips by 4-6 orders of magnitude on which bracket level is
+  assumed, and the bracket's lower end derives from the grid-clamped
+  `theta_c` below — so the gate is decided by the coherence angle, not
+  by the tail measurement (solid at 2.2-3.7% in both arms) or by more
+  integration time; a wider `structure_function` angular grid is what
+  would decide it, not a longer run.
 - [x] Coherence-bracket caveat: `theta_c_clamped` is `[True True True]` in
   both npz files — the coherence angle hit the 0.2 deg edge of the
   `structure_function` search grid at every band, both arms, so `theta_c`
