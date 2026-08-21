@@ -10,6 +10,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+from matplotlib.lines import Line2D  # noqa: E402
 
 from common import FIG_DIR, GEN_DIR  # noqa: E402
 from lusee_faraday import dispersion as dsp  # noqa: E402
@@ -83,15 +84,24 @@ def fig_knee_tail(d):
         title="knee vs geometry (dashed: plane-tapered)",
     )
     a2.legend(fontsize=7)
-    fig.tight_layout()
+    # No fig.tight_layout() here: a1's rotated ylabel ("template power
+    # fraction above beam-weighted p99") is long enough that
+    # tight_layout()'s pre-save subplot repositioning leaves too
+    # little vertical room for it, and savefig's own
+    # bbox_inches="tight" pass then clips the ends (verified with
+    # pdftotext -bbox: the leading "T" and trailing "p99" fell
+    # outside the page's mediabox even at pad_inches=0.25).  Skipping
+    # tight_layout() and letting bbox_inches="tight" alone size the
+    # canvas around the default subplot layout, with a larger pad,
+    # fits the whole label with margin to spare.
     fig.savefig(
         FIG_DIR / "step5_knee_tail_lst.pdf",
         bbox_inches="tight",
-        pad_inches=0.25,
+        pad_inches=0.4,
     )
 
 
-def fig_envelope(env, d):
+def fig_envelope(env):
     fig, ax = plt.subplots(figsize=(5, 3.4))
     x = np.arange(len(env["bands"]))
     ax.bar(x - 0.15, env["parent_horizon"], 0.3, label="parent horizon")
@@ -138,6 +148,13 @@ def fig_sensitivity(s, d):
         clamped = bool(d["theta_c_clamped"][jb])
         tag = ", grid-limited" if clamped else ""
         ax.axhspan(dis, up, color=ln.get_color(), alpha=0.06)
+        # `sl` (lower_slab) sits strictly inside (dis, up) and is a
+        # physically distinct bound from `dis` (lower_dispersion) --
+        # orders of magnitude apart, per S4.4.1 -- so it is drawn as
+        # its own interior line rather than discarded; one shared
+        # proxy legend entry below covers all three bands, per-band
+        # color already established by the matched-filter line.
+        ax.axhline(sl, color=ln.get_color(), lw=0.5, ls="-.", alpha=0.8)
         ax.axhline(
             up,
             color=ln.get_color(),
@@ -162,16 +179,33 @@ def fig_sensitivity(s, d):
         ylabel=r"5$\sigma$ threshold (fraction of $T_{sys}$)",
         title="threshold vs the S4.4 amplitude bracket",
     )
-    ax.legend(fontsize=6, loc="upper left", ncol=1, framealpha=0.85)
+    handles, labels = ax.get_legend_handles_labels()
+    slab_proxy = Line2D(
+        [0],
+        [0],
+        color="0.3",
+        lw=0.5,
+        ls="-.",
+        label="bracket lower (slab)",
+    )
+    ax.legend(
+        handles + [slab_proxy],
+        labels + [slab_proxy.get_label()],
+        fontsize=6,
+        loc="upper left",
+        ncol=1,
+        framealpha=0.85,
+    )
     fig.tight_layout(rect=(0.0, 0.09, 1.0, 1.0))
     fig.text(
         0.5,
         0.01,
-        "Bracket (shaded/dashed) is a fractional polarized amplitude "
-        r"referred to $T_{sky}$, not $T_{sys}$ ($T_{sys}/T_{sky}$ "
-        f"mismatch $\\leq$ {mismatch_pct:.1f}%, not rescaled here); "
-        "it derives from theta_c, which is grid-limited at every "
-        "band shown -- a search-grid artifact, not a measurement.",
+        "Bracket (shaded/dashed upper/dash-dot lower-slab) is a "
+        r"fractional polarized amplitude referred to $T_{sky}$, not "
+        r"$T_{sys}$ ($T_{sys}/T_{sky}$ mismatch $\leq$"
+        f" {mismatch_pct:.1f}%, not rescaled here); it derives from "
+        "theta_c, which is grid-limited at every band shown -- a "
+        "search-grid artifact, not a measurement.",
         ha="center",
         va="bottom",
         fontsize=6,
@@ -251,7 +285,7 @@ def main():
     d = np.load(GEN_DIR / "step5_template.npz")
     fig_template_family(d)
     fig_knee_tail(d)
-    fig_envelope(np.load(GEN_DIR / "step5_envelope.npz"), d)
+    fig_envelope(np.load(GEN_DIR / "step5_envelope.npz"))
     fig_sensitivity(np.load(GEN_DIR / "step5_sensitivity.npz"), d)
     fig_chirp_coherence()
     two = GEN_DIR / "step5_template_two_port.npz"
