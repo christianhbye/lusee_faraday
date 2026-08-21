@@ -269,7 +269,7 @@ state and the distinction matters if figures move to the paper.
   (setup, steps 1-4, practical conclusions on parent vs zoom bins and
   the delay window; figures in `report/figures/`).
 
-## Step 5: the Faraday delay template (branch faraday-delay-template)
+## Step 5b: the Faraday delay template (branch faraday-delay-template)
 - [x] `dispersion.py` (depth distributions, NUFFT transforms, real-response
   RMSF, depth horizon, geometry knob, coherence bracket) + `noise.py`
   (ported + matched filter) + `response.pair_weight_maps` (basis-independent

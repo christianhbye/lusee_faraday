@@ -305,18 +305,25 @@ typo, and it is `dispersion.rmsf`'s own output (exercised in
 which never computes an RMSF at all; that script builds the
 depth-horizon/percentile table of section 11 below.
 
-Even broadened, 30 MHz still has the sharpest resolution of the three
-bands, and it hosts the template's **90%-mass-quantile knee**
-(`dispersion.mass_quantile_knee` — a CDF statistic, not a half-power
-crossing; an earlier half-power version pinned to a narrow origin spike
-under the `k=0` slab geometry and was replaced for exactly that reason)
-at **89.6 rad/m^2** (fiducial `k=0` uniform-slab geometry, four-port
-arm). 50 MHz has the coarsest resolution but is the only band whose
-zoom horizon reaches the sky's map maximum. 10 MHz is out: its zoom
-horizon (22.4 rad/m^2) sits about 4% below the beam-weighted median sky
-depth (23.4 rad/m^2) — under the *unweighted* map percentile the same
-horizon would sit *above* the median (18.4), so the ordering is itself
-a beam-weighting effect, not a robust separation; section 11 works
+Resolution alone ranks the bands the opposite way from usefulness:
+10 MHz is sharpest (0.207 rad/m^2), then 30 MHz (5.57), then 50 MHz, the
+coarsest (25.8). Resolution and reach are different axes, and 10 MHz's
+resolution is superb and irrelevant — section 11 shows its zoom horizon
+falls below the beam-weighted median sky depth, so there is nothing
+there for that resolution to resolve. 30 MHz is the band where
+resolution and reach line up: it hosts the template's
+**90%-mass-quantile knee** (`dispersion.mass_quantile_knee` — a CDF
+statistic, not a half-power crossing; an earlier half-power version
+pinned to a narrow origin spike under the `k=0` slab geometry and was
+replaced for exactly that reason) at **89.6 rad/m^2** (fiducial `k=0`
+uniform-slab geometry, four-port arm) — well inside its own 604 rad/m^2
+zoom horizon and ~16 resolution elements from the origin spike. 50 MHz
+has the coarsest resolution but is the only band whose zoom horizon
+reaches the sky's map maximum. 10 MHz is out: its zoom horizon
+(22.4 rad/m^2) sits about 4% below the beam-weighted median sky depth
+(23.4 rad/m^2) — under the *unweighted* map percentile the same horizon
+would sit *above* the median (18.4), so the ordering is itself a
+beam-weighting effect, not a robust separation; section 11 works
 through both weightings side by side. The chirp of `lambda^2(nu)`
 against a uniform frequency grid is an analysis artifact removed by the
 NUFFT (`test_nufft_beats_fft_on_a_single_depth`), not a physical wall.
