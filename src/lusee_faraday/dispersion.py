@@ -194,3 +194,14 @@ def weighted_percentiles(values, weights, qs):
             for q in np.atleast_1d(qs)
         ]
     )
+
+
+def bh4_window(n):
+    """4-term minimum-sidelobe Blackman-Harris (peak sidelobe ~ -92 dB).
+
+    The window step4_power_spectra.py used; the S4.8 dynamic-range
+    budget is computed against exactly this.
+    """
+    from scipy.signal.windows import blackmanharris
+
+    return blackmanharris(int(n), sym=False)
