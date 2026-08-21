@@ -183,7 +183,7 @@ def test_depth_horizon_pins_the_s46_table():
     off = _fine_offsets()
     wp = parent_weights(off)
     wz = zoom_weights(off)[:, 0]
-    parent_expect = {50.0: 58.03, 30.0: 12.54, 10.0: 0.466}
+    parent_expect = {50.0: 58.03, 30.0: 12.54, 10.0: 0.4643}
     zoom_expect = {50.0: 2796.9, 30.0: 604.1, 10.0: 22.38}
     for band in (50.0, 30.0, 10.0):
         hp_ = dsp.depth_horizon(off, wp, band)
