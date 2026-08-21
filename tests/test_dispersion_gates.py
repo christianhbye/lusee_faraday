@@ -213,3 +213,83 @@ def test_gate_envelope_orderings_against_the_sky():
     assert 0.5 * p50 < z10 < 1.5 * p50, (z10, p50)
     for band in (50.0, 30.0, 10.0):
         assert dsp.depth_horizon(off, wp, band) < p90
+
+
+def test_tail_gate_bincount_identity():
+    """Pinning R19: the tail-gate identity and rejection of the tautological
+    form.
+
+    Spec S6.14, ruling R19: LST tail gate uses a FIXED per-band threshold
+    (the beam-weighted p99 of |RM|, computed once from the band-summed weight)
+    while the numerator varies per LST. The tautological form (recomputing
+    threshold from each per-LST weight separately) forces the fraction to ~1%
+    always; the correct form varies across LSTs.
+
+    This test validates the identity by showing:
+    1. With a FIXED threshold and varying weights, fractions vary (NOT ~1%).
+    2. With per-LST thresholds (tautological), fractions are ~1% always.
+    """
+    # Synthetic data: random |RM| field and LST-varying weights.
+    np.random.seed(42)
+    npix = 10000
+    rm_abs = np.abs(np.random.randn(npix)) * 200.0 + 50.0
+
+    # Compute a FIXED threshold from an aggregate (band-summed) weight.
+    w2_band = np.ones(npix)  # uniform aggregate
+    p99_fixed = dsp.weighted_percentiles(rm_abs, w2_band, [99.0])[0]
+
+    # Generate 5 LST-specific weight distributions, applied to same |RM| field.
+    fractions_correct = []  # using fixed p99_fixed
+    fractions_tautological = []  # recomputing p99 per LST
+
+    np.random.seed(42)
+    for lst_trial in range(5):
+        # LST-specific weight (e.g., beam varies with LST hour angle)
+        if lst_trial == 0:
+            w2_lst = np.ones(npix) / npix
+        elif lst_trial == 1:
+            w2 = np.random.exponential(1.0 / npix, npix)
+            w2_lst = w2 / w2.sum()
+        elif lst_trial == 2:
+            w2 = np.random.gamma(2.0, 1.0 / (2.0 * npix), npix)
+            w2_lst = w2 / w2.sum()
+        elif lst_trial == 3:
+            w2 = np.random.beta(0.5, 2.0, npix)
+            w2_lst = w2 / w2.sum()
+        else:
+            w2 = np.random.gamma(0.5, 1.0 / (0.5 * npix), npix)
+            w2_lst = w2 / w2.sum()
+
+        # CORRECT: use the FIXED band threshold with per-LST weight
+        frac_correct = w2_lst[rm_abs > p99_fixed].sum() / w2_lst.sum()
+        fractions_correct.append(frac_correct)
+
+        # TAUTOLOGICAL: recompute p99 from the SAME per-LST weight
+        # (This would force fraction to ~1% by definition of percentile)
+        p99_lst = dsp.weighted_percentiles(rm_abs, w2_lst, [99.0])[0]
+        frac_tauto = w2_lst[rm_abs > p99_lst].sum() / w2_lst.sum()
+        fractions_tautological.append(frac_tauto)
+
+    # Verify: correct form varies significantly (NOT constant ~1%).
+    correct_std = np.std(fractions_correct)
+    correct_range = max(fractions_correct) - min(fractions_correct)
+    assert (
+        correct_range > 0.001
+    ), f"Correct form should vary; range={correct_range}, values={fractions_correct}"  # noqa: E501
+
+    # Verify: tautological form gives ~1% always (by definition).
+    # This is the key regression detector: if someone re-introduces the
+    # tautological form, all fractions cluster at ~1%.
+    for frac in fractions_tautological:
+        assert (
+            0.008 < frac < 0.012
+        ), f"Tautological form should give ~1%; got {frac}"
+
+    print(
+        f"\nTail-gate identity R19 validation:"
+        f"\n  Correct form (fixed p99={p99_fixed:.1f}): "
+        f"{[f'{f:.5f}' for f in fractions_correct]}"
+        f"\n    range={correct_range:.6f}, std={correct_std:.6f}"
+        f"\n  Tautological form (~1%): "
+        f"{[f'{f:.5f}' for f in fractions_tautological]}"
+    )

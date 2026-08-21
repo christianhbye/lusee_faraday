@@ -34,7 +34,6 @@ from lusee_faraday.config import (
 from lusee_faraday.conventions import lambda_squared
 
 KS = (np.inf, 0.0, -1.0)
-K_LABELS = ("inf", "0", "-1")
 COARSE_DPHI = 1.0  # rad/m^2, the display/npz grid
 
 
@@ -192,7 +191,7 @@ def main():
                 target[ib, ik] = rb / max(rb.sum(), 1e-300)
 
         wpct_band = dsp.weighted_percentiles(
-            np.abs(rm), w2_band, [50.0, 90.0, 99.0, 99.9]
+            rm_abs, w2_band, [50.0, 90.0, 99.0, 99.9]
         )
         omega_beam = w2_band.sum() ** 2 / (w2_band**2).sum() * pix_area
         br = dsp.amplitude_bracket(
@@ -206,9 +205,7 @@ def main():
 
     # AFTER the band loop -- matches the w2_mean the envelope script
     # re-weights with
-    wpct = dsp.weighted_percentiles(
-        np.abs(rm), w2_accum, [50.0, 90.0, 99.0, 99.9]
-    )
+    wpct = dsp.weighted_percentiles(rm_abs, w2_accum, [50.0, 90.0, 99.0, 99.9])
 
     suffix = "" if args.arm == "four-port" else "_two_port"
     out = GEN_DIR / f"step5_template{suffix}.npz"
