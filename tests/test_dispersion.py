@@ -145,3 +145,62 @@ def test_bh4_window_sidelobe_level():
     side = p[phi_out > 15.0].max()
     assert np.sqrt(side) < 5e-5
     assert np.sqrt(side) > 5e-7  # a window this good would be a bug
+
+
+from lusee_faraday.channelization import parent_weights, zoom_weights
+
+
+def _fine_offsets():
+    return np.arange(-50000.0, 50000.0 + 1.0, 12.20703125)
+
+
+def test_boxcar_rmsf_widths():
+    """S6.7: the rectangular idealisation gives 2 sqrt(3) / Dlam2."""
+    expected = {50.0: 12.0, 30.0: 2.60, 10.0: 0.096}
+    for band, width in expected.items():
+        freqs = fine_freqs(band)[::8]
+        phi_out = np.arange(0.0, 40.0 * width, width / 50.0)
+        p = dsp.delay_power(np.ones(freqs.size), freqs, phi_out)
+        amp = np.sqrt(p)
+        half = np.nonzero(amp >= 0.5)[0]
+        fwhm = 2.0 * phi_out[half[-1]]  # symmetric about 0
+        assert np.isclose(fwhm, width, rtol=0.08), (band, fwhm)
+
+
+def test_depth_horizon_pins_the_s46_table():
+    """S6.9 (instrument side): 50% depths of the real bin responses.
+
+    These expectations supersede the spec S4.6 draft table
+    (parent {58.7, 13.3, 2.7}, zoom {2830, 613, 24}). Two invariants
+    say the draft's 10 MHz parent entry is wrong: (1) the zoom/parent
+    ratio is a band-independent bandwidth ratio -- measured ~48.1 at
+    all three bands, while the draft gives 48.2, 46.1 and 8.9, with
+    only the 10 MHz entry breaking the pattern; (2) the horizon scales
+    as f^3 (lambda^2 ~ f^-2, and the envelope argument scales phi by
+    lambda^2), which the measured values below satisfy to <1% and the
+    draft's 2.7 does not.
+    """
+    off = _fine_offsets()
+    wp = parent_weights(off)
+    wz = zoom_weights(off)[:, 0]
+    parent_expect = {50.0: 58.03, 30.0: 12.54, 10.0: 0.466}
+    zoom_expect = {50.0: 2796.9, 30.0: 604.1, 10.0: 22.38}
+    for band in (50.0, 30.0, 10.0):
+        hp_ = dsp.depth_horizon(off, wp, band)
+        hz_ = dsp.depth_horizon(off, wz, band)
+        assert np.isclose(hp_, parent_expect[band], rtol=0.05), (band, hp_)
+        assert np.isclose(hz_, zoom_expect[band], rtol=0.05), (band, hz_)
+
+
+def test_zoom_bin_matrix_shape_and_normalization():
+    fine, bins, W = dsp.zoom_bin_matrix(30.0)
+    assert W.shape == (fine.size, 192) and bins.size == 192
+    np.testing.assert_allclose(W.sum(axis=0), 1.0, rtol=1e-9)
+    assert np.all(np.diff(bins) > 0)
+
+
+def test_rmsf_peaks_at_the_probe_depth_inside_the_horizon():
+    fine, bins, W = dsp.zoom_bin_matrix(30.0)
+    phi_out = np.arange(0.0, 200.0, 0.2)
+    r = dsp.rmsf(100.0, fine, W, bins, phi_out)
+    assert abs(phi_out[np.argmax(r)] - 100.0) < 1.0
