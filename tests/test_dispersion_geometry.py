@@ -11,12 +11,92 @@ from lusee_faraday import dispersion as dsp
 
 
 def test_k_infinite_is_the_rm_histogram():
+    """k = inf: all emission behind the column, so F is the w2-weighted
+    histogram of the SIGNED column depths themselves.
+
+    The expectation is written out by hand rather than taken from
+    ``np.histogram`` -- comparing the branch against the very call it
+    makes is a tautology, and this is the only test of the k = inf
+    branch, which is what the S6.14 tail gate runs on.
+    Bins are [-3,-2), [-2,-1), [-1,0), [0,1), [1,2), [2,3]:
+      -2.5 (w 4)          -> bin 0
+      0.5 (w 1)           -> bin 3
+      1.5 (w 2), 1.6 (w 3) -> bin 4, summed to 5
+    """
     phi_col = np.array([0.5, 1.5, 1.6, -2.5])
     w2 = np.array([1.0, 2.0, 3.0, 4.0])
     edges = np.arange(-3.0, 3.5, 1.0)
     H = dsp.depth_distribution(phi_col, w2, edges, k=np.inf)
-    expected, _ = np.histogram(phi_col, bins=edges, weights=w2)
-    np.testing.assert_allclose(H, expected)
+    np.testing.assert_allclose(H, [4.0, 0.0, 0.0, 1.0, 5.0, 0.0])
+    assert np.isclose(H.sum(), w2.sum())
+
+
+def test_k_infinite_keeps_the_sign_and_the_last_bin_edge():
+    """Sign fidelity and the right-closed final bin, hand-written.
+
+    Bins [-2,-1), [-1,0), [0,1), [1,2] -- every bin half-open except
+    the last, which is closed on the right.  A branch that took
+    |phi_col| would put everything in bins 2-3 and fails the first
+    array; one that dropped the closed top edge loses the 2.0 pixel.
+
+    The sign flip is deliberately NOT a mirror image, and that is the
+    point: under negation 2.0 -> -2.0 moves from the closed top edge
+    into bin 0 while 1.0 -> -1.0 moves from bin 3 into bin 1, so
+    [1,2,0,12] becomes [4,8,2,1] rather than its reverse.  Writing
+    the reversal down by hand is what caught this; the previous
+    version of this test compared against ``np.histogram`` and could
+    not have.
+    """
+    edges = np.array([-2.0, -1.0, 0.0, 1.0, 2.0])
+    phi_col = np.array([-2.0, -0.5, 2.0, 1.0])
+    w2 = np.array([1.0, 2.0, 4.0, 8.0])
+    H = dsp.depth_distribution(phi_col, w2, edges, k=np.inf)
+    np.testing.assert_allclose(H, [1.0, 2.0, 0.0, 12.0])
+    Hm = dsp.depth_distribution(-phi_col, w2, edges, k=np.inf)
+    np.testing.assert_allclose(Hm, [4.0, 8.0, 2.0, 1.0])
+
+
+def test_k_infinite_ignores_the_zero_bin_guard():
+    """k = inf is exempt from the bracket-zero guard the finite-k
+    pushforwards need: it is a plain histogram of phi_col and never
+    touches the zero bin, so an all-positive grid is legitimate."""
+    edges = np.array([10.0, 20.0, 30.0, 40.0])
+    H = dsp.depth_distribution(
+        np.array([0.0, 15.0, 35.0]),
+        np.array([5.0, 1.0, 2.0]),
+        edges,
+        k=np.inf,
+    )
+    np.testing.assert_allclose(H, [1.0, 0.0, 2.0])  # the phi=0 mass drops
+
+
+def test_depth_distribution_requires_edges_bracketing_zero():
+    """Finite k puts mass at phi = 0 (the near end of every column).
+
+    With an all-positive grid the old ``searchsorted(edges, 0.0,
+    'right') - 1`` returned -1 and that mass landed silently in the
+    LAST bin.  Measured against the pre-fix code, ``edges =
+    [10,20,30,40]`` with pixels ``phi = [0, 100]``, ``w2 = [5, 1]``
+    gave ``[0.1, 0.1, 5.1]`` at k=0 and ``[0, 0, 6]`` at k=-1 -- five
+    units of ZERO-depth mass reported at 30-40 rad/m^2, and at k=-1
+    the entire distribution. Must raise instead.
+    """
+    edges = np.array([10.0, 20.0, 30.0, 40.0])
+    phi_col = np.array([0.0, 100.0])
+    w2 = np.array([5.0, 1.0])
+    for k in (0.0, 1.0, -1.0):
+        with pytest.raises(ValueError, match="edges must bracket"):
+            dsp.depth_distribution(phi_col, w2, edges, k=k)
+    # an all-negative grid is rejected too (it used to IndexError)
+    with pytest.raises(ValueError, match="edges must bracket"):
+        dsp.depth_distribution(
+            phi_col, w2, np.array([-40.0, -30.0, -20.0]), k=0.0
+        )
+    # the boundary cases that ARE well posed still work
+    ok = dsp.depth_distribution(
+        np.array([2.0]), np.array([1.0]), np.array([0.0, 1.0, 2.0]), k=0.0
+    )
+    np.testing.assert_allclose(ok, [0.5, 0.5])
 
 
 def test_k_zero_is_a_superposition_of_tophats():

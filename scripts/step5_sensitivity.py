@@ -23,11 +23,24 @@ sky-noise-dominated radiometer, so the ratio is ``1 + r + t_amp/t_sky``,
 where ``r`` is the luseepy loading model's Moon+antenna-loss
 contribution (250 K each) referenced to the sky via a 1 K blackbody,
 and ``t_sky`` is the mean Haslam-scaled sky temperature
-(``common.sky_at_freq``, which includes the T_CMB offset).  Amplifier
-noise is NOT in this chain -- pass --t-amp with the receiver noise
-temperature when the collaboration provides it; until then ``1 + r``
-is a genuine lower bound (``r`` alone was a vacuous one: it omits the
-sky's own contribution to its own system temperature).
+(``common.sky_at_freq``, which includes the T_CMB offset).
+
+TWO LIMITS ON WHAT THAT RATIO ANSWERS, and both must travel with it:
+
+1. Amplifier noise is NOT in this chain, and ``--t-amp`` defaults to
+   0, so what is printed is ``1 + T_loading/T_sky`` and nothing else.
+   Spec S4.10's risk item -- "sky domination must be computed, not
+   asserted; for a short mismatched dipole on regolith it is not
+   automatic at 50 MHz" -- is precisely about the receiver term this
+   sets to zero.  1.0044 / 1.0170 / 1.0006 is therefore a genuine
+   LOWER BOUND on T_sys/T_sky, not a computed sky-domination result
+   (``r`` alone was a vacuous bound: it omits the sky's own
+   contribution to its own system temperature).  Re-run with
+   ``--t-amp <T_rx>`` once the collaboration supplies one.
+2. ``t_sky = mean(I_sky)`` is an ALL-SKY mean, not a beam-weighted
+   antenna temperature.  The beam is not uniform, so the antenna
+   temperature the receiver actually sees differs from it; nothing
+   here weights the sky by ``|w(n)|^2``.
 """
 
 import argparse
@@ -60,9 +73,12 @@ def template_for(band):
 
     ``theta_c_clamped`` is ``None`` for the standalone fallback (it
     carries no coherence-angle statement at all); otherwise it is the
-    bool read straight from ``step5_template.npz`` -- callers must not
-    present a clamped ``bracket`` as a measurement (see the module
-    docstring of ``dispersion.coherence_angle``).
+    bool read straight from ``step5_template.npz``.  When it is True,
+    the bracket's UPPER entry -- and only that one -- is a clamped
+    quantity, and the clamp OVERSTATES it: see the docstrings of
+    ``dispersion.coherence_angle`` and ``dispersion.amplitude_bracket``.
+    ``lower_slab`` and ``lower_dispersion`` are theta_c-free closed
+    forms and are unaffected.
     """
     f = GEN_DIR / "step5_template.npz"
     if f.exists():
@@ -138,9 +154,11 @@ def main():
         phi, H, bracket[ib], clamped = template_for(band)
         if clamped:
             print(
-                f"{band:.0f} MHz: theta_c is CLAMPED (grid-limited, "
-                f"not measured) -- bracket is a search-grid artifact, "
-                f"not a measurement"
+                f"{band:.0f} MHz: theta_c is CLAMPED at the grid's low "
+                f"edge, which OVERSTATES it -- bracket['upper'] "
+                f"({bracket[ib, 0]:.2e}) is an upper bound not "
+                f"computable from this map, not a measurement; the two "
+                f"lower ends are theta_c-free and stand"
             )
         lam2b = np.asarray(lambda_squared(bins), dtype=float)
         keep = H > H.max() * 1e-6

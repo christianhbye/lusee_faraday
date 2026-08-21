@@ -140,13 +140,20 @@ def fig_sensitivity(s, d):
             label=f"{band:.0f} MHz closed form",
         )
         up, sl, dis = s["bracket"][ib]
-        # R10/theta_c note: the bracket is derived from theta_c, which
-        # is grid-limited (clamped) at every band -- read the flag
-        # from the template npz rather than assuming it, and mark the
-        # bracket lines as grid-limited, not measured.
+        # theta_c note: ONLY the bracket's upper end contains theta_c
+        # (N_patch = Omega_beam / theta_c^2).  lower_slab and
+        # lower_dispersion are closed forms in phi_med and sigma_eff
+        # and are theta_c-free, so a clamped theta_c contaminates the
+        # upper line ALONE -- an earlier caption said the whole
+        # bracket "derives from theta_c", which was wrong about two of
+        # the three lines drawn here.  And the clamp OVERSTATES (it
+        # returns the grid edge when the root lies below it), so a
+        # clamped upper is an upper BOUND, overstated by ~1e3 on this
+        # map; widening the grid cannot fix it (the root is
+        # sub-arcsecond).  Read the flag from the template npz.
         jb = int(np.argmin(np.abs(d["bands"] - band)))
         clamped = bool(d["theta_c_clamped"][jb])
-        tag = ", grid-limited" if clamped else ""
+        tag = " (clamp bound)" if clamped else ""
         ax.axhspan(dis, up, color=ln.get_color(), alpha=0.06)
         # `sl` (lower_slab) sits strictly inside (dis, up) and is a
         # physically distinct bound from `dis` (lower_dispersion) --
@@ -170,6 +177,10 @@ def fig_sensitivity(s, d):
     # the axis label states the reference for the plotted curves and
     # the caption below states the bracket's (different) reference
     # rather than leaving it for the reader to guess.
+    # The ratio is loading-only: --t-amp defaults to 0 and the luseepy
+    # chain carries no amplifier noise, so it is 1 + T_loading/T_sky
+    # and a LOWER BOUND on T_sys/T_sky, not a sky-domination result.
+    # The caption says so; do not let 1.7% read as "computed".
     ratio = np.asarray(s["tsys_over_tsky"], dtype=float)
     mismatch_pct = 100.0 * np.nanmax(np.abs(ratio - 1.0))
     ax.set(
@@ -196,20 +207,30 @@ def fig_sensitivity(s, d):
         ncol=1,
         framealpha=0.85,
     )
-    fig.tight_layout(rect=(0.0, 0.09, 1.0, 1.0))
+    fig.tight_layout(rect=(0.0, 0.14, 1.0, 1.0))
+    # Explicit line breaks, NOT wrap=True: a wrapped Text reports its
+    # pre-wrap extent to the tight-bbox pass, which pushed the first
+    # word to xMin = 0.5 pt (flush against the page edge, verified
+    # with pdftotext -bbox).  Hard-wrapped lines measure correctly and
+    # keep the pad_inches margin.
     fig.text(
         0.5,
         0.01,
-        "Bracket (shaded/dashed upper/dash-dot lower-slab) is a "
+        "Bracket (shaded / dashed upper / dash-dot lower-slab) is a "
         r"fractional polarized amplitude referred to $T_{sky}$, not "
-        r"$T_{sys}$ ($T_{sys}/T_{sky}$ mismatch $\leq$"
-        f" {mismatch_pct:.1f}%, not rescaled here); it derives from "
-        "theta_c, which is grid-limited at every band shown -- a "
-        "search-grid artifact, not a measurement.",
+        r"$T_{sys}$"
+        f"\n($T_{{sys}}/T_{{sky}}$ within {mismatch_pct:.1f}% of 1, "
+        "loading only -- no amplifier noise in this chain -- and not "
+        "rescaled here).\nThe dashed UPPER line alone derives from "
+        r"$\theta_c$, which is clamped to the search grid at every "
+        "band shown: it is a\nclamp-derived upper bound, overstated "
+        "by ~3 decades, and is not computable from this map.\nThe "
+        "dash-dot lower-slab and shaded lower-dispersion ends contain "
+        r"no $\theta_c$ and stand.",
         ha="center",
         va="bottom",
         fontsize=6,
-        wrap=True,
+        linespacing=1.4,
     )
     fig.savefig(
         FIG_DIR / "step5_sensitivity.pdf", bbox_inches="tight", pad_inches=0.25

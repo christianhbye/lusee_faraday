@@ -155,16 +155,56 @@ def _fine_offsets():
 
 
 def test_boxcar_rmsf_widths():
-    """S6.7: the rectangular idealisation gives 2 sqrt(3) / Dlam2."""
-    expected = {50.0: 12.0, 30.0: 2.60, 10.0: 0.096}
-    for band, width in expected.items():
+    """S6.7: the boxcar RMSF against BOTH top-hat width conventions.
+
+    Convention: AMPLITUDE FWHM (``delay_power`` returns power, so the
+    half-max crossing is taken on ``sqrt(p)``), matching the
+    convention of Brentjens & de Bruyn's ``2 sqrt(3) / dlambda^2``.
+
+    The assertion is against the EXACT half-power width of a top-hat's
+    sinc RMSF, ``2 * 1.8955 / dlambda^2`` (``sin(x)/x = 1/2`` at
+    x = 1.895494), with the ``(n-1)/n`` correction for summing n
+    discrete samples instead of integrating: a discrete sum spans
+    ``n`` cells of width ``dlambda^2/(n-1)``, i.e. an effective
+    ``dlambda^2 * n/(n-1)``.  ``2 sqrt(3) / dlambda^2`` = 3.4641 is
+    a rule of thumb 9.44% BELOW that exact width and is printed as
+    the spec's comparison, not asserted.
+
+    History (the fifth vacuous test on this branch): the previous
+    version asserted the measured width equalled ``2 sqrt(3)/dlambda^2``
+    at rtol=0.08, and the measured relative error was
+    0.08000000000000007 at all three bands -- it cleared only through
+    ``np.isclose``'s default atol=1e-8, and only because taking the
+    last grid point at or above half-max on a ``width/50`` grid rounds
+    down by almost exactly the 9.4% the approximation is off by.
+    Refining the grid or interpolating the crossing makes it fail.
+    Ruling R6 said "if it ever flips, interpolate the crossing -- do
+    NOT loosen rtol"; interpolating is what exposes it.
+    """
+    boxcar_rule = {50.0: 12.0, 30.0: 2.60, 10.0: 0.096}  # 2 sqrt(3)/dl2
+    for band, rule in boxcar_rule.items():
         freqs = fine_freqs(band)[::8]
-        phi_out = np.arange(0.0, 40.0 * width, width / 50.0)
-        p = dsp.delay_power(np.ones(freqs.size), freqs, phi_out)
-        amp = np.sqrt(p)
-        half = np.nonzero(amp >= 0.5)[0]
-        fwhm = 2.0 * phi_out[half[-1]]  # symmetric about 0
-        assert np.isclose(fwhm, width, rtol=0.08), (band, fwhm)
+        n = freqs.size
+        lam2 = np.asarray(lambda_squared(freqs), dtype=float)
+        dlam2 = lam2[0] - lam2[-1]
+        assert np.isclose(2.0 * np.sqrt(3.0) / dlam2, rule, rtol=0.01)
+        exact = 2.0 * 1.895494267 / dlam2 * (n - 1) / n
+        phi_out = np.arange(0.0, 40.0 * rule, rule / 50.0)
+        amp = np.sqrt(dsp.delay_power(np.ones(n), freqs, phi_out))
+        i = np.nonzero(amp >= 0.5)[0][-1]
+        # interpolate the half-max crossing (R6); symmetric about 0
+        cross = phi_out[i] + (amp[i] - 0.5) * (phi_out[i + 1] - phi_out[i]) / (
+            amp[i] - amp[i + 1]
+        )
+        fwhm = 2.0 * cross
+        assert np.isclose(fwhm, exact, rtol=1e-3), (band, fwhm, exact)
+        print(
+            f"\n{band:.0f} MHz boxcar RMSF amplitude FWHM {fwhm:.4f} "
+            f"rad/m^2; exact sinc half-power {exact:.4f}; "
+            f"2 sqrt(3)/dlam2 = {2.0 * np.sqrt(3.0) / dlam2:.4f}, "
+            f"which the measured width exceeds by "
+            f"{100 * (fwhm * dlam2 / (2 * np.sqrt(3)) - 1):.2f}%"
+        )
 
 
 def test_depth_horizon_pins_the_s46_table():
@@ -207,26 +247,71 @@ def test_rmsf_peaks_at_the_probe_depth_inside_the_horizon():
 
 
 def test_foreground_sidelobe_budget():
-    """S6.10: a phi~0 leakage foreground at |P|/I = 0.15 through BH4.
+    """S6.10 / S4.8: a phi~0 leakage foreground at |P|/I = 0.15
+    through BH4, resolved in phi.  This IS the S4.8 window
+    dynamic-range deliverable; the numbers it prints are quoted in
+    docs/measurement-model.md section 12.
 
-    The budget: sidelobe amplitude in the roll-off region ~ 0.15 *
-    2.5e-5 = 3.8e-6.  Adequate against the bracket's optimistic end
-    (1e-4); inadequate against the 1e-6 floor -- both reported.
+    The contamination is strongly phi-dependent and a single number
+    misreports it.  The spec's estimate -- peak sidelobe 2.5e-5 in
+    amplitude, so 0.15 * 2.5e-5 = 3.8e-6 everywhere, "inadequate
+    against the 1e-6 floor" -- is right only about the first sidelobe
+    and wrong about the verdict:
+
+      phi <~ 9.4   the BH4 MAIN LOBE (first null ~9.4 rad/m^2):
+                   1.5e-1 falling to ~1e-5.  No protection at all,
+                   and the k=0 template's origin spike lives here.
+      10 - 27      first sidelobes, peak 3.7e-6 near phi = 10.8
+                   (the spec's 3.8e-6).
+      phi >= 27.5  <= 1e-6 from here outward.
+      90 - 190     1.4e-7 across the 30 MHz knee (89.6 rad/m^2).
+      phi > 200    <= 8.8e-8.
+      phi > 776    <= 2.5e-8 (beyond the beam-weighted p99).
+
+    So BH4 is ADEQUATE against both ends of the S4.4 bracket
+    everywhere the template's roll-off lives -- at the knee it clears
+    the 30 MHz internal-dispersion floor (5.2e-7) by 3.7x and the
+    uniform-slab floor (4.3e-4) by 3000x -- and inadequate only inside
+    its own main lobe, phi <~ 10, which is the low-phi core the delay
+    axis was never claimed to protect (S4.8: leakage sits at phi ~ 0).
     """
     freqs = fine_freqs(30.0)[::4]  # 4096 samples
     # smooth synchrotron-sloped foreground at the PROGRESS.md level
     fg = 0.15 * (freqs / 30.0) ** (-2.5)
     win = dsp.bh4_window(freqs.size)
-    phi_out = np.arange(0.0, 2500.0, 1.0)
-    p = dsp.delay_power(fg.astype(complex), freqs, phi_out, window=win)
-    contamination = float(np.sqrt(p[phi_out > 200.0].max()))
-    # disqualification threshold: the optimistic bracket end (S4.8)
-    assert contamination < 1e-5
-    assert contamination > 1e-8  # sanity: the foreground exists
+    phi_out = np.arange(0.0, 2500.0, 0.25)
+    amp = np.sqrt(
+        dsp.delay_power(fg.astype(complex), freqs, phi_out, window=win)
+    )
+
+    def peak(lo, hi=np.inf):
+        sel = (phi_out > lo) & (phi_out <= hi)
+        j = int(np.argmax(amp[sel]))
+        return float(amp[sel][j]), float(phi_out[sel][j])
+
+    side, phi_side = peak(10.5)  # past the BH4 main lobe's first null
+    knee, _ = peak(90.0, 190.0)
+    tail, _ = peak(200.0)
+    far, _ = peak(776.1)
+    assert 1e-6 < side < 5e-6, (side, phi_side)
+    assert knee < 5e-7, knee
+    assert tail < 2e-7, tail
+    assert far < 1e-7, far
+    assert tail > 1e-9  # sanity: the foreground exists
+    # the level is cleared from ~27 rad/m^2 outward, well inside the
+    # knee -- measured as the last phi at which 1e-6 is exceeded
+    outward = np.maximum.accumulate(amp[::-1])[::-1]
+    phi_clear = float(phi_out[np.nonzero(outward > 1e-6)[0][-1]])
+    assert phi_clear < 40.0, phi_clear
     print(
-        f"\nsidelobe contamination amplitude {contamination:.2e}; "
-        f"vs bracket ends 1e-4 (ratio {contamination / 1e-4:.2e}) "
-        f"and 1e-6 (ratio {contamination / 1e-6:.2e})"
+        f"\nS4.8 BH4 budget (foreground 0.15 at phi ~ 0, 30 MHz):"
+        f"\n  peak sidelobe      {side:.2e} at phi = {phi_side:.2f}"
+        f"\n  <= 1e-6 for phi >= {phi_clear:.2f}"
+        f"\n  knee 90-190        {knee:.2e}"
+        f"\n  tail phi > 200     {tail:.2e}"
+        f"\n  beyond p99 (776)   {far:.2e}"
+        f"\n  vs bracket ends: 1e-4 -> {knee / 1e-4:.1e}, "
+        f"1e-6 -> {knee / 1e-6:.1e} at the knee"
     )
 
 
