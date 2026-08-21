@@ -105,8 +105,91 @@ def test_mass_quantile_knee_ignores_a_narrow_origin_spike():
     assert dsp.mass_quantile_knee(phi_abs, H, q=0.95) == 5.0
 
 
+def test_mass_quantile_knee_raises_on_non_positive_total_mass():
+    """Cleanup A: an all-zero H used to divide 0/0 (RuntimeWarning) and
+    return phi_abs[0] by accident of how searchsorted treats an
+    all-NaN array. Must raise instead, matching the k < -1 guard
+    style in depth_distribution."""
+    phi_abs = np.array([0.0, 1.0, 2.0])
+    H = np.zeros(3)
+    with pytest.raises(ValueError, match="total mass must be positive"):
+        dsp.mass_quantile_knee(phi_abs, H)
+
+
 def test_weighted_percentiles():
     v = np.array([1.0, 2.0, 3.0, 4.0])
     w = np.array([1.0, 1.0, 1.0, 97.0])
     p = dsp.weighted_percentiles(v, w, [50.0, 99.0])
     assert p[0] == 4.0 and p[1] == 4.0
+
+
+healpy = pytest.importorskip("healpy")
+
+
+def test_structure_function_of_a_smooth_map_scales_as_theta_squared():
+    import healpy as hp
+
+    nside = 64
+    th, _ = hp.pix2ang(nside, np.arange(hp.nside2npix(nside)))
+    m = np.cos(th)  # smooth dipole-like scalar
+    thetas = np.array([1.0, 2.0, 4.0])
+    D = dsp.structure_function(
+        m, thetas, nsamp=40_000, rng=np.random.default_rng(1)
+    )
+    # D(theta) ~ c theta^2 for a smooth field: ratios 4 and 16
+    assert np.isclose(D[1] / D[0], 4.0, rtol=0.3)
+    assert np.isclose(D[2] / D[0], 16.0, rtol=0.3)
+
+
+def test_coherence_angle_analytic():
+    # R15: the brief's grid (start 0.1 deg) does not bracket the root
+    # (0.081028 deg), so coherence_angle takes the documented clamped-
+    # low branch and the test cannot pass as originally written. Any
+    # start below 0.081028 deg puts the root interior; 0.01 was
+    # verified to make the log-log interpolation exact (D ~ theta^2
+    # makes log D linear in log theta).
+    theta_deg = np.linspace(0.01, 30.0, 300)
+    c = 25.0
+    D = c * np.radians(theta_deg) ** 2
+    lam2 = 100.0
+    got = dsp.coherence_angle(theta_deg, D, lam2)
+    expected = 1.0 / (lam2 * np.sqrt(2.0 * c))
+    assert np.isclose(got, expected, rtol=0.02)
+
+
+def test_coherence_angle_clamps_below_the_sampled_range():
+    """When the true root lies below the grid's first sample,
+    coherence_angle clamps to that sample instead of extrapolating
+    (documented behaviour). A caller must check for this explicitly:
+    on the real sky this branch is expected to trigger, and a silent
+    clamp would be a trap."""
+    theta_deg = np.linspace(0.5, 30.0, 300)  # root is at 0.081 deg
+    c = 25.0
+    D = c * np.radians(theta_deg) ** 2
+    lam2 = 100.0
+    got = dsp.coherence_angle(theta_deg, D, lam2)
+    assert got == np.radians(theta_deg[0])
+
+
+def test_patch_counts_and_tilt():
+    phi_col = np.array([1.5, 1.6, 5.5])
+    w2 = np.array([1.0, 1.0, 2.0])
+    edges = np.array([0.0, 3.0, 6.0])
+    npatch = dsp.patch_counts(phi_col, w2, edges, 0.01, pix_area=1e-3)
+    # bin 0: N_eff = (2)^2/2 = 2 -> 2 * 1e-3 / 1e-4 = 20
+    # bin 1: N_eff = 1 -> 10
+    np.testing.assert_allclose(npatch, [20.0, 10.0])
+    H = np.array([2.0, 2.0])
+    tilt = dsp.coherence_tilt(H, npatch)
+    assert np.isclose(tilt.sum(), H.sum())
+    assert tilt[0] > tilt[1]  # more patches -> boosted in the coherent limit
+
+
+def test_amplitude_bracket_closed_forms():
+    b = dsp.amplitude_bracket(
+        lam2=99.86, theta_c=0.01, omega_beam=2 * np.pi, phi_med=18.4
+    )
+    assert np.isclose(b["upper"], 1.0 / np.sqrt(2 * np.pi / 1e-4))
+    assert np.isclose(b["lower_slab"], 1.0 / (18.4 * 99.86))
+    assert np.isclose(b["lower_dispersion"], 1.0 / (2.0 * 9.8**2 * 99.86**2))
+    assert b["upper"] > b["lower_slab"] > b["lower_dispersion"]

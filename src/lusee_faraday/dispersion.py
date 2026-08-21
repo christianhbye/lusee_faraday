@@ -1,10 +1,20 @@
-"""Faraday depth distributions and their delay-space transforms.
+"""Faraday depth distributions, their transforms, and the delay-space
+template geometry built on top of them.
 
-Owns F(phi) and its transforms (spec S4.1).  Model side: ``transform``
-turns a depth distribution into P(lambda^2).  Analysis side:
-``delay_power`` turns a measured/model spectrum into delay-space power
-via a type-3 NUFFT on the true lambda^2 nodes -- NEVER an FFT on a
-uniform nu grid; the chirp that removes is spec S4.5.
+Owns F(phi) and its transforms (spec S4.1): ``transform`` turns a
+depth distribution into P(lambda^2) on the model side; ``delay_power``
+turns a measured/model spectrum into delay-space power via a type-3
+NUFFT on the true lambda^2 nodes -- NEVER an FFT on a uniform nu grid;
+the chirp that removes is spec S4.5. It also owns the shape geometry
+of the template built from F(phi) -- folding, the half-power and
+mass-quantile knees (S4.2, S4.2.2) -- the real channel response that
+that shape is measured through, via luseepy's zoom-bin machinery and
+``channelization``/``config`` (S4.6: ``zoom_bin_matrix``, ``rmsf``,
+``bin_envelope``, ``depth_horizon``), and the coherence and amplitude
+brackets that separate the shape prediction from the amplitude this
+repository does not predict (S4.4, S4.4.1: ``structure_function``,
+``coherence_angle``, ``patch_counts``, ``coherence_tilt``,
+``amplitude_bracket``).
 
 Does not import pixel_arm.
 """
@@ -175,6 +185,8 @@ def mass_quantile_knee(phi_abs, H, q=0.90):
     """
     phi_abs = np.asarray(phi_abs, dtype=float)
     H = np.asarray(H, dtype=float)
+    if not H.sum() > 0.0:
+        raise ValueError("total mass must be positive")
     cum = np.cumsum(H)
     cum = cum / cum[-1]
     return float(phi_abs[np.searchsorted(cum, float(q))])
@@ -284,3 +296,78 @@ def depth_horizon(fine_offsets_hz, w, center_mhz, level=0.5):
         else:
             hi = mid
     return 0.5 * (lo + hi)
+
+
+def structure_function(rm_map, theta_deg, nsamp=200_000, rng=None):
+    """RM structure function D(theta) by Monte-Carlo pixel pairs."""
+    import healpy as hp
+
+    rng = np.random.default_rng(0) if rng is None else rng
+    rm_map = np.asarray(rm_map, dtype=float)
+    nside = hp.get_nside(rm_map)
+    out = np.empty(len(np.atleast_1d(theta_deg)))
+    for i, th in enumerate(np.atleast_1d(theta_deg)):
+        pix = rng.integers(0, rm_map.size, nsamp)
+        v1 = np.array(hp.pix2vec(nside, pix))
+        r = rng.normal(size=(3, nsamp))
+        t = r - (r * v1).sum(axis=0) * v1
+        t /= np.linalg.norm(t, axis=0)
+        a = np.radians(th)
+        v2 = np.cos(a) * v1 + np.sin(a) * t
+        th2, ph2 = hp.vec2ang(v2.T)
+        rm2 = hp.get_interp_val(rm_map, th2, ph2)
+        out[i] = np.mean((rm_map[pix] - rm2) ** 2)
+    return out
+
+
+def coherence_angle(theta_deg, D, lam2):
+    """theta_c (radians) solving 2 lam2^2 D(theta_c) = 1 (spec S4.4).
+
+    ``D`` is monotonized (running max) before inverting, then
+    log-log-interpolated for the root. If the target lies outside the
+    sampled range, the result is CLAMPED to the nearest sampled
+    ``theta_deg`` rather than extrapolated -- callers must check for
+    this: on the real sky the low-end clamp is expected to trigger
+    (the true coherence angle is often below the finest sampled
+    separation), and treating a clamped return as the true root would
+    silently understate theta_c.
+    """
+    th = np.radians(np.asarray(theta_deg, dtype=float))
+    D = np.maximum.accumulate(np.asarray(D, dtype=float))
+    target = 1.0 / (2.0 * float(lam2) ** 2)
+    if target <= D[0]:
+        return float(th[0])
+    if target >= D[-1]:
+        return float(th[-1])
+    return float(np.exp(np.interp(np.log(target), np.log(D), np.log(th))))
+
+
+def patch_counts(phi_col, w2, edges, theta_c, pix_area):
+    """Independent-patch count per depth bin (spec S4.4.1)."""
+    phi_col = np.asarray(phi_col, dtype=float).ravel()
+    w2 = np.asarray(w2, dtype=float).ravel()
+    s1, _ = np.histogram(phi_col, bins=edges, weights=w2)
+    s2, _ = np.histogram(phi_col, bins=edges, weights=w2**2)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        neff = np.where(s2 > 0, s1**2 / s2, 0.0)
+    return np.maximum(1.0, neff * pix_area / float(theta_c) ** 2)
+
+
+def coherence_tilt(H, npatch):
+    """Coherent-limit template: H boosted by the patch count, then
+    renormalized to H's total (the tilt is a shape statement, S4.4.1).
+    """
+    H = np.asarray(H, dtype=float)
+    tilted = H * np.asarray(npatch, dtype=float)
+    return tilted * (H.sum() / tilted.sum())
+
+
+def amplitude_bracket(lam2, theta_c, omega_beam, phi_med, sigma_eff=9.8):
+    """The S4.4 bracket.  Not a prediction -- two ends with reasons."""
+    n_patch_tot = max(1.0, float(omega_beam) / float(theta_c) ** 2)
+    lam2 = float(lam2)
+    return {
+        "upper": 1.0 / np.sqrt(n_patch_tot),
+        "lower_slab": 1.0 / (abs(float(phi_med)) * lam2),
+        "lower_dispersion": 1.0 / (2.0 * float(sigma_eff) ** 2 * lam2**2),
+    }
