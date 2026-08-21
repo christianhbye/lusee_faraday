@@ -394,6 +394,44 @@ state and the distinction matters if figures move to the paper.
   --inplace notebooks/faraday_delay_template.ipynb`; it needs the
   `generated_data/step5_*.npz` products but no `data/` artifacts, and
   raises with the rebuild instructions if they are absent.
+- [x] **`report/delay_template/` -- the write-up with the derivations.**
+  20 pp, `cd report/delay_template && make` (two pdflatex passes, no
+  bibtex). Standalone, with a reconciliation section saying what it
+  supersedes at the `audit-2026-08-18` tag (Steps 2 and 4) and what
+  stands there (Steps 0/1/3 and the I-only limit). It does NOT touch
+  `report.tex`; transferring anything into the paper is still out of
+  scope. Derives, rather than asserts: the `N^-1/2` random walk, the
+  `f^k` pushforward CDF `min(e/phi_col, 1)^(k+1)`, the incoherent-limit
+  identity and why maximal phase coherence still passes it, the sinc
+  RMSF with the 0.734 power-vs-amplitude factor, the bin envelope, all
+  three bracket levels, and the whitened matched filter. The physics
+  point the verdict rests on is stated as such: **both usable floors
+  are power laws because the geometry is MIXED** -- an external screen
+  gives Burn's `exp(-2 sigma^2 lambda^4)`, which at 30 MHz has exponent
+  ~1.9e6 and is not a small number but zero.
+  `.gitignore` changed from `report/` to `report/*` for this: git does
+  not descend into an excluded *directory*, so a bare `report/` makes
+  the two exceptions (the report source, and the seven
+  `report/figures/step5_*.pdf` it includes) impossible to express.
+  Verified with `git check-ignore -v`; everything else under `report/`,
+  including the refuted step-2/4 figures and `report.tex`, stays
+  ignored.
+- [x] `step5_plots.fig_weight_map` -- the `|w|^2` sky map, added as the
+  seventh tracked figure so the report's "what beam-weighted means"
+  section has a picture and the notebook stops carrying its own healpy
+  call.
+- Correction, notebook section 11: an earlier revision said the
+  matched filter and the closed form "sit within a few percent" and
+  that their separation *is* the overlap degradation. Both wrong. At
+  24 lunations the ratio `A_mf/A_closed` is 0.980 / 1.161 / 0.542 at
+  30 / 50 / 10 MHz -- they agree at 30 MHz only, and diverge in
+  opposite directions elsewhere, because the closed form's fixed
+  coherence bandwidth is a poor description of the real signal
+  covariance there. The overlap degradation is a *separate* controlled
+  measurement -- hold everything fixed, replace `N` by its diagonal --
+  and it is **1.160x**
+  (`test_noise.py::test_overlap_correlation_degrades_the_threshold`).
+  The notebook now derives the comparison table instead of asserting it.
 
 ## Possible follow-ups
 - [ ] Transfer selected figures/text into the paper (explicitly out of
