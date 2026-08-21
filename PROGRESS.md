@@ -379,6 +379,21 @@ state and the distinction matters if figures move to the paper.
 - Figure provenance: all step-5 figures regenerate from committed scripts
   on this branch; the refuted Step 2/4 figures live only at the
   audit-2026-08-18 tag. The mixed-provenance list is empty here.
+- [x] **`notebooks/faraday_delay_template.ipynb` -- the results paper
+  trail**, committed *executed* so the eight figures are visible without
+  un-ignoring `report/`. It calls `scripts/step5_plots.py`'s `fig_*`
+  builders directly (they now return their figure; `step5_plots.save`
+  writes the PDFs), so the notebook cannot drift from the paper's
+  figures. Three things it *derives* rather than transcribes, each
+  landing on the ledger value above: the RMSF resolution table
+  (`dispersion.rmsf`, live, ~2 s, no data/ needed -- 7.592 / 35.150 /
+  0.281 amplitude FWHM), the tail-gate OPEN/closed verdict from
+  `bracket x sqrt(f)` against `A_mf` (4.72 / 19.35 / 0.458 four-port,
+  4.77 / 19.92 / 0.466 two-port), and the ~3e4-nights integration cost.
+  Re-execute with `uv run jupyter nbconvert --to notebook --execute
+  --inplace notebooks/faraday_delay_template.ipynb`; it needs the
+  `generated_data/step5_*.npz` products but no `data/` artifacts, and
+  raises with the rebuild instructions if they are absent.
 
 ## Possible follow-ups
 - [ ] Transfer selected figures/text into the paper (explicitly out of
