@@ -18,11 +18,16 @@ after multiplying ``A_mf``/``A_closed`` by T_sys/T_sky (the
 NOT apply that rescaling -- it reports the ratio and leaves the
 correction to whichever task plots the two together.
 
-T_sys/T_sky: computed from the luseepy loading model (moon + loss
-terms at 250 K) against a 1 K blackbody scaled by the mean sky
-temperature.  Amplifier noise is NOT in this chain -- pass --t-amp
-with the receiver noise temperature when the collaboration provides
-it; until then the printed ratio is a lower bound.
+T_sys/T_sky (Ruling R28): T_sys = T_sky + T_loading + T_amp for a
+sky-noise-dominated radiometer, so the ratio is ``1 + r + t_amp/t_sky``,
+where ``r`` is the luseepy loading model's Moon+antenna-loss
+contribution (250 K each) referenced to the sky via a 1 K blackbody,
+and ``t_sky`` is the mean Haslam-scaled sky temperature
+(``common.sky_at_freq``, which includes the T_CMB offset).  Amplifier
+noise is NOT in this chain -- pass --t-amp with the receiver noise
+temperature when the collaboration provides it; until then ``1 + r``
+is a genuine lower bound (``r`` alone was a vacuous one: it omits the
+sky's own contribution to its own system temperature).
 """
 
 import argparse
@@ -31,10 +36,10 @@ from pathlib import Path
 import common  # noqa: F401
 import numpy as np
 
-from common import GEN_DIR, RESPONSE_PATH, load_sky_maps
+from common import GEN_DIR, RESPONSE_PATH, load_sky_maps, sky_at_freq
 from lusee_faraday import dispersion as dsp
 from lusee_faraday import noise
-from lusee_faraday.config import BETA_I, FREQ_REF_I, SIDEREAL_DAY_S
+from lusee_faraday.config import SIDEREAL_DAY_S
 from lusee_faraday.conventions import lambda_squared
 
 TAU_S = SIDEREAL_DAY_S / 1024
@@ -91,14 +96,13 @@ def tsys_over_tsky(band, t_amp_k):
             T_ant=250.0,
             impedance_freq_mhz=band,
         )
-        t_sky = float(
-            np.mean(load_sky_maps()["I408"]) * (band / FREQ_REF_I) ** BETA_I
-        )
+        I_sky, _, _ = sky_at_freq(load_sky_maps(), band)
+        t_sky = float(np.mean(I_sky))
         r = np.nanmean(
             np.abs(np.diagonal(load[0, 0]))
             / (np.abs(np.diagonal(bb[0])) * t_sky)
         )
-        return float(r + t_amp_k / t_sky)
+        return float(1.0 + r + t_amp_k / t_sky)
     except Exception as e:  # artifact or receiver model unavailable
         if Path(RESPONSE_PATH).exists():
             # The artifact IS present -- a failure here is a bug, not
@@ -153,7 +157,7 @@ def main():
             f"{band:.0f} MHz: A(1 lun) mf {A_mf[ib, 0]:.2e} "
             f"closed {A_cf[ib, 0]:.2e}; A({args.lunations} lun) mf "
             f"{A_mf[ib, -1]:.2e} closed {A_cf[ib, -1]:.2e}; "
-            f"T_sys/T_sky >= {ratios[ib]:.2f}"
+            f"T_sys/T_sky >= {ratios[ib]:.5f}"
         )
 
     np.savez(
