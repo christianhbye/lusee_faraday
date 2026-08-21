@@ -5,7 +5,6 @@ import os
 os.environ.setdefault("JAX_ENABLE_X64", "1")
 
 import numpy as np
-import pytest
 
 from lusee_faraday import noise
 from lusee_faraday.conventions import lambda_squared
@@ -63,8 +62,43 @@ def test_overlap_correlation_degrades_the_threshold():
     S = noise.faraday_signal_covariance(phi, H, lam2b)
     a_corr = noise.matched_filter_threshold(S, N_corr, 1, 1024)
     a_diag = noise.matched_filter_threshold(S, N_diag, 1, 1024)
-    assert a_corr > a_diag
-    print(f"\noverlap degradation: {a_corr / a_diag:.3f}x")
+    ratio = a_corr / a_diag
+    print(f"\noverlap degradation: {ratio:.3f}x")
+    # S6.12: the 1.44x ENBW overlap must show up with the right
+    # MAGNITUDE, not merely the right sign.  A covariance with a
+    # 300x-too-small correlation still satisfies ratio > 1, so the
+    # bare inequality is not a regression guard.  Measured: 1.160.
+    assert 1.05 < ratio < 1.5, ratio
+
+
+def test_zoom_noise_covariance_contract():
+    """Direct contract for zoom_noise_covariance (S6.12).
+
+    These are the properties that make the overlap-degradation ratio
+    in test_overlap_correlation_degrades_the_threshold meaningful:
+    unit diagonal (by construction), symmetric, PSD, and a
+    nearest-neighbour correlation of order 0.15 (the real ~1.44x ENBW
+    overlap) rather than ~0 (a diagonal-only covariance).
+    """
+    from lusee_faraday import dispersion as dsp
+
+    _, bins, W = dsp.zoom_bin_matrix(30.0)
+    sigma = 8.8e-4
+    N = noise.zoom_noise_covariance(W, sigma)
+
+    np.testing.assert_allclose(np.diag(N), sigma**2, rtol=1e-10)
+    np.testing.assert_allclose(N, N.T, rtol=1e-10)
+
+    eigvals = np.linalg.eigvalsh(N)
+    assert eigvals.min() > 0.0
+
+    rho = N / sigma**2
+    nn_corr = np.diag(rho, k=1)
+    # Measured range is [0.074, 0.153], median 0.152 -- of order the
+    # real 1.44x ENBW overlap, not ~0 (a diagonal-only covariance).
+    assert np.all(np.abs(nn_corr) > 0.05)
+    assert np.all(np.abs(nn_corr) < 0.25)
+    assert 0.1 < np.median(np.abs(nn_corr)) < 0.2
 
 
 def test_matched_filter_monte_carlo():
