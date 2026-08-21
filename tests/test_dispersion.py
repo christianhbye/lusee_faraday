@@ -239,32 +239,62 @@ def test_boxcar_would_fail_the_budget():
     assert np.sqrt(p[phi_out > 200.0].max()) > 1e-5
 
 
-def test_zoom_aliasing_image_is_modelled():
-    """S6.13: a depth beyond the zoom fold appears at the aliased
-    position, and the rmsf model predicts the same image.
+def test_zoom_fold_is_unreachable_because_the_envelope_nulls_there():
+    """S4.6 item 3: a depth cannot reach its own alias.
 
-    The zoom delay range wraps with period dphi_wrap =
-    2 pi nu / (4 lam2 * 390.625 Hz) ~ 1208 rad/m^2 at 30 MHz, so
-    phi0 = 900 folds to |900 - 1208| ~ 308.
+    The zoom delay range wraps with period
+    dphi_wrap = 2 pi nu / (4 lam2 * 390.625 Hz) ~ 1208 rad/m^2 at
+    30 MHz.  But the zoom is critically sampled (ENBW 563 Hz on
+    390.6 Hz spacing), so a single bin's envelope has its first null
+    at that same depth: the response tracks faithfully up to ~1100
+    and is annihilated at the wrap rather than folding to an image.
+    Aliased Faraday power is therefore not a contaminant here.
+
+    phi_out MUST span past the wrap.  A window that stops short of
+    the true peak reports the largest residual bump instead, which is
+    how the plan's original version of this test measured 12.5.
     """
     fine, bins, W = dsp.zoom_bin_matrix(30.0)
     lam2 = np.asarray(lambda_squared(fine), dtype=float)
     lam2_0 = float(lambda_squared(30.0)[0])
-    phi0 = 900.0
     wrap = 2.0 * np.pi * 30e6 / (4.0 * lam2_0 * 390.625)
-    phi_img = abs(phi0 - wrap)  # ~ 308
+    assert 1200.0 < wrap < 1215.0
 
-    tone = np.exp(2j * phi0 * lam2)
-    binned = W.T @ tone
     win = dsp.bh4_window(bins.size)
-    phi_out = np.arange(0.0, 700.0, 0.5)
-    measured = dsp.delay_power(binned, bins, phi_out, window=win)
-    model = dsp.rmsf(phi0, fine, W, bins, phi_out, window=win)
+    phi_out = np.arange(0.0, 1400.0, 0.5)
 
-    peak_meas = phi_out[np.argmax(measured)]
-    peak_model = phi_out[np.argmax(model)]
-    assert abs(peak_meas - phi_img) < 10.0, (peak_meas, phi_img)
-    assert abs(peak_meas - peak_model) < 1.0
-    # the true depth itself must NOT be the peak: it is beyond the fold
-    near_true = measured[np.abs(phi_out - (phi0 - 300.0)) < 5.0]
-    assert measured.max() > 3.0 * near_true.max()
+    def recovered(phi0):
+        tone = np.exp(2j * phi0 * lam2)
+        p = dsp.delay_power(W.T @ tone, bins, phi_out, window=win)
+        return phi_out[np.argmax(p)], p.max()
+
+    # tracks faithfully well past the 604 rad/m^2 depth horizon
+    for phi0 in (100.0, 604.0, 900.0):
+        pk, power = recovered(phi0)
+        assert abs(pk - phi0) < 1.0, (phi0, pk)
+        assert power > 1e-2, (phi0, power)
+        print(f"phi0 {phi0:5.0f} -> peak {pk:6.1f}  power {power:.2e}")
+
+    # and the model agrees with the measurement at phi0 = 900
+    p_model = dsp.rmsf(900.0, fine, W, bins, phi_out, window=win)
+    model_peak = phi_out[np.argmax(p_model)]
+    assert abs(model_peak - 900.0) < 1.0
+    print(f"model peak at phi0=900: {model_peak:.1f}")
+
+    # at the wrap the bin envelope has nulled: no image survives
+    off = _fine_offsets()
+    wz = zoom_weights(off)[:, 0]
+    env_1000 = dsp.bin_envelope(1000.0, off, wz, 30.0)
+    env_wrap = dsp.bin_envelope(wrap, off, wz, 30.0)
+    assert env_1000 > 0.1, env_1000
+    assert env_wrap < 1e-3, env_wrap
+    print(f"bin envelope at phi=1000: {env_1000:.2e}")
+    print(f"bin envelope at wrap={wrap:.1f}: {env_wrap:.2e}")
+
+    _, power_wrap = recovered(wrap)
+    _, power_ref = recovered(100.0)
+    ratio = power_wrap / power_ref
+    assert ratio < 1e-4, (power_wrap, power_ref, ratio)
+    print(f"power at wrap {wrap:.1f}: {power_wrap:.2e}")
+    print(f"power at reference (100): {power_ref:.2e}")
+    print(f"ratio (wrap/ref): {ratio:.2e}")
