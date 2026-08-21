@@ -276,12 +276,13 @@ def two_port_pair_alms(h_theta, h_phi, theta_deg, phi_deg, lmax):
 
 
 def pair_weight_maps(kernel, time, loc, nside):
-    """Per-pair |W^{P-}| on the galactic HEALPix grid -> (npair, npix).
+    """Per-pair Faraday weight on the galactic HEALPix grid -> (npair, npix).
 
-    The Faraday-active weight of spec S4.3: the pair-Stokes kernel
-    couples K_Q Q + K_U U = W^- (Q + iU) + W^+ (Q - iU) with
-    W^- = (K_Q - i K_U) / 2, and (Q + iU) carries e^{+2i phi lam2}.
-    Zero below the horizon.  RING ordering, galactic frame.
+    The Faraday-active weight from both branches of the pair-Stokes
+    decomposition: weight^2 = |W^+|^2 + |W^-|^2 = 0.5 * (|K_Q|^2 + |K_U|^2),
+    where W^± = (K_Q ± i K_U) / 2. Both branches contribute to the full
+    Faraday phase range; fold_template combines ±phi downstream. The form is
+    basis-independent. Zero below the horizon.  RING ordering, galactic frame.
     """
     import healpy as hp
 
@@ -294,5 +295,5 @@ def pair_weight_maps(kernel, time, loc, nside):
     phi = np.mod(np.arctan2(n_resp[1, up], n_resp[0, up]), 2.0 * np.pi)
     K = np.asarray(kernel.sample(theta, phi))  # (npair, 4, Nup), I Q U V
     w = np.zeros((K.shape[0], npix))
-    w[:, up] = 0.5 * np.abs(K[:, 1] - 1j * K[:, 2])
+    w[:, up] = np.sqrt(0.5 * (np.abs(K[:, 1]) ** 2 + np.abs(K[:, 2]) ** 2))
     return w
