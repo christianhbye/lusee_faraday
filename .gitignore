@@ -213,13 +213,29 @@ __marimo__/
 # lusee_faraday analysis outputs (regenerable; multi-GB waterfalls)
 generated_data/
 
-# LaTeX build artifacts
-report/*.aux
-report/*.log
-report/*.out
-report/*.synctex.gz
-report/latex.log
+# The refuted report lives on the audit-2026-08-18 tag, not here, and
+# report/figures/ is regenerable output of the analysis scripts -- so
+# report/ is ignored by default.  Note the pattern is `report/*`, NOT
+# `report/`: git does not descend into an excluded DIRECTORY, so a bare
+# `report/` makes the two exceptions below impossible to express.
+report/*
 
-# The report lives on the audit-2026-08-18 tag, not on main; figures
-# here are regenerable output of the analysis scripts.
-report/
+# Exception 1: the delay-template report's source, which has to be
+# reviewable in the PR.  Its build artifacts stay ignored.
+!report/delay_template/
+report/delay_template/*.aux
+report/delay_template/*.fdb_latexmk
+report/delay_template/*.fls
+report/delay_template/*.log
+report/delay_template/*.out
+report/delay_template/*.pdf
+report/delay_template/*.synctex.gz
+report/delay_template/*.toc
+
+# Exception 2: the six step-5 figures that report include, ~220 kB, so
+# the report builds from a fresh clone without a heavy re-run.  Every
+# other figure under report/figures/ -- including the refuted step-2/4
+# set -- stays ignored.
+!report/figures/
+report/figures/*
+!report/figures/step5_*.pdf

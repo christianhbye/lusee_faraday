@@ -284,6 +284,34 @@ def fig_two_arm(d, d2):
     return fig
 
 
+def fig_weight_map(d):
+    """The LST- and pair-averaged Faraday weight, as a sky map.
+
+    What "beam-weighted" means, in one picture: every sky percentile
+    and every template in this set is weighted by this map.  healpy
+    makes its own figure, so this returns plt.gcf() rather than a
+    figure it created -- passing a pre-made one only makes mollview
+    warn that it is ignoring the figsize.
+    """
+    import healpy as hp
+
+    w2 = d["w2_mean"]
+    nside = hp.npix2nside(w2.size)
+    hp.mollview(
+        w2 / w2.max(),
+        norm="log",
+        min=1e-4,
+        max=1.0,
+        title=(
+            f"LST- and pair-averaged $|w|^2$ " f"(nside {nside}, normalised)"
+        ),
+        unit="relative weight",
+        cmap="viridis",
+    )
+    hp.graticule(30)
+    return plt.gcf()
+
+
 def save(fig, name, pad=0.25):
     """Write one figure to FIG_DIR/<name>.pdf and close it.
 
@@ -309,6 +337,7 @@ def main():
     s = np.load(GEN_DIR / "step5_sensitivity.npz")
     save(fig_sensitivity(s, d), "step5_sensitivity")
     save(fig_chirp_coherence(), "step5_chirp_coherence")
+    save(fig_weight_map(d), "step5_weight_map")
     two = GEN_DIR / "step5_template_two_port.npz"
     if two.exists():
         save(fig_two_arm(d, np.load(two)), "step5_two_arm")
