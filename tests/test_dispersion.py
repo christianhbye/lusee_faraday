@@ -204,3 +204,67 @@ def test_rmsf_peaks_at_the_probe_depth_inside_the_horizon():
     phi_out = np.arange(0.0, 200.0, 0.2)
     r = dsp.rmsf(100.0, fine, W, bins, phi_out)
     assert abs(phi_out[np.argmax(r)] - 100.0) < 1.0
+
+
+def test_foreground_sidelobe_budget():
+    """S6.10: a phi~0 leakage foreground at |P|/I = 0.15 through BH4.
+
+    The budget: sidelobe amplitude in the roll-off region ~ 0.15 *
+    2.5e-5 = 3.8e-6.  Adequate against the bracket's optimistic end
+    (1e-4); inadequate against the 1e-6 floor -- both reported.
+    """
+    freqs = fine_freqs(30.0)[::4]  # 4096 samples
+    # smooth synchrotron-sloped foreground at the PROGRESS.md level
+    fg = 0.15 * (freqs / 30.0) ** (-2.5)
+    win = dsp.bh4_window(freqs.size)
+    phi_out = np.arange(0.0, 2500.0, 1.0)
+    p = dsp.delay_power(fg.astype(complex), freqs, phi_out, window=win)
+    contamination = float(np.sqrt(p[phi_out > 200.0].max()))
+    # disqualification threshold: the optimistic bracket end (S4.8)
+    assert contamination < 1e-5
+    assert contamination > 1e-8  # sanity: the foreground exists
+    print(
+        f"\nsidelobe contamination amplitude {contamination:.2e}; "
+        f"vs bracket ends 1e-4 (ratio {contamination / 1e-4:.2e}) "
+        f"and 1e-6 (ratio {contamination / 1e-6:.2e})"
+    )
+
+
+def test_boxcar_would_fail_the_budget():
+    """Without the window the foreground floods the roll-off region."""
+    freqs = fine_freqs(30.0)[::4]
+    fg = 0.15 * (freqs / 30.0) ** (-2.5)
+    phi_out = np.arange(0.0, 2500.0, 1.0)
+    p = dsp.delay_power(fg.astype(complex), freqs, phi_out)
+    assert np.sqrt(p[phi_out > 200.0].max()) > 1e-5
+
+
+def test_zoom_aliasing_image_is_modelled():
+    """S6.13: a depth beyond the zoom fold appears at the aliased
+    position, and the rmsf model predicts the same image.
+
+    The zoom delay range wraps with period dphi_wrap =
+    2 pi nu / (4 lam2 * 390.625 Hz) ~ 1208 rad/m^2 at 30 MHz, so
+    phi0 = 900 folds to |900 - 1208| ~ 308.
+    """
+    fine, bins, W = dsp.zoom_bin_matrix(30.0)
+    lam2 = np.asarray(lambda_squared(fine), dtype=float)
+    lam2_0 = float(lambda_squared(30.0)[0])
+    phi0 = 900.0
+    wrap = 2.0 * np.pi * 30e6 / (4.0 * lam2_0 * 390.625)
+    phi_img = abs(phi0 - wrap)  # ~ 308
+
+    tone = np.exp(2j * phi0 * lam2)
+    binned = W.T @ tone
+    win = dsp.bh4_window(bins.size)
+    phi_out = np.arange(0.0, 700.0, 0.5)
+    measured = dsp.delay_power(binned, bins, phi_out, window=win)
+    model = dsp.rmsf(phi0, fine, W, bins, phi_out, window=win)
+
+    peak_meas = phi_out[np.argmax(measured)]
+    peak_model = phi_out[np.argmax(model)]
+    assert abs(peak_meas - phi_img) < 10.0, (peak_meas, phi_img)
+    assert abs(peak_meas - peak_model) < 1.0
+    # the true depth itself must NOT be the peak: it is beyond the fold
+    near_true = measured[np.abs(phi_out - (phi0 - 300.0)) < 5.0]
+    assert measured.max() > 3.0 * near_true.max()
