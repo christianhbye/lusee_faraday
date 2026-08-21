@@ -14,7 +14,9 @@ shape is measured through, via luseepy's zoom-bin machinery and
 brackets that separate the shape prediction from the amplitude this
 repository does not predict (S4.4, S4.4.1: ``structure_function``,
 ``coherence_angle``, ``patch_counts``, ``coherence_tilt``,
-``amplitude_bracket``).
+``amplitude_bracket``). ``tail_gate_bins``/``tail_gate_fractions`` are
+the LST-resolved tail gate's fixed |RM| binning and threshold-to-
+fraction arithmetic (S6.14).
 
 Does not import pixel_arm.
 """
@@ -206,6 +208,64 @@ def weighted_percentiles(values, weights, qs):
             for q in np.atleast_1d(qs)
         ]
     )
+
+
+def tail_gate_bins(rm_abs, nbins=2000):
+    """Fixed |RM| binning for the LST-resolved tail gate (spec S6.14).
+
+    |RM| does not change across LSTs, so it is binned once; the
+    per-LST w2 is then accumulated into these bins with a streaming
+    ``np.bincount`` (in the caller) instead of storing a full depth
+    histogram per LST -- 2000 bins is ~2 MB per band's ``(nlst,
+    nbins)`` accumulator versus up to hundreds of MB for a full
+    ``phi_edges`` histogram per LST.
+
+    Returns ``(edges, idx)``: ``edges`` has ``nbins + 1`` entries
+    spanning ``[0, rm_abs.max()]``; ``idx`` maps each input pixel to
+    its bin, clipped so a value at the maximum still lands in the
+    last bin rather than falling out of range.
+    """
+    rm_abs = np.asarray(rm_abs, dtype=float).ravel()
+    edges = np.linspace(0.0, rm_abs.max(), nbins + 1)
+    idx = np.clip(
+        np.searchsorted(edges, rm_abs, side="right") - 1, 0, nbins - 1
+    )
+    return edges, idx
+
+
+def tail_gate_fractions(rm_bin_edges, tail_hist, threshold):
+    """Per-LST tail fraction above a threshold (spec S6.14).
+
+    ``tail_hist`` is one or more |RM|-binned w2 histograms (shape
+    ``(..., nbins)``, built on ``rm_bin_edges`` from ``tail_gate_bins``
+    via ``np.bincount`` per LST).  For k=inf the template mass beyond
+    a depth T is exactly the w2 weight of pixels with |RM| > T, so no
+    depth histogram is needed to get the fraction of mass above
+    ``threshold``.
+
+    ``threshold`` must be held FIXED across whatever leading axis
+    ``tail_hist`` carries (e.g. LST, Ruling R19): computing it
+    separately per row from that row's own weight forces the returned
+    fraction to ~1% by the definition of the percentile -- that is
+    the tautological gate this replaced, since it measures nothing
+    but NumPy's percentile implementation.
+
+    Sums row by row rather than as one vectorised ``(..., above)``
+    reduction: NumPy's pairwise summation groups a masked reduction
+    over a >1-D array's last axis differently from summing each row
+    on its own (verified to differ at the ~1e-16 relative level).
+    scripts/step5_template.py's original inline form used the
+    per-row loop, and this function must reproduce that original
+    row-by-row floating point sum bit-for-bit -- it is the arithmetic
+    that built the committed, not-regenerated
+    ``generated_data/step5_template*.npz``.
+    """
+    rm_bin_edges = np.asarray(rm_bin_edges, dtype=float)
+    tail_hist = np.asarray(tail_hist, dtype=float)
+    above = rm_bin_edges[:-1] > threshold
+    flat = tail_hist.reshape(-1, tail_hist.shape[-1])
+    frac = np.array([row[above].sum() / row.sum() for row in flat])
+    return frac.reshape(tail_hist.shape[:-1])
 
 
 def bh4_window(n):

@@ -87,10 +87,11 @@ def main():
     # per LST (320k x 128 x 8 bytes = 328 MB/band of pure addition).
     # For k=inf the template mass above a depth T is exactly the w2
     # weight of pixels with |rm| > T -- no depth histogram needed.
-    rm_bin_edges = np.linspace(0.0, rm_abs.max(), 2001)
-    rm_idx = np.clip(
-        np.searchsorted(rm_bin_edges, rm_abs, side="right") - 1, 0, 1999
-    )
+    # The binning and the threshold-to-fraction arithmetic below are
+    # ``dsp.tail_gate_bins``/``dsp.tail_gate_fractions`` -- pure,
+    # tested functions shared with tests/test_dispersion_gates.py so
+    # a reversion of the gate is caught there.
+    rm_bin_edges, rm_idx = dsp.tail_gate_bins(rm_abs)
     loc = moon_location()
     t_all = times()
     lst_idx = np.linspace(0, len(t_all) - 1, args.lst, dtype=int)
@@ -167,9 +168,7 @@ def main():
         # fraction identically 1% by definition of the percentile and
         # measure nothing (Ruling R19).
         p99_band = dsp.weighted_percentiles(rm_abs, w2_band, [99.0])[0]
-        above = rm_bin_edges[:-1] > p99_band
-        for il in range(args.lst):
-            tail[ib, il] = tail_hist[il][above].sum() / tail_hist[il].sum()
+        tail[ib] = dsp.tail_gate_fractions(rm_bin_edges, tail_hist, p99_band)
         print(
             f"band {band}: p99_band = {p99_band:.3f} rad/m^2, "
             f"tail min {tail[ib].min():.2e} max {tail[ib].max():.2e}",
