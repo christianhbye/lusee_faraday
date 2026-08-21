@@ -309,8 +309,9 @@ state and the distinction matters if figures move to the paper.
   | 50 MHz | 2.07e-4 | **19.3 OPEN** | 7.2e-7 | 0.067 closed |
   | 10 MHz | 7.7e-6 | 0.46 closed | 1.0e-9 | 6e-5 closed |
 
-  (the two-port arm moves these ratios by at most 8%: 4.75 / 21.0 /
-  0.49, same OPEN/closed calls.) The bracket's
+  (the two-port arm, taken consistently -- its own bracket with its own
+  `sqrt(f)`, not the four-port bracket -- gives 4.77 / 19.92 / 0.47, at
+  most 3% away, same OPEN/closed calls.) The bracket's
   `upper` level is deliberately **not** in the table: it is
   clamp-derived and not computable from this map (below). So the gate
   **opens at 30 and 50 MHz if the diffuse amplitude sits at the
@@ -324,6 +325,8 @@ state and the distinction matters if figures move to the paper.
   entry**, which recorded the gate as decided by the grid-clamped
   `theta_c` with a wider `structure_function` grid as the fix. Only
   `upper` contains `theta_c`; both floors above are `theta_c`-free.
+  Also written up in `docs/measurement-model.md` §12 — this is the
+  branch's headline decision and must not live only in the ledger.
 - [x] Coherence angle / the bracket's upper end: `theta_c_clamped` is
   `[True True True]` in both npz files — the coherence angle hit the
   0.2 deg edge of the `structure_function` search grid at every band and
