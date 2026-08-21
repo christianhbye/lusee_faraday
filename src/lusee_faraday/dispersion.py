@@ -205,3 +205,82 @@ def bh4_window(n):
     from scipy.signal.windows import blackmanharris
 
     return blackmanharris(int(n), sym=False)
+
+
+def zoom_bin_matrix(center_mhz):
+    """Fine grid, sorted zoom-bin centres, (nfine, 192) weight matrix.
+
+    Built from luseepy's real spectrometer_response_zoom via
+    channelization.zoom_weights -- the real response, not a boxcar
+    (spec S4.6).  Columns are normalized bin weights.
+    """
+    from .channelization import (
+        PARENT_HALF_WIDTH_HZ,
+        zoom_frequency_grid,
+        zoom_weights,
+    )
+    from .config import fine_freqs, parent_centers
+
+    fine = fine_freqs(center_mhz)
+    parents = parent_centers(center_mhz)
+    bin_f, order = zoom_frequency_grid(parents)
+    W = np.zeros((fine.size, bin_f.size))
+    cache = {}
+    for i, (p, kbin) in enumerate(order):
+        if p not in cache:
+            off = (fine - parents[p]) * 1e6
+            sel = np.abs(off) <= PARENT_HALF_WIDTH_HZ + 1e-6
+            cache[p] = (sel, zoom_weights(off[sel]))
+        sel, Wz = cache[p]
+        W[sel, i] = Wz[:, kbin]
+    return fine, np.asarray(bin_f), W
+
+
+def rmsf(phi0, fine_freqs_mhz, W, bin_freqs_mhz, phi_out, window=None):
+    """Delay-power response of the binned system to a tone at phi0.
+
+    The deconvolution kernel of spec S4.1: a unit Faraday tone on the
+    fine grid, integrated by the true bin responses, then
+    delay-transformed over the bin centres.
+    """
+    lam2 = np.asarray(lambda_squared(fine_freqs_mhz), dtype=float)
+    tone = np.exp(2j * float(phi0) * lam2)
+    binned = np.asarray(W).T @ tone
+    return delay_power(binned, bin_freqs_mhz, phi_out, window=window)
+
+
+def bin_envelope(phi, fine_offsets_hz, w, center_mhz):
+    """|FT of the bin response| at the Faraday rate of depth phi.
+
+    The multiplicative envelope a channel imposes in Faraday depth
+    (spec S4.6): attenuation of a tone at phi integrated by one bin.
+    """
+    off = np.asarray(fine_offsets_hz, dtype=float)
+    w = np.asarray(w, dtype=float)
+    w = w / w.sum()
+    freqs = center_mhz + off * 1e-6
+    dlam2 = (
+        np.asarray(lambda_squared(freqs), dtype=float)
+        - lambda_squared(center_mhz)[0]
+    )
+    phi = np.atleast_1d(np.asarray(phi, dtype=float))
+    env = np.abs(np.exp(2j * np.outer(phi, dlam2)) @ w)
+    return env if env.size > 1 else float(env[0])
+
+
+def depth_horizon(fine_offsets_hz, w, center_mhz, level=0.5):
+    """First depth where the bin envelope falls through ``level``."""
+    grid = np.geomspace(0.1, 1e5, 600)
+    env = bin_envelope(grid, fine_offsets_hz, w, center_mhz)
+    below = np.nonzero(env < level)[0]
+    if below.size == 0:
+        return float(grid[-1])
+    j = below[0]
+    lo, hi = (0.0, grid[0]) if j == 0 else (grid[j - 1], grid[j])
+    for _ in range(60):
+        mid = 0.5 * (lo + hi)
+        if bin_envelope(mid, fine_offsets_hz, w, center_mhz) >= level:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
