@@ -16,7 +16,7 @@ being pushed through a band-limited harmonic transform.
 
 import numpy as np
 
-from .conventions import PORT_PAIRS, lambda_squared
+from .conventions import PORT_PAIRS, lambda_squared, topo_rotation_matrix
 
 
 def load_response(path):
@@ -273,3 +273,26 @@ def two_port_pair_alms(h_theta, h_phi, theta_deg, phi_deg, lmax):
         frame="topo",
     )
     return np.asarray(beam.compute_alm(lmax=int(lmax)))[:, 0]
+
+
+def pair_weight_maps(kernel, time, loc, nside):
+    """Per-pair |W^{P-}| on the galactic HEALPix grid -> (npair, npix).
+
+    The Faraday-active weight of spec S4.3: the pair-Stokes kernel
+    couples K_Q Q + K_U U = W^- (Q + iU) + W^+ (Q - iU) with
+    W^- = (K_Q - i K_U) / 2, and (Q + iU) carries e^{+2i phi lam2}.
+    Zero below the horizon.  RING ordering, galactic frame.
+    """
+    import healpy as hp
+
+    R = topo_rotation_matrix(time, loc)
+    npix = hp.nside2npix(nside)
+    vec = np.array(hp.pix2vec(nside, np.arange(npix)))
+    n_resp = R @ vec
+    up = n_resp[2] > 0.0
+    theta = np.arccos(np.clip(n_resp[2, up], -1.0, 1.0))
+    phi = np.mod(np.arctan2(n_resp[1, up], n_resp[0, up]), 2.0 * np.pi)
+    K = np.asarray(kernel.sample(theta, phi))  # (npair, 4, Nup), I Q U V
+    w = np.zeros((K.shape[0], npix))
+    w[:, up] = 0.5 * np.abs(K[:, 1] - 1j * K[:, 2])
+    return w
