@@ -215,81 +215,206 @@ def test_gate_envelope_orderings_against_the_sky():
         assert dsp.depth_horizon(off, wp, band) < p90
 
 
-def test_tail_gate_bincount_identity():
-    """Pinning R19: the tail-gate identity and rejection of the tautological
-    form.
+def _transiting_beam_regime(
+    seed=0,
+    npix=20000,
+    nlst=40,
+    beam_width=0.03,
+    floor_amp=3e-3,
+    floor_width=0.15,
+    hot_width=0.05,
+    hot_lo=200.0,
+    hot_hi=800.0,
+):
+    """Synthetic |RM| field + LST-resolved w2, shaped like the real
+    regime (spec S6.14): a real transiting beam is near-zero over
+    most of the sky at most LSTs, with its weight concentrated on a
+    small, shifting patch as the sky rotates under a fixed pointing.
 
-    Spec S6.14, ruling R19: LST tail gate uses a FIXED per-band threshold
-    (the beam-weighted p99 of |RM|, computed once from the band-summed weight)
-    while the numerator varies per LST. The tautological form (recomputing
-    threshold from each per-LST weight separately) forces the fraction to ~1%
-    always; the correct form varies across LSTs.
+    Pixels sit on a periodic 1-D coordinate (a stand-in for the great
+    circle the zenith beam sweeps through as the sky turns). A narrow
+    "hot" arc holds most of the very-high-|RM| pixels, standing in for
+    the Galactic-plane/GC region. Each LST's weight is a narrow
+    Gaussian "spotlight" centred at a different point on the circle
+    (the beam), plus a much weaker, broader Gaussian floor (sidelobe
+    leakage) so weight is never exactly zero anywhere. Whether an
+    LST's spotlight currently overlaps the hot arc, and how much of it
+    is sidelobe-only leakage, is what makes the tail fraction swing
+    over orders of magnitude instead of clustering near a single
+    number -- unlike a diffuse/uniform synthetic field, which cannot
+    reproduce that regime (see Fix round 2 in the task report).
 
-    This test validates the identity by showing:
-    1. With a FIXED threshold and varying weights, fractions vary (NOT ~1%).
-    2. With per-LST thresholds (tautological), fractions are ~1% always.
+    Returns ``(rm_abs, edges, tail_hist, w2_band, w2_all)``:
+    ``edges``/``tail_hist`` are exactly what the script builds
+    (``dsp.tail_gate_bins`` + a per-LST ``np.bincount``); ``w2_band``
+    is the LST-summed weight (matches the script's ``w2_band``);
+    ``w2_all`` is the raw per-pixel per-LST weight, kept only so a
+    per-LST threshold can be recomputed for the divergence test below
+    (this replicates the taut form's own pre-R19 inputs -- not
+    additional gate arithmetic).
     """
-    # Synthetic data: random |RM| field and LST-varying weights.
-    np.random.seed(42)
-    npix = 10000
-    rm_abs = np.abs(np.random.randn(npix)) * 200.0 + 50.0
+    rng = np.random.default_rng(seed)
+    x = np.arange(npix) / npix
+    rm_abs = 5.0 + 3.0 * np.abs(rng.standard_normal(npix))
+    hot_center = 0.5
+    d = np.minimum(np.abs(x - hot_center), 1.0 - np.abs(x - hot_center))
+    hot_mask = d < hot_width
+    rm_abs[hot_mask] += rng.uniform(hot_lo, hot_hi, size=hot_mask.sum())
 
-    # Compute a FIXED threshold from an aggregate (band-summed) weight.
-    w2_band = np.ones(npix)  # uniform aggregate
-    p99_fixed = dsp.weighted_percentiles(rm_abs, w2_band, [99.0])[0]
+    lst_centers = np.arange(nlst) / nlst
+    w2_all = np.zeros((nlst, npix))
+    for il in range(nlst):
+        dcen = np.minimum(
+            np.abs(x - lst_centers[il]), 1.0 - np.abs(x - lst_centers[il])
+        )
+        w2 = np.exp(-0.5 * (dcen / beam_width) ** 2)
+        w2 += floor_amp * np.exp(-0.5 * (dcen / floor_width) ** 2)
+        w2_all[il] = w2
 
-    # Generate 5 LST-specific weight distributions, applied to same |RM| field.
-    fractions_correct = []  # using fixed p99_fixed
-    fractions_tautological = []  # recomputing p99 per LST
+    edges, idx = dsp.tail_gate_bins(rm_abs)
+    tail_hist = np.zeros((nlst, 2000))
+    for il in range(nlst):
+        tail_hist[il] = np.bincount(idx, weights=w2_all[il], minlength=2000)
+    w2_band = w2_all.sum(axis=0)
+    return rm_abs, edges, tail_hist, w2_band, w2_all
 
-    np.random.seed(42)
-    for lst_trial in range(5):
-        # LST-specific weight (e.g., beam varies with LST hour angle)
-        if lst_trial == 0:
-            w2_lst = np.ones(npix) / npix
-        elif lst_trial == 1:
-            w2 = np.random.exponential(1.0 / npix, npix)
-            w2_lst = w2 / w2.sum()
-        elif lst_trial == 2:
-            w2 = np.random.gamma(2.0, 1.0 / (2.0 * npix), npix)
-            w2_lst = w2 / w2.sum()
-        elif lst_trial == 3:
-            w2 = np.random.beta(0.5, 2.0, npix)
-            w2_lst = w2 / w2.sum()
-        else:
-            w2 = np.random.gamma(0.5, 1.0 / (0.5 * npix), npix)
-            w2_lst = w2 / w2.sum()
 
-        # CORRECT: use the FIXED band threshold with per-LST weight
-        frac_correct = w2_lst[rm_abs > p99_fixed].sum() / w2_lst.sum()
-        fractions_correct.append(frac_correct)
+def test_tail_gate_transiting_beam_dynamic_range():
+    """S6.14/Ruling R19 regression test, via the SHIPPED code path.
 
-        # TAUTOLOGICAL: recompute p99 from the SAME per-LST weight
-        # (This would force fraction to ~1% by definition of percentile)
-        p99_lst = dsp.weighted_percentiles(rm_abs, w2_lst, [99.0])[0]
-        frac_tauto = w2_lst[rm_abs > p99_lst].sum() / w2_lst.sum()
-        fractions_tautological.append(frac_tauto)
+    Calls the exact functions ``scripts/step5_template.py`` calls --
+    ``dsp.tail_gate_bins`` for the fixed |RM| binning and
+    ``dsp.tail_gate_fractions`` for the threshold-to-fraction
+    arithmetic -- with a FIXED per-band threshold (the beam-weighted
+    p99 of |RM| over the LST-summed weight, exactly as the script
+    computes ``p99_band``), on a synthetic transiting-beam regime
+    whose tail fraction spans orders of magnitude like the real run
+    (script log: 2.06e-06 to 1.98e-02 at 30 MHz), not the 0.8-1.2%
+    band a uniform/diffuse synthetic field produces.
 
-    # Verify: correct form varies significantly (NOT constant ~1%).
-    correct_std = np.std(fractions_correct)
-    correct_range = max(fractions_correct) - min(fractions_correct)
-    assert (
-        correct_range > 0.001
-    ), f"Correct form should vary; range={correct_range}, values={fractions_correct}"  # noqa: E501
+    Measured on this fixture (seed=0, see Fix round 2 in the task
+    report for the exact figures): fraction range
+    [2.705314e-06, 8.999003e-02], ratio 3.326e4 (~4.52 decades).  The
+    ``> 1e3`` bound below sits ~33x under that measured ratio while
+    sitting ~500x above the ratio a collapsed-to-~1% tautological
+    output would give (measured separately at ~1.9, see
+    ``test_tail_gate_correct_form_diverges_from_tautological`` below)
+    -- ample margin on both sides.
+    """
+    rm_abs, edges, tail_hist, w2_band, _ = _transiting_beam_regime()
 
-    # Verify: tautological form gives ~1% always (by definition).
-    # This is the key regression detector: if someone re-introduces the
-    # tautological form, all fractions cluster at ~1%.
-    for frac in fractions_tautological:
-        assert (
-            0.008 < frac < 0.012
-        ), f"Tautological form should give ~1%; got {frac}"
+    p99_band = dsp.weighted_percentiles(rm_abs, w2_band, [99.0])[0]
+    frac = dsp.tail_gate_fractions(edges, tail_hist, p99_band)
+
+    assert frac.min() < 1e-4, frac.min()
+    assert frac.max() > 1e-2, frac.max()
+    ratio = frac.max() / frac.min()
+    assert ratio > 1e3, ratio
 
     print(
-        f"\nTail-gate identity R19 validation:"
-        f"\n  Correct form (fixed p99={p99_fixed:.1f}): "
-        f"{[f'{f:.5f}' for f in fractions_correct]}"
-        f"\n    range={correct_range:.6f}, std={correct_std:.6f}"
-        f"\n  Tautological form (~1%): "
-        f"{[f'{f:.5f}' for f in fractions_tautological]}"
+        f"\ntransiting-beam tail fraction: min={frac.min():.6e} "
+        f"max={frac.max():.6e} ratio={ratio:.3e}"
     )
+
+
+def test_tail_gate_correct_form_diverges_from_tautological():
+    """Real discriminator between the fixed-threshold (correct, R19)
+    and per-LST-threshold (tautological, pre-R19) forms -- NOT a
+    restatement that the tautological form equals ~1%, which is true
+    by the definition of a percentile and cannot fail.
+
+    Both forms are built from the same two extracted functions
+    (``dsp.tail_gate_bins``, ``dsp.tail_gate_fractions`` -- no
+    parallel gate reimplementation); they differ only in whether the
+    threshold passed to ``tail_gate_fractions`` is the one FIXED
+    per-band value (correct) or recomputed per LST from that LST's
+    own raw weight (tautological, the pre-R19 bug's own inputs). The
+    assertion is on the size of the disagreement between the two
+    forms, which is a real, independently falsifiable quantity: if a
+    future change made the two forms coincide (e.g. by making the
+    "fixed" threshold secretly vary per row again), this fails.
+
+    Measured on the same fixture (seed=0): tautological fractions sit
+    in [5.252e-03, 9.978e-03] (near 1%, as expected, off it only by
+    the 2000-bin quantisation) while the correct-form fractions reach
+    8.999e-02; max |correct - tautological| = 8.001e-02. The `> 1e-2`
+    bound below sits 8x under that measured value.
+    """
+    rm_abs, edges, tail_hist, w2_band, w2_all = _transiting_beam_regime()
+
+    p99_band = dsp.weighted_percentiles(rm_abs, w2_band, [99.0])[0]
+    correct = dsp.tail_gate_fractions(edges, tail_hist, p99_band)
+
+    nlst = tail_hist.shape[0]
+    tautological = np.zeros(nlst)
+    for il in range(nlst):
+        p99_lst = dsp.weighted_percentiles(rm_abs, w2_all[il], [99.0])[0]
+        tautological[il] = dsp.tail_gate_fractions(
+            edges, tail_hist[il], p99_lst
+        )
+
+    diff = np.abs(correct - tautological)
+    assert diff.max() > 1e-2, diff.max()
+
+    print(
+        f"\ncorrect form: min={correct.min():.6e} max={correct.max():.6e}"
+        f"\ntautological form: min={tautological.min():.6e} "
+        f"max={tautological.max():.6e}"
+        f"\nmax |correct - tautological| = {diff.max():.6e}"
+    )
+
+
+def test_tail_gate_extraction_is_numerically_inert():
+    """Mandatory inertness proof: the refactor that moved the tail-gate
+    arithmetic out of ``scripts/step5_template.py`` (which built the
+    committed, NOT-regenerated ``generated_data/step5_template*.npz``)
+    into ``dsp.tail_gate_bins``/``dsp.tail_gate_fractions`` is a pure
+    code move.  This runs a VERBATIM copy of the OLD inline arithmetic
+    (as it stood at commit 7d23e07, before this refactor) side by side
+    with the NEW extracted functions on identical synthetic inputs and
+    requires bitwise equality (``assert_array_equal``), not a
+    tolerance.
+    """
+    rng = np.random.default_rng(7)
+    npix = 5000
+    nlst = 12
+    rm_abs = np.abs(rng.standard_normal(npix)) * 200.0 + 50.0
+    # skewed, beam-like weight: most mass near zero, occasional spikes
+    w2_all = rng.random((nlst, npix)) ** 3
+    w2_band = w2_all.sum(axis=0)
+
+    # --- OLD verbatim inline arithmetic ---
+    old_rm_bin_edges = np.linspace(0.0, rm_abs.max(), 2001)
+    old_rm_idx = np.clip(
+        np.searchsorted(old_rm_bin_edges, rm_abs, side="right") - 1,
+        0,
+        1999,
+    )
+    old_tail_hist = np.zeros((nlst, 2000))
+    for il in range(nlst):
+        old_tail_hist[il] = np.bincount(
+            old_rm_idx, weights=w2_all[il], minlength=2000
+        )
+    old_p99_band = dsp.weighted_percentiles(rm_abs, w2_band, [99.0])[0]
+    old_above = old_rm_bin_edges[:-1] > old_p99_band
+    old_tail = np.zeros(nlst)
+    for il in range(nlst):
+        old_tail[il] = (
+            old_tail_hist[il][old_above].sum() / old_tail_hist[il].sum()
+        )
+
+    # --- NEW: extracted functions, same call pattern as the script ---
+    new_rm_bin_edges, new_rm_idx = dsp.tail_gate_bins(rm_abs)
+    new_tail_hist = np.zeros((nlst, 2000))
+    for il in range(nlst):
+        new_tail_hist[il] = np.bincount(
+            new_rm_idx, weights=w2_all[il], minlength=2000
+        )
+    new_p99_band = dsp.weighted_percentiles(rm_abs, w2_band, [99.0])[0]
+    new_tail = dsp.tail_gate_fractions(
+        new_rm_bin_edges, new_tail_hist, new_p99_band
+    )
+
+    np.testing.assert_array_equal(new_rm_bin_edges, old_rm_bin_edges)
+    np.testing.assert_array_equal(new_rm_idx, old_rm_idx)
+    np.testing.assert_array_equal(new_tail, old_tail)
