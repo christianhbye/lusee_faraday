@@ -7,8 +7,8 @@ turns a measured/model spectrum into delay-space power via a type-3
 NUFFT on the true lambda^2 nodes -- NEVER an FFT on a uniform nu grid;
 the chirp that removes is spec S4.5. It also owns the shape geometry
 of the template built from F(phi) -- folding, the half-power and
-mass-quantile knees (S4.2, S4.2.2) -- the real channel response that
-that shape is measured through, via luseepy's zoom-bin machinery and
+mass-quantile knees (S4.2, S4.2.2) -- the real channel response the
+shape is measured through, via luseepy's zoom-bin machinery and
 ``channelization``/``config`` (S4.6: ``zoom_bin_matrix``, ``rmsf``,
 ``bin_envelope``, ``depth_horizon``), and the coherence and amplitude
 brackets that separate the shape prediction from the amplitude this
