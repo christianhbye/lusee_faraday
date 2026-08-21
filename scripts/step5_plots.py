@@ -46,11 +46,7 @@ def fig_template_family(d):
     np.atleast_1d(axes)[0].set_ylabel("normalised template")
     np.atleast_1d(axes)[0].legend(fontsize=7)
     fig.tight_layout()
-    fig.savefig(
-        FIG_DIR / "step5_template_family.pdf",
-        bbox_inches="tight",
-        pad_inches=0.25,
-    )
+    return fig
 
 
 def fig_knee_tail(d):
@@ -94,11 +90,7 @@ def fig_knee_tail(d):
     # tight_layout() and letting bbox_inches="tight" alone size the
     # canvas around the default subplot layout, with a larger pad,
     # fits the whole label with margin to spare.
-    fig.savefig(
-        FIG_DIR / "step5_knee_tail_lst.pdf",
-        bbox_inches="tight",
-        pad_inches=0.4,
-    )
+    return fig
 
 
 def fig_envelope(env):
@@ -119,9 +111,7 @@ def fig_envelope(env):
     )
     ax.legend(fontsize=7)
     fig.tight_layout()
-    fig.savefig(
-        FIG_DIR / "step5_envelope.pdf", bbox_inches="tight", pad_inches=0.25
-    )
+    return fig
 
 
 def fig_sensitivity(s, d):
@@ -232,9 +222,7 @@ def fig_sensitivity(s, d):
         fontsize=6,
         linespacing=1.4,
     )
-    fig.savefig(
-        FIG_DIR / "step5_sensitivity.pdf", bbox_inches="tight", pad_inches=0.25
-    )
+    return fig
 
 
 def fig_chirp_coherence():
@@ -273,11 +261,7 @@ def fig_chirp_coherence():
     )
     ax.legend(fontsize=7)
     fig.tight_layout()
-    fig.savefig(
-        FIG_DIR / "step5_chirp_coherence.pdf",
-        bbox_inches="tight",
-        pad_inches=0.25,
-    )
+    return fig
 
 
 def fig_two_arm(d, d2):
@@ -297,21 +281,37 @@ def fig_two_arm(d, d2):
     np.atleast_1d(axes)[0].set_ylabel("normalised template (k = 0)")
     np.atleast_1d(axes)[0].legend(fontsize=7)
     fig.tight_layout()
-    fig.savefig(
-        FIG_DIR / "step5_two_arm.pdf", bbox_inches="tight", pad_inches=0.25
-    )
+    return fig
+
+
+def save(fig, name, pad=0.25):
+    """Write one figure to FIG_DIR/<name>.pdf and close it.
+
+    The ``fig_*`` builders return their figure rather than saving it,
+    so that ``notebooks/faraday_delay_template.ipynb`` renders the
+    same figures the paper uses instead of carrying a second copy of
+    the plotting code that can drift from this one.  Saving lives
+    here; the notebook displays instead.
+    """
+    fig.savefig(FIG_DIR / f"{name}.pdf", bbox_inches="tight", pad_inches=pad)
+    plt.close(fig)
 
 
 def main():
     d = np.load(GEN_DIR / "step5_template.npz")
-    fig_template_family(d)
-    fig_knee_tail(d)
-    fig_envelope(np.load(GEN_DIR / "step5_envelope.npz"))
-    fig_sensitivity(np.load(GEN_DIR / "step5_sensitivity.npz"), d)
-    fig_chirp_coherence()
+    save(fig_template_family(d), "step5_template_family")
+    # pad 0.4: fig_knee_tail deliberately skips tight_layout (see the
+    # comment there), so its long rotated ylabel needs the wider pad.
+    save(fig_knee_tail(d), "step5_knee_tail_lst", pad=0.4)
+    save(
+        fig_envelope(np.load(GEN_DIR / "step5_envelope.npz")), "step5_envelope"
+    )
+    s = np.load(GEN_DIR / "step5_sensitivity.npz")
+    save(fig_sensitivity(s, d), "step5_sensitivity")
+    save(fig_chirp_coherence(), "step5_chirp_coherence")
     two = GEN_DIR / "step5_template_two_port.npz"
     if two.exists():
-        fig_two_arm(d, np.load(two))
+        save(fig_two_arm(d, np.load(two)), "step5_two_arm")
     print(f"figures in {FIG_DIR}")
 
 
