@@ -269,6 +269,37 @@ state and the distinction matters if figures move to the paper.
   (setup, steps 1-4, practical conclusions on parent vs zoom bins and
   the delay window; figures in `report/figures/`).
 
+## Step 5: the Faraday delay template (branch faraday-delay-template)
+- [x] `dispersion.py` (depth distributions, NUFFT transforms, real-response
+  RMSF, depth horizon, geometry knob, coherence bracket) + `noise.py`
+  (ported + matched filter) + `response.pair_weight_maps` (basis-independent
+  weight combining both Faraday branches, `sqrt(0.5*(|K_Q|^2+|K_U|^2))`,
+  not one branch alone).
+- [x] Acceptance gates passed: normalised template invariant under nside
+  256–2048 refinement and under a null rotation (the audit's two findings,
+  rebutted); converged-regime control reproduced through the NUFFT path.
+- [x] `step5_instrument_envelope.py` / `step5_template.py` /
+  `step5_sensitivity.py` / `step5_plots.py`; figures in report/figures/.
+- [x] Tail gate verdict (S4.2.2): from the full `--lst 128` run, the
+  `|w|^2`-weighted tail fraction above the fixed beam-weighted-p99
+  threshold, resolved over LST. Four-port arm GC-transit maxima per band:
+  **2.16% (30 MHz), 3.15% (50 MHz), 2.39% (10 MHz)**; two-port arm:
+  **2.18% (30 MHz), 3.70% (50 MHz), 2.69% (10 MHz)**. Away from transit the
+  fraction falls to ~1e-6; the LST mean sits near ~0.8% at every band and
+  arm, close to the ~1% the p99 definition implies at a typical LST, and
+  GC transit lifts it only 2-4x above that floor, not by orders of
+  magnitude. Read from `generated_data/step5_template.npz["tail_frac_lst"]`
+  and `step5_template_two_port.npz["tail_frac_lst"]`, both shape `(3, 128)`.
+- [x] Coherence-bracket caveat: `theta_c_clamped` is `[True True True]` in
+  both npz files — the coherence angle hit the 0.2 deg edge of the
+  `structure_function` search grid at every band, both arms, so `theta_c`
+  and the amplitude `bracket` derived from it are grid-limited, not
+  measured. Widening the angular grid is needed before quoting the
+  bracket as a physical measurement.
+- Figure provenance: all step-5 figures regenerate from committed scripts
+  on this branch; the refuted Step 2/4 figures live only at the
+  audit-2026-08-18 tag. The mixed-provenance list is empty here.
+
 ## Possible follow-ups
 - [ ] Transfer selected figures/text into the paper (explicitly out of
   scope per INSTRUCTIONS-LPY.md: "don't change the paper yet").
