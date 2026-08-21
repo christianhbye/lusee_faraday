@@ -300,13 +300,36 @@ and carry no new sky either. That second, load-bearing claim is tested
 directly by `test_delay_power_equals_the_weighted_depth_distribution`:
 the delay power of the *coherent pixel sum* — the very sum the audit
 found to be shot noise in amplitude, with the real WMAP K polarisation
-angles as the pixel phases — against `depth_distribution`, agreeing to
-**1.069** integrated over `30 <= |phi| < 1500` at 30 MHz. That is an
-independent reproduction of the audit's 1.038 total-power ratio, which
-nothing else on this branch reproduces. Inside `|phi| < 10` the ratio
-rises to 1.92, where the pixel sum is genuinely partly coherent; the
-same statistic run on the `RM x 0.02` converged control fails by >1e4,
-which is what makes it a test rather than an identity.
+angles as the pixel phases — against `depth_distribution`. Measured at
+30 MHz: **1.069** integrated over `30 <= |phi| < 1500`, and **1.332**
+over the whole axis, the total-power counterpart. The difference
+between the two is the `|phi| < 10` region, where the pixel sum is
+genuinely partly coherent and the ratio alone is 1.92.
+
+Read that as an **independent confirmation that the ratio is consistent
+with unity**, not as a reproduction of a particular number. It is a
+different statistic from the audit's 1.038 — different window (BH4),
+different grid, different estimator, and restricted in range — and the
+audit's own figure is one of a series running 1.010 / 1.184 / 1.038 /
+0.843 across nside, carrying ~13% scatter, so 1.038 is not a precise
+target to hit. What this adds is that a second estimator built from
+different machinery lands in the same place, which nothing else on this
+branch does.
+
+Two limits on what it shows, both measured. It does **not** demonstrate
+that the sky is incoherent: setting `c = |c|`, every pixel phase
+identical and maximally coherent, still passes at 0.889. The identity
+is more robust than "the sky happens to be incoherent" — one turn of
+the `e^{2i phi lambda^2}` carrier is a depth separation of just
+`pi/lambda^2` = 0.0315 rad/m^2 at 30 MHz, so two pixels one RMSF width
+apart (BH4 amplitude FWHM 6.29) are already ~200 turns apart, and
+pixel-phase coherence cannot survive unless their RMs agree to ~0.03
+rad/m^2. Nor does it pass only because WMAP K's per-pixel noise
+randomises the phases: smoothing Q and U to 3 deg and 10 deg gives
+1.107 and 1.143 on the same statistic. The `RM x 0.02` converged
+control, where the depth distribution collapses inside one RMSF width,
+fails by >1e4 — which is what makes this a test rather than an
+identity.
 
 **Where the template's shape is and is not robust** (both computed by
 `scripts/step5_template.py`, both plotted by `step5_plots.py`, neither
@@ -359,12 +382,19 @@ half-power width of an ideal top-hat over the *same* 74609 Hz span,
 `2*1.8955/dlam2` (`sin x / x = 1/2` at x = 1.8955). The measured RMSF
 sits **0.5% below** it, at 191/192 of it — exactly the `(n-1)/n`
 correction for summing 192 discrete samples instead of integrating.
-So the real bin responses broaden the RMSF **not at all**, and there is
-a structural reason: at `phi = 0` the tone is flat and
+So the real bin responses broaden the RMSF **not at all**. At
+`phi = 0` there is a structural reason — the tone is flat and
 `zoom_bin_matrix`'s columns are normalised, so every bin returns
-exactly 1.0 and the width depends only on where the bin centres sit.
-The bin *shapes* enter through the depth envelope of section 11, not
-through the RMSF width.
+exactly 1.0 and the width depends only on where the bin centres sit —
+and away from `phi = 0` it is a measurement: probing at `phi0 != 0`
+against a shape-free control (the same bin centres with
+delta-function bins), the bin responses enter as a **multiplicative
+envelope**: the peak amplitude response falls 1.00 -> 0.85 -> 0.74 ->
+0.48 at `phi0` = 0 / 100 / 300 / 600, while the amplitude FWHM moves by
+**<= 0.8%** (measured +0.5% / +0.1% / +0.2%). They attenuate; they do
+not broaden — and the 0.48 at `phi0 = 600` is just section 11's 50%
+depth horizon of 604 rad/m^2, seen from the other side. That envelope
+is where the bin shapes belong.
 
 An earlier version of this section reported 5.57 / 25.8 / 0.207 as the
 resolution and called it "~2.14x broader than the idealised top-hat
@@ -443,7 +473,9 @@ deconvolve against. Zoom bins overlap (ENBW 563 Hz on 390.6 Hz
 spacing): adjacent bins are correlated and the matched filter in
 `noise.py` carries that covariance.
 
-## 12. The amplitude bracket, and the one number this map cannot give
+## 12. The amplitude bracket, the tail gate, and the window budget
+
+### The bracket, and the one number this map cannot give
 
 The paper claims a normalised *shape*, not an amplitude, and quotes the
 amplitude as a bracket with reasons (spec S4.4). `dispersion.amplitude_bracket`
@@ -479,6 +511,46 @@ would extrapolate rather than measure. The honest statement is that
 `faraday2020v2`**, and the spec's own S4.4 range ("1e-4 down to 1e-6")
 already disagreed with the `1e-2` the code produces. Narrowing it is
 the follow-up paper's 3D-modelling job, not this one's.
+
+### The tail gate, and what decides it (spec S4.2.2)
+
+`max phi_col = 2442` is not what the thresholds detect — the template
+is core-dominated, and the paper's roll-off is the 90%-mass knee. The
+`max phi_col` feature is an LST-gated stretch goal: at Galactic-centre
+transit the `|w|^2` weighting swings toward the high-`|RM|` inner
+plane, and the question is whether that lifts the tail into reach of
+the matched-filter thresholds (`noise.py`, S4.10). Measured over 128
+LSTs, the tail's power fraction above the fixed beam-weighted p99
+peaks at GC transit at
+**2.16% / 3.15% / 2.39%** (30 / 50 / 10 MHz, four-port; two-port
+2.18 / 3.70 / 2.69), against ~1e-6 away from transit and an LST mean
+near 0.8%.
+
+The comparison has a convention in it that changes the answer: that
+fraction is a fraction of the template's **power**, while the bracket
+is an **amplitude**, and S4.2.2 puts the two "roughly the square root
+of the tail's power fraction" apart. The tail's amplitude is therefore
+`bracket * sqrt(f)`, not `bracket * f` — a factor 6.8x at 30 MHz.
+Against the matched-filter threshold at 24 lunations (1.33e-5 / 1.07e-5
+/ 1.67e-5), and with the clamp-derived `upper` excluded as not
+computable:
+
+| band | at `lower_slab` | at `lower_dispersion` |
+|---|---|---|
+| 30 MHz | 6.3e-5, **4.7x — open** | 7.7e-8, 0.006x — closed |
+| 50 MHz | 2.1e-4, **19.3x — open** | 7.2e-7, 0.067x — closed |
+| 10 MHz | 7.7e-6, 0.46x — closed | 1.0e-9, 6e-5x — closed |
+
+So **the gate opens at 30 and 50 MHz if the diffuse amplitude sits at
+the uniform-slab floor and closes at every band if it sits at the
+internal-dispersion floor.** What decides it is which depolarisation
+floor the medium sets — an external-screen versus mixed-medium
+geometry question — and nothing else on the list: not the tail
+measurement, which is solid at 2.2-3.7% in both arms; not `theta_c`,
+which appears in neither floor; and not integration time, since with
+`A ~ n^-1/2 N^-1/4` closing the 30 MHz dispersion-floor gap of 173x
+would take ~3e4 times more nights. (The two-port arm, taken
+consistently, gives 4.77 / 19.92 / 0.47 — the same calls.)
 
 ### The window budget on the delay axis (spec S4.8)
 

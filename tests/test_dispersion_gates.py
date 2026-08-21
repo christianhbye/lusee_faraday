@@ -229,12 +229,29 @@ def test_delay_power_equals_the_weighted_depth_distribution():
     MEASURED, integrated over ``30 <= |phi| < 1500`` (below 30 the
     BH4 main lobe and the genuinely coherent low-|phi| pixels sit;
     above 1500 there is essentially no mass): ratio **1.069**, i.e.
-    the identity holds to 7% -- an independent reproduction of the
-    audit's 1.038 total-power ratio, which nothing else on this
-    branch reproduces.  Per-band ratios 1.070 / 0.848 / 1.474 /
-    1.075 / 1.113; over the whole axis the ratio is 1.33, inflated by
-    a factor 1.92 inside |phi| < 10 where the pixel sum really is
-    partly coherent.
+    the identity holds to 7%.  Per-band ratios 1.070 / 0.848 / 1.474 /
+    1.075 / 1.113; over the whole axis the ratio is 1.332 -- the
+    total-power counterpart -- inflated by a factor 1.92 inside
+    |phi| < 10 where the pixel sum really is partly coherent.
+
+    What that IS and IS NOT.  It is an independent confirmation, by a
+    different window, grid and estimator, that the ratio is consistent
+    with unity; it is NOT a reproduction of the audit's 1.038, which
+    is a different (whole-axis) statistic and itself one of a series
+    running 1.010 / 1.184 / 1.038 / 0.843 across nside, ~13% scatter.
+    Do not quote 1.069 against 1.038 as a 3% agreement.
+
+    It also does NOT demonstrate that the sky is incoherent.  Setting
+    ``c = |c|`` -- every pixel phase identical, maximally coherent --
+    still passes, at 0.889.  That makes the identity more robust than
+    "the sky happens to be incoherent", not less trustworthy: one turn
+    of the e^{2i phi lam2} carrier is a depth separation of only
+    pi/lam2 = 0.0315 rad/m^2 at 30 MHz, so two pixels one RMSF width
+    apart (BH4 amplitude FWHM 6.29) are ~200 carrier turns apart, and
+    pixel-phase coherence cannot survive unless their RMs agree to
+    ~0.03 rad/m^2.  Nor does it pass merely because WMAP K's
+    per-pixel noise randomises the phases: smoothing Q and U to 3 deg
+    and 10 deg gives 1.107 and 1.143 on the same statistic.
 
     Non-vacuity: run on ``RM x 0.02`` -- the converged/coherent
     positive control of S6.6, where the whole depth distribution
@@ -284,9 +301,11 @@ def test_delay_power_equals_the_weighted_depth_distribution():
     )
     print(
         f"\ndelay power / weighted depth distribution: {ratio:.4f} over "
-        f"30 <= |phi| < 1500 (audit's total-power ratio 1.038)"
+        f"30 <= |phi| < 1500 -- consistent with unity, NOT a "
+        f"reproduction of the audit's 1.038 (different statistic; the "
+        f"audit's own series is 1.010/1.184/1.038/0.843 across nside)"
         f"\n  per band {[f'{r:.3f}' for r in per_band]}"
-        f"\n  whole axis {meas.sum() / model.sum():.4f}; "
+        f"\n  whole axis (total power) {meas.sum() / model.sum():.4f}; "
         f"|phi| < 10 alone "
         f"{meas[a < 10].sum() / model[a < 10].sum():.4f}"
         f"\n  RM x 0.02 control, |phi| >= 90: measured/model = "
