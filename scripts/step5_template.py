@@ -7,8 +7,20 @@ Outputs the normalised template family, the coherence-tilted variant
 the LST-resolved tail fraction that decides the S4.2.2 gate, and the
 amplitude bracket inputs.
 
-Heavy: run in the background under ulimit -v 16000000 with a log in
-generated_data/.  ~20-40 min at --lst 128 on the as-built kernel.
+Heavy: ~20-40 min at --lst 128 on the as-built kernel, peak RSS
+5.3 GiB (four-port) / 2.2 GiB (two-port), measured with
+/usr/bin/time -v.  Run it in the background, with an ABSOLUTE log path
+under generated_data/, inside a cgroup that caps PHYSICAL memory:
+
+  systemd-run --user --scope -q -p MemoryMax=10G -- \
+      uv run python scripts/step5_template.py ... > <abs path> 2>&1 &
+
+`ulimit -v` is NOT that cap (Ruling R21): it bounds virtual address
+space, and jax/BLAS/numpy reserve far more address space than they
+commit -- an 8 GB `ulimit -v` killed this script 13.7 s in at a 960 MiB
+allocation while its RSS was under 5 GiB.  Keep `ulimit -v 16000000`
+if you want the documented address-space guard, but it protects the
+desktop from nothing; MemoryMax does, by OOM-killing this job alone.
 
 Usage:
   uv run python step5_template.py [--arm four-port|two-port]
@@ -135,8 +147,12 @@ def main():
                 f"WARNING band {band}: theta_c CLAMPED to the sampled "
                 f"range at {np.degrees(theta_cs[ib]):.3f} deg -- the true "
                 f"coherence angle lies outside [{theta_grid[0]}, "
-                f"{theta_grid[-1]}] deg, so N_patch and the amplitude "
-                f"bracket are grid-limited, not measured.",
+                f"{theta_grid[-1]}] deg. At the LOW edge the clamp "
+                f"OVERSTATES (the root is below the grid), so N_patch is "
+                f"a lower bound and the bracket's UPPER end alone is an "
+                f"overstated upper bound -- not computable from this map, "
+                f"and a wider grid cannot fix it. lower_slab and "
+                f"lower_dispersion contain no theta_c and stand.",
                 flush=True,
             )
 

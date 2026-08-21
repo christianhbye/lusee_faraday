@@ -26,10 +26,17 @@ flake8, pytest-cov) and `addopts`' unconditional `--cov=src` then makes
 killer (croissant dense spherical transform: ~(lmax+1)^2·npix·16 bytes;
 nside=128 + lmax=128 → 50 GB). Validation uses nside=64/lmax=64 skies
 and single-channel response slices for the harmonic engine. Run every
-heavy job in background under `ulimit -v 16000000` (24 GB if croissant
-dense transforms are involved) with **absolute** log paths under
-`generated_data/`. 16 GB is the floor even for the test suite: at
-12 GB three zenith tests OOM inside jax.
+heavy job in background with **absolute** log paths under
+`generated_data/`, inside a cgroup that caps **physical** memory:
+`systemd-run --user --scope -q -p MemoryMax=10G -- uv run python …`.
+`ulimit -v 16000000` (24 GB if croissant dense transforms are involved)
+is the **address-space** guard and stays — 16 GB is the floor even for
+the test suite, since at 12 GB three zenith tests OOM inside jax — but
+it bounds `RLIMIT_AS`, not RSS, and protects the desktop from nothing:
+jax/BLAS/numpy reserve far more address space than they commit, so
+*lowering* it just kills jobs early (`ulimit -v 8000000` killed
+`step5_template.py` 13.7 s in at a 960 MiB allocation while its RSS was
+4.9 GiB). Report peak RSS from `/usr/bin/time -v`, always.
 
 ## Environment
 
@@ -159,14 +166,32 @@ below too; it was missing from earlier revisions of this table.
 - `scripts/step_ionly.py --centers 30 10 50 [--analyze]
   [--engine harmonic|legacy]` — perfect depolarization reference +
   fractional-effect table numbers. *new stack (harmonic default)*
-- `scripts/step2_real_sky.py --center {30,10,50}` — real-sky
-  waterfalls (~80 min each); `step2_plots.py --center C` — figures.
-  *deliberately still on `pixel_arm`*
-- `scripts/step4_power_spectra.py --centers 30 10 50` — 2D delay
-  spectra, delay profiles, zoom deconvolution.
-  *deliberately still on `pixel_arm`*
+- `step2_real_sky.py`, `step2_plots.py`, `step4_power_spectra.py` —
+  **not on this branch.** They compute the diffuse-Faraday results the
+  2026-08-18 audit refuted and were left at the `audit-2026-08-18` tag
+  by commit 956e770; check the tag out to re-run them, and cite the tag
+  rather than a branch. (Pre-existing inventory rot, corrected here.)
 - `scripts/beam_ablation.py`, `scripts/compare_main_vs_asbuilt.py` —
   response ablations and the Fig-4 lineage.
+- **Step 5, the diffuse delay template** (`dispersion.py` + `noise.py`;
+  outputs `generated_data/step5_*.npz`, figures `report/figures/step5_*`).
+  Run them in this order; only the first is heavy:
+  - `scripts/step5_template.py [--arm four-port|two-port] [--lst 128]
+    [--bands 30 50 10] [--sigma-eff 9.8]` — builds `F(phi)` per band and
+    per geometry `k`, the coherence-tilted variant, the knees (plain and
+    plane-tapered) and the LST-resolved tail gate. **Heavy: 20-40 min,
+    peak RSS 5.3 GiB four-port / 2.2 GiB two-port.** Background +
+    `MemoryMax=10G` + absolute log path. Its two npz files are the
+    inputs to everything below and are *not* cheap to regenerate.
+  - `scripts/step5_instrument_envelope.py` — the depth-horizon /
+    percentile table of `docs/measurement-model.md` §11 (minutes).
+  - `scripts/step5_sensitivity.py [--lunations 24] [--t-amp K]` — the
+    whitened matched-filter threshold curve and the closed-form
+    cross-check (~1 min). `--t-amp` is 0 by default and the chain has no
+    amplifier noise, so its `T_sys/T_sky` is `1 + T_loading/T_sky`, a
+    lower bound — not a sky-domination result.
+  - `scripts/step5_plots.py` — all six step-5 figures from the npz
+    files. Re-run it after ANY figure-text change (seconds).
 - `tests/testpixel_arm.py` — data-free unit tests for the pixel arm.
 - Report: `report/report.tex` (pdflatex twice; needs amssymb).
 

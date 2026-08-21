@@ -103,8 +103,11 @@ state and the distinction matters if figures move to the paper.
   (+`--calibrated`), `step2_plots.py --center {30,10,50}`,
   `step_ionly.py --centers 30 10 50 --analyze`,
   `step4_power_spectra.py --centers 30 10 50`; then pdflatex twice
-  in `report/`.  Run under `ulimit -v 16000000` with absolute log
-  paths; 12 GB is not enough.
+  in `report/`.  (The `step2_*`/`step4_*` scripts live at the
+  `audit-2026-08-18` tag, not on this branch.)  Run heavy jobs under
+  `systemd-run --user --scope -p MemoryMax=10G` with absolute log
+  paths; `ulimit -v 16000000` is an address-space guard only (12 GB is
+  not enough for it) and does not cap RSS — see AGENTS.md.
 - Read AGENTS.md for pinned conventions, OOM/memory rules, the PSD
   sanity invariant, and the script inventory.
 - Next natural tasks (not started): transfer report content into the
@@ -280,7 +283,7 @@ state and the distinction matters if figures move to the paper.
   rebutted); converged-regime control reproduced through the NUFFT path.
 - [x] `step5_instrument_envelope.py` / `step5_template.py` /
   `step5_sensitivity.py` / `step5_plots.py`; figures in report/figures/.
-- [x] Tail gate verdict (S4.2.2): from the full `--lst 128` run, the
+- [x] Tail gate (S4.2.2), measured: from the full `--lst 128` run, the
   `|w|^2`-weighted tail fraction above the fixed beam-weighted-p99
   threshold, resolved over LST. Four-port arm GC-transit maxima per band:
   **2.16% (30 MHz), 3.15% (50 MHz), 2.39% (10 MHz)**; two-port arm:
@@ -290,24 +293,86 @@ state and the distinction matters if figures move to the paper.
   GC transit lifts it only 2-4x above that floor, not by orders of
   magnitude. Read from `generated_data/step5_template.npz["tail_frac_lst"]`
   and `step5_template_two_port.npz["tail_frac_lst"]`, both shape `(3, 128)`.
-  **Verdict against the S4.10 threshold (`A_mf` at 24 lunations):
-  indeterminate.** The tail amplitude (max tail fraction x bracket level)
-  clears `A_mf` — OPEN, ratio 15-26x — under the bracket's *upper*
-  (incoherent-patch) level at all three bands, but falls short — closed,
-  ratio <=0.7x — under *lower_dispersion* at all three bands, with
-  *lower_slab* split (closed at 30/10 MHz, OPEN at 50 MHz, ratio 3.4x).
-  The call flips by 4-6 orders of magnitude on which bracket level is
-  assumed, and the bracket's lower end derives from the grid-clamped
-  `theta_c` below — so the gate is decided by the coherence angle, not
-  by the tail measurement (solid at 2.2-3.7% in both arms) or by more
-  integration time; a wider `structure_function` angular grid is what
-  would decide it, not a longer run.
-- [x] Coherence-bracket caveat: `theta_c_clamped` is `[True True True]` in
-  both npz files — the coherence angle hit the 0.2 deg edge of the
-  `structure_function` search grid at every band, both arms, so `theta_c`
-  and the amplitude `bracket` derived from it are grid-limited, not
-  measured. Widening the angular grid is needed before quoting the
-  bracket as a physical measurement.
+- [x] **Tail-gate verdict against the S4.10 threshold.** Convention
+  first, because it moves every number: `tail_frac_lst` is a fraction
+  of the template's **power** while the bracket is an **amplitude**, and
+  spec S4.2.2 says detection and localisation are "separated by roughly
+  the square root of the tail's power fraction". So the tail's amplitude
+  is `bracket x sqrt(f)`, not `bracket x f`. At 30 MHz
+  `sqrt(0.0216) = 0.147` against `f = 0.0216` — a factor **6.8x on every
+  ratio**, which an earlier version of this entry lost. Against `A_mf` at
+  24 lunations (1.33e-5 / 1.07e-5 / 1.67e-5, four-port maxima):
+
+  | band | at `lower_slab` | ratio | at `lower_dispersion` | ratio |
+  |---|---|---|---|---|
+  | 30 MHz | 6.26e-5 | **4.7 OPEN** | 7.7e-8 | 0.006 closed |
+  | 50 MHz | 2.07e-4 | **19.3 OPEN** | 7.2e-7 | 0.067 closed |
+  | 10 MHz | 7.7e-6 | 0.46 closed | 1.0e-9 | 6e-5 closed |
+
+  (the two-port arm moves these ratios by at most 8%: 4.75 / 21.0 /
+  0.49, same OPEN/closed calls.) The bracket's
+  `upper` level is deliberately **not** in the table: it is
+  clamp-derived and not computable from this map (below). So the gate
+  **opens at 30 and 50 MHz if the diffuse amplitude sits at the
+  uniform-slab floor, and closes at every band if it sits at the
+  internal-dispersion floor** — it is decided by which depolarisation
+  floor the medium sets, a mixed-vs-external-screen geometry question.
+  It is *not* decided by the tail measurement (solid at 2.2-3.7% in both
+  arms), *not* by `theta_c`, and *not* by integration time: with
+  `A ~ n^-1/2 N^-1/4`, closing the 30 MHz dispersion-floor gap of 173x
+  would take ~3e4 times more nights. **This supersedes the earlier
+  entry**, which recorded the gate as decided by the grid-clamped
+  `theta_c` with a wider `structure_function` grid as the fix. Only
+  `upper` contains `theta_c`; both floors above are `theta_c`-free.
+- [x] Coherence angle / the bracket's upper end: `theta_c_clamped` is
+  `[True True True]` in both npz files — the coherence angle hit the
+  0.2 deg edge of the `structure_function` search grid at every band and
+  both arms. Two consequences, both recorded late:
+  **(1) the clamp OVERSTATES.** `coherence_angle` returns the grid edge
+  when the root lies *below* it, so a clamped return is an upper bound
+  on `theta_c`, and `upper ~ theta_c` inherits that. Measured with the
+  script's own grid: `D(0.2 deg) = 96.2 (rad/m^2)^2` against targets
+  5.01e-5 / 3.87e-4 / 6.19e-7, i.e. a root 1385x / 499x / 12465x below
+  the grid edge under `D ~ theta^2`. The shipped `upper` (9.9e-3 at
+  30 MHz) is therefore overstated by ~3 orders of magnitude; a `theta^2`
+  extrapolation gives 7.1e-6, which is *below* `lower_slab` — the
+  bracket inverts, which is itself the proof the extrapolation is not
+  quotable. (Spec S4.4 says the bracket runs "1e-4 down to 1e-6"; the
+  code produces 1e-2. The spec and the code disagreed all along.)
+  **(2) widening the grid cannot fix it.** The root sits at 0.52 / 1.44
+  / 0.058 arcsec, three decades below `faraday2020v2`'s own nside-512
+  resolution; a wider grid would extrapolate `D ~ theta^2`, not measure.
+  **The incoherent-patch upper bound is not determinable from this map**
+  and must be quoted as such, never as ~1e-2. The two lower levels
+  (`lower_slab`, `lower_dispersion`) contain no `theta_c` and stand.
+- [x] `T_sys/T_sky` (S4.10 risk item), **partial**: 1.0044 (30 MHz),
+  1.0170 (50), 1.0006 (10). Read it as `1 + T_loading/T_sky` and nothing
+  more — `step5_sensitivity.py --t-amp` defaults to 0 and the luseepy
+  chain carries no amplifier noise, so the term the spec's risk item is
+  actually about (receiver noise through a short mismatched dipole on
+  regolith at 50 MHz) is set to zero. It is a genuine lower bound, not a
+  computed sky-domination check, and `t_sky = mean(I_sky)` is an all-sky
+  mean rather than a beam-weighted antenna temperature. **Sky domination
+  at 50 MHz stays open** until the collaboration supplies a receiver
+  noise temperature; re-run with `--t-amp` when it does.
+- [x] Template robustness, reported numbers (S6.5, S6.11): the
+  `sin^2|b|` plane taper moves the 90%-mass knee by **4.3-5.5x** (30 MHz
+  `k=0`: 89.6 -> 17.9 rad/m^2), so the roll-off is carried by the
+  Galactic plane — per S4.2.1 the branch's *worst* case for the linear
+  `phi(f)` ansatz, and a reason to read the amplitude bracket as wider
+  rather than narrower. The two-arm swap (S4.9) moves the same knee by
+  **+24% at 50 MHz**, +12% at 10 MHz, and **<1% at 30 MHz**, the band
+  that owns the knee. Both are in `docs/measurement-model.md` §9.
+- [x] Window dynamic-range budget (S4.8), reported: a `phi ~ 0`
+  foreground at `|P|/I = 0.15` through BH4 leaks **3.7e-6 peak** (first
+  sidelobe, `phi ~ 10.8`), **<=1e-6 beyond `phi = 27.5`**, **1.4e-7
+  across the 30 MHz knee** and **<=8.8e-8 beyond `phi = 200`**. BH4 is
+  therefore *adequate* against both bracket ends everywhere the roll-off
+  lives, and inadequate only inside its own main lobe (`phi <~ 10`).
+  The spec's "3.8e-6 everywhere, inadequate against the 1e-6 floor" read
+  a single peak-sidelobe level as a flat floor. Table in
+  `docs/measurement-model.md` §12; measured by
+  `tests/test_dispersion.py::test_foreground_sidelobe_budget`.
 - Figure provenance: all step-5 figures regenerate from committed scripts
   on this branch; the refuted Step 2/4 figures live only at the
   audit-2026-08-18 tag. The mixed-provenance list is empty here.

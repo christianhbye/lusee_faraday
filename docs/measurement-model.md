@@ -286,28 +286,104 @@ NUFFTs on the true `lambda^2` nodes, and raw pixel depths can be fed as
 nonuniform points directly (`test_converged_regime_points_match_direct_sum`
 does exactly this, reproducing a direct coherent sum to four digits).
 
+**Two different claims, two different tests.** The acceptance gates say
+*the model's shape is pixelisation-stable*: the normalised `F(phi)`
+moves by <1% in Kolmogorov distance and <2% in the 90%-mass knee across
+nside 256–2048 and under a rigid null rotation, while the old coherent
+observable moved by 7.2x under the same rotation. They do **not** say
+*the observable equals the weighted depth distribution* — with the
+uniform `w2` those gates use, the normalised template is a functional
+of the empirical RM distribution alone, and a rigid rotation is a pixel
+permutation that leaves it invariant by construction; the nside 1024
+and 2048 legs are `get_interp_val` upsamplings of the native 512 map
+and carry no new sky either. That second, load-bearing claim is tested
+directly by `test_delay_power_equals_the_weighted_depth_distribution`:
+the delay power of the *coherent pixel sum* — the very sum the audit
+found to be shot noise in amplitude, with the real WMAP K polarisation
+angles as the pixel phases — against `depth_distribution`, agreeing to
+**1.069** integrated over `30 <= |phi| < 1500` at 30 MHz. That is an
+independent reproduction of the audit's 1.038 total-power ratio, which
+nothing else on this branch reproduces. Inside `|phi| < 10` the ratio
+rises to 1.92, where the pixel sum is genuinely partly coherent; the
+same statistic run on the `RM x 0.02` converged control fails by >1e4,
+which is what makes it a test rather than an identity.
+
+**Where the template's shape is and is not robust** (both computed by
+`scripts/step5_template.py`, both plotted by `step5_plots.py`, neither
+a pass/fail):
+
+- *Plane taper* (spec S4.2.1/S6.5). Down-weighting the Galactic plane
+  by `sin^2|b|` moves the 90%-mass knee by a factor **4.3–5.5x** across
+  the three bands and both `k` geometries — at 30 MHz, `k=0`, from 89.6
+  to 17.9 rad/m^2. The roll-off is therefore carried by the plane, not
+  by high-`|b|` sightlines. Per S4.2.1 that is the *unfavourable*
+  branch: long in-plane paths are exactly where `B_par` reverses and
+  the linear `phi(f)` ansatz is weakest, so the geometry assumption is
+  doing real work and **the amplitude bracket must be read as wider,
+  not narrower**, than section 12's two usable ends suggest. The
+  direction of the reversal effect is still favourable
+  (reversals broaden `F`, so the computed roll-off is a lower bound on
+  the extent), but its size is not bounded by anything here.
+- *Two arms* (S4.9/S6.11). Swapping the as-built four-port `|w|^2` for
+  the symmetric two-port one moves the same knee by **+24% at 50 MHz**
+  (`k=0`: 83.3 -> 103.0 rad/m^2), **+12% at 10 MHz** and **<1% at
+  30 MHz** (-0.7%). The beams weight different declination strips, so
+  they see different parts of the RM sky; at the band the paper leads
+  with for the knee, they agree.
+
 ## 10. The three bands are three different problems
 
-The real spectrometer response sets each band's Faraday resolution
-differently. `dispersion.rmsf` builds the point-spread function from the
-true zoom-bin weight matrix (`zoom_bin_matrix`, luseepy's real bin
-responses, not an idealised boxcar): a unit-amplitude Faraday tone at
-`phi = 0` is carried through the bin weights and delay-transformed. The
-FWHM of `|RMSF|` (normalised to its peak, measured over
-`phi_out = linspace(-30, 30, 6001)`) comes out to **5.57 / 25.8 /
-0.207 rad/m^2 at 30 / 50 / 10 MHz** — consistently **~2.14x broader**
-than the idealised analytic top-hat `2*sqrt(3)/dlam2` over the same
-~199988 Hz window (2.60 / 12.0 / 0.0963): a real, tapered channel
-response has less effective bandwidth than a uniform top-hat of the
-same span, so its RMSF is wider. That broadening is physics, not a
-typo, and it is `dispersion.rmsf`'s own output (exercised in
-`tests/test_dispersion.py`) — **not** `scripts/step5_instrument_envelope.py`,
-which never computes an RMSF at all; that script builds the
-depth-horizon/percentile table of section 11 below.
+Each band's Faraday resolution is set by the span of `lambda^2` the
+zoom bins actually cover. `dispersion.rmsf` builds the point-spread
+function from the true zoom-bin weight matrix (`zoom_bin_matrix`,
+luseepy's real bin responses): a unit-amplitude Faraday tone is carried
+through the bin weights and delay-transformed over the **192 zoom-bin
+centres, which span 74609 Hz** — not the fine grid's 199988 Hz.
+
+Two conventions have to be stated or the number is meaningless.
+`dispersion.rmsf` returns delay *power*, so a width read off it is a
+power FWHM; the conventional RMSF resolution — the one Brentjens & de
+Bruyn's `2*sqrt(3)/dlam2` quotes — is an *amplitude* FWHM, wider by
+1/0.734. Measured from the committed code with interpolated half-max
+crossings on an 80001-point `phi` grid:
+
+| band | power FWHM | **amplitude FWHM** | ideal top-hat, same span |
+|---|---|---|---|
+| 30 MHz | 5.574 | **7.592** | 7.632 |
+| 50 MHz | 25.805 | **35.150** | 35.334 |
+| 10 MHz | 0.206 | **0.281** | 0.283 |
+
+(rad/m^2). **The resolution is 7.59 / 35.15 / 0.281 rad/m^2 at
+30 / 50 / 10 MHz, amplitude FWHM.** The last column is the exact
+half-power width of an ideal top-hat over the *same* 74609 Hz span,
+`2*1.8955/dlam2` (`sin x / x = 1/2` at x = 1.8955). The measured RMSF
+sits **0.5% below** it, at 191/192 of it — exactly the `(n-1)/n`
+correction for summing 192 discrete samples instead of integrating.
+So the real bin responses broaden the RMSF **not at all**, and there is
+a structural reason: at `phi = 0` the tone is flat and
+`zoom_bin_matrix`'s columns are normalised, so every bin returns
+exactly 1.0 and the width depends only on where the bin centres sit.
+The bin *shapes* enter through the depth envelope of section 11, not
+through the RMSF width.
+
+An earlier version of this section reported 5.57 / 25.8 / 0.207 as the
+resolution and called it "~2.14x broader than the idealised top-hat
+because a tapered response has less effective bandwidth". Both halves
+were wrong. The 2.14 was an artifact of the comparison in three
+factors — the fine grid's `dlam2` against the bins' (2.680), a power
+FWHM against an amplitude convention (0.734), and `2*sqrt(3)/dlam2`,
+a rule of thumb 9.4% below the exact sinc half-power width (1.094) —
+and `2.680 * 0.734 * 1.094 * 0.995 = 2.14` closes it with the
+discrete-sampling factor above. No tapering enters anywhere. The
+numbers are `dispersion.rmsf`'s own output, exercised in
+`tests/test_dispersion.py` — **not**
+`scripts/step5_instrument_envelope.py`, which never computes an RMSF at
+all; that script builds the depth-horizon/percentile table of section
+11 below.
 
 Resolution alone ranks the bands the opposite way from usefulness:
-10 MHz is sharpest (0.207 rad/m^2), then 30 MHz (5.57), then 50 MHz, the
-coarsest (25.8). Resolution and reach are different axes, and 10 MHz's
+10 MHz is sharpest (0.281 rad/m^2), then 30 MHz (7.59), then 50 MHz, the
+coarsest (35.2). Resolution and reach are different axes, and 10 MHz's
 resolution is superb and irrelevant — section 11 shows its zoom horizon
 falls below the beam-weighted median sky depth, so there is nothing
 there for that resolution to resolve. 30 MHz is the band where
@@ -317,7 +393,9 @@ statistic, not a half-power crossing; an earlier half-power version
 pinned to a narrow origin spike under the `k=0` slab geometry and was
 replaced for exactly that reason) at **89.6 rad/m^2** (fiducial `k=0`
 uniform-slab geometry, four-port arm) — well inside its own 604 rad/m^2
-zoom horizon and ~16 resolution elements from the origin spike. 50 MHz
+zoom horizon and ~12 resolution elements from the origin spike
+(89.6 / 7.59; the same ratio is ~16 if the power FWHM is used, which
+is why the convention has to travel with the number). 50 MHz
 has the coarsest resolution but is the only band whose zoom horizon
 reaches the sky's map maximum. 10 MHz is out: its zoom horizon
 (22.4 rad/m^2) sits about 4% below the beam-weighted median sky depth
@@ -364,6 +442,74 @@ claimed — and only deconvolution separates the two: `dispersion.rmsf`
 deconvolve against. Zoom bins overlap (ENBW 563 Hz on 390.6 Hz
 spacing): adjacent bins are correlated and the matched filter in
 `noise.py` carries that covariance.
+
+## 12. The amplitude bracket, and the one number this map cannot give
+
+The paper claims a normalised *shape*, not an amplitude, and quotes the
+amplitude as a bracket with reasons (spec S4.4). `dispersion.amplitude_bracket`
+returns three levels; only their provenance makes them usable.
+
+| level | formula | at 30 / 50 / 10 MHz | status |
+|---|---|---|---|
+| `upper` (incoherent patches) | `1/sqrt(Omega_beam/theta_c^2)` | 9.9e-3 / 9.0e-3 / 1.1e-2 | **not computable from this map** |
+| `lower_slab` | `1/(\|phi_med\| lambda^2)` | 4.3e-4 / 1.2e-3 / 5.0e-5 | robust |
+| `lower_dispersion` | `1/(2 sigma_eff^2 lambda^4)` | 5.2e-7 / 4.0e-6 / 6.4e-9 | robust |
+
+Only `upper` contains `theta_c`; the two lower levels are `theta_c`-free
+closed forms in the map median depth and `sigma_eff`. That matters
+because `theta_c` is not measured here. `dispersion.coherence_angle`
+solves `2 lambda^4 D(theta_c) = 1` on the RM structure function, and on
+`faraday2020v2` the root lies far below the sampled grid at every band:
+with `step5_template.py`'s 0.2–30 deg grid, `D(0.2 deg) = 96.2
+(rad/m^2)^2` against targets `5.01e-5 / 3.87e-4 / 6.19e-7`, so under
+`D ~ theta^2` the root sits **1385x / 499x / 12465x below the grid's
+lower edge** — 0.52 / 1.44 / 0.058 arcsec, three decades below the
+map's own nside-512 resolution.
+
+`coherence_angle` clamps to the grid edge there, and **the clamp
+overstates**: a clamped return is an *upper bound* on `theta_c`, so the
+shipped `upper` (`~1e-2`) is an upper bound overstated by ~3 orders of
+magnitude. Extrapolating `D ~ theta^2` would put it at 7.1e-6 / 1.8e-5
+/ 8.6e-7 — *below* `lower_slab` at every band, i.e. the bracket
+inverts, which is the clearest possible sign that the extrapolation is
+not a number to quote. Widening the search grid cannot fix this: the
+map carries no information at sub-arcsecond scales, so a wider grid
+would extrapolate rather than measure. The honest statement is that
+**the incoherent-patch upper bound is not determinable from
+`faraday2020v2`**, and the spec's own S4.4 range ("1e-4 down to 1e-6")
+already disagreed with the `1e-2` the code produces. Narrowing it is
+the follow-up paper's 3D-modelling job, not this one's.
+
+### The window budget on the delay axis (spec S4.8)
+
+Leakage is `I -> Q,U` through a frozen beam, so it is smooth in
+frequency and sits at `phi ~ 0`; the template lives at non-zero `phi`.
+The binding requirement is therefore the window's dynamic range.
+Injecting a smooth synchrotron-sloped foreground at `|P|/I = 0.15`
+through the 4-term Blackman-Harris window actually used, on the 30 MHz
+fine grid (`test_foreground_sidelobe_budget`), the contamination
+amplitude is strongly `phi`-dependent:
+
+| `phi` [rad/m^2] | leaked amplitude |
+|---|---|
+| < ~9.4 (BH4 main lobe) | 1.5e-1 falling to ~1e-5 |
+| 10–27 (first sidelobes) | peak **3.7e-6** at 10.8 |
+| >= 27.5 | <= 1e-6 |
+| 90–190 (the 30 MHz knee) | **1.4e-7** |
+| > 200 | <= 8.8e-8 |
+| > 776 (beyond beam-weighted p99) | <= 2.4e-8 |
+
+So **BH4 is adequate**, against both ends of the bracket, everywhere
+the roll-off lives: at the knee it clears the internal-dispersion floor
+(5.2e-7) by 3.7x and the uniform-slab floor (4.3e-4) by ~3000x. It is
+inadequate only inside its own main lobe, `phi <~ 10`, which is the
+low-`phi` core the delay axis was never claimed to protect. The spec's
+estimate — "0.15 x 2.5e-5 = 3.8e-6, inadequate against the 1e-6 floor"
+— is right about the first sidelobe and wrong about the verdict,
+because it treats a single peak sidelobe level as if it applied at
+every depth. Without a window the same foreground puts >1e-5 into the
+roll-off region (`test_boxcar_would_fail_the_budget`), so the window is
+load-bearing.
 
 ## See also
 

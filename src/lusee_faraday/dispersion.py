@@ -123,13 +123,20 @@ def depth_distribution(phi_col, w2, edges, k=0.0):
     k = -1    -> all emission local, delta at phi = 0.
     k must be >= -1 (the pushforward CDF is (e/phi)^(k+1), non-integrable
     at f = 0 for k < -1).
+    Every finite-k pushforward puts mass at phi = 0 (the near end of
+    every column), so ``edges`` must bracket zero: ``edges[0] <= 0 <
+    edges[-1]``.  Without that guard ``searchsorted(edges, 0.0,
+    'right') - 1`` returns -1 for an all-positive grid and the
+    zero-depth mass -- all of it, for k = -1 -- lands silently in the
+    LAST bin.  Same style as the k >= -1 check: raise rather than
+    return a wrong histogram.  ``k = np.inf`` is exempt: it is a plain
+    ``np.histogram`` of phi_col, which drops out-of-range mass in the
+    usual way and never touches the zero bin.
     Spec S4.2.  Sums to w2.sum().
     """
     phi_col = np.asarray(phi_col, dtype=float).ravel()
     w2 = np.asarray(w2, dtype=float).ravel()
     edges = np.asarray(edges, dtype=float)
-    H = np.zeros(edges.size - 1)
-    zero_bin = np.searchsorted(edges, 0.0, side="right") - 1
     if np.isinf(k):
         H, _ = np.histogram(phi_col, bins=edges, weights=w2)
         return H
@@ -137,6 +144,14 @@ def depth_distribution(phi_col, w2, edges, k=0.0):
         raise ValueError(
             "k must be >= -1: rho ~ f^k is not integrable at f = 0"
         )
+    if not (edges[0] <= 0.0 < edges[-1]):
+        raise ValueError(
+            "edges must bracket phi = 0 (edges[0] <= 0 < edges[-1]): "
+            "the pushforward puts mass at zero depth and there is no "
+            f"bin for it in [{edges[0]}, {edges[-1]}]"
+        )
+    H = np.zeros(edges.size - 1)
+    zero_bin = np.searchsorted(edges, 0.0, side="right") - 1
     if k == -1.0:
         H[zero_bin] = w2.sum()
         return H
@@ -314,6 +329,18 @@ def rmsf(phi0, fine_freqs_mhz, W, bin_freqs_mhz, phi_out, window=None):
     The deconvolution kernel of spec S4.1: a unit Faraday tone on the
     fine grid, integrated by the true bin responses, then
     delay-transformed over the bin centres.
+
+    Returns POWER, not amplitude -- an FWHM taken from this array is a
+    power FWHM, a factor 0.734 below the amplitude FWHM that
+    Brentjens & de Bruyn's 2 sqrt(3) / dlambda^2 rule quotes.  State
+    the convention wherever the width is reported (docs section 10).
+
+    At ``phi0 = 0`` the tone is flat and ``W`` has normalized columns,
+    so ``binned`` is exactly 1.0 in every bin: the width returned
+    there is set by the bin-CENTRE positions alone (192 zoom bins,
+    390.625 Hz apart, spanning 74609 Hz) and carries no information
+    about the bin response shapes.  The shapes enter at phi0 != 0,
+    through the depth envelope of ``bin_envelope``/``depth_horizon``.
     """
     lam2 = np.asarray(lambda_squared(fine_freqs_mhz), dtype=float)
     tone = np.exp(2j * float(phi0) * lam2)
@@ -387,10 +414,28 @@ def coherence_angle(theta_deg, D, lam2):
     log-log-interpolated for the root. If the target lies outside the
     sampled range, the result is CLAMPED to the nearest sampled
     ``theta_deg`` rather than extrapolated -- callers must check for
-    this: on the real sky the low-end clamp is expected to trigger
-    (the true coherence angle is often below the finest sampled
-    separation), and treating a clamped return as the true root would
-    silently understate theta_c.
+    this.
+
+    **The low-end clamp OVERSTATES theta_c.** ``target <= D[0]`` means
+    the root lies BELOW the grid's lower edge (D is a running max and
+    the root is where D falls to ``target``), so returning ``th[0]``
+    returns something LARGER than the true root: a clamped return is
+    an UPPER BOUND on theta_c, not the root. Anything proportional to
+    theta_c -- ``amplitude_bracket``'s ``upper``, via
+    ``N_patch = omega_beam / theta_c^2`` -- inherits that as an upper
+    bound too, and on the real sky the overstatement is large: with
+    ``faraday2020v2`` and the 0.2-30 deg grid ``step5_template.py``
+    uses, D(0.2 deg) = 96.2 (rad/m^2)^2 against targets 5.01e-5 /
+    3.87e-4 / 6.19e-7 at 30 / 50 / 10 MHz, i.e. a root 1385x / 499x /
+    12465x below the grid's lower edge under D ~ theta^2, and a
+    correspondingly overstated ``upper``.
+
+    Widening the grid does not fix this: at these lambda^4 the root
+    sits at sub-arcsecond separations (0.52 / 1.44 / 0.058 arcsec),
+    three decades below the map's own nside-512 resolution. The map
+    cannot determine theta_c at all; a wider grid would extrapolate
+    ``D ~ theta^2``, not measure. Quote a clamped ``upper`` as
+    "not computable from this map", never as a value.
     """
     th = np.radians(np.asarray(theta_deg, dtype=float))
     D = np.maximum.accumulate(np.asarray(D, dtype=float))
@@ -423,7 +468,17 @@ def coherence_tilt(H, npatch):
 
 
 def amplitude_bracket(lam2, theta_c, omega_beam, phi_med, sigma_eff=9.8):
-    """The S4.4 bracket.  Not a prediction -- two ends with reasons."""
+    """The S4.4 bracket.  Not a prediction -- two ends with reasons.
+
+    Only ``upper`` -- the incoherent-patch estimate -- contains
+    ``theta_c``.  ``lower_slab`` = 1/(|phi_med| lam2) and
+    ``lower_dispersion`` = 1/(2 sigma_eff^2 lam2^2) are theta_c-FREE:
+    a clamped coherence angle (see ``coherence_angle``) contaminates
+    the bracket's UPPER end only, and it contaminates it badly -- on
+    the real sky ``upper`` is a clamp-derived upper bound overstated
+    by ~3 orders of magnitude, not a measurement.  Do not write that
+    the bracket, or its lower end, "derives from theta_c".
+    """
     n_patch_tot = max(1.0, float(omega_beam) / float(theta_c) ** 2)
     lam2 = float(lam2)
     return {

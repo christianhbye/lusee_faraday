@@ -71,6 +71,17 @@ def test_gate1_shape_invariance_under_refinement(k):
     spike's edge and makes it fail the refinement tolerance on grid
     quantisation alone.  Both statistics are printed so the rejected
     one's instability is on the record.
+
+    **What this gate does NOT test.** The nside 1024 and 2048 legs are
+    ``hp.get_interp_val`` upsamplings of the native nside-512 map:
+    they carry no sky information the 512 map does not already have,
+    so their agreement bounds the interpolation and the binning, not
+    the sky. Only the (256, 512) pair changes the information content,
+    and it does so by ``ud_grade`` smoothing. The gate is a
+    pixelisation-stability statement about the MODEL's shape; that the
+    OBSERVABLE equals the weighted depth distribution is a separate
+    claim, tested by
+    ``test_delay_power_equals_the_weighted_depth_distribution``.
     """
     from lusee_faraday.conventions import lambda_squared
 
@@ -105,6 +116,19 @@ def test_gate1_shape_invariance_under_refinement(k):
 def test_gate2_shape_invariance_under_null_rotation():
     """S6.2: a rigid grid rotation is physically null.  It moved the old
     |P| by 7.2x; the normalised template must be stable.
+
+    Scope, stated because it is easy to overclaim: with the uniform
+    ``w2`` used here the normalised template is a functional of the
+    empirical RM distribution alone, and a rigid rotation is a pixel
+    permutation, so the only thing that can move it is
+    ``rotate_map_pixel``'s resampling.  That is exactly the audit's
+    complaint about the OLD observable -- the coherent sum moved 7.2x
+    under the same null operation -- so the contrast is the result;
+    but the gate is not evidence for the incoherent-limit identity
+    (see ``test_delay_power_equals_the_weighted_depth_distribution``),
+    and it cannot see the depth-dependent coherence tilt of S4.4.1,
+    which is a physical shape systematic rather than a pixelisation
+    one.
     """
     import healpy as hp
 
@@ -179,6 +203,95 @@ def test_converged_regime_points_match_direct_sum():
         direct += np.exp(2j * np.outer(lam2, rm[s])) @ c[s]
     nufft = dsp.transform(rm, c, lam2)
     np.testing.assert_allclose(nufft, direct, rtol=1e-4)
+
+
+@needs_rm
+@needs_wmap
+def test_delay_power_equals_the_weighted_depth_distribution():
+    """The load-bearing identity itself (spec S3), which gates 1 and 2
+    do not test: for a sky whose pixels are incoherent,
+
+        <|P~(phi)|^2>  =  the |w|^2-weighted depth distribution,
+
+    convolved with the window's own delay response.  Gates 1/2 test
+    that the MODEL side of that equation is pixelisation-stable; this
+    one computes the LEFT side from the coherent pixel sum -- the same
+    sum the 2026-08-18 audit found to be shot noise in amplitude --
+    and compares it against the right side computed by
+    ``depth_distribution``.
+
+    Both sides come from the real sky at native nside 512: depths are
+    ``faraday2020v2``, weights are the WMAP K polarised sky
+    ``c = (Q + iU)/N`` (so the pixel PHASES are the sky's own
+    polarisation angles, not a random draw), transformed over the
+    30 MHz +-0.1 MHz fine grid through BH4.
+
+    MEASURED, integrated over ``30 <= |phi| < 1500`` (below 30 the
+    BH4 main lobe and the genuinely coherent low-|phi| pixels sit;
+    above 1500 there is essentially no mass): ratio **1.069**, i.e.
+    the identity holds to 7% -- an independent reproduction of the
+    audit's 1.038 total-power ratio, which nothing else on this
+    branch reproduces.  Per-band ratios 1.070 / 0.848 / 1.474 /
+    1.075 / 1.113; over the whole axis the ratio is 1.33, inflated by
+    a factor 1.92 inside |phi| < 10 where the pixel sum really is
+    partly coherent.
+
+    Non-vacuity: run on ``RM x 0.02`` -- the converged/coherent
+    positive control of S6.6, where the whole depth distribution
+    collapses inside one RMSF width and the incoherent limit does NOT
+    apply -- the model puts essentially no mass above |phi| = 90
+    while the measurement does, by >1e4x. The statistic can fail, and
+    it fails exactly where the physics says it should.
+    """
+    from lusee_faraday.config import fine_freqs
+    from lusee_faraday.conventions import lambda_squared
+
+    rm = _rm_map()
+    Q, U = _wmap_qu()
+    c = (Q + 1j * U) / rm.size
+    freqs = fine_freqs(30.0)[::8]  # 2048 pts; phi wraps only at ~4833
+    lam2 = np.asarray(lambda_squared(freqs), dtype=float)
+    win = dsp.bh4_window(freqs.size)
+    phi_out = np.arange(-2500.0, 2500.0, 1.0)
+    edges = np.arange(-2500.5, 2500.5, 1.0)  # bin centres = phi_out
+    ker_phi = np.arange(-60.0, 61.0, 1.0)
+    ker = dsp.delay_power(np.ones(freqs.size), freqs, ker_phi, window=win)
+
+    def sides(depths):
+        spec = dsp.transform(depths, c, lam2)
+        meas = dsp.delay_power(spec, freqs, phi_out, window=win)
+        F = dsp.depth_distribution(depths, np.abs(c) ** 2, edges, k=np.inf)
+        return meas, np.convolve(F, ker, mode="same")
+
+    meas, model = sides(rm)
+    a = np.abs(phi_out)
+    sel = (a >= 30.0) & (a < 1500.0)
+    ratio = meas[sel].sum() / model[sel].sum()
+    assert 0.8 < ratio < 1.3, ratio
+    bands = [(30, 90), (90, 186), (186, 400), (400, 776), (776, 1500)]
+    per_band = []
+    for lo, hi in bands:
+        s = (a >= lo) & (a < hi)
+        per_band.append(meas[s].sum() / model[s].sum())
+        assert 0.5 < per_band[-1] < 2.0, (lo, hi, per_band[-1])
+
+    # coherent control: the identity must NOT hold at RM x 0.02
+    meas_c, model_c = sides(0.02 * rm)
+    tail = a >= 90.0
+    assert meas_c[tail].sum() > 1e4 * model_c[tail].sum(), (
+        meas_c[tail].sum(),
+        model_c[tail].sum(),
+    )
+    print(
+        f"\ndelay power / weighted depth distribution: {ratio:.4f} over "
+        f"30 <= |phi| < 1500 (audit's total-power ratio 1.038)"
+        f"\n  per band {[f'{r:.3f}' for r in per_band]}"
+        f"\n  whole axis {meas.sum() / model.sum():.4f}; "
+        f"|phi| < 10 alone "
+        f"{meas[a < 10].sum() / model[a < 10].sum():.4f}"
+        f"\n  RM x 0.02 control, |phi| >= 90: measured/model = "
+        f"{meas_c[tail].sum() / max(model_c[tail].sum(), 1e-300):.3e}"
+    )
 
 
 @needs_rm
