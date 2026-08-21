@@ -250,9 +250,15 @@ def test_zoom_fold_is_unreachable_because_the_envelope_nulls_there():
     and is annihilated at the wrap rather than folding to an image.
     Aliased Faraday power is therefore not a contaminant here.
 
-    phi_out MUST span past the wrap.  A window that stops short of
-    the true peak reports the largest residual bump instead, which is
-    how the plan's original version of this test measured 12.5.
+    phi_out MUST span past the wrap (0..1400 gives ~16% margin past
+    1208).  A window that stops short of the true peak reports the
+    largest residual bump instead, which is how the plan's original
+    version of this test measured 12.5.
+
+    The independent physics evidence: (1) the bin_envelope nulling at
+    the wrap, and (2) the wrap-period arithmetic.  The rmsf regression
+    pin verifies the wrapper has not drifted from its inline path,
+    but does not add independent physics verification.
     """
     fine, bins, W = dsp.zoom_bin_matrix(30.0)
     lam2 = np.asarray(lambda_squared(fine), dtype=float)
@@ -275,11 +281,22 @@ def test_zoom_fold_is_unreachable_because_the_envelope_nulls_there():
         assert power > 1e-2, (phi0, power)
         print(f"phi0 {phi0:5.0f} -> peak {pk:6.1f}  power {power:.2e}")
 
-    # and the model agrees with the measurement at phi0 = 900
+    # Regression pin on dsp.rmsf's wrapper, NOT independent physics:
+    # rmsf runs the same tone -> W.T @ tone -> delay_power sequence
+    # that recovered() runs inline, so this catches the wrapper
+    # drifting from the inline path and nothing more.  The
+    # independent evidence in this test is the bin_envelope block
+    # below and the wrap arithmetic above.
+    pk_900, _ = recovered(900.0)
     p_model = dsp.rmsf(900.0, fine, W, bins, phi_out, window=win)
-    model_peak = phi_out[np.argmax(p_model)]
-    assert abs(model_peak - 900.0) < 1.0
-    print(f"model peak at phi0=900: {model_peak:.1f}")
+    assert phi_out[np.argmax(p_model)] == pk_900
+    np.testing.assert_allclose(
+        p_model,
+        dsp.delay_power(
+            W.T @ np.exp(2j * 900.0 * lam2), bins, phi_out, window=win
+        ),
+        rtol=1e-12,
+    )
 
     # at the wrap the bin envelope has nulled: no image survives
     off = _fine_offsets()
