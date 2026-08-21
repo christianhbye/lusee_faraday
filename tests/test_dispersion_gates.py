@@ -179,3 +179,37 @@ def test_converged_regime_points_match_direct_sum():
         direct += np.exp(2j * np.outer(lam2, rm[s])) @ c[s]
     nufft = dsp.transform(rm, c, lam2)
     np.testing.assert_allclose(nufft, direct, rtol=1e-4)
+
+
+@needs_rm
+def test_gate_envelope_orderings_against_the_sky():
+    """S6.9 (sky side): the orderings the paper's claims rest on."""
+    rm = np.abs(_rm_map())
+    p50, p90, p99, p999 = np.percentile(rm, [50.0, 90.0, 99.0, 99.9])
+    mx = rm.max()
+    # pin the map percentiles themselves (loose -- conclusions, not digits)
+    for got, want in [
+        (p50, 18.4),
+        (p90, 91.0),
+        (p99, 278.0),
+        (p999, 648.8),
+        (mx, 2442.1),
+    ]:
+        assert np.isclose(got, want, rtol=0.02), (got, want)
+    off = np.arange(-50000.0, 50001.0, 12.20703125)
+    from lusee_faraday.channelization import parent_weights, zoom_weights
+
+    wp, wz = parent_weights(off), zoom_weights(off)[:, 0]
+    assert dsp.depth_horizon(off, wz, 50.0) > mx
+    z30 = dsp.depth_horizon(off, wz, 30.0)
+    assert p999 / 1.5 < z30 < p999 * 1.5
+    z10 = dsp.depth_horizon(off, wz, 10.0)
+    # S4.6/S6.9: the 10 MHz zoom horizon is the only one that misses
+    # the p90 knee, and it lands AT the median rather than below it.
+    # The spec's "below the median" wording is not reproducible --
+    # neither its own table (24.0) nor the measured value (22.38) is
+    # below p50 (18.36).
+    assert z10 < p90, (z10, p90)
+    assert 0.5 * p50 < z10 < 1.5 * p50, (z10, p50)
+    for band in (50.0, 30.0, 10.0):
+        assert dsp.depth_horizon(off, wp, band) < p90
