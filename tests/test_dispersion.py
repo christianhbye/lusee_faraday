@@ -5,7 +5,6 @@ import os
 os.environ.setdefault("JAX_ENABLE_X64", "1")
 
 import numpy as np
-import pytest
 
 from lusee_faraday import dispersion as dsp
 from lusee_faraday.config import PHI_FD_POINT, fine_freqs
@@ -79,3 +78,58 @@ def test_delay_power_recovers_a_single_depth():
     p = dsp.delay_power(spec, freqs, phi_out)
     assert abs(phi_out[np.argmax(p)] - phi0) < 1.0
     assert np.isclose(p.max(), 1.0, rtol=1e-6)  # unit tone, normalized
+
+
+def _fwhm(x, y):
+    half = 0.5 * y.max()
+    above = np.nonzero(y >= half)[0]
+    return x[above[-1]] - x[above[0]]
+
+
+def test_nufft_beats_fft_on_a_single_depth():
+    """S6.8: the chirp is an analysis artifact; the NUFFT removes it.
+
+    A single depth at 30 MHz, phi0 = 600 (chirp ~ 5 resolution elements
+    per the spec's table): the uniform-nu FFT smears it >= 4x wider than
+    the type-3 NUFFT on the same samples.
+    """
+    phi0 = 600.0
+    freqs = fine_freqs(30.0)[::4]  # 4096 uniform samples
+    lam2 = np.asarray(lambda_squared(freqs), dtype=float)
+    spec = np.exp(2j * phi0 * lam2)
+
+    phi_out = np.arange(560.0, 640.0, 0.05)
+    p_nufft = dsp.delay_power(spec, freqs, phi_out)
+    w_nufft = _fwhm(phi_out, p_nufft)
+
+    # FFT on the uniform nu grid; map delay bins to phi by linearizing
+    # lambda^2(nu) at the band centre.
+    n = freqs.size
+    P = np.fft.fftshift(np.fft.fft(spec)) / n
+    dnu_hz = (freqs[1] - freqs[0]) * 1e6
+    bw = n * dnu_hz
+    nu0 = 30e6
+    lam2_0 = float(lambda_squared(30.0)[0])
+    # delay bin k <-> phase rate 2*pi*k/bw <-> phi = pi*k*nu0/(2*bw*lam2_0)
+    k = np.arange(n) - n // 2
+    phi_fft = np.pi * k * nu0 / (2.0 * bw * lam2_0)
+    p_fft = np.abs(P) ** 2
+    sel = np.abs(phi_fft - phi0) < 60.0
+    w_fft = _fwhm(phi_fft[sel], p_fft[sel])
+
+    assert w_fft / w_nufft >= 4.0  # spec measured 11.80 / 2.36 = 5.0
+    # and the NUFFT peak is within one bin of the truth
+    assert abs(phi_out[np.argmax(p_nufft)] - phi0) < 0.5
+
+
+def test_bh4_window_sidelobe_level():
+    """The 4-term Blackman-Harris peak sidelobe is ~ -92 dB (2.5e-5)."""
+    n = 4096
+    win = dsp.bh4_window(n)
+    freqs = fine_freqs(30.0)[::4]
+    phi_out = np.arange(0.0, 400.0, 0.1)
+    p = dsp.delay_power(np.ones(n), freqs, phi_out, window=win)
+    # main lobe is at phi = 0; measure the highest sidelobe beyond it
+    side = p[phi_out > 15.0].max()
+    assert np.sqrt(side) < 5e-5
+    assert np.sqrt(side) > 5e-7  # a window this good would be a bug
