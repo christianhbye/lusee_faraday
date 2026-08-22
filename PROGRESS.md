@@ -272,7 +272,7 @@ state and the distinction matters if figures move to the paper.
   (setup, steps 1-4, practical conclusions on parent vs zoom bins and
   the delay window; figures in `report/figures/`).
 
-## Step 5b: the Faraday delay template (branch faraday-delay-template)
+## Step 5b: the Faraday depth template (branch faraday-delay-template)
 - [x] `dispersion.py` (depth distributions, NUFFT transforms, real-response
   RMSF, depth horizon, geometry knob, coherence bracket) + `noise.py`
   (ported + matched filter) + `response.pair_weight_maps` (basis-independent
@@ -379,59 +379,90 @@ state and the distinction matters if figures move to the paper.
 - Figure provenance: all step-5 figures regenerate from committed scripts
   on this branch; the refuted Step 2/4 figures live only at the
   audit-2026-08-18 tag. The mixed-provenance list is empty here.
-- [x] **`notebooks/faraday_delay_template.ipynb` -- the results paper
-  trail**, committed *executed* so the eight figures are visible without
-  un-ignoring `report/`. It calls `scripts/step5_plots.py`'s `fig_*`
-  builders directly (they now return their figure; `step5_plots.save`
-  writes the PDFs), so the notebook cannot drift from the paper's
-  figures. Three things it *derives* rather than transcribes, each
-  landing on the ledger value above: the RMSF resolution table
-  (`dispersion.rmsf`, live, ~2 s, no data/ needed -- 7.592 / 35.150 /
-  0.281 amplitude FWHM), the tail-gate OPEN/closed verdict from
-  `bracket x sqrt(f)` against `A_mf` (4.72 / 19.35 / 0.458 four-port,
-  4.77 / 19.92 / 0.466 two-port), and the ~3e4-nights integration cost.
-  Re-execute with `uv run jupyter nbconvert --to notebook --execute
-  --inplace notebooks/faraday_delay_template.ipynb`; it needs the
-  `generated_data/step5_*.npz` products but no `data/` artifacts, and
-  raises with the rebuild instructions if they are absent.
-- [x] **`report/delay_template/` -- the write-up with the derivations.**
-  20 pp, `cd report/delay_template && make` (two pdflatex passes, no
-  bibtex). Standalone, with a reconciliation section saying what it
-  supersedes at the `audit-2026-08-18` tag (Steps 2 and 4) and what
-  stands there (Steps 0/1/3 and the I-only limit). It does NOT touch
-  `report.tex`; transferring anything into the paper is still out of
-  scope. Derives, rather than asserts: the `N^-1/2` random walk, the
-  `f^k` pushforward CDF `min(e/phi_col, 1)^(k+1)`, the incoherent-limit
-  identity and why maximal phase coherence still passes it, the sinc
-  RMSF with the 0.734 power-vs-amplitude factor, the bin envelope, all
-  three bracket levels, and the whitened matched filter. The physics
-  point the verdict rests on is stated as such: **both usable floors
-  are power laws because the geometry is MIXED** -- an external screen
-  gives Burn's `exp(-2 sigma^2 lambda^4)`, which at 30 MHz has exponent
-  ~1.9e6 and is not a small number but zero.
-  `.gitignore` changed from `report/` to `report/*` for this: git does
-  not descend into an excluded *directory*, so a bare `report/` makes
-  the two exceptions (the report source, and the seven
-  `report/figures/step5_*.pdf` it includes) impossible to express.
-  Verified with `git check-ignore -v`; everything else under `report/`,
-  including the refuted step-2/4 figures and `report.tex`, stays
-  ignored.
-- [x] `step5_plots.fig_weight_map` -- the `|w|^2` sky map, added as the
-  seventh tracked figure so the report's "what beam-weighted means"
-  section has a picture and the notebook stops carrying its own healpy
-  call.
-- Correction, notebook section 11: an earlier revision said the
-  matched filter and the closed form "sit within a few percent" and
-  that their separation *is* the overlap degradation. Both wrong. At
-  24 lunations the ratio `A_mf/A_closed` is 0.980 / 1.161 / 0.542 at
-  30 / 50 / 10 MHz -- they agree at 30 MHz only, and diverge in
-  opposite directions elsewhere, because the closed form's fixed
-  coherence bandwidth is a poor description of the real signal
-  covariance there. The overlap degradation is a *separate* controlled
-  measurement -- hold everything fixed, replace `N` by its diagonal --
-  and it is **1.160x**
-  (`test_noise.py::test_overlap_correlation_degrades_the_threshold`).
-  The notebook now derives the comparison table instead of asserting it.
+- [x] **Reframed from shape/localisation to DETECTION.** The user's
+  point, and it is right: we will never resolve a peak in Faraday depth
+  and map it to real Galactic structure. What matters is the SNR of
+  *any* evidence of Faraday rotation and whether that evidence is
+  degenerate with systematics. Those are different statistics from the
+  tail gate and they give different answers, and the earlier write-up
+  led with a localisation verdict as though it were the detection one.
+- [x] **`scripts/step5_detection.py`** -- detection SNR against the
+  low-depth systematics cut. Instrumental `I -> Q,U` leakage is
+  spectrally smooth and sits at `phi ~ 0`, so a statistic integrating
+  all depths is degenerate with it; the cut is what breaks the
+  degeneracy, and the BH4 window budget puts it at `phi >= 27.5`
+  (leakage `<= 1e-6` of I beyond there). **The cut is cheap: it keeps
+  ~27% of template power and costs only ~2.2x in sensitivity at every
+  band**, because the truncated template still spans most of the axis.
+- [x] **Tail-gate error, corrected.** The published gate compared
+  `A_bracket x sqrt(f)` -- a TRUNCATED signal -- against `A_mf` for the
+  FULL template. Inconsistent: a statistic that looks only above the
+  cut has only the truncated shape to match against, and its threshold
+  is 28-35% higher. `step5_detection.py` recomputes the threshold on
+  the truncated template at every cut. Verdicts unchanged, numbers
+  ~26% lower.
+- [x] **`H_lst`** added to `step5_template.npz` (fiducial `k` only,
+  3 x 128 x 2500, 7.7 MB) so the transit-time tail numbers are exact
+  rather than a GC-transit power fraction against an LST-averaged
+  threshold. **Both arms re-run.** Note the trap this exposed:
+  `step5_template.py` writes the same path regardless of `--lst`, so a
+  smoke run overwrites the production product -- it did, once.
+- [x] **Delay (`tau`) is FEASIBLE, and the argument against it was
+  overstated.** `tau_FD = 2 phi c^2 / (pi nu^3)` is monotonic in `phi`,
+  so a cut in one basis is exactly a cut in the other with an identical
+  retained power fraction: every detection number is basis-independent.
+  The chirp smears by **2.0% (30 MHz) / 1.2% (50 MHz)** of the
+  template's OWN extent, because the signal is a broad distribution
+  spanning hundreds of resolution elements, not a peak -- the chirp
+  only destroys a *narrow* feature, i.e. localisation. Aliasing costs
+  1.8% / 0.0% of the kept signal at 30 / 50 MHz. Only 10 MHz fails, on
+  **aliasing** (115%), and it was already out. Measured and unexplained:
+  the delay-Nyquist wall and the zoom depth horizon agree to 0.1% at all
+  three bands (2796.4/2796.9, 604.0/604.1, 22.4/22.4).
+- [x] **The cut's separation from the origin is basis-independent and
+  ranks the bands.** At 30 MHz `phi >= 27.5` is 3.6 amplitude
+  resolution elements out; at 50 MHz only 0.8 -- inside one element.
+  So although 50 MHz has the larger raw SNR, **30 MHz is the band where
+  the cut is cleanly executable**; at 50 MHz the separation from
+  `phi ~ 0` leakage rests entirely on window sidelobe control. A better
+  reason to lead with 30 MHz than the knee.
+- [x] **Renamed `delay` -> `depth` through the code and docs.** The
+  axis is `phi` in rad/m^2, the conjugate of `lambda^2`; it is NOT the
+  `tau` in milliseconds that the refuted Step 4 transformed onto.
+  `dispersion.delay_power` -> `depth_power`; prose in `dispersion.py`
+  (which now carries an explicit naming warning), `response.py`,
+  `instrument.py`, both step5 scripts, `docs/measurement-model.md`,
+  `CLAUDE.md`, `AGENTS.md`. **Deliberately NOT renamed**: the
+  PROGRESS.md lines describing the old Step 2/4 work, which are a
+  genuine record of a genuine delay analysis. The branch name keeps the
+  old word because PR #4 is open on it.
+- [x] **`report/faraday_depth_template/`** (was `report/delay_template/`)
+  -- restructured around detection: SNR-vs-cut as the headline section
+  and figure, the two bases as their own section, shape / resolution /
+  knee demoted to what sets the template, the tail gate moved to a
+  localisation section with corrected numbers. `cd
+  report/faraday_depth_template && make`.
+- [x] **No number in the report is typed by hand.**
+  `scripts/step5_tables.py` writes `generated.tex` -- macros and table
+  bodies -- straight from the npz, and the `.tex` `\input`s it.
+  Transcription had failed twice (the tail gate above; the closed-form
+  "within a few percent" claim, which is really 0.980 / 1.161 / 0.542).
+  `generated.tex` is TRACKED, like the figures, so the report builds
+  from a fresh clone.
+- [x] **`notebooks/faraday_depth_template.ipynb`** (was
+  `faraday_delay_template.ipynb`) -- executable companion, committed
+  executed, restructured to match the report and deriving the detection
+  table, the chirp/aliasing table and the resolution table live.
+- [x] `step5_plots.fig_detection` and `fig_weight_map` added;
+  `fig_template_family` rewritten after review -- colour now means
+  geometry and linestyle means treatment (they were two apart in the
+  property cycle, so the fiducial's solid was green and its own dotted
+  companion red, with the dotted curves absent from the legend), and
+  `k -> -1` is drawn as a marked point with a legend entry saying it is
+  `delta(phi)` rather than as an invisible curve at the axis edge.
+- [x] `.gitignore`: `report/` -> `report/*` plus exceptions. git does
+  not descend into an excluded DIRECTORY, so a bare `report/` makes the
+  exceptions impossible to express. Verified with `git check-ignore -v`.
 
 ## Possible follow-ups
 - [ ] Transfer selected figures/text into the paper (explicitly out of
@@ -439,7 +470,7 @@ state and the distinction matters if figures move to the paper.
 - [ ] Ionospheric-regime study: dedicated run with small phi (1-30
   rad/m^2) uniform screen to emulate the lunar ionosphere at 10 MHz.
 - [ ] Noise: propagate radiometer noise through the zoom bins to turn
-  the delay-space signature into a detectability forecast.
+  the depth-space signature into a detectability forecast.
 
 ## Key decisions / conventions (pinned)
 - Response frame: x=East, y=North, z=zenith (proper rotation);
@@ -447,7 +478,7 @@ state and the distinction matters if figures move to the paper.
 - Sky Q/U in healpy/COSMO convention; U_IAU = −U_COSMO when feeding
   croissant. Faraday: (Q+iU) e^{+2iφλ²}.
 - Fixed 30/10/50 MHz beam across the narrow band; only the Faraday
-  phase is chromatic → all delay-space power is Faraday-induced.
+  phase is chromatic → all depth-space power is Faraday-induced.
 - Real maps at native nside=512 RING, never degraded; Haslam file is
   RING, WMAP K NESTED (check ORDERING headers!).
 - Time: 1024 samples over one lunar sidereal day (periodic).

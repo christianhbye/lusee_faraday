@@ -81,7 +81,7 @@ def test_gate1_shape_invariance_under_refinement(k):
     pixelisation-stability statement about the MODEL's shape; that the
     OBSERVABLE equals the weighted depth distribution is a separate
     claim, tested by
-    ``test_delay_power_equals_the_weighted_depth_distribution``.
+    ``test_depth_power_equals_the_weighted_depth_distribution``.
     """
     from lusee_faraday.conventions import lambda_squared
 
@@ -125,7 +125,7 @@ def test_gate2_shape_invariance_under_null_rotation():
     complaint about the OLD observable -- the coherent sum moved 7.2x
     under the same null operation -- so the contrast is the result;
     but the gate is not evidence for the incoherent-limit identity
-    (see ``test_delay_power_equals_the_weighted_depth_distribution``),
+    (see ``test_depth_power_equals_the_weighted_depth_distribution``),
     and it cannot see the depth-dependent coherence tilt of S4.4.1,
     which is a physical shape systematic rather than a pixelisation
     one.
@@ -207,7 +207,7 @@ def test_converged_regime_points_match_direct_sum():
 
 @needs_rm
 @needs_wmap
-def test_delay_power_equals_the_weighted_depth_distribution():
+def test_depth_power_equals_the_weighted_depth_distribution():
     """The load-bearing identity itself (spec S3), which gates 1 and 2
     do not test: for a sky whose pixels are incoherent,
 
@@ -272,11 +272,11 @@ def test_delay_power_equals_the_weighted_depth_distribution():
     phi_out = np.arange(-2500.0, 2500.0, 1.0)
     edges = np.arange(-2500.5, 2500.5, 1.0)  # bin centres = phi_out
     ker_phi = np.arange(-60.0, 61.0, 1.0)
-    ker = dsp.delay_power(np.ones(freqs.size), freqs, ker_phi, window=win)
+    ker = dsp.depth_power(np.ones(freqs.size), freqs, ker_phi, window=win)
 
     def sides(depths):
         spec = dsp.transform(depths, c, lam2)
-        meas = dsp.delay_power(spec, freqs, phi_out, window=win)
+        meas = dsp.depth_power(spec, freqs, phi_out, window=win)
         F = dsp.depth_distribution(depths, np.abs(c) ** 2, edges, k=np.inf)
         return meas, np.convolve(F, ker, mode="same")
 

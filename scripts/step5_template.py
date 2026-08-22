@@ -1,4 +1,4 @@
-"""Build the diffuse Faraday delay templates (spec S4.2--S4.3, S4.9).
+"""Build the diffuse Faraday depth templates (spec S4.2--S4.3, S4.9).
 
 Per band and per geometry k, the |w|^2-weighted depth distribution of
 the RM map, with w = pair beam x polarised emissivity, LST-resolved.
@@ -122,6 +122,15 @@ def main():
     knee = np.zeros((nb, nk))
     knee_taper = np.zeros((nb, nk))
     tail = np.zeros((nb, args.lst))
+    # The FIDUCIAL geometry's template, resolved over LST and coarse-
+    # binned like H_out.  The LST-summed H_out cannot answer "what is
+    # the detection SNR at Galactic Centre transit", because the
+    # matched-filter threshold depends on the SHAPE retained by a cut
+    # and that shape moves with LST.  Only k = 0 is stored: 3 x 128 x
+    # 2500 float64 is 7.7 MB, and all three geometries would be 23 MB
+    # for two curves nothing quotes.
+    kf = int(np.argmin([abs(k) if np.isfinite(k) else np.inf for k in KS]))
+    H_lst = np.zeros((nb, args.lst, ccent.size))
     theta_cs = np.zeros(nb)
     clamped = np.zeros(nb, dtype=bool)
     bracket = np.zeros((nb, 3))
@@ -172,6 +181,10 @@ def main():
                 Hsum_taper[ik] += dsp.depth_distribution(
                     rm, w2 * taper, edges, k=k
                 )
+                if ik == kf:
+                    pa_l, Hf_l = dsp.fold_template(cent, H)
+                    rb_l, _ = np.histogram(pa_l, bins=coarse, weights=Hf_l)
+                    H_lst[ib, il] = rb_l / max(rb_l.sum(), 1e-300)
             tail_hist[il] = np.bincount(rm_idx, weights=w2, minlength=2000)
             print(f"band {band} LST {il + 1}/{args.lst}", flush=True)
 
@@ -234,6 +247,8 @@ def main():
         knee=knee,
         knee_taper=knee_taper,
         tail_frac_lst=tail,
+        H_lst=H_lst,
+        k_fiducial_index=kf,
         lst_hours=lst_idx * (27.321661 * 24.0 / 1024.0),
         w2_mean=w2_accum / w2_accum.sum(),
         weighted_percentiles=wpct,
