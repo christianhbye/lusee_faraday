@@ -54,8 +54,8 @@ P(n, nu) = P_0(n) * exp( +2i * phi_FD(n) * lambda^2 )
 
 - **It is chromatic and everything else is not.** We deliberately freeze the
   beam at one native response channel across each narrow band. Any structure
-  that appears along the frequency axis — and therefore any power in delay
-  space — is Faraday-induced by construction. That is the entire point of the
+  that appears along the frequency axis — and therefore any power at nonzero
+  Faraday depth — is Faraday-induced by construction. That is the entire point of the
   measurement.
 - **It is fast.** At 30 MHz, `lambda^2 ~ 100 m^2`, so a Faraday depth of
   250 rad/m^2 turns the polarization angle through a full cycle every ~1.9 kHz.
@@ -190,7 +190,7 @@ The fixed-beam approximation covers the **receiver loading as well as the
 response**. This is not optional: the antenna sits near resonance at 30 MHz,
 where one 0.5 MHz native step moves `Z_A` by 12%, and letting the impedances
 follow the +-0.1 MHz fine grid moves the loading matrix `M` by 11% across the
-band. That is a smooth chromatic ramp of exactly the kind the delay-space
+band. That is a smooth chromatic ramp of exactly the kind the depth-space
 argument asserts is absent, so it has to be frozen with the beam.
 `instrument.covariance` and `instrument.blackbody_normalization` both take
 `impedance_freq_mhz`, which makes the freeze visible at the call site.
@@ -280,7 +280,7 @@ Faraday branches of the pair-Stokes kernel as
 `sqrt(0.5 * (|K_Q|^2 + |K_U|^2))`, not one branch alone. The observable
 is then the RM-synthesis pair
 `P(lambda^2) = Int F(phi) e^{2i phi lambda^2} dphi`
-and, in the incoherent limit, delay power = the `|w|^2`-weighted depth
+and, in the incoherent limit, depth power = the `|w|^2`-weighted depth
 distribution. `dispersion.py` owns both directions; both use type-3
 NUFFTs on the true `lambda^2` nodes, and raw pixel depths can be fed as
 nonuniform points directly (`test_converged_regime_points_match_direct_sum`
@@ -297,8 +297,8 @@ of the empirical RM distribution alone, and a rigid rotation is a pixel
 permutation that leaves it invariant by construction; the nside 1024
 and 2048 legs are `get_interp_val` upsamplings of the native 512 map
 and carry no new sky either. That second, load-bearing claim is tested
-directly by `test_delay_power_equals_the_weighted_depth_distribution`:
-the delay power of the *coherent pixel sum* — the very sum the audit
+directly by `test_depth_power_equals_the_weighted_depth_distribution`:
+the depth power of the *coherent pixel sum* — the very sum the audit
 found to be shot noise in amplitude, with the real WMAP K polarisation
 angles as the pixel phases — against `depth_distribution`. Measured at
 30 MHz: **1.069** integrated over `30 <= |phi| < 1500`, and **1.332**
@@ -360,11 +360,11 @@ Each band's Faraday resolution is set by the span of `lambda^2` the
 zoom bins actually cover. `dispersion.rmsf` builds the point-spread
 function from the true zoom-bin weight matrix (`zoom_bin_matrix`,
 luseepy's real bin responses): a unit-amplitude Faraday tone is carried
-through the bin weights and delay-transformed over the **192 zoom-bin
+through the bin weights and depth-transformed over the **192 zoom-bin
 centres, which span 74609 Hz** — not the fine grid's 199988 Hz.
 
 Two conventions have to be stated or the number is meaningless.
-`dispersion.rmsf` returns delay *power*, so a width read off it is a
+`dispersion.rmsf` returns depth *power*, so a width read off it is a
 power FWHM; the conventional RMSF resolution — the one Brentjens & de
 Bruyn's `2*sqrt(3)/dlam2` quotes — is an *amplitude* FWHM, wider by
 1/0.734. Measured from the committed code with interpolated half-max
@@ -552,7 +552,7 @@ which appears in neither floor; and not integration time, since with
 would take ~3e4 times more nights. (The two-port arm, taken
 consistently, gives 4.77 / 19.92 / 0.47 — the same calls.)
 
-### The window budget on the delay axis (spec S4.8)
+### The window budget on the Faraday-depth axis (spec S4.8)
 
 Leakage is `I -> Q,U` through a frozen beam, so it is smooth in
 frequency and sits at `phi ~ 0`; the template lives at non-zero `phi`.
@@ -575,7 +575,7 @@ So **BH4 is adequate**, against both ends of the bracket, everywhere
 the roll-off lives: at the knee it clears the internal-dispersion floor
 (5.2e-7) by 3.7x and the uniform-slab floor (4.3e-4) by ~3000x. It is
 inadequate only inside its own main lobe, `phi <~ 10`, which is the
-low-`phi` core the delay axis was never claimed to protect. The spec's
+low-`phi` core the depth axis was never claimed to protect. The spec's
 estimate — "0.15 x 2.5e-5 = 3.8e-6, inadequate against the 1e-6 floor"
 — is right about the first sidelobe and wrong about the verdict,
 because it treats a single peak sidelobe level as if it applied at

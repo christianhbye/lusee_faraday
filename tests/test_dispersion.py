@@ -68,14 +68,14 @@ def test_gaussian_is_burn():
     np.testing.assert_allclose(np.abs(P), expected, rtol=1e-3)
 
 
-def test_delay_power_recovers_a_single_depth():
-    """delay_power inverts transform: peak at the injected depth."""
+def test_depth_power_recovers_a_single_depth():
+    """depth_power inverts transform: peak at the injected depth."""
     phi0 = 120.0
     freqs = fine_freqs(30.0)[::16]  # 1024 points
     lam2 = np.asarray(lambda_squared(freqs), dtype=float)
     spec = np.exp(2j * phi0 * lam2)
     phi_out = np.arange(0.0, 300.0, 0.25)
-    p = dsp.delay_power(spec, freqs, phi_out)
+    p = dsp.depth_power(spec, freqs, phi_out)
     assert abs(phi_out[np.argmax(p)] - phi0) < 1.0
     assert np.isclose(p.max(), 1.0, rtol=1e-6)  # unit tone, normalized
 
@@ -103,7 +103,7 @@ def test_nufft_beats_fft_on_a_single_depth():
     spec = np.exp(2j * phi0 * lam2)
 
     phi_out = np.arange(560.0, 640.0, 0.05)
-    p_nufft = dsp.delay_power(spec, freqs, phi_out)
+    p_nufft = dsp.depth_power(spec, freqs, phi_out)
     w_nufft = _fwhm(phi_out, p_nufft)
 
     # FFT on the uniform nu grid; map delay bins to phi by linearizing
@@ -140,7 +140,7 @@ def test_bh4_window_sidelobe_level():
     win = dsp.bh4_window(n)
     freqs = fine_freqs(30.0)[::4]
     phi_out = np.arange(0.0, 400.0, 0.1)
-    p = dsp.delay_power(np.ones(n), freqs, phi_out, window=win)
+    p = dsp.depth_power(np.ones(n), freqs, phi_out, window=win)
     # main lobe is at phi = 0; measure the highest sidelobe beyond it
     side = p[phi_out > 15.0].max()
     assert np.sqrt(side) < 5e-5
@@ -157,7 +157,7 @@ def _fine_offsets():
 def test_boxcar_rmsf_widths():
     """S6.7: the boxcar RMSF against BOTH top-hat width conventions.
 
-    Convention: AMPLITUDE FWHM (``delay_power`` returns power, so the
+    Convention: AMPLITUDE FWHM (``depth_power`` returns power, so the
     half-max crossing is taken on ``sqrt(p)``), matching the
     convention of Brentjens & de Bruyn's ``2 sqrt(3) / dlambda^2``.
 
@@ -190,7 +190,7 @@ def test_boxcar_rmsf_widths():
         assert np.isclose(2.0 * np.sqrt(3.0) / dlam2, rule, rtol=0.01)
         exact = 2.0 * 1.895494267 / dlam2 * (n - 1) / n
         phi_out = np.arange(0.0, 40.0 * rule, rule / 50.0)
-        amp = np.sqrt(dsp.delay_power(np.ones(n), freqs, phi_out))
+        amp = np.sqrt(dsp.depth_power(np.ones(n), freqs, phi_out))
         i = np.nonzero(amp >= 0.5)[0][-1]
         # interpolate the half-max crossing (R6); symmetric about 0
         cross = phi_out[i] + (amp[i] - 0.5) * (phi_out[i + 1] - phi_out[i]) / (
@@ -281,7 +281,7 @@ def test_foreground_sidelobe_budget():
     win = dsp.bh4_window(freqs.size)
     phi_out = np.arange(0.0, 2500.0, 0.25)
     amp = np.sqrt(
-        dsp.delay_power(fg.astype(complex), freqs, phi_out, window=win)
+        dsp.depth_power(fg.astype(complex), freqs, phi_out, window=win)
     )
 
     def peak(lo, hi=np.inf):
@@ -320,7 +320,7 @@ def test_boxcar_would_fail_the_budget():
     freqs = fine_freqs(30.0)[::4]
     fg = 0.15 * (freqs / 30.0) ** (-2.5)
     phi_out = np.arange(0.0, 2500.0, 1.0)
-    p = dsp.delay_power(fg.astype(complex), freqs, phi_out)
+    p = dsp.depth_power(fg.astype(complex), freqs, phi_out)
     assert np.sqrt(p[phi_out > 200.0].max()) > 1e-5
 
 
@@ -356,7 +356,7 @@ def test_zoom_fold_is_unreachable_because_the_envelope_nulls_there():
 
     def recovered(phi0):
         tone = np.exp(2j * phi0 * lam2)
-        p = dsp.delay_power(W.T @ tone, bins, phi_out, window=win)
+        p = dsp.depth_power(W.T @ tone, bins, phi_out, window=win)
         return phi_out[np.argmax(p)], p.max()
 
     # tracks faithfully well past the 604 rad/m^2 depth horizon
@@ -367,7 +367,7 @@ def test_zoom_fold_is_unreachable_because_the_envelope_nulls_there():
         print(f"phi0 {phi0:5.0f} -> peak {pk:6.1f}  power {power:.2e}")
 
     # Regression pin on dsp.rmsf's wrapper, NOT independent physics:
-    # rmsf runs the same tone -> W.T @ tone -> delay_power sequence
+    # rmsf runs the same tone -> W.T @ tone -> depth_power sequence
     # that recovered() runs inline, so this catches the wrapper
     # drifting from the inline path and nothing more.  The
     # independent evidence in this test is the bin_envelope block
@@ -377,7 +377,7 @@ def test_zoom_fold_is_unreachable_because_the_envelope_nulls_there():
     assert phi_out[np.argmax(p_model)] == pk_900
     np.testing.assert_allclose(
         p_model,
-        dsp.delay_power(
+        dsp.depth_power(
             W.T @ np.exp(2j * 900.0 * lam2), bins, phi_out, window=win
         ),
         rtol=1e-12,

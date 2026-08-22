@@ -60,7 +60,7 @@ def native_channel_index(resp, freq_mhz):
     The fixed-beam approximation is an assertion, not a default: an
     off-grid frequency would be silently interpolated by luseepy's
     ``FrequencyMap``, smearing the beam across the band and putting
-    non-Faraday structure into delay space.
+    non-Faraday structure into Faraday depth space.
     """
     freq = np.asarray(resp.freq, dtype=float)
     idx = int(np.argmin(np.abs(freq - freq_mhz)))

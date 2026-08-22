@@ -90,7 +90,7 @@ re-typing any of the following. Validated in
 - **The freeze covers the receiver loading too.** Z_A moves 12% across
   one 0.5 MHz native step at 30 MHz, and letting the impedances follow
   the fine grid puts an 11% smooth ramp into the band — exactly the
-  non-Faraday chromatic structure the delay-space argument asserts is
+  non-Faraday chromatic structure the depth-space argument asserts is
   absent. Pass `instrument.covariance(..., impedance_freq_mhz=CENTER)`,
   and `T_moon=0.0, T_ant=0.0` wherever the legacy assembler had no
   thermal terms (luseepy defaults T_moon to 250 K: a factor 7.4e3).
@@ -173,13 +173,18 @@ below too; it was missing from earlier revisions of this table.
   rather than a branch. (Pre-existing inventory rot, corrected here.)
 - `scripts/beam_ablation.py`, `scripts/compare_main_vs_asbuilt.py` —
   response ablations and the Fig-4 lineage.
-- **Step 5, the diffuse delay template** (`dispersion.py` + `noise.py`;
+- **Step 5, the diffuse Faraday-depth template** (`dispersion.py` + `noise.py`;
   outputs `generated_data/step5_*.npz`, figures `report/figures/step5_*`).
   Run them in this order; only the first is heavy:
   - `scripts/step5_template.py [--arm four-port|two-port] [--lst 128]
     [--bands 30 50 10] [--sigma-eff 9.8]` — builds `F(phi)` per band and
     per geometry `k`, the coherence-tilted variant, the knees (plain and
-    plane-tapered) and the LST-resolved tail gate. **Heavy: 20-40 min,
+    plane-tapered), the LST-resolved tail gate, and `H_lst` -- the
+    fiducial template resolved over LST, which the transit-time
+    detection numbers need and the LST-summed `H` cannot supply.
+    **NOTE: it writes `step5_template.npz` regardless of `--lst` or
+    `--bands`, so a smoke run OVERWRITES the production product.**
+    **Heavy: 20-40 min,
     peak RSS 5.3 GiB four-port / 2.2 GiB two-port.** Background +
     `MemoryMax=10G` + absolute log path. Its two npz files are the
     inputs to everything below and are *not* cheap to regenerate.
@@ -190,10 +195,23 @@ below too; it was missing from earlier revisions of this table.
     cross-check (~1 min). `--t-amp` is 0 by default and the chain has no
     amplifier noise, so its `T_sys/T_sky` is `1 + T_loading/T_sky`, a
     lower bound — not a sky-domination result.
-  - `scripts/step5_plots.py` — all six step-5 figures from the npz
+  - `scripts/step5_detection.py [--lunations 24] [--arm ...]` — the
+    DETECTION deliverable: SNR against the low-depth systematics cut,
+    with the matched-filter threshold recomputed on the **truncated**
+    template at every cut (seconds). Detection and localisation are
+    different statistics with different answers; this script owns the
+    first and the tail gate owns the second.
+  - `scripts/step5_tables.py` — writes
+    `report/faraday_depth_template/generated.tex`, every number the
+    report quotes, straight from the npz (seconds). **No number is
+    typed into the `.tex` by hand**; two published errors were
+    hand-transcription drifting from the products.
+  - `scripts/step5_plots.py` — all eight step-5 figures from the npz
     files. Re-run it after ANY figure-text change (seconds).
 - `tests/testpixel_arm.py` — data-free unit tests for the pixel arm.
-- Report: `report/report.tex` (pdflatex twice; needs amssymb).
+- Report: `report/faraday_depth_template/` (`make`; pdflatex twice,
+  no bibtex). `report/report.tex` is the earlier document and lives
+  only at the `audit-2026-08-18` tag.
 
 ## Workflow rules
 

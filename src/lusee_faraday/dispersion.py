@@ -1,9 +1,19 @@
-"""Faraday depth distributions, their transforms, and the delay-space
+"""Faraday depth distributions, their transforms, and the depth-space
 template geometry built on top of them.
 
+A NAMING WARNING, because this module used to get it wrong.  The axis
+here is Faraday depth ``phi`` in rad/m^2, the Fourier conjugate of
+``lambda^2``.  It is NOT the delay ``tau`` (in seconds) conjugate to
+``nu``, which is what the refuted Step 4 at the audit-2026-08-18 tag
+transformed onto.  The two are related by a MONOTONIC map,
+``tau_FD = 2 phi c^2 / (pi nu^3)``, so a cut in one is exactly a cut in
+the other and detection is identical either way -- but they have
+different units and the same phi sits at different tau in different
+bands, so they must not be called by one name.
+
 Owns F(phi) and its transforms (spec S4.1): ``transform`` turns a
-depth distribution into P(lambda^2) on the model side; ``delay_power``
-turns a measured/model spectrum into delay-space power via a type-3
+depth distribution into P(lambda^2) on the model side; ``depth_power``
+turns a measured/model spectrum into Faraday-depth power via a type-3
 NUFFT on the true lambda^2 nodes -- NEVER an FFT on a uniform nu grid;
 the chirp that removes is spec S4.5. It also owns the shape geometry
 of the template built from F(phi) -- folding, the half-power and
@@ -67,7 +77,7 @@ def transform(phi, F, lam2_targets, eps=1e-12):
     return finufft.nufft1d3(phi, F, s, isign=+1, eps=eps)
 
 
-def delay_power(spectrum, freqs_mhz, phi_out, window=None, eps=1e-12):
+def depth_power(spectrum, freqs_mhz, phi_out, window=None, eps=1e-12):
     """|P~(phi)|^2 of a spectrum sampled at arbitrary frequencies.
 
     Type-3 NUFFT with nodes 2*lambda^2(freq) and targets phi; the
@@ -328,7 +338,7 @@ def rmsf(phi0, fine_freqs_mhz, W, bin_freqs_mhz, phi_out, window=None):
 
     The deconvolution kernel of spec S4.1: a unit Faraday tone on the
     fine grid, integrated by the true bin responses, then
-    delay-transformed over the bin centres.
+    depth-transformed over the bin centres.
 
     Returns POWER, not amplitude -- an FWHM taken from this array is a
     power FWHM, a factor 0.734 below the amplitude FWHM that
@@ -345,7 +355,7 @@ def rmsf(phi0, fine_freqs_mhz, W, bin_freqs_mhz, phi_out, window=None):
     lam2 = np.asarray(lambda_squared(fine_freqs_mhz), dtype=float)
     tone = np.exp(2j * float(phi0) * lam2)
     binned = np.asarray(W).T @ tone
-    return delay_power(binned, bin_freqs_mhz, phi_out, window=window)
+    return depth_power(binned, bin_freqs_mhz, phi_out, window=window)
 
 
 def bin_envelope(phi, fine_offsets_hz, w, center_mhz):

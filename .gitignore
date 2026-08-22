@@ -220,17 +220,22 @@ generated_data/
 # `report/` makes the two exceptions below impossible to express.
 report/*
 
-# Exception 1: the delay-template report's source, which has to be
-# reviewable in the PR.  Its build artifacts stay ignored.
-!report/delay_template/
-report/delay_template/*.aux
-report/delay_template/*.fdb_latexmk
-report/delay_template/*.fls
-report/delay_template/*.log
-report/delay_template/*.out
-report/delay_template/*.pdf
-report/delay_template/*.synctex.gz
-report/delay_template/*.toc
+# Exception 1: the report's source, which has to be reviewable in the
+# PR.  Its LaTeX build artifacts stay ignored.  generated.tex is NOT a
+# build artifact for this purpose: scripts/step5_tables.py builds it
+# from the npz products so that no number in the report is
+# hand-transcribed, and it is tracked for the same reason the six
+# step5 figures are -- so the report builds from a fresh clone without
+# re-running a multi-hour job.
+!report/faraday_depth_template/
+report/faraday_depth_template/*.aux
+report/faraday_depth_template/*.fdb_latexmk
+report/faraday_depth_template/*.fls
+report/faraday_depth_template/*.log
+report/faraday_depth_template/*.out
+report/faraday_depth_template/*.pdf
+report/faraday_depth_template/*.synctex.gz
+report/faraday_depth_template/*.toc
 
 # Exception 2: the six step-5 figures that report include, ~220 kB, so
 # the report builds from a fresh clone without a heavy re-run.  Every

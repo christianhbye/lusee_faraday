@@ -1,4 +1,4 @@
-"""Figures for the delay-template paper (spec S5).
+"""Figures for the Faraday-depth template paper (spec S5).
 
 Reads the step5_*.npz products; every figure is regenerable from
 committed code plus data/.
@@ -23,28 +23,116 @@ K_LABELS = {
     2: "$k\\to-1$ (all local)",
 }
 
+# One fixed colour per emissivity geometry.  NOT the property cycle:
+# fig_template_family draws two lines for the fiducial geometry (the
+# incoherent template and its coherence-tilted companion) and they must
+# share a colour.  Letting the cycle assign them gave the fiducial a
+# green solid and a RED dotted, two slots apart, which no legend can
+# pair up -- the defect this constant exists to prevent.
+K_COLORS = {0: "C0", 1: "C2", 2: "C4"}
+
+# dispersion.weighted_percentiles is called with these, in this order,
+# by step5_template.py; the figure labels them so the grey verticals
+# are readable rather than decorative.
+PCT_LABELS = ("p50", "p90", "p99", "p99.9")
+
 
 def fig_template_family(d):
+    """The template family: shape against emissivity geometry, per band.
+
+    Colour is the geometry, linestyle is the treatment, and the two are
+    kept separate -- see K_COLORS.
+
+    Two things are deliberately not drawn as curves.  ``k -> -1`` (all
+    emission local, in front of the whole rotating column) is
+    ``delta(phi)``: it has exactly ONE non-zero bin out of 2500, so
+    there is no line to see, and it is drawn as a marker whose legend
+    entry says so rather than as a phantom curve at the axis edge.  And
+    the coherence tilt is drawn for the fiducial geometry only, because
+    that is the one every quoted number uses; the other tilts are
+    reported as numbers.
+    """
     bands = d["bands"]
+    phi = d["phi"]
+    kf = int(np.argmin(np.abs(d["ks"])))  # fiducial, k = 0
+    kd = int(np.argmin(d["ks"]))  # degenerate, k -> -1
     fig, axes = plt.subplots(
-        1, len(bands), figsize=(4 * len(bands), 3.2), sharey=True
+        1, len(bands), figsize=(4 * len(bands), 3.5), sharey=True
     )
-    for ib, (ax, band) in enumerate(zip(np.atleast_1d(axes), bands)):
-        for ik in range(d["H"].shape[1]):
-            ax.plot(d["phi"], d["H"][ib, ik], label=K_LABELS[ik])
-            ax.plot(d["phi"], d["H_coh"][ib, ik], ls=":", alpha=0.7)
-        for q in d["weighted_percentiles"]:
-            ax.axvline(q, color="0.8", lw=0.6, zorder=0)
+    axes = np.atleast_1d(axes)
+    for ib, (ax, band) in enumerate(zip(axes, bands)):
+        for ik in range(len(d["ks"])):
+            if ik != kd:
+                ax.plot(phi, d["H"][ib, ik], color=K_COLORS[ik], lw=1.1)
+        ax.plot(
+            phi,
+            d["H_coh"][ib, kf],
+            color=K_COLORS[kf],
+            ls=":",
+            lw=1.4,
+        )
+        j = int(np.argmax(d["H"][ib, kd]))
+        ax.plot(
+            phi[j],
+            d["H"][ib, kd][j],
+            ls="none",
+            marker="v",
+            ms=8,
+            color=K_COLORS[kd],
+        )
+        for q, lab in zip(d["weighted_percentiles"], PCT_LABELS):
+            ax.axvline(q, color="0.85", lw=0.6, zorder=0)
+            # Rotated and INSIDE the axes: horizontal labels at the
+            # top collided with the panel title (p50) and with each
+            # other (p99 against p99.9, 776 and 1283 rad/m^2 being
+            # close on a log axis).
+            ax.annotate(
+                lab,
+                xy=(q, 0.985),
+                xycoords=("data", "axes fraction"),
+                xytext=(-2, 0),
+                textcoords="offset points",
+                ha="right",
+                va="top",
+                rotation=90,
+                fontsize=6,
+                color="0.45",
+            )
         ax.set(
             xscale="log",
             yscale="log",
-            xlim=(0.5, 2600),
+            xlim=(0.4, 2600),
+            ylim=(1e-8, 3.0),
             title=f"{band:.0f} MHz",
             xlabel=r"$\phi$ [rad m$^{-2}$]",
         )
-        ax.set_ylim(1e-8, None)
-    np.atleast_1d(axes)[0].set_ylabel("normalised template")
-    np.atleast_1d(axes)[0].legend(fontsize=7)
+    axes[0].set_ylabel("normalised template")
+    axes[0].legend(
+        handles=[
+            Line2D([0], [0], color=K_COLORS[0], lw=1.1, label=K_LABELS[0]),
+            Line2D([0], [0], color=K_COLORS[kf], lw=1.1, label=K_LABELS[kf]),
+            Line2D(
+                [0],
+                [0],
+                color=K_COLORS[kf],
+                lw=1.4,
+                ls=":",
+                label=K_LABELS[kf] + ", coherence-tilted",
+            ),
+            Line2D(
+                [0],
+                [0],
+                color=K_COLORS[kd],
+                lw=0,
+                marker="v",
+                ms=8,
+                label=K_LABELS[kd] + r": $\delta(\phi)$, one bin",
+            ),
+        ],
+        fontsize=6.5,
+        loc="lower left",
+        framealpha=0.9,
+    )
     fig.tight_layout()
     return fig
 
@@ -231,7 +319,7 @@ def fig_chirp_coherence():
     phi0 = 600.0
     spec = np.exp(2j * phi0 * lam2)
     phi_out = np.arange(500.0, 700.0, 0.1)
-    p_nufft = dsp.delay_power(spec, freqs, phi_out)
+    p_nufft = dsp.depth_power(spec, freqs, phi_out)
     n = freqs.size
     P = np.abs(np.fft.fftshift(np.fft.fft(spec)) / n) ** 2
     bw = (freqs[1] - freqs[0]) * 1e6 * n
@@ -281,6 +369,88 @@ def fig_two_arm(d, d2):
     np.atleast_1d(axes)[0].set_ylabel("normalised template (k = 0)")
     np.atleast_1d(axes)[0].legend(fontsize=7)
     fig.tight_layout()
+    return fig
+
+
+def fig_detection(s):
+    """Detection SNR against the low-depth systematics cut.
+
+    The deliverable for the DETECTION question, as opposed to the
+    template family (the shape question) and the tail figure (the
+    localisation question).  One panel per band; the top axis is the
+    same cut expressed as a delay, because ``tau_FD`` is monotonic in
+    ``phi`` and every cut here is exactly a cut in either basis.
+
+    ``cuts[0]`` is the no-cut case and cannot go on a log axis, so it
+    is annotated rather than plotted.
+    """
+    bands = s["bands"]
+    cuts, tau_us = s["cuts"], s["tau_us"]
+    keep = cuts > 0
+    fig, axes = plt.subplots(
+        1, len(bands), figsize=(4.2 * len(bands), 3.8), sharey=True
+    )
+    axes = np.atleast_1d(axes)
+    for ib, (ax, band) in enumerate(zip(axes, bands)):
+        ax.plot(
+            cuts[keep],
+            s["ratio_slab"][ib][keep],
+            "o-",
+            color="C0",
+            lw=1.2,
+            ms=3.5,
+            label="uniform-slab floor",
+        )
+        ax.plot(
+            cuts[keep],
+            s["ratio_dispersion"][ib][keep],
+            "s--",
+            color="C3",
+            lw=1.2,
+            ms=3.5,
+            label="internal-dispersion floor",
+        )
+        ax.axhline(1.0, color="k", lw=0.9, ls="-", zorder=0)
+        # Below the window-budget cut the statistic is degenerate with
+        # spectrally smooth I -> Q,U leakage, which sits at phi ~ 0.
+        ax.axvspan(cuts[keep].min(), 27.5, color="0.9", zorder=0)
+        ax.annotate(
+            f"no cut: {s['ratio_slab'][ib][0]:.0f} / "
+            f"{s['ratio_dispersion'][ib][0]:.3f}",
+            xy=(0.03, 0.03),
+            xycoords="axes fraction",
+            fontsize=6,
+            color="0.35",
+        )
+        ax.set(
+            xscale="log",
+            yscale="log",
+            title=f"{band:.0f} MHz",
+            xlabel=r"cut: $\phi \geq$ [rad m$^{-2}$]",
+        )
+        # tau = (2 c^2 / pi nu^3) phi -- linear, so one scale factor.
+        k = tau_us[ib][keep][-1] / cuts[keep][-1]
+        sec = ax.secondary_xaxis(
+            "top", functions=(lambda x, k=k: x * k, lambda t, k=k: t / k)
+        )
+        sec.set_xlabel(r"same cut as a delay $\tau$ [$\mu$s]", fontsize=8)
+        sec.tick_params(labelsize=7)
+    axes[0].set_ylabel(r"detection ratio  $A\sqrt{f}\,/\,A_{5\sigma}$")
+    axes[0].legend(fontsize=7, loc="upper right")
+    fig.tight_layout(rect=(0.0, 0.11, 1.0, 1.0))
+    fig.text(
+        0.5,
+        0.01,
+        "Above the black line the floor is detectable at 5$\\sigma$ in "
+        f"{int(s['lunations'])} lunations. Shading marks the region where "
+        "the statistic is degenerate\nwith spectrally smooth "
+        "$I\\rightarrow Q,U$ leakage. The threshold is recomputed on the "
+        "TRUNCATED template at every cut, not taken from the full one.",
+        ha="center",
+        va="top",
+        fontsize=6.5,
+        linespacing=1.4,
+    )
     return fig
 
 
@@ -338,6 +508,9 @@ def main():
     save(fig_sensitivity(s, d), "step5_sensitivity")
     save(fig_chirp_coherence(), "step5_chirp_coherence")
     save(fig_weight_map(d), "step5_weight_map")
+    det = GEN_DIR / "step5_detection.npz"
+    if det.exists():
+        save(fig_detection(np.load(det)), "step5_detection", pad=0.4)
     two = GEN_DIR / "step5_template_two_port.npz"
     if two.exists():
         save(fig_two_arm(d, np.load(two)), "step5_two_arm")
