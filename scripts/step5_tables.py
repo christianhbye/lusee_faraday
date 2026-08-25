@@ -363,6 +363,14 @@ def main():
         vr = q["toy_var"][3, 1] / q["toy_var"][3, 0]
         macro("cvVarRatioHutschenreuter", f"{vr:.3f}")
         macro("betaShift", sci(float(q["beta_shift"]), 2))
+        # The random-walk argument's own input.  It was asserted as
+        # "order 1e3 rad/m^2" and is actually ~0.6; generated so it
+        # cannot drift again.
+        macro("adjMedian", f"{float(q['adj_median']):.2f}")
+        macro("adjPninety", f"{float(q['adj_p90']):.1f}")
+        for i, w in enumerate(("Ten", "Thirty", "Fifty")):
+            macro(f"adjTurns{w}", f"{q['adj_turns'][i]:.0f}")
+        macro("cohValidMHz", f"{float(q['coherent_valid_above_mhz']):.0f}")
         macro("rmStdMedian", f"{float(q['rm_std_median']):.1f}")
         macro("rmAbsMedian", f"{float(q['rm_abs_median']):.1f}")
         rm_pct = 100 * float(q["rm_std_median"]) / float(q["rm_abs_median"])
