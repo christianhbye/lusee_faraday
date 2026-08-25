@@ -222,10 +222,13 @@ quantity.
 
 Write $w_n = |w_n|e^{i\alpha_n}$ and $\theta_n = \alpha_n +
 2\phi_n\lamsq$. The intrinsic angles $\alpha_n$ are effectively random
-between pixels, and so is $2\phi_n\lamsq$ modulo $2\pi$: at nside 512
-the depth changes by order $10^{3}$\,\rmu{} between neighbours, so at
-30\,MHz ($\lamsq = 99.86\,\mathrm{m^2}$) the phase advances hundreds of
-turns from one pixel to the next. Then
+between pixels, and so is $2\phi_n\lamsq$ modulo $2\pi$. The Faraday
+map is a smooth reconstruction, so neighbouring nside-512 pixels are
+not far apart in depth --- a median $\adjMedian$\,\rmu, a p90 of
+$\adjPninety$ --- but at these wavelengths that is already many turns
+of the carrier: $\adjTurnsThirty$ between a median neighbour pair at
+30\,MHz, $\adjTurnsTen$ at 10\,MHz and $\adjTurnsFifty$ at 50\,MHz.
+Then
 \begin{equation}
   \bigl\langle |P|^2 \bigr\rangle
   = \sum_{n,m} |w_n||w_m|\bigl\langle e^{i(\theta_n-\theta_m)}\bigr\rangle
@@ -248,9 +251,15 @@ the coherent power by a factor $134$ --- close to the factor $64$
 Equation~\eqref{eq:nhalf} predicts, and nothing like the invariance a
 physical signal would show.
 
-The sum in Equation~\eqref{eq:pixelsum} is computed correctly. It is
-simply the wrong estimator for a quantity whose phases decorrelate
-below the pixel scale.
+The sum in Equation~\eqref{eq:pixelsum} is computed correctly, and it
+is not wrong in general --- it is the standard RM-synthesis estimator,
+and it is the right one at the frequencies where the Faraday map itself
+was measured. Coherence across a pixel needs
+$2\,\Delta\mathrm{RM}\,\lamsq \lesssim 1$, which for the median
+neighbour pair holds above $\sim\cohValidMHz$\,MHz. \textbf{LuSEE-Night
+observes about a decade below that floor}, which is the whole of the
+difference: the same estimator that builds the input map cannot be used
+on the data the map is being applied to.
 
 Figure~\ref{fig:bridge} makes that quantitative by scaling the RM map
 down until the estimator does converge. It converges where the sky is
@@ -803,12 +812,21 @@ $Q$ and $U$ with a specific correlation length.
   \centering
   \includegraphics[width=\textwidth]{step5_data.pdf}
   \caption{What the instrument measures, drawn from this report's own
-  signal model. (a) and (b) are noise-free. (c) is one sample at the
-  uniform-slab floor, where the signal is a fraction of the noise: no
-  single spectrum is a detection, and none is meant to be. (d) is the
-  object actually predicted --- coadding drives the measured channel
-  covariance onto $|S_{ij}|$, while the no-Faraday hypothesis is a flat
-  line at unity.}
+  signal model. Top row is 30\,MHz and is illustrative: (a) and (b) are
+  noise-free, and (c) is one sample at the uniform-slab floor, where
+  the signal is a fraction of the noise. No single spectrum is a
+  detection and none is meant to be. The bottom row is the object
+  actually predicted, at all three bands, against \emph{frequency}
+  separation with \lamsq{} on the opposite axis. Coadding drives the
+  measured covariance onto $|S_{ij}|$; the no-Faraday hypothesis is the
+  flat line at unity. The three bands differ in kind, not degree:
+  50\,MHz has the best single-sample sensitivity but spans only
+  $0.10\,\mathrm{m^2}$ in \lamsq{} and so barely decorrelates across
+  the band; 10\,MHz is aliased --- the periodic revivals are template
+  power folding back past the depth-Nyquist wall
+  (Appendix~\ref{sec:bases}) --- and its single samples are
+  noise. 30\,MHz is the band where the decorrelation is both large and
+  clean.}
   \label{fig:data}
 \end{figure}
 
@@ -816,6 +834,16 @@ So the analysis chain is: measure $Q(\nu)$ and $U(\nu)$, form
 $P = Q+iU$, estimate its channel covariance across the mission, and
 test that covariance against $S$. Section~\ref{sec:noise} is the
 optimal version of that test.
+
+\paragraph{Zoom mode throughout.} Every covariance in this report is
+built on the \textbf{zoom} channelisation --- $192$ bins of
+$390.625$\,Hz --- through luseepy's real spectrometer response, not a
+boxcar (\code{dispersion.zoom\_bin\_matrix}). That is not a free
+choice: Section~\ref{sec:horizon} shows no parent bin reaches the
+knee, so the parent mode cannot see the signal at all, and no
+parent-mode detection number is computed anywhere here. The
+parent/zoom comparison appears once, in Figure~\ref{fig:envelope},
+and it is what justifies the choice rather than an aside.
 
 \subsection{How much the prediction depends on inputs we do not
 control}
@@ -1543,6 +1571,17 @@ Matched filter, Eq.~\eqref{eq:mf}
 
 \section{Faraday depth and delay are the same measurement}
 \label{sec:bases}
+
+\textbf{This appendix settles a question the present analysis does not
+face.} Nothing in Sections~\ref{sec:depthdist}--\ref{sec:detection}
+transforms data into either basis: the template lives in depth, the
+statistic lives in the channel covariance
+(Equation~\eqref{eq:sij}), and no delay spectrum and no depth spectrum
+is ever formed from a measurement. Delay appears in the main text only
+as an alternative label on the cut axis of
+Figure~\ref{fig:detection}. The basis question matters because the
+superseded Step 4 worked in delay, and Section~\ref{sec:reconcile}
+has to say whether that was sound. It was, at 30 and 50\,MHz.
 
 Faraday depth $\phi$ is the Fourier conjugate of $\lamsq$. Delay $\tau$
 is the Fourier conjugate of $\nu$. They are not the same axis, and this

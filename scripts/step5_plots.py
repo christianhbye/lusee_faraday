@@ -186,59 +186,81 @@ def fig_data(q):
     covariance A^2 S -- so these are realizations of exactly what the
     analysis claims the instrument sees, not a cartoon.
 
-    The point of (c) is that ONE sample is not a detection and is not
-    meant to be: no spectrum is ever predicted here, a COVARIANCE is,
-    and (d) is the object the matched filter actually tests.
+    Top row is the lead band and is illustrative.  Bottom row repeats
+    the only panel that differs between bands, so the claim that 30 MHz
+    is the interesting one can be checked rather than taken.
+
+    The covariance panels are plotted against FREQUENCY separation with
+    lambda^2 on the opposite axis, not the other way round: LuSEE
+    delivers frequency spectra, and Delta(lambda^2) is the natural
+    variable only after the reader already believes the argument.
     """
     nu = np.linspace(29.9625, 30.0371, q["demo_spectra"].shape[1])
-    dl2 = np.abs(q["lam2_bins"] - q["lam2_bins"][0])
     lab = ("no Faraday  ($F=\\delta(0)$)", "one depth  $\\phi_0=20$",
            "the Galactic sky")
     cols = ("C7", "C1", "C2")
-    fig, ax = plt.subplots(2, 2, figsize=(12.5, 7.6))
+    fig = plt.figure(figsize=(13.5, 7.8))
+    gs = fig.add_gridspec(2, 3, hspace=0.52, wspace=0.26)
+
+    a1 = fig.add_subplot(gs[0, 0])
     for i in range(3):
         P = q["demo_spectra"][i]
-        ax[0, 0].plot(q["lam2_bins"], np.unwrap(2 * np.angle(P)) / 2,
-                      color=cols[i], lw=1.4, label=lab[i])
-    ax[0, 0].set(xlabel=r"$\lambda^2$ [m$^2$]",
-                 ylabel=r"$\chi=\frac{1}{2}\arg(Q+iU)$ [rad]")
-    ax[0, 0].set_title("(a) noise-free: Faraday rotation winds $\\chi$ "
-                       "linearly in $\\lambda^2$", fontsize=10)
-    ax[0, 0].legend(fontsize=7.5)
+        a1.plot(q["lam2_bins"], np.unwrap(2 * np.angle(P)) / 2,
+                color=cols[i], lw=1.4, label=lab[i])
+    a1.set(xlabel=r"$\lambda^2$ [m$^2$]",
+           ylabel=r"$\chi=\frac{1}{2}\arg(Q+iU)$ [rad]")
+    a1.set_title("(a) noise-free: Faraday rotation winds\n$\\chi$ linearly "
+                 "in $\\lambda^2$", fontsize=10)
+    a1.legend(fontsize=7)
+
+    a2 = fig.add_subplot(gs[0, 1])
     for i in (0, 2):
         P = q["demo_spectra"][i]
-        ax[0, 1].plot(nu, P.real, color=cols[i], lw=1.3, label=f"Q, {lab[i]}")
-        ax[0, 1].plot(nu, P.imag, color=cols[i], lw=1.0, ls=":",
-                      label=f"U, {lab[i]}")
-    ax[0, 1].set(xlabel="frequency [MHz]", ylabel="Q, U  (arbitrary)")
-    ax[0, 1].set_title("(b) noise-free $Q(\\nu)$, $U(\\nu)$: flat vs "
-                       "decorrelating", fontsize=10)
-    ax[0, 1].legend(fontsize=6.5, ncol=2)
-    ax[1, 0].plot(nu, q["one_sample"].real, color="0.35", lw=0.9,
-                  label="$Q$ measured (signal + noise)")
-    ax[1, 0].plot(nu, q["one_signal"].real, color="C2", lw=1.6,
-                  label="the Faraday signal in it")
-    ax[1, 0].set(xlabel="frequency [MHz]", ylabel="$Q\\,/\\,T_{\\rm sys}$")
-    ax[1, 0].set_title(f"(c) ONE {float(q['tau_s']):.0f}-s sample at the slab "
-                       f"floor: signal is {float(q['sample_snr']):.2f}x the "
-                       "noise", fontsize=10)
-    ax[1, 0].legend(fontsize=7.5)
-    for i, lun in enumerate(q["coadd_lunations"]):
-        ax[1, 1].plot(dl2, q["coadd_S"][i], lw=1.0, alpha=0.85,
-                      color=plt.cm.viridis(i / max(len(q["coadd_lunations"])
-                                                   - 1, 1)),
-                      label=f"measured, {int(lun)} lunation"
-                            f"{'s' if lun > 1 else ''}")
-    ax[1, 1].plot(dl2, q["S_fiducial"], "k-", lw=2.2,
-                  label="predicted, Faraday")
-    ax[1, 1].plot(dl2, q["S_no_faraday"], color="0.4", ls="--", lw=1.6,
-                  label="predicted, NO Faraday")
-    ax[1, 1].set(xlabel=r"channel separation $|\Delta\lambda^2|$ [m$^2$]",
-                 ylabel=r"$|S_{ij}|$", ylim=(-0.4, 1.6))
-    ax[1, 1].set_title("(d) the covariance is what is predicted, and what "
-                       "integration recovers", fontsize=10)
-    ax[1, 1].legend(fontsize=7)
-    fig.tight_layout()
+        a2.plot(nu, P.real, color=cols[i], lw=1.3, label=f"Q, {lab[i]}")
+        a2.plot(nu, P.imag, color=cols[i], lw=1.0, ls=":",
+                label=f"U, {lab[i]}")
+    a2.set(xlabel="frequency [MHz]", ylabel="Q, U  (arbitrary)")
+    a2.set_title("(b) noise-free $Q(\\nu)$, $U(\\nu)$:\nflat vs "
+                 "decorrelating", fontsize=10)
+    a2.legend(fontsize=6, ncol=2)
+
+    a3 = fig.add_subplot(gs[0, 2])
+    a3.plot(nu, q["one_sample"].real, color="0.35", lw=0.9,
+            label="$Q$ measured (signal + noise)")
+    a3.plot(nu, q["one_signal"].real, color="C2", lw=1.6,
+            label="the Faraday signal in it")
+    a3.set(xlabel="frequency [MHz]", ylabel="$Q\\,/\\,T_{\\rm sys}$")
+    a3.set_title(f"(c) ONE {float(q['tau_s']):.0f}-s sample at 30 MHz,\n"
+                 f"slab floor: signal is "
+                 f"{float(q['sample_snr']):.2f}$\\times$ the noise",
+                 fontsize=10)
+    a3.legend(fontsize=7)
+
+    tags = "def"
+    for ib, bb in enumerate(q["all_bands"]):
+        ax = fig.add_subplot(gs[1, ib])
+        dnu = q["band_dnu_hz"][ib] / 1e3          # kHz
+        ax.plot(dnu, q["band_coadd"][ib], color="0.55", lw=1.0,
+                label="measured, 24 lunations")
+        ax.plot(dnu, q["band_S"][ib], "k-", lw=2.2, label="predicted")
+        ax.plot(dnu, q["band_S_no_faraday"][ib], color="C3", ls="--", lw=1.6,
+                label="predicted, NO Faraday")
+        ax.set(xlim=(0, dnu.max()), ylim=(-0.4, 1.6),
+               xlabel=r"channel separation $\Delta\nu$ [kHz]")
+        ax.set_title(f"({tags[ib]}) {bb:.0f} MHz   "
+                     f"(one sample: {q['band_sample_snr'][ib]:.2f}"
+                     r"$\times$ noise)", fontsize=10)
+        # lambda^2 on the opposite axis: dlam2/dnu varies by <1% across
+        # the 75 kHz zoom span, so one scale factor is enough.
+        kfac = q["band_dlam2"][ib][-1] / max(dnu[-1], 1e-30)
+        sec = ax.secondary_xaxis(
+            "top", functions=(lambda x, k=kfac: x * k,
+                              lambda t, k=kfac: t / k))
+        sec.set_xlabel(r"$|\Delta\lambda^2|$ [m$^2$]", fontsize=8)
+        sec.tick_params(labelsize=7)
+        if ib == 0:
+            ax.set_ylabel(r"$|S_{ij}|$")
+            ax.legend(fontsize=6.5, loc="upper right")
     return fig
 
 

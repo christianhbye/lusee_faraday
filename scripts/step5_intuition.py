@@ -109,6 +109,31 @@ def main():
         toy_var[i] = [ex2 - mu**2, ex2 / 3.0 - mu**2 / 4.0]
         toy_cv[i] = np.sqrt(max(toy_var[i, 0], 0.0)) / abs(mu)
 
+    # ---- how far apart neighbouring pixels actually are in depth
+    # The random-walk argument of report sec:randomwalk rests on this
+    # number, and it was quoted as "order 1e3 rad/m^2" -- wrong by ~3
+    # decades.  Hutschenreuter is a SMOOTH reconstruction: neighbours
+    # differ by ~3% of the median |RM|.  The conclusion survives (a
+    # median pair is still many turns apart at LuSEE wavelengths) but
+    # the number must be measured, not asserted.
+    # healpy returns -1 for absent neighbours; indexing with -1 wraps
+    # silently, so those are filtered rather than trusted.
+    pix = rng.integers(0, rm.size, 300_000)
+    nbr = hp.get_all_neighbours(hp.npix2nside(rm.size), pix)
+    dd = np.concatenate([
+        np.abs(rm[pix[nbr[j] >= 0]] - rm[nbr[j][nbr[j] >= 0]])
+        for j in range(8)
+    ])
+    adj_med = float(np.median(dd))
+    adj_p90 = float(np.percentile(dd, 90.0))
+    # turns of Faraday phase between a median neighbour pair, per band
+    adj_turns = np.array([
+        2.0 * adj_med * float(lambda_squared(bb)[0]) / (2.0 * np.pi)
+        for bb in (10.0, 30.0, 50.0)
+    ])
+    # where the coherent pixel sum WOULD be valid: 2*dRM*lam2 < 1
+    coh_freq_mhz = 299.792458 / np.sqrt(1.0 / (2.0 * adj_med))
+
     # ---- the refuted coherent sum, against pixelisation and RM scale
     coh = np.zeros((SCALES.size, NSIDES.size))
     scan_H = np.zeros((SCALES.size, ccent.size))
@@ -276,6 +301,53 @@ def main():
             done += mm
         coadd[i] = np.abs((acc / M - N)[0]) / slab**2
 
+    # ---- the same measurement at all three bands
+    # The report leads with 30 MHz; showing 10 and 50 beside it is what
+    # lets a reader check that claim rather than take it.  Only the
+    # covariance panel is repeated per band -- the angle/spectra panels
+    # are illustrative and stay at the lead band.
+    all_bands = [10.0, 30.0, 50.0]
+    nb = len(all_bands)
+    band_S = np.zeros((nb, len(bins)))
+    band_S0 = np.zeros((nb, len(bins)))
+    band_coadd = np.zeros((nb, len(bins)))
+    band_dl2 = np.zeros((nb, len(bins)))
+    band_dnu = np.zeros((nb, len(bins)))
+    band_snr = np.zeros(nb)
+    # Use the STORED signed templates, on the 5000-bin coarse grid the
+    # production covariance uses.  Rebuilding on the FINE phi_edges grid
+    # would hand faraday_signal_covariance a (192, nphi) dense matrix --
+    # 1.0 GB at 30 MHz and 9.0 GB at 10 MHz, which OOM-kills the job.
+    kf_i = int(d["k_fiducial_index"])
+    phi_sg = d["phi_signed"]
+    for ib, bb in enumerate(all_bands):
+        _, bins_b, W_b = dsp.zoom_bin_matrix(bb)
+        l2_b = np.asarray(lambda_squared(bins_b), dtype=float)
+        N_b = noise.zoom_noise_covariance(
+            W_b, noise.radiometer_sigma(1.0, 563.4, tau))
+        sg_b = noise.radiometer_sigma(1.0, 563.4, tau)
+        jb = int(np.argmin(np.abs(np.asarray(d["bands"]) - bb)))
+        H_b = d["H_signed"][jb, kf_i]
+        S_b = noise.faraday_signal_covariance(phi_sg, H_b, l2_b)
+        A_b = float(d["bracket"][jb, 1])
+        band_S[ib] = np.abs(S_b[0])
+        band_S0[ib] = np.abs(noise.faraday_signal_covariance(
+            np.array([0.0]), np.array([1.0]), l2_b, allow_one_sided=True)[0])
+        band_dl2[ib] = np.abs(l2_b - l2_b[0])
+        band_dnu[ib] = np.abs(bins_b - bins_b[0]) * 1e6      # Hz
+        band_snr[ib] = A_b / sg_b
+        nl = int(round(1024 * min(1.0, 0.55 * 24)))
+        M = int(max(1.0, 0.54 * 24) * nl)
+        acc = np.zeros((len(bins_b), len(bins_b)), complex)
+        done = 0
+        while done < M:
+            mm = min(1024, M - done)
+            x = (realize(S_b, mm, A_b, sim_rng)
+                 + realize(N_b / sg_b**2, mm, sg_b, sim_rng))
+            acc += x @ x.conj().T
+            done += mm
+        band_coadd[ib] = np.abs((acc / M - N_b)[0]) / A_b**2
+
     # ---- the single-screen and no-Faraday reference covariances
     S_none = srow(np.array([0.0]), np.array([1.0]), one_sided=True)
     S_one = srow(np.array([20.0]), np.array([1.0]), one_sided=True)
@@ -291,6 +363,10 @@ def main():
         toy_S=toy_S,
         toy_cv=toy_cv,
         toy_var=toy_var,
+        adj_median=adj_med,
+        adj_p90=adj_p90,
+        adj_turns=adj_turns,
+        coherent_valid_above_mhz=float(coh_freq_mhz),
         nsides=NSIDES,
         scales=SCALES,
         coherent_norm=coh,
@@ -302,6 +378,13 @@ def main():
         beta_shift=beta_shift,
         S_no_faraday=S_none,
         S_one_screen=S_one,
+        all_bands=np.array(all_bands),
+        band_S=band_S,
+        band_S_no_faraday=band_S0,
+        band_coadd=band_coadd,
+        band_dlam2=band_dl2,
+        band_dnu_hz=band_dnu,
+        band_sample_snr=band_snr,
         demo_spectra=demo,
         one_sample=one,
         one_signal=one_sig,
@@ -333,6 +416,13 @@ def main():
           f"ratio {crab_deliv[0][0]:.2f} -> {crab_deliv[1][0]:.2f}")
     print(f"sigma_eff broadening raises the ratio by "
           f"{sigma_broaden[0]:+.1f}% (1x) / {sigma_broaden[1]:+.1f}% (2x)")
+    print(f"adjacent-pixel |dRM|: median {adj_med:.2f}, p90 {adj_p90:.2f} "
+          f"rad/m^2; turns 10/30/50 MHz = "
+          + "/".join(f"{t:.1f}" for t in adj_turns))
+    print(f"coherent pixel sum valid above ~{coh_freq_mhz:.0f} MHz")
+    print("per-band single-sample SNR: "
+          + ", ".join(f"{b:.0f} MHz {v:.2f}"
+                      for b, v in zip(all_bands, band_snr)))
     print(f"effective modes {n_eff:.1f}, diagonal-N penalty "
           f"{diag_penalty:.3f}")
     print(f"wrote {out}")
