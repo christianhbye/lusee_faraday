@@ -273,3 +273,203 @@ def test_amplitude_bracket_closed_forms():
     assert np.isclose(b["lower_slab"], 1.0 / (18.4 * 99.86))
     assert np.isclose(b["lower_dispersion"], 1.0 / (2.0 * 9.8**2 * 99.86**2))
     assert b["upper"] > b["lower_slab"] > b["lower_dispersion"]
+
+
+# --------------------------------------------------------------------
+# The binned pushforward: the geometry scan re-analyses the committed
+# k -> inf template instead of re-running the 20-40 minute template
+# job, so it must be the SAME operator depth_distribution applies.
+
+
+def test_pushforward_histogram_k_infinite_is_the_identity():
+    phi = np.arange(0.5, 9.0, 1.0)
+    H = np.array([3.0, 0.0, 1.0, 0.0, 0.0, 2.0, 0.0, 0.0, 5.0])
+    out = dsp.pushforward_histogram(phi, H, np.inf)
+    np.testing.assert_allclose(out, H)
+    assert out is not H  # a copy, so callers cannot alias the product
+
+
+def test_pushforward_histogram_k_zero_is_a_tophat():
+    """One populated bin at phi=3.5 spreads uniformly onto [0, 3.5]."""
+    phi = np.arange(0.5, 6.0, 1.0)  # centres 0.5 .. 5.5, edges 0..6
+    H = np.zeros(phi.size)
+    H[3] = 1.0  # the bin centred at 3.5
+    out = dsp.pushforward_histogram(phi, H, 0.0)
+    # uniform density 1/3.5 on [0, 3.5]: three full bins then a part bin
+    expected = np.array([1.0, 1.0, 1.0, 0.5, 0.0, 0.0]) / 3.5
+    np.testing.assert_allclose(out, expected, atol=1e-12)
+    assert np.isclose(out.sum(), H.sum())
+
+
+@pytest.mark.parametrize("k", [np.inf, 4.0, 1.0, 0.0, -0.5, -1.0])
+def test_pushforward_histogram_conserves_mass(k):
+    """It REDISTRIBUTES power in depth; it never reweights it."""
+    rng = np.random.default_rng(7)
+    phi = np.arange(0.5, 200.0, 1.0)
+    H = rng.gamma(2.0, 1.0, size=phi.size)
+    out = dsp.pushforward_histogram(phi, H, k)
+    assert np.isclose(out.sum(), H.sum(), rtol=1e-12)
+    assert np.all(out >= 0.0)
+
+
+def test_pushforward_histogram_matches_depth_distribution():
+    """The binned operator equals the per-pixel one on the same sky.
+
+    This is the claim the geometry scan rests on: re-casting the stored
+    k -> inf histogram is the same calculation as re-running
+    depth_distribution from the pixels, up to the display binning.
+    """
+    rng = np.random.default_rng(11)
+    n = 20_000
+    phi_col = rng.gamma(2.0, 40.0, size=n) * rng.choice([-1.0, 1.0], n)
+    w2 = rng.gamma(3.0, 1.0, size=n)
+    dphi = 1.0
+    # The grid MUST span the sky: k=inf is a np.histogram and drops
+    # out-of-range columns outright, while a finite-k pushforward of the
+    # same sky still lands mass from those columns inside the grid.  The
+    # committed products satisfy this (PHI_SPAN 2500 against |RM|max
+    # 2442); a test grid that did not would compare two different skies.
+    span = dphi * np.ceil(np.abs(phi_col).max() / dphi + 1.0)
+    edges = np.arange(-span, span + dphi, dphi)
+    cent = dsp.phi_centers(edges)
+    _, far = dsp.fold_template(
+        cent, dsp.depth_distribution(phi_col, w2, edges, k=np.inf)
+    )
+    far_c, _ = dsp.fold_template(cent, np.zeros_like(cent))
+    for k in (4.0, 1.0, 0.0, -0.5):
+        _, direct = dsp.fold_template(
+            cent, dsp.depth_distribution(phi_col, w2, edges, k=k)
+        )
+        binned = dsp.pushforward_histogram(far_c, far, k)
+        c1 = np.cumsum(direct) / direct.sum()
+        c2 = np.cumsum(binned) / binned.sum()
+        ks = np.abs(c1 - c2).max()
+        assert ks < 2e-3, f"k={k}: KS {ks:.2e} between binned and per-pixel"
+
+
+def test_retained_fraction_matches_summing_the_pushforward():
+    phi = np.arange(0.5, 300.0, 1.0)
+    rng = np.random.default_rng(3)
+    H = rng.gamma(2.0, 1.0, size=phi.size)
+    for k in (np.inf, 2.0, 0.0, -0.5):
+        out = dsp.pushforward_histogram(phi, H, k)
+        want = out[phi >= 27.5].sum() / out.sum()
+        assert np.isclose(dsp.retained_fraction(phi, H, 27.5, k), want)
+
+
+def test_retained_fraction_falls_monotonically_with_k():
+    """Moving emission toward the observer can only remove power from
+    above a cut: f(k) is nondecreasing in k."""
+    phi = np.arange(0.5, 500.0, 1.0)
+    rng = np.random.default_rng(5)
+    H = rng.gamma(2.0, 20.0, size=phi.size)
+    ks = [-0.9, -0.5, 0.0, 1.0, 4.0, 16.0, np.inf]
+    fs = [dsp.retained_fraction(phi, H, 27.5, k) for k in ks]
+    assert np.all(np.diff(fs) > 0.0), fs
+    assert fs[-1] == dsp.retained_fraction(phi, H, 27.5, np.inf)
+
+
+def test_pushforward_histogram_rejects_a_grid_missing_the_origin():
+    """A grid whose first edge is above zero would silently drop the
+    zero-depth mass the pushforward creates."""
+    phi = np.arange(10.5, 20.0, 1.0)
+    H = np.ones(phi.size)
+    with pytest.raises(ValueError, match="first edge is zero"):
+        dsp.pushforward_histogram(phi, H, 0.0)
+
+
+def test_pushforward_histogram_rejects_a_nonuniform_grid():
+    phi = np.array([0.5, 1.5, 3.5, 4.5])
+    with pytest.raises(ValueError, match="uniform grid"):
+        dsp.pushforward_histogram(phi, np.ones(4), 0.0)
+
+
+def test_pushforward_histogram_below_minus_one_raises():
+    phi = np.arange(0.5, 10.0, 1.0)
+    with pytest.raises(ValueError, match="not integrable"):
+        dsp.pushforward_histogram(phi, np.ones(phi.size), -1.5)
+
+
+def test_pushforward_suffix_sum_does_not_cancel_at_large_k():
+    """Pins the numerical form of the tail sum.
+
+    The summands w * p^-q span (p_max/p_min)^q, so forming the tail as
+    ``total - prefix`` cancels catastrophically: it returned exactly the
+    k -> inf histogram above k ~ 8 on the committed display grid, and
+    was already ~40% wrong at k = 2 on the real RM map (whose smallest
+    |RM| is far below one bin).  Checked against the direct O(n*m) CDF
+    difference, which has no cancellation to lose.
+    """
+    phi = np.arange(0.5, 500.0, 1.0)
+    w = np.linspace(1.0, 2.0, phi.size)
+    edges = np.arange(0.0, 501.0, 1.0)
+    for k in (0.0, 2.0, 6.0, 12.0):
+        got = dsp._pushforward_onesided(phi, w, edges, k)
+        cdf = np.minimum(edges[None, :] / phi[:, None], 1.0) ** (k + 1.0)
+        want = (w[:, None] * np.diff(cdf, axis=1)).sum(axis=0)
+        np.testing.assert_allclose(got, want, rtol=1e-9, atol=1e-12)
+
+
+def test_pushforward_approaches_k_infinity_without_reaching_it():
+    """f(k) rises strictly toward the k -> inf asymptote and never
+    snaps onto it -- the signature the cancellation bug produced."""
+    phi = np.arange(0.5, 2500.0, 1.0)
+    rng = np.random.default_rng(17)
+    H = rng.gamma(2.0, 30.0, size=phi.size)
+    ks = np.array([4.0, 8.0, 12.0, 24.0, 40.0])
+    fs = np.array([dsp.retained_fraction(phi, H, 27.5, k) for k in ks])
+    f_inf = dsp.retained_fraction(phi, H, 27.5, np.inf)
+    assert np.all(np.diff(fs) > 0.0), fs
+    assert np.all(fs < f_inf), (fs, f_inf)
+
+
+def test_pushforward_raises_rather_than_overflowing():
+    """A geometry too steep for the grid must raise, not return nan."""
+    phi = np.arange(0.5, 2500.0, 1.0)
+    with pytest.raises(ValueError, match="too steep"):
+        dsp.pushforward_histogram(phi, np.ones(phi.size), 500.0)
+
+
+# --------------------------------------------------------------------
+# The SIGNED pushforward.  The matched filter needs the sign (the
+# observable is the complex P = Q + iU), so the geometry re-cast has to
+# work on the signed grid too, and must stay consistent with the folded
+# one it is derived from.
+
+
+def _signed_grid(n=200, dphi=1.0):
+    return dphi * (np.arange(-n, n) + 0.5)
+
+
+def test_pushforward_signed_folds_to_the_folded_pushforward():
+    """The consistency that makes the two paths one calculation:
+    re-casting the signed histogram and folding the result equals
+    re-casting the folded histogram directly."""
+    phis = _signed_grid()
+    rng = np.random.default_rng(19)
+    far = rng.gamma(2.0, 1.0, size=phis.size)
+    pos = phis > 0
+    far_fold = far[pos] + far[phis < 0][::-1]
+    for k in (np.inf, 4.0, 1.0, 0.0, -0.5):
+        out = dsp.pushforward_signed(phis, far, k)
+        folded = out[pos] + out[phis < 0][::-1]
+        direct = dsp.pushforward_histogram(phis[pos], far_fold, k)
+        np.testing.assert_allclose(folded, direct, rtol=1e-10, atol=1e-14)
+
+
+@pytest.mark.parametrize("k", [np.inf, 2.0, 0.0, -0.5, -1.0])
+def test_pushforward_signed_conserves_mass_and_sign_support(k):
+    phis = _signed_grid()
+    rng = np.random.default_rng(23)
+    far = rng.gamma(2.0, 1.0, size=phis.size)
+    out = dsp.pushforward_signed(phis, far, k)
+    assert np.isclose(out.sum(), far.sum(), rtol=1e-12)
+    # mass never crosses the origin: each sign is re-cast on its own
+    # side, because a column at -phi rotates toward -phi, not +phi.
+    assert np.isclose(out[phis > 0].sum(), far[phis > 0].sum(), rtol=1e-12)
+    assert np.isclose(out[phis < 0].sum(), far[phis < 0].sum(), rtol=1e-12)
+
+
+def test_pushforward_signed_rejects_an_asymmetric_grid():
+    with pytest.raises(ValueError, match="symmetric about zero"):
+        dsp.pushforward_signed(np.array([-1.5, -0.5, 0.5]), np.ones(3), 0.0)

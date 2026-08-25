@@ -201,12 +201,42 @@ below too; it was missing from earlier revisions of this table.
     template at every cut (seconds). Detection and localisation are
     different statistics with different answers; this script owns the
     first and the tail gate owns the second.
+  - `scripts/step5_inputs.py [--band 30] [--nlst 3] [--nside 128]` —
+    the two arrays `depth_distribution` consumes, as maps: `|w|^2` at a
+    few LSTs and the RM map. Needs the 631 MB artifact, ~15 s, ~5.3 GiB
+    RSS, so run it under the cgroup. `step5_template.npz` cannot serve
+    this — it stores only the LST- and band-SUMMED `w2_mean`, and the
+    point of the figure is that the weight moves with LST. Everything
+    it writes is ud_grade'd for DISPLAY only; nothing downstream of it
+    computes anything.
+  - `scripts/step5_intuition.py [--band 30]` — precomputes everything
+    the intuition figures need (toy skies, the RM-scale scan, the
+    input-sensitivity variants, the measured-data realizations, the
+    Crab diagnostics, the matched filter's effective mode count).
+    Needs `data/` but NOT the response artifact, ~1 min. It exists so
+    that `step5_plots.py` stays data-free: every figure must regenerate
+    from the npz products alone. Everything it writes is for figures
+    and caveats; nothing downstream computes a published number from
+    its toy skies, which are deliberately unphysical.
+  - `scripts/step5_kscan.py [--arm ...] [--lunations 24]` — the
+    emissivity geometry `k` as a CONTINUOUS knob, where
+    `step5_template.py` computes only the three bracket values
+    (seconds). A re-analysis of the committed products, not a re-run:
+    the `k -> inf` column of `step5_template.npz` IS the folded
+    `|w|^2`-weighted `|RM|` histogram, which is exactly the input a
+    pushforward to any other `k` needs, so
+    `dispersion.pushforward_histogram` re-casts it in milliseconds.
+    `--validate` (default on) pins the reconstruction against the
+    stored `k = 0` column AND against `step5_detection.npz`'s retained
+    fraction, and **exits nonzero if the KS exceeds 1e-2** — the scan
+    must not be published if it cannot reproduce the template it
+    re-casts.
   - `scripts/step5_tables.py` — writes
     `report/faraday_depth_template/generated.tex`, every number the
     report quotes, straight from the npz (seconds). **No number is
     typed into the `.tex` by hand**; two published errors were
     hand-transcription drifting from the products.
-  - `scripts/step5_plots.py` — all eight step-5 figures from the npz
+  - `scripts/step5_plots.py` — all fifteen step-5 figures from the npz
     files. Re-run it after ANY figure-text change (seconds).
 - `tests/testpixel_arm.py` — data-free unit tests for the pixel arm.
 - Report: `report/faraday_depth_template/` (`make`; pdflatex twice,

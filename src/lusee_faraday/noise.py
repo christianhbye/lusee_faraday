@@ -43,14 +43,40 @@ def zoom_noise_covariance(W, sigma_bin):
     return float(sigma_bin) ** 2 * (G / np.outer(d, d))
 
 
-def faraday_signal_covariance(phi, H, lam2_bins):
+def faraday_signal_covariance(phi, H, lam2_bins, allow_one_sided=False):
     """Frequency covariance of a Gaussian Faraday signal of shape H.
 
     S_ij = sum_b Hhat_b exp(2i phi_b (lam2_i - lam2_j)); Hhat sums to
     one so diag(S) = 1 and an amplitude A means per-bin signal power
     A^2.
+
+    ``phi`` MUST BE THE SIGNED DEPTH GRID.  The observable is the
+    complex P = Q + iU, so S is the complex transform of the SIGNED
+    depth distribution.  Passing a FOLDED (all-positive) template
+    models a sky whose every column has one sign of RM: it understates
+    A_5sigma by ~18% on the real map, and the visible symptom is an S
+    that is Hermitian but grossly non-symmetric (max|S - S^T| = 1.08
+    folded against 0.19 signed, with |Im S| running 54% of |S| rather
+    than 9%).
+
+    That mix-up shipped once and was reproduced in fresh prototype code
+    within an hour of being found, so it is refused here rather than
+    documented -- the same way ``sky.binned_screen`` refuses an
+    unresolved screen.  ``allow_one_sided=True`` is the deliberate
+    opt-out, for the coherence tilt (a folded shape statement with no
+    signed twin, entering no verdict) and for tests that compare the
+    two conventions on purpose.
     """
     phi = np.asarray(phi, dtype=float).ravel()
+    if not allow_one_sided and not np.any(phi < 0.0):
+        raise ValueError(
+            "phi has no negative bins, so this looks like a FOLDED "
+            "template. S must be built from the SIGNED depth "
+            "distribution (the observable is the complex P = Q + iU); "
+            "a folded one understates A_5sigma by ~18%. Pass the "
+            "signed grid, or allow_one_sided=True if the one-sided "
+            "shape is deliberate."
+        )
     Hhat = np.asarray(H, dtype=float).ravel()
     Hhat = Hhat / Hhat.sum()
     lam2 = np.asarray(lam2_bins, dtype=float).ravel()

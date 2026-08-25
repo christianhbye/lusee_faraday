@@ -59,6 +59,13 @@ def sci(x, sig=3):
         return "0"
     e = int(np.floor(np.log10(abs(x))))
     m = x / 10.0**e
+    # Renormalise when the mantissa ROUNDS up through a decade: 9.98e-4
+    # at sig=2 formats as "10.0x10^-4" otherwise, which is not
+    # scientific notation.  floor(log10) cannot see this because it acts
+    # before the rounding does.
+    if abs(round(m, sig - 1)) >= 10.0:
+        e += 1
+        m = x / 10.0**e
     return f"\\ensuremath{{{m:.{sig - 1}f}\\times10^{{{e}}}}}"
 
 
@@ -247,6 +254,141 @@ def main():
     LINES.append(r"\newcommand{\BasisRows}{%")
     LINES.extend(rows)
     LINES.append("}")
+
+    # ----------------------------------------- the pushforward itself
+    # The geometry knob as an intermediate product: what the f^k
+    # pushforward DOES to the map's own histogram, and how much the
+    # deliverable depends on where in the family you sit.  Both come
+    # from the committed templates; the scan is a re-analysis of them
+    # (scripts/step5_kscan.py), pinned there against this same
+    # detection product.
+    ki = int(np.argmax(np.where(np.isfinite(d["ks"]), d["ks"], np.inf)))
+    kd = int(np.argmin(d["ks"]))
+    phi = d["phi"]
+    ib0 = int(np.argmin(np.abs(np.array(bands) - 30)))  # the lead band
+    rows = []
+    for lo, hi in ((0, 1), (1, 3), (3, 10), (10, 30), (30, 100),
+                   (100, 300), (300, 1000), (1000, 2500)):
+        m = (phi >= lo) & (phi < hi)
+        cells = [f"${lo}$--${hi}$"] + [
+            f"{d['H'][ib0, ik][m].sum():.4f}" for ik in (ki, kf, kd)
+        ]
+        rows.append(" & ".join(cells) + r" \\")
+    rows.append(r"\midrule")
+    rows.append(
+        "total & "
+        + " & ".join(f"{d['H'][ib0, ik].sum():.4f}" for ik in (ki, kf, kd))
+        + r" \\"
+    )
+    LINES.append(r"\newcommand{\MassRows}{%")
+    LINES.extend(rows)
+    LINES.append("}")
+    macro("MassBand", f"{bands[ib0]}")
+    # The factor between the two depolarisation floors, so the report
+    # can set the geometry systematic against it without typing either.
+    for ib, b in enumerate(bands):
+        macro(
+            f"floorRatio{WORD[b]}",
+            big(d["bracket"][ib, 1] / d["bracket"][ib, 2]),
+        )
+    macro("MassZeroBinInf", f"{100 * d['H'][ib0, ki][0]:.1f}")
+    macro("MassZeroBinFid", f"{100 * d['H'][ib0, kf][0]:.1f}")
+
+    ksc_path = GEN_DIR / "step5_kscan.npz"
+    if ksc_path.exists():
+        ksc = np.load(ksc_path)
+        kg, kcuts = ksc["ks"], ksc["cuts"]
+        icut = int(np.argmin(np.abs(kcuts - float(ksc["safe_cut"]))))
+        i0 = int(np.argmin(np.abs(kg)))       # k = 0
+        ilo = int(np.argmin(np.abs(kg + 0.9)))  # k = -0.9
+        macro("kscanKLow", f"{kg[ilo]:.2f}")
+        macro("tiltThetaCDeg", f"{np.degrees(float(ksc['theta_c'][0])):.3f}")
+        macro(
+            "tiltThetaCClamped",
+            "yes" if bool(np.all(ksc["theta_c_clamped"])) else "no",
+        )
+        # the nside-512 pixel scale theta_c has to beat to be resolvable
+        macro(
+            "pixelScaleDeg",
+            f"{np.degrees(np.sqrt(4 * np.pi / (12 * 512.0**2))):.3f}",
+        )
+        macro("kscanKMax", f"{kg[-1]:.0f}")
+        for ib, b in enumerate(bands):
+            w = WORD[b]
+            f0 = ksc["power_fraction"][ib, icut, i0]
+            flo = ksc["power_fraction"][ib, icut, ilo]
+            finf = ksc["power_fraction_kinf"][ib, icut]
+            macro(f"kscanFZero{w}", f"{f0:.3f}")
+            macro(f"kscanFLow{w}", f"{flo:.3f}")
+            macro(f"kscanFInf{w}", f"{finf:.3f}")
+            # the defensible half of the family costs this in POWER ...
+            macro(f"kscanSpanHi{w}", f"{finf / f0:.2f}")
+            # ... which is this in AMPLITUDE, hence in detection ratio
+            macro(f"kscanAmp{w}", f"{np.sqrt(finf / f0):.2f}")
+            macro(f"kscanSpanLo{w}", f"{f0 / flo:.2f}")
+            macro(f"kscanKneeZero{w}", f"{ksc['knee'][ib, i0]:.0f}")
+            macro(f"kscanKneeInf{w}", f"{ksc['knee_kinf'][ib]:.0f}")
+            macro(f"kscanKS{w}", sci(ksc["validation"][ib, 0], 2))
+            # The deliverable across the family.  RatioZero must equal
+            # the detection table's detSafeSlab -- the scan recomputes
+            # it from the k=inf histogram by an independent path, so a
+            # disagreement means one of the two has drifted.
+            macro(f"kscanRatioZero{w}", f"{ksc['ratio_slab'][ib, i0]:.1f}")
+            macro(f"kscanRatioInf{w}", f"{ksc['ratio_slab_kinf'][ib]:.1f}")
+            # The coherent limit, quantified rather than drawn: it is
+            # the shape-space sibling of A_upper and inherits the same
+            # theta_c disqualification, so the report states it in
+            # "what this map cannot decide" and nowhere else.
+            macro(f"tiltFrac{w}", f"{ksc['tilt'][ib, 0]:.3f}")
+            macro(f"tiltRatio{w}", f"{ksc['tilt'][ib, 1]:.2f}")
+            macro(f"tiltKnee{w}", f"{ksc['tilt'][ib, 2]:.0f}")
+            # Convention-safe: folded/folded, so the signed fix cancels.
+            fac = float(ksc["tilt"][ib, 3])
+            macro(f"tiltFactor{w}", f"{fac:.2f}")
+            macro(f"tiltApplied{w}", f"{ksc['ratio_slab'][ib, i0] / fac:.1f}")
+            macro(f"kscanSqueeze{w}", f"{ksc['squeeze'][ib, 0]:.2f}")
+            macro(f"kscanSqueezeKS{w}", f"{ksc['squeeze'][ib, 1]:.3f}")
+            macro(f"kscanRawKS{w}", f"{ksc['squeeze'][ib, 2]:.3f}")
+
+    # ------------------------------------------- intuition / caveats
+    # scripts/step5_intuition.py; figures-and-caveats quantities that
+    # need data/ and so cannot be computed in step5_plots.py.
+    q_path = GEN_DIR / "step5_intuition.npz"
+    if q_path.exists():
+        q = np.load(q_path)
+        names = ["Constant", "TwoValued", "GaussianSky", "Hutschenreuter"]
+        for i, nm in enumerate(names):
+            macro(f"cv{nm}", f"{q['toy_cv'][i]:.2f}")
+        # the pushforward's variance ratio; -> 1/3 for a heavy tail
+        vr = q["toy_var"][3, 1] / q["toy_var"][3, 0]
+        macro("cvVarRatioHutschenreuter", f"{vr:.3f}")
+        macro("betaShift", sci(float(q["beta_shift"]), 2))
+        macro("rmStdMedian", f"{float(q['rm_std_median']):.1f}")
+        macro("rmAbsMedian", f"{float(q['rm_abs_median']):.1f}")
+        rm_pct = 100 * float(q["rm_std_median"]) / float(q["rm_abs_median"])
+        macro("rmStdPct", f"{rm_pct:.0f}")
+        # sensitivity of S to each input we do not control
+        for nm, key in (("KInf", 0), ("RmSigma", 1), ("TwoPort", 2)):
+            dm = np.abs(q["S_variants"][key] - q["S_fiducial"]).max()
+            macro(f"dS{nm}", f"{dm:.3f}")
+        # the Crab
+        macro("crabSep", f"{float(q['pol_max_sep_deg']):.3f}")
+        macro("crabSkyPct", f"{q['crab'][0]:.4f}")
+        macro("crabWeightPct", f"{q['crab'][1]:.2f}")
+        macro("crabContrast", f"{q['crab'][2]:.1f}")
+        macro("crabExcess", f"{q['crab_excess'][0]:.2f}")
+        macro("crabExcised", f"{q['crab_excess'][1]:.2f}")
+        macro("weightConc", f"{float(q['weight_concentration']):.1f}")
+        cd = q["crab_deliverable"]
+        macro("crabRatioPct", f"{100 * (cd[1][0] / cd[0][0] - 1):+.1f}")
+        macro("crabKneePct", f"{100 * (cd[1][1] / cd[0][1] - 1):+.1f}")
+        # sigma_eff's missing effect on the SHAPE (report sec:sigmashape)
+        macro("sigmaBroadenOne", f"{q['sigma_broaden_pct'][0]:.0f}")
+        macro("sigmaBroadenTwo", f"{q['sigma_broaden_pct'][1]:.0f}")
+        macro("sigmaEff", f"{float(d['sigma_eff']):.1f}")
+        # the matched filter's real dimensionality
+        macro("nEffModes", f"{float(q['n_eff_modes']):.0f}")
+        macro("diagPenalty", f"{float(q['diag_noise_penalty']):.3f}")
 
     # ---------------------------------------------------- caveats
     macro("thetaCDeg", f"{np.degrees(float(d['theta_c'][0])):.1f}")

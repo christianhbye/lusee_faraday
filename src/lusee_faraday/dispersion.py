@@ -111,17 +111,43 @@ def _pushforward_onesided(phi_abs, w2, edges_abs, k):
     difference summed over pixels.  Sorting once gives every edge in
     O(log N): pixels with phi <= e contribute w2 fully; the rest
     contribute w2 * (e / phi)^(k+1), whose pixel sum is a suffix sum.
+
+    That suffix sum is formed as an ACTUAL suffix cumsum and not as
+    ``total - prefix``.  The summands ``w * p^-q`` span a dynamic range
+    of ``(p_max/p_min)^q``, so the subtractive form cancels
+    catastrophically once that exceeds double precision: on the
+    committed 1 rad/m^2 display grid the ratio of total to remainder
+    reaches 1.5e15 at k = 8 and the subtraction returns exactly zero by
+    k = 12, silently snapping every large-k answer onto the k -> inf
+    histogram.  A continuous k scan walks straight into it; the
+    production geometries (k = inf, 0, -1) never did, which is why it
+    survived -- at k = 0 the ratio is 2.2 and the two forms agree to
+    3e-15.  Summing the tail among itself is well conditioned because
+    every term of ``(e/p)^q`` there lies in (0, 1).
     """
     order = np.argsort(phi_abs)
     p = phi_abs[order]
     w = w2[order]
     q = k + 1.0
-    csum_w = np.concatenate([[0.0], np.cumsum(w)])
-    csum_wp = np.concatenate([[0.0], np.cumsum(w * p ** (-q))])
-    total_wp = csum_wp[-1]
     e = np.clip(np.asarray(edges_abs, dtype=float), 0.0, None)
+    # ``p^-q`` and ``e^q`` are formed explicitly, so a large enough q
+    # overflows to inf and then to nan (inf * 0).  Raise instead: a
+    # geometry this steep is indistinguishable from k -> inf anyway,
+    # and the caller should say so rather than get a nan.
+    if q > 0.0 and p.size:
+        pmin = float(p.min())
+        emax = float(e.max()) if e.size else 0.0
+        span = q * (np.log10(max(emax, 1.0)) - np.log10(max(pmin, 1e-300)))
+        if span > 290.0 or -q * np.log10(max(pmin, 1e-300)) > 290.0:
+            raise ValueError(
+                f"k = {k} is too steep for this depth grid: (e/phi)^(k+1) "
+                f"spans 10^{span:.0f} and overflows double precision. Use "
+                "k = np.inf, which is the limit it is approaching."
+            )
+    csum_w = np.concatenate([[0.0], np.cumsum(w)])
+    suffix_wp = np.concatenate([np.cumsum((w * p ** (-q))[::-1])[::-1], [0.0]])
     idx = np.searchsorted(p, e, side="right")
-    G = csum_w[idx] + e**q * (total_wp - csum_wp[idx])
+    G = csum_w[idx] + e**q * suffix_wp[idx]
     return np.diff(G)
 
 
@@ -174,6 +200,135 @@ def depth_distribution(phi_col, w2, edges, k=0.0):
         e_abs = np.clip(-edges, 0.0, None)[::-1]
         H += _pushforward_onesided(-phi_col[neg], w2[neg], e_abs, k)[::-1]
     return H
+
+
+def _uniform_abs_grid(phi_abs):
+    """Bin edges of a uniform folded |phi| grid whose first edge is 0.
+
+    ``depth_distribution`` consumes per-pixel depths; the two functions
+    below consume an already-binned k -> infinity histogram, which is
+    the only form the committed products carry (``step5_template.npz``
+    stores templates, not the per-band ``w2``).  Both need the same
+    guard, so it lives here.
+    """
+    phi_abs = np.asarray(phi_abs, dtype=float).ravel()
+    if phi_abs.size < 2:
+        raise ValueError("need at least two bins")
+    d = np.diff(phi_abs)
+    if not np.allclose(d, d[0], rtol=1e-9, atol=0.0):
+        raise ValueError("phi_abs must be a uniform grid of bin centres")
+    dphi = float(d[0])
+    if dphi <= 0.0:
+        raise ValueError("phi_abs must be increasing")
+    first = phi_abs[0] - 0.5 * dphi
+    # The pushforward drags mass to zero depth from EVERY column, so a
+    # grid whose first edge sits above the origin silently loses it --
+    # the same failure ``depth_distribution`` raises on, in the folded
+    # form.  Tolerance is a fraction of a bin, not exact equality: the
+    # committed grid is built by arithmetic on floats.
+    if abs(first) > 1e-6 * dphi:
+        raise ValueError(
+            "phi_abs must be a folded grid whose first edge is zero "
+            f"(got {first}); the pushforward puts mass at zero depth "
+            "and there is no bin for it"
+        )
+    return np.concatenate([[0.0], phi_abs + 0.5 * dphi])
+
+
+def pushforward_histogram(phi_abs, H_far, k):
+    """Re-cast a ``k -> infinity`` depth histogram into geometry ``k``.
+
+    ``H_far`` is the folded, ``|w|^2``-weighted histogram of ``|RM|`` --
+    that is, ``depth_distribution(..., k=np.inf)`` folded onto ``|phi|``,
+    which is exactly the ``k -> infinity`` column of the committed
+    template products.  Each of its bins is one population of columns
+    at depth ``phi_j``; this spreads each one over ``[0, phi_j]`` with
+    the CDF of Equation (pushforward), ``min(e/phi_j, 1)^(k+1)``.
+
+    It is the SAME operator as ``depth_distribution`` -- both call
+    ``_pushforward_onesided`` -- applied to binned rather than
+    per-pixel input, so the two agree to the binning of ``phi_abs``
+    (measured at KS ~ 1e-3 on the committed 1 rad/m^2 display grid,
+    against a 1e-2 gate).  That is what makes the geometry scan a
+    re-analysis of the stored products rather than a re-run of the
+    20-40 minute template job.
+
+    Total mass is conserved: the pushforward REDISTRIBUTES the sky's
+    polarized power in depth, it does not reweight it.
+    """
+    H_far = np.asarray(H_far, dtype=float).ravel()
+    phi_abs = np.asarray(phi_abs, dtype=float).ravel()
+    if phi_abs.size != H_far.size:
+        raise ValueError(
+            f"phi_abs ({phi_abs.size}) and H_far ({H_far.size}) must match"
+        )
+    if np.isinf(k):
+        return H_far.copy()
+    if k < -1.0:
+        raise ValueError(
+            "k must be >= -1: rho ~ f^k is not integrable at f = 0"
+        )
+    edges = _uniform_abs_grid(phi_abs)
+    if k == -1.0:
+        out = np.zeros_like(H_far)
+        out[0] = H_far.sum()
+        return out
+    return _pushforward_onesided(phi_abs, H_far, edges, k)
+
+
+def pushforward_signed(phi_signed, H_far, k):
+    """Re-cast a SIGNED ``k -> inf`` histogram into geometry ``k``.
+
+    ``pushforward_histogram`` requires a folded grid whose first edge is
+    zero, so each sign is re-cast on its own ``|phi|`` grid and the two
+    are reassembled -- exactly how ``depth_distribution`` treats the two
+    signs internally.
+
+    The signed form exists because the matched filter needs it: the
+    observable is the complex ``P = Q + iU``, so its frequency
+    covariance is the complex transform of the SIGNED depth
+    distribution.  Re-casting the folded histogram instead would model a
+    sky whose every column has one sign of RM.  Folding this result
+    reproduces ``pushforward_histogram`` on the folded input, which is
+    the consistency the tests pin.
+
+    ``phi_signed`` must be a uniform grid symmetric about zero with no
+    bin centred there (the committed grid is +-0.5, +-1.5, ...).
+    """
+    phi_signed = np.asarray(phi_signed, dtype=float).ravel()
+    H_far = np.asarray(H_far, dtype=float).ravel()
+    if phi_signed.size != H_far.size:
+        raise ValueError(
+            f"phi_signed ({phi_signed.size}) and H_far ({H_far.size}) "
+            "must match"
+        )
+    pos, neg = phi_signed > 0, phi_signed < 0
+    if pos.sum() != neg.sum():
+        raise ValueError(
+            "phi_signed must be symmetric about zero: got "
+            f"{pos.sum()} positive and {neg.sum()} negative bins"
+        )
+    ph = phi_signed[pos]
+    out = np.zeros_like(H_far)
+    out[pos] = pushforward_histogram(ph, H_far[pos], k)
+    out[neg] = pushforward_histogram(ph, H_far[neg][::-1], k)[::-1]
+    return out
+
+
+def retained_fraction(phi_abs, H_far, cut, k):
+    """Template power fraction at ``|phi| >= cut`` under geometry ``k``.
+
+    The systematics-cut statistic of spec S4.10, as a function of the
+    emissivity geometry.  Selection is by BIN CENTRE (``phi_abs >=
+    cut``), which is the convention ``scripts/step5_detection.py``
+    uses; computing it any other way would let the geometry scan and
+    the detection table disagree on the same number.
+    """
+    H = pushforward_histogram(phi_abs, H_far, k)
+    total = H.sum()
+    if not total > 0.0:
+        raise ValueError("total mass must be positive")
+    return float(H[np.asarray(phi_abs, dtype=float) >= cut].sum() / total)
 
 
 def fold_template(centers, H):
