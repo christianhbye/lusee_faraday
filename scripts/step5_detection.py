@@ -79,7 +79,24 @@ def delay_of_depth(phi, band_mhz):
 
 
 def threshold_for(H, phi, sel, lam2_bins, N, n_coh, n_lst):
-    """5-sigma threshold for the template restricted to ``sel``."""
+    """5-sigma threshold for the template restricted to ``sel``.
+
+    ``sel`` must select on |phi| ALONE.  A relative-amplitude floor
+    (``H > H.max()*1e-6``) is fine for the folded template that sets
+    ``f``, but on the signed grid it can drop every bin of one sign --
+    measured at two-port 50 MHz above the p99 cut -- which silently
+    rebuilds the folded-template bug the signed grid exists to fix.
+    Zero-weight bins contribute exactly nothing to S, so there is
+    nothing to gain by excluding them.
+
+    ``phi``/``H`` must be the SIGNED depth distribution, not the folded
+    one.  The observable is the complex P = Q + iU, so the frequency
+    covariance is the complex transform of the signed distribution;
+    feeding it the folded template models a sky whose every column has
+    one sign of RM and understates this threshold by ~18%.  The cut is
+    still applied on |phi|, and the retained power fraction ``f`` is
+    still a folded quantity -- only the covariance reads the sign.
+    """
     S = noise.faraday_signal_covariance(phi[sel], H[sel], lam2_bins)
     return noise.matched_filter_threshold(S, N, n_coh, n_lst)
 
@@ -123,9 +140,12 @@ def main():
         )
         lam2b = np.asarray(lambda_squared(bins), dtype=float)
         H = d["H"][ib, kf]
+        # folded for f and the cut; signed for the covariance (S4.10)
+        phis, Hs = d["phi_signed"], d["H_signed"][ib, kf]
         total = H.sum()
         slab, disp = d["bracket"][ib, 1], d["bracket"][ib, 2]
-        floor = H.max() * 1e-6  # numerical, matches step5_sensitivity
+        floor_rel = 1e-6  # numerical, matches step5_sensitivity
+        floor = H.max() * floor_rel
         print(f"\n=== {band:.0f} MHz  A_slab={slab:.3e}  A_disp={disp:.3e}")
         print("  phi cut      tau      keeps      A_mf      slab     disp")
         for ic, cut in enumerate(CUTS):
@@ -133,7 +153,8 @@ def main():
             if sel.sum() < 2:
                 continue
             f = H[sel].sum() / total
-            A = threshold_for(H, phi, sel, lam2b, N, n_coh, n_lst)
+            sels = np.abs(phis) >= cut
+            A = threshold_for(Hs, phis, sels, lam2b, N, n_coh, n_lst)
             frac[ib, ic], a_mf[ib, ic] = f, A
             tau_us[ib, ic] = delay_of_depth(cut, band) * 1e6
             ratio_slab[ib, ic] = slab * np.sqrt(f) / A
@@ -153,12 +174,14 @@ def main():
             Ht = d["H_lst"][ib, il]
             selt = (phi >= p99) & (Ht > Ht.max() * 1e-6)
             ft = Ht[selt].sum() / Ht.sum()
-            At = threshold_for(Ht, phi, selt, lam2b, N, n_coh, n_lst)
+            Hts = d["H_lst_signed"][ib, il]
+            selts = np.abs(phis) >= p99
+            At = threshold_for(Hts, phis, selts, lam2b, N, n_coh, n_lst)
             src = f"LST bin {il} (transit)"
         else:
-            selt = (phi >= p99) & (H > floor)
+            selts = np.abs(phis) >= p99
             ft = float(d["tail_frac_lst"][ib].max())
-            At = threshold_for(H, phi, selt, lam2b, N, n_coh, n_lst)
+            At = threshold_for(Hs, phis, selts, lam2b, N, n_coh, n_lst)
             src = "LST-averaged shape, transit f (approximate)"
         tail_corrected[ib] = [ft, At, slab * np.sqrt(ft) / At]
         print(

@@ -43,17 +43,19 @@ can \emph{detect} Faraday rotation at all --- not whether it can
 resolve the Galactic rotation-measure distribution, which it cannot ---
 and what limits that detection.
 
-Two results are methodological. First, the earlier diffuse calculation
-summed the Faraday phasor pixel by pixel over a HEALPix map; that is a
-random walk whose amplitude falls as $N_{\rm pix}^{-1/2}$, so it was
-measuring pixelisation shot noise rather than sky. Binning the beam-
-and emissivity-weighted sky \emph{in Faraday depth first} and
-transforming second gives a distribution $F(\phi)$ whose shape is
-invariant under refinement. Second, that distribution can be read out
-in Faraday depth $\phi$ or in delay $\tau$ with no loss: the two are
-related by a monotonic map, the chirp that distinguishes them smears by
-only \chirpPctThirty--\chirpPctFifty\% of the template's own extent, and the
-detection statistic is identical in either basis.
+The central methodological result is an estimator. The earlier diffuse
+calculation summed the Faraday phasor pixel by pixel over a HEALPix
+map; that is a random walk whose amplitude falls as
+$N_{\rm pix}^{-1/2}$, so it was measuring pixelisation shot noise
+rather than sky. Binning the beam- and emissivity-weighted sky
+\emph{in Faraday depth first} and transforming second gives a
+distribution $F(\phi)$ whose shape is invariant under refinement, and
+whose dependence on the one free input --- where synchrotron emission
+sits along the rotating column --- moves the detection number by a
+factor \kscanAmpThirty{} rather than by an order of magnitude. (The same
+distribution can be read out in delay rather than depth with no loss;
+Appendix~\ref{sec:bases} shows why, since the superseded analysis
+worked there.)
 
 The detection result is a curve, not a number, because the useful
 statistic must discard the low-depth region where spectrally smooth
@@ -70,7 +72,8 @@ internal-dispersion floor it is undetectable at every band, with
 The science case therefore turns on a single unknown --- which
 depolarisation floor the interstellar medium sets, a
 mixed-versus-external-screen geometry question --- and not on the
-instrument, the analysis basis, or the integration time.
+instrument, the emissivity geometry, the analysis basis, or the
+integration time.
 \end{abstract}
 
 \tableofcontents
@@ -249,8 +252,75 @@ The sum in Equation~\eqref{eq:pixelsum} is computed correctly. It is
 simply the wrong estimator for a quantity whose phases decorrelate
 below the pixel scale.
 
+Figure~\ref{fig:bridge} makes that quantitative by scaling the RM map
+down until the estimator does converge. It converges where the sky is
+weak enough that the Faraday phase varies slowly between neighbouring
+pixels --- and \emph{that regime has no signal to measure}, because the
+whole depth distribution then sits at $\phi\approx0$, inside the region
+Section~\ref{sec:detection} must discard as degenerate with smooth
+leakage. The two regimes are disjoint. That is why the estimator had to
+be replaced rather than repaired.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{step5_bridge.pdf}
+  \caption{Scaling the Galactic RM map down moves it from the regime
+  where the coherent pixel sum converges to the regime where it is a
+  random walk. Left: the estimator against pixelisation --- flat means
+  it converges, sloped means it is measuring $N_{\rm pix}$. Intrinsic
+  angles are set to zero (maximally coherent), so any decay is the
+  Faraday phase decorrelating and not the sky's angles. Middle and
+  right: the depth distribution that replaces it, and the channel
+  covariance that follows. Reading one colour left to right is one
+  sky.}
+  \label{fig:bridge}
+\end{figure}
+
 \section{The depth distribution and its transform}
 \label{sec:depthdist}
+
+\subsection{Why the power estimator is the right target}
+\label{sec:identity}
+
+Substituting Equation~\eqref{eq:pixelsum} into the depth transform and
+expanding,
+\begin{equation}
+  \bigl\langle |\tilde P(\phi)|^2 \bigr\rangle
+  = \sum_{n} |w_n|^2 \bigl|R(\phi-\phi_n)\bigr|^2
+  + \underbrace{\sum_{n \ne m} |w_n||w_m|
+    \bigl\langle e^{i(\alpha_n-\alpha_m)}\bigr\rangle
+    R(\phi-\phi_n)\overline{R(\phi-\phi_m)}}_{\to\,0},
+  \label{eq:identity}
+\end{equation}
+with $R$ the point-spread function of Section~\ref{sec:rmsf}. The first
+term is $F$ convolved with $|R|^2$. \textbf{The same sum that fails as
+an \emph{amplitude} estimator succeeds as a \emph{power} estimator}:
+the shot noise of Equation~\eqref{eq:walk} is precisely the diagonal
+term Equation~\eqref{eq:identity} wants. That is the licence for
+everything below --- the object worth predicting is a distribution of
+polarized \emph{power} over depth, and the rest of this section
+constructs it.
+
+Measured with real WMAP K-band polarization angles \citep{bennett2013}
+supplying $\alpha_n$, the ratio of the two sides is $1.069$ over
+$30 \le |\phi| < 1500$\,\rmu{} at 30\,MHz, and $1.332$ over the whole
+axis; the difference is the $|\phi|<10$ region where the pixel sum is
+genuinely partly coherent. Read this as an \emph{independent
+confirmation that the ratio is consistent with unity}, not as
+reproducing a particular number: the audit's comparable figure of
+$1.038$ used a different window, grid and estimator, and is one of a
+series running $1.010/1.184/1.038/0.843$ across nside.
+
+It is a test, not an identity --- falsification probes break it ($k=0$
+against a $k\to\infty$ observable gives $1.85$, a shuffled RM map
+$1.58$, and the $\mathrm{RM}\times0.02$ control fails by $>10^4$). But
+two limits are worth stating. It does \emph{not} show the sky is
+incoherent: with $\alpha_n \equiv 0$, maximally coherent, it still
+passes at $0.889$, because one carrier turn is a depth separation of
+$\pi/\lamsq = 0.0315$\,\rmu{} at 30\,MHz and the cross terms cancel by
+oscillation rather than by phase randomness. Nor does it pass only on
+WMAP K noise: smoothing $Q,U$ to $3^\circ$ and $10^\circ$ gives
+$1.107$ and $1.143$.
 
 \subsection{Bin first, transform second}
 
@@ -261,12 +331,76 @@ to form $F(\phi)$, then transform:
   \label{eq:rmsynth}
 \end{equation}
 Equation~\eqref{eq:rmsynth} is the standard RM-synthesis relation
-\citep{burn1966,brentjens2005}. What changes is the order: binning is a
-histogram operation, and a histogram's shape is stable under refinement
-because refining splits a pixel's weight among sub-pixels of nearly the
-same depth. The shot noise of Equation~\eqref{eq:nhalf} does not
-disappear --- it is confined to the normalisation, which is exactly the
-quantity this report declines to predict.
+\citep{burn1966,brentjens2005}. What changes is the order.
+
+Concretely, the accumulation is a \emph{weighted histogram}: the RM map
+supplies each pixel's bin \textbf{index} and the beam-sky weight
+supplies the \textbf{mass} deposited there. Writing $w_n(t)$ for
+Equation~\eqref{eq:weight} at pixel $n$ and local sidereal time $t$,
+multiplied by the polarized emissivity of that pixel and summed in
+quadrature over port pairs, each pixel deposits its whole weight in
+the one bin $b = [\phi_b, \phi_{b+1})$ containing its column depth:
+\begin{equation}
+  F_b^{(\infty)} \;=\; \sum_{t}\sum_{n} w_n(t)^2 \,
+  \mathbf{1}\!\left[\phi_{{\rm col},n} \in b\right] .
+  \label{eq:histogram}
+\end{equation}
+That is the blue curve of Figures~\ref{fig:inputs}
+and~\ref{fig:family}. The two maps enter at native nside 512 with
+one-to-one pixel correspondence, and the weight is recomputed at every
+$t$ because the beam moves over the sky.
+
+Equation~\eqref{eq:histogram} assumes all the emission sits behind all
+the rotation. It does not, and Section~\ref{sec:pushforward} replaces
+the indicator by an emissivity kernel $C_n$ that spreads each pixel's
+weight along its own column,
+\begin{equation}
+  F_b \;=\; \sum_{t}\sum_{n} w_n(t)^2 \,
+  \bigl[\,C_n(\phi_{b+1}) - C_n(\phi_b)\,\bigr],
+  \label{eq:deposit}
+\end{equation}
+of which Equation~\eqref{eq:histogram} is the limiting case.
+
+\paragraph{Fold for shape, keep the sign for the covariance.} Every
+$|\phi|$ statistic in this report --- the knee, the retained fraction
+above a cut, the comparisons against the depth horizon and the sky
+percentiles --- is computed on the \emph{folded} distribution, because
+the instrument response is even in $\phi$ and a four-decade logarithmic
+axis cannot hold a signed one. The channel covariance is not: it needs
+the \emph{signed} distribution, because $+\phi$ and $-\phi$ wind in
+opposite directions and partially cancel. Folding relocates the $-\phi$
+mass to $+\phi$ where it adds coherently instead, which understates the
+threshold by about a fifth. The products therefore store both, and
+\code{noise.faraday\_signal\_covariance} refuses an all-positive grid
+rather than trusting the caller to remember.
+
+\textbf{No phase appears in Equation~\eqref{eq:deposit}.} That is the
+whole difference from Equation~\eqref{eq:pixelsum}, and it is why the
+result converges: binning is a histogram operation, and a histogram's
+shape is stable under refinement because refining splits a pixel's
+weight among sub-pixels of nearly the same depth. The shot noise of
+Equation~\eqref{eq:nhalf} does not disappear --- it is confined to the
+normalisation, which is exactly the quantity this report declines to
+predict. By Section~\ref{sec:identity} this incoherent power
+distribution is not an approximation to something better: it is what a
+real depth-space measurement recovers.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{step5_inputs.pdf}
+  \caption{The two inputs to Equation~\eqref{eq:deposit} and what they
+  build, at 30\,MHz. Top: the beam-sky weight $|w|^2$ at three local
+  sidereal times, and the Galactic Faraday depth map
+  \citep{hutschenreuter2022}. Grey is sky below the horizon, which
+  carries exactly zero weight; the weight sweeps across the sky as the
+  Moon rotates, so no single map can stand in for the sum over $t$ ---
+  one lunar sidereal day is $655.7$\,h, which is the axis these three
+  samples are drawn from. Bottom: the resulting normalised template,
+  Equation~\eqref{eq:histogram} in blue and its $k=0$ smoothed version
+  in green. Maps are degraded for display only; every number in this
+  report is computed at native nside 512.}
+  \label{fig:inputs}
+\end{figure}
 
 \subsection{The emissivity geometry: the $f^k$ pushforward}
 \label{sec:pushforward}
@@ -296,45 +430,293 @@ far end, $F$ is the weighted histogram of $\phi_{\rm col}$); $k=0$
 $F\to\delta(\phi)$). Every finite-$k$ pushforward puts mass at
 $\phi = 0$, because every column has a near end.
 
-\subsection{The incoherent limit}
-\label{sec:identity}
+\paragraph{What $f$ indexes.} The parameterisation sets $\phi =
+f\phi_{\rm col}$, so $f$ is the fraction of the column's Faraday
+\emph{depth} already accumulated, not the fraction of its physical
+length. Any non-uniformity in how $\phi$ piles up along the line of
+sight is absorbed into $f$ before $k$ is chosen, and $\rho(f)\propto
+f^{k}$ is a statement about emissivity per unit accumulated depth. That
+is weaker than ``uniform slab'' suggests: what has to be a power law is
+the emissivity against depth, not against distance.
 
-Substituting Equation~\eqref{eq:pixelsum} into the depth transform and
-expanding,
+\paragraph{One histogram in, a family out.} Only $k\to\infty$ is a
+histogram of anything --- it is the $|w|^2$-weighted histogram of
+$|\mathrm{RM}|$ itself, and the implementation takes that code path.
+Every other $k$ is that histogram passed through the smoothing operator
+of Equation~\eqref{eq:pushforward}. Figure~\ref{fig:family} draws the
+family; Table~\ref{tab:mass} counts it.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{step5_template_family.pdf}
+  \caption{The normalised template for three bands and the emissivity
+  geometries of this section. Colour is the geometry and linestyle the
+  treatment. \textbf{$k\to\infty$ (blue) is the sky's own
+  $|w|^2$-weighted $|\mathrm{RM}|$ histogram; every other geometry is
+  that histogram smoothed} by Equation~\eqref{eq:pushforward} --- which
+  is visible directly, the $k\to\infty$ curve going ragged above
+  $\sim300$\,\rmu{} where its bins hold few pixels while $k=0$ stays
+  smooth, each column there contributing to every bin below it.
+  $k\to-1$ is $\delta(\phi)$ by construction and is marked rather than
+  drawn.}
+  \label{fig:family}
+\end{figure}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Where the template mass sits at \MassBand\,MHz: the
+  normalised folded template summed over depth bands, per geometry.
+  The columns total to one because the pushforward \emph{redistributes}
+  power in depth rather than reweighting it. Units of $\phi$ are
+  \rmu.}
+  \label{tab:mass}
+  \begin{tabular}{lccc}
+    \toprule
+    $\phi$ band & $k\to\infty$ & $k=0$ (fiducial) & $k\to-1$ \\
+    \midrule
+    \MassRows
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Every column keeps its $|w|^2$ and only its position on the depth axis
+moves. What changes is where that power sits: the fiducial geometry
+carries \MassZeroBinFid\% of the template mass in the lowest bin
+against \MassZeroBinInf\% for the screen, and that is precisely the
+mass degenerate with the smooth leakage Section~\ref{sec:detection}
+cuts away. Assuming $k\to\infty$ would have overstated the power
+surviving the cut by $\kscanSpanHiThirty\times$.
+
+\paragraph{Why it smooths.} For the fiducial geometry the pushforward
+has a closed form. A column at depth $x$ lays down uniform density
+$1/x$ over $[0,x]$, so with $h$ the $|w|^2$-weighted histogram of
+$|\phi_{\rm col}|$,
 \begin{equation}
-  \bigl\langle |\tilde P(\phi)|^2 \bigr\rangle
-  = \sum_{n} |w_n|^2 \bigl|R(\phi-\phi_n)\bigr|^2
-  + \underbrace{\sum_{n \ne m} |w_n||w_m|
-    \bigl\langle e^{i(\alpha_n-\alpha_m)}\bigr\rangle
-    R(\phi-\phi_n)\overline{R(\phi-\phi_m)}}_{\to\,0},
-  \label{eq:identity}
+  F_0(\phi) \;=\; \int_{x>\phi} \frac{h(x)}{x}\,\mathrm dx .
+  \label{eq:survival}
 \end{equation}
-with $R$ the point-spread function of Section~\ref{sec:rmsf}. The first
-term is $F$ convolved with $|R|^2$. The same sum that fails as an
-\emph{amplitude} estimator succeeds as a \emph{power} estimator: the
-shot noise of Equation~\eqref{eq:walk} is precisely the diagonal term
-Equation~\eqref{eq:identity} wants.
+$F_0$ is a \emph{survival integral} of $h$ --- not a convolution with a
+fixed kernel, but a cumulative integral whose weight $1/x$ falls with
+depth. An integral of a ragged function is smooth and monotone however
+ragged the function is, which is why the $k\to\infty$ curve of
+Figure~\ref{fig:family} is visibly noisy in its tail while every finite
+$k$ is not.
 
-Measured with real WMAP K-band polarization angles \citep{bennett2013}
-supplying $\alpha_n$, the ratio of the two sides is $1.069$ over
-$30 \le |\phi| < 1500$\,\rmu{} at 30\,MHz, and $1.332$ over the whole
-axis; the difference is the $|\phi|<10$ region where the pixel sum is
-genuinely partly coherent. Read this as an \emph{independent
-confirmation that the ratio is consistent with unity}, not as
-reproducing a particular number: the audit's comparable figure of
-$1.038$ used a different window, grid and estimator, and is one of a
-series running $1.010/1.184/1.038/0.843$ across nside.
+\paragraph{When it broadens, and when it narrows.} The initial fall of
+the channel covariance is set by the variance of $F$
+(Section~\ref{sec:roadmap}), so the \emph{sign} of the geometry's
+effect follows from what the pushforward does to that variance. Write
+$\phi = fX$ with $X = \phi_{\rm col}$ and $f$ the emissivity variable
+of Equation~\eqref{eq:pushforward}, independent of $X$. Then
+\begin{equation}
+  \operatorname{Var}(fX) =
+  \mathbb{E}[f^2]\,\mathbb{E}[X^2] - \mathbb{E}[f]^2\mu^2,
+  \qquad
+  \operatorname{Var}(X) = \mathbb{E}[X^2] - \mu^2,
+  \label{eq:pushvar}
+\end{equation}
+with $\mu = \mathbb{E}[X]$; for $\rho(f)\propto f^k$,
+$\mathbb{E}[f] = \tfrac{k+1}{k+2}$ and
+$\mathbb{E}[f^2] = \tfrac{k+1}{k+3}$. At the fiducial $k=0$ these are
+$\tfrac12$ and $\tfrac13$, and the two variances are equal when
+$\mathbb{E}[X^2]/\mu^2 = 9/8$ --- that is, at a coefficient of
+variation
+\begin{equation}
+  \mathrm{CV} \;\equiv\; \frac{\sqrt{\operatorname{Var}(X)}}{|\mu|}
+  \;=\; \sqrt{\tfrac18} \;=\; 0.354 .
+  \label{eq:cvcrit}
+\end{equation}
 
-It is a test, not an identity --- falsification probes break it ($k=0$
-against a $k\to\infty$ observable gives $1.85$, a shuffled RM map
-$1.58$, and the $\mathrm{RM}\times0.02$ control fails by $>10^4$). But
-two limits are worth stating. It does \emph{not} show the sky is
-incoherent: with $\alpha_n \equiv 0$, maximally coherent, it still
-passes at $0.889$, because one carrier turn is a depth separation of
-$\pi/\lamsq = 0.0315$\,\rmu{} at 30\,MHz and the cross terms cancel by
-oscillation rather than by phase randomness. Nor does it pass only on
-WMAP K noise: smoothing $Q,U$ to $3^\circ$ and $10^\circ$ gives
-$1.107$ and $1.143$.
+Below that the pushforward \textbf{broadens} $F$; above it, it
+\textbf{narrows} it. Multiplying by $f<1$ shrinks the depths, which
+reduces spread, while the randomness of $f$ adds spread; which wins
+depends on whether $X$ already has spread of its own to shrink. A
+single screen has $\mathrm{CV}=0$ and can only be broadened. The
+Galactic sky is heavy-tailed, $\mathbb{E}[X^2]\gg\mu^2$, and
+Equation~\eqref{eq:pushvar} tends to
+$\operatorname{Var}(fX)/\operatorname{Var}(X)\to\tfrac13$: \textbf{the
+fiducial geometry makes the template narrower than the map's own
+histogram}, so its covariance decorrelates more slowly, not faster.
+The geometry is therefore not a monotone knob --- its sign of effect
+flips at Equation~\eqref{eq:cvcrit}. Measured on the beam-weighted sky,
+$\mathrm{CV} = \cvHutschenreuter$ and
+$\operatorname{Var}(fX)/\operatorname{Var}(X) = \cvVarRatioHutschenreuter$,
+within a per cent of the $1/3$ asymptote. Figure~\ref{fig:twoaxes}
+draws both axes together: a constant RM map ($\mathrm{CV}=\cvConstant$)
+is $\delta(\phi_0)$ at $k\to\infty$ and a top hat at $k=0$, the same sky
+giving opposite covariances, which is what makes the two axes
+independent.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{step5_pushforward.pdf}
+  \caption{How the pushforward mixes emission. (a) One sightline under
+  four geometries; each curve carries unit area. (b) What that single
+  sightline deposits in depth --- a delta at $\phi_{\rm col}$ for the
+  screen, a top hat for the slab. (c) Five columns at $k=0$: nested top
+  hats, each running from zero to its \emph{own} $\phi_{\rm col}$.
+  (d) The real sky: because Equation~\eqref{eq:survival} is an integral
+  of the histogram, the result is smooth and monotone however ragged
+  the histogram is.}
+  \label{fig:pushforward}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{step5_two_axes.pdf}
+  \caption{The two axes that build $F$, and what each does to the
+  covariance. Columns are the map's spread of \emph{column} depths;
+  rows are where emission sits \emph{along} each column. Column one is
+  the proof they are independent: one constant RM map is
+  $\delta(\phi_0)$ at $k\to\infty$ and a top hat at $k=0$, with
+  opposite covariances. Note the effect of $k$ on $|S|$ reverses
+  between the first column and the last, at the coefficient of
+  variation of Equation~\eqref{eq:cvcrit}. Each panel depends on its
+  map only through the weighted histogram, never the arrangement, which
+  is why an alternating checkerboard is a legitimate two-valued sky.}
+  \label{fig:twoaxes}
+\end{figure}
+
+\paragraph{$F$ sees only a histogram.} Equation~\eqref{eq:deposit}
+contains no pixel position: each pixel deposits its weight in the bin
+holding its depth and nothing else. $F$ therefore depends on the map
+only through the joint distribution of (weight, depth) over pixels, and
+not at all on how those pixels are arranged on the sky. Two
+consequences follow. The acceptance gate's rigid rotation
+(Section~\ref{sec:gates}) is a pixel permutation and leaves the
+statistic invariant by construction whenever the weights are uniform.
+And the RM map's spatial power spectrum is discarded entirely --- which
+is the deeper reason $\theta_c$ cannot be recovered from the template
+(Section~\ref{sec:clamp}).
+
+\paragraph{The sightline spread is not a substitute.} The sky already
+supplies a wide range of depths, one per column, so it is fair to ask
+what the pushforward adds. The difference is structural. The sightline
+mixture places every column at a single $\phi_{{\rm col},n}$ and has no
+mechanism to put it anywhere else; the pushforward drags mass to zero
+depth from \emph{every} column, however deep. A sky with all
+$|\mathrm{RM}|>500$ would give an $F_{\infty}$ supported entirely above
+$500$ and an $F_{0}$ supported down to the origin. Nor is the
+difference a rescaling of the axis: the best squeeze factor mapping
+$F_{\infty}$ onto $F_{0}$ is $\kscanSqueezeThirty$ and still leaves a
+Kolmogorov distance of $\kscanSqueezeKSThirty$ (against
+$\kscanRawKSThirty$ unrescaled), an order of magnitude outside the
+$10^{-2}$ tolerance this report uses for shape agreement.
+
+\subsection{How much the geometry decides}
+\label{sec:kscan}
+
+Three geometries do not show the \emph{shape} of the dependence, and
+that shape is the robustness claim. Figure~\ref{fig:kscan} scans $k$
+continuously. It re-casts the stored $k\to\infty$ histogram rather than
+re-running the template job, which is legitimate because that histogram
+is exactly the pushforward's input; the reconstruction reproduces the
+stored $k=0$ column to a Kolmogorov distance of \kscanKSThirty{} and
+its detection ratio to \kscanRatioZeroThirty{} against the
+\detSafeSlabThirty{} of Table~\ref{tab:detection}, arrived at by an
+independent path.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{step5_kscan.pdf}
+  \caption{The emissivity geometry as a continuous knob: retained power
+  above the systematics cut, the 90\%-mass knee, and the detection
+  ratio at the slab floor. Dashed is the $k\to\infty$ asymptote, which
+  cannot sit on a linear $k$ axis; $k\to-1$ is off the left edge by
+  construction. The threshold in the right panel is recomputed on the
+  truncated template at every $k$.}
+  \label{fig:kscan}
+\end{figure}
+
+The dependence is \textbf{shallow above $k=0$ and steep only as
+$k\to-1$}. Over $k\in[0,\infty)$ --- emissivity flat or rising outward
+--- the retained fraction moves by $\kscanSpanHiThirty\times$ at
+30\,MHz, which is $\kscanAmpThirty\times$ in amplitude, so the
+detection ratio runs \kscanRatioZeroThirty{} to \kscanRatioInfThirty.
+Over $k\in[\kscanKLow,0]$ it moves by $\kscanSpanLoThirty\times$.
+Almost all of that flows through the retained fraction and not the
+threshold: the matched filter is integrating a distribution spanning
+hundreds of resolution elements, and moving mass around inside that
+support barely changes how well a broadband filter does against it.
+
+The roll-off statistic in the middle panel is the \textbf{90\%-mass
+quantile} of the folded template --- a CDF quantile, not a half-power
+crossing, because a half-power statistic pins to the narrow spike the
+$k=0$ slab piles up at the origin.
+
+The emissivity geometry is therefore a factor-\kscanAmpThirty{}
+systematic on the detection number, and it changes no verdict of
+Section~\ref{sec:detection}. Set against the factor \floorRatioThirty{}
+between the two depolarisation floors of
+Section~\ref{sec:bracket}, it is subdominant --- which is the substance
+of the claim that the science case turns on the floor and not on the
+template.
+
+\subsection{How robust the shape is to the sky and the instrument}
+\label{sec:robust}
+
+Section~\ref{sec:kscan} perturbed the emissivity geometry. Two
+further perturbations act on the inputs rather than on the model:
+the sky weighting and the instrument arm.
+
+\begin{table}[htbp]
+  \centering
+  \caption{The 90\%-mass knee at $k=0$ under two perturbations. Units
+  \rmu.}
+  \label{tab:robust}
+  \begin{tabular}{lccccc}
+    \toprule
+    Band & knee & plane-tapered & taper factor & two-port arm & arm swap \\
+    \midrule
+    \RobustnessRows
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Plane taper.} Down-weighting the Galactic plane by
+$\sin^2|b|$ moves the knee by a factor $\taperFactorThirty$ at 30\,MHz,
+so \textbf{the roll-off is carried by the plane}. That is the
+\emph{unfavourable} branch: long in-plane paths are where
+$B_\parallel$ reverses and the linear $\phi(f)$ ansatz of
+Section~\ref{sec:pushforward} is weakest, so \textbf{the amplitude
+bracket must be read as wider, not narrower}, than
+Table~\ref{tab:bracket} suggests. The direction of the reversal effect
+is favourable --- reversals broaden $F$ outward --- but its size is not
+bounded by anything computed here.
+
+\paragraph{Compact sources.} The weighting is dominated by extremes:
+the brightest $0.01\%$ of pixels carry $\weightConc\%$ of the template
+weight. The brightest polarized pixel in the WMAP K map lies
+$\crabSep^\circ$ from Taurus A, and within one degree of the Crab
+$\crabSkyPct\%$ of the sky carries $\crabWeightPct\%$ of all weight at
+$\crabContrast\times$ the mean polarized brightness. Because the map
+puts that region at $|\phi|\approx20$\,\rmu, it is what produces the
+local excess visible in the $k\to\infty$ curve of
+Figures~\ref{fig:inputs} and~\ref{fig:family}: measured at
+$\crabExcess\times$ a local smooth, falling to $\crabExcised\times$ when
+the region is excised. It is not instrumental --- the two arms agree ---
+and at the fiducial geometry the pushforward has already smoothed it
+away, which is why the $k=0$ curve shows no such feature.
+
+This report does \emph{not} mask it. Masking compact polarized sources
+is a decision for the sky model, and a source-subtracted polarization
+map is the principled fix; what belongs here is the bound. Excising the
+region moves the knee by $\crabKneePct\%$ and the detection ratio by
+$\crabRatioPct\%$.
+
+\paragraph{Two arms.} Swapping the four-port $|w|^2$ for the symmetric
+two-port one moves the knee by $\armSwapFifty$\% at 50\,MHz and
+$\armSwapTen$\% at 10\,MHz, but only $\armSwapThirty$\% at 30\,MHz. The
+beams weight different declination strips; at the band that owns the
+knee they agree. Figure~\ref{fig:twoarm} shows the templates.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{step5_two_arm.pdf}
+  \caption{The $k=0$ template through the as-built four-port response
+  and the symmetric two-port pseudo-dipole.}
+  \label{fig:twoarm}
+\end{figure}
 
 \subsection{The acceptance gates}
 \label{sec:gates}
@@ -350,95 +732,129 @@ uniform weights they use, a rigid rotation is a pixel permutation that
 leaves the statistic invariant by construction, and the nside 1024 and
 2048 legs are interpolated upsamplings carrying no new sky.
 
-\section{One signal, two bases: Faraday depth and delay}
-\label{sec:bases}
+\subsection{What the template is for}
+\label{sec:roadmap}
 
-Faraday depth $\phi$ is the Fourier conjugate of $\lamsq$. Delay $\tau$
-is the Fourier conjugate of $\nu$. They are not the same axis, and this
-report keeps them distinct --- but for detection they carry the same
-information, and it is worth saying why, because the earlier analysis
-worked in $\tau$ and the argument against it has been overstated.
+$F(\phi)$ is now built, and the rest of this report does exactly three
+things with it.
 
-\subsection{The mapping}
-
-The phase of a single depth is $\Theta(\nu) = 2\phi c^2/\nu^2$, so
-against an FFT kernel $e^{-2\pi i\nu\tau}$ its local delay is
+\textbf{It becomes a frequency covariance, not a spectrum.} The
+temptation is to transform $F$ once through
+Equation~\eqref{eq:rmsynth} and compare $P(\lamsq)$ against data. That
+is the wrong object here for the same reason
+Section~\ref{sec:randomwalk} gave: the intrinsic phases are unknown, so
+$P(\lamsq)$ has an unpredictable phase and only its second moment is
+predictable. The signal is therefore modelled as a Gaussian field of
+known normalised shape and unknown amplitude, whose covariance between
+two channels is Equation~\eqref{eq:rmsynth} evaluated at their
+\emph{separation} rather than at either channel,
 \begin{equation}
-  \tau_{\rm FD}(\phi,\nu)
-  = -\frac{1}{2\pi}\frac{\mathrm d\Theta}{\mathrm d\nu}
-  = \frac{2\phi c^2}{\pi\nu^3}.
-  \label{eq:taufd}
+  S_{ij} \;=\; \sum_b \hat H_b\, e^{2i\phi_b(\lamsq_i - \lamsq_j)}
+  \;=\; P\bigl(\lamsq_i - \lamsq_j\bigr) ,
+  \label{eq:sij}
 \end{equation}
-Equation~\eqref{eq:taufd} is \emph{monotonic} in $\phi$, so a cut at
-$\phi \ge \phi_{\min}$ is exactly a cut at
-$\tau \ge \tau_{\rm FD}(\phi_{\min})$ and retains identically the same
-power. Every detection number in Section~\ref{sec:detection} is
-therefore a statement about the measurement, not about the basis. (It
-is also $\nu$-dependent, which is the one thing that does not transfer:
-the same sky sits at different delays in different bands, so 30 and
-50\,MHz cannot be combined on one delay axis.)
+with $\hat H$ the normalised template. Nothing is discarded in the step
+from $F$ to $S$: Equation~\eqref{eq:sij} is the same transform, read on
+the difference axis.
 
-\subsection{The chirp is negligible against a broad template}
+\textbf{It is measured through a real instrument.}
+Section~\ref{sec:resolution} carries a unit tone through the true
+spectrometer bin weights to get the point-spread function $R$ that
+Equation~\eqref{eq:identity} already invoked, the depth horizon beyond
+which the channel width attenuates, and the low-depth cut that
+separates the signal from smooth $I\!\to\!Q,U$ leakage.
 
-Because $\tau_{\rm FD} \propto \nu^{-3}$, a single depth drifts in
-delay across the band --- the chirp. The relevant question is not
-whether the chirp exists but whether it is large compared with the
-structure being measured, and it is not:
+\textbf{It is weighed against noise.} Section~\ref{sec:noise} whitens
+Equation~\eqref{eq:sij} by the zoom-bin noise covariance and reads off
+the amplitude at which the whole template would be a $5\sigma$
+detection; Section~\ref{sec:bracket} supplies the amplitude the sky
+plausibly has, which this report does not predict and quotes as a
+bracket. Section~\ref{sec:detection} is the comparison of the two, and
+is the deliverable.
 
-\begin{center}
-\begin{tabular}{lccccc}
-\toprule
-Band & extent & chirp smear & \textbf{smear/extent}
-  & aliasing wall & aliased/kept \\
- & \multicolumn{2}{c}{(delay resolution elements)} &
-  & (\rmu) & signal \\
-\midrule
-\BasisRows
-\bottomrule
-\end{tabular}
-\end{center}
+% The basis argument is a defence of a choice, not a step in the
+% construction, so it is an appendix; this keeps the main line running
+% template -> instrument -> noise -> detection.
+\section{What LuSEE-Night measures}
+\label{sec:data}
 
-\textbf{Our signal is not a peak.} It is a broad, monotonically falling
-distribution spanning hundreds of resolution elements; smearing it by
-1--2\% of its own width changes nothing. The chirp destroys information
-only when a \emph{narrow} feature must be resolved --- that is,
-localisation. Figure~\ref{fig:chirp} shows the effect on a single
-injected depth, which is the case where it matters most.
+Nothing above predicts a spectrum, and it is worth being concrete about
+what it does predict and what the instrument returns.
 
-The one genuine failure is 10\,MHz, and it fails on \emph{aliasing},
-not the chirp: $30\%$ of its template power sits beyond the
-delay-Nyquist wall and folds back onto the signal. At 30 and 50\,MHz
-that contamination is \aliasPctThirty\% and \aliasPctFifty\%. Notably
-the aliasing wall (\aliasWallThirty{} and \aliasWallFifty\,\rmu) and
-the instrument's own depth horizon (\zoomHorThirty{} and
-\zoomHorFifty, Section~\ref{sec:horizon}) coincide to $0.1\%$ at all
-three bands --- measured, and not something this work explains --- so
-aliasing never binds where the bin response has not already
-attenuated.
+The polarimeter delivers pseudo-Stokes $I,Q,U,V$ per channel
+(\code{polarimeter.pseudo\_stokes}), so each frequency carries $Q$ and
+$U$ as two independent real numbers --- equivalently the complex
+$P(\nu) = Q + iU$ on which Equation~\eqref{eq:faraday} acts. That is
+the data vector, and it settles a convention that matters: the
+covariance of Equation~\eqref{eq:sij} is built on the \emph{signed}
+depth distribution and the Fisher information of
+Equation~\eqref{eq:mf} carries no factor of one half. Treating the
+observable as a single real projection would discard $U$ and cost a
+factor $\sqrt2$ in signal-to-noise.
+
+Figure~\ref{fig:data} shows what follows. A single Faraday depth winds
+the polarization angle linearly in \lamsq; no Faraday rotation leaves
+it constant, so $Q$ and $U$ are flat; the Galactic sky decorrelates,
+so they wander on the scale $|S_{ij}|$ sets. \textbf{That is the whole
+observational signature} --- not a line, not a peak, but structure in
+$Q$ and $U$ with a specific correlation length.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.62\textwidth]{step5_chirp_coherence.pdf}
-  \caption{A single Faraday depth at $\phi_0 = 600$\,\rmu, 30\,MHz,
-  transformed on the true \lamsq{} nodes and by an FFT on a uniform
-  $\nu$ grid. This is the worst case for the delay basis --- one narrow
-  feature. Against the broad template of Figure~\ref{fig:family} the
-  same chirp is 2\% of the extent.}
-  \label{fig:chirp}
+  \includegraphics[width=\textwidth]{step5_data.pdf}
+  \caption{What the instrument measures, drawn from this report's own
+  signal model. (a) and (b) are noise-free. (c) is one sample at the
+  uniform-slab floor, where the signal is a fraction of the noise: no
+  single spectrum is a detection, and none is meant to be. (d) is the
+  object actually predicted --- coadding drives the measured channel
+  covariance onto $|S_{ij}|$, while the no-Faraday hypothesis is a flat
+  line at unity.}
+  \label{fig:data}
 \end{figure}
 
-\subsection{Which basis to use}
+So the analysis chain is: measure $Q(\nu)$ and $U(\nu)$, form
+$P = Q+iU$, estimate its channel covariance across the mission, and
+test that covariance against $S$. Section~\ref{sec:noise} is the
+optimal version of that test.
 
-For \textbf{detection}, either. The matched filter of
-Section~\ref{sec:noise} builds its signal covariance from the true
-\lamsq{} of the bins, so it carries the exact chirped phases and is the
-optimal statistic regardless of how the result is plotted.
+\subsection{How much the prediction depends on inputs we do not
+control}
+\label{sec:inputsens}
 
-For everything else, $\phi$: it is in \rmu{} and comparable with the RM
-literature, the deconvolution kernel is shift-invariant in $\phi$ but
-$\phi$-dependent in $\tau$, and bands can be combined. This work
-computes in $\phi$ for those reasons and not because the delay basis
-fails.
+$S$ is built from the RM map, the polarized emissivity, the beam and
+the emissivity geometry. Only one of them matters.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.62\textwidth]{step5_robustness.pdf}
+  \caption{Sensitivity of $|S_{ij}|$ to its inputs. Everything except
+  the emissivity geometry lies on the fiducial curve.}
+  \label{fig:robustness}
+\end{figure}
+
+Perturbing the geometry from $k=0$ to $k\to\infty$ moves $|S|$ by
+$\dSKInf$. Redrawing the RM map at its own stated $1\sigma$ --- a
+median uncertainty of \rmStdMedian\,\rmu{} against a median $|{\rm
+RM}|$ of \rmAbsMedian, i.e. \rmStdPct\% --- moves it by $\dSRmSigma$,
+because adding that much scatter to a distribution of coefficient of
+variation \cvHutschenreuter{} is a small perturbation. Swapping the
+four-port beam for the two-port one moves it by $\dSTwoPort$.
+
+The WMAP spectral index cannot move it at all, and that is exact rather
+than measured: $(\nu/\nu_{\rm ref})^\beta$ is a spatially \emph{uniform}
+rescaling of the emissivity, so it multiplies $|w|^2$ by a constant and
+cancels in the normalised template (measured residual $\betaShift$).
+Only the spatial \emph{pattern} of the polarized sky enters, never its
+overall scale or spectral index. A spatially \emph{varying} index would
+reweight pixels against each other and is not tested here.
+
+Two caveats travel with this. The RM redraw uses independent per-pixel
+noise, whereas the reconstruction's errors are correlated; the coherent
+limit is benign for $|S|$, which is exactly invariant under a uniform
+depth shift, but not for the threshold. And $\sigma_{\rm eff}$ appears
+in Section~\ref{sec:bracket} as an amplitude and nowhere in $F$ ---
+if that turbulence exists it should broaden the template too, which
+Section~\ref{sec:cannot} takes up.
 
 \section{What sets the template, and the cut}
 \label{sec:resolution}
@@ -672,10 +1088,40 @@ for the column-normalised fine-to-bin weight matrix,
 unit-diagonal by construction with a measured nearest-neighbour
 correlation of $0.15$.
 
-Modelling the signal as a Gaussian field of known normalised shape
-$\hat H$ and unknown amplitude $A$, its frequency covariance is
-$S_{ij} = \sum_b \hat H_b e^{2i\phi_b(\lamsq_i-\lamsq_j)}$ with
-$\sum_b \hat H_b = 1$, and for $M$ LST samples and $n$ coherent nights
+There is no waveform to match, and that is what shapes the statistic.
+The intrinsic polarization angles are unknown, so $P(\lamsq)$ carries a
+random phase and a classical matched filter --- correlate the data
+against a known template --- has nothing to correlate against. What
+\emph{is} predictable is the second moment: a signal of amplitude $A$
+contributes $A^2S$ to the channel covariance, so the data covariance is
+$C(A) = N + A^2 S$ and the question becomes whether the data carries
+extra covariance of a known shape. The optimal test for that is
+quadratic rather than linear,
+\begin{equation}
+  q \;=\; d^{\dagger} N^{-1} S N^{-1} d ,
+  \label{eq:score}
+\end{equation}
+whose mean shifts by $A^2\operatorname{tr}[(N^{-1}S)^2]$ against a
+noise-only scatter of $\operatorname{tr}[(N^{-1}S)^2]^{1/2}$. Coadding
+$M$ independent LST samples and $n$ coherent nights gives
+$\mathrm{SNR} = nA^2\sqrt{M\operatorname{tr}[(N^{-1}S)^2]}$, which
+inverts to Equation~\eqref{eq:mf}. Note $A \propto
+\operatorname{tr}^{-1/4}$: the statistic is quadratic in $A$ and the
+signal-to-noise quadratic again, so even a factor of two in the Fisher
+information is only $2^{1/4}$ in amplitude.
+
+Whitening is not cosmetic. $N^{-1}$ on both sides upweights the channel
+combinations where $S$'s structure differs most from the noise's, and
+of the $192$ zoom channels only \nEffModes{} are effectively
+independent by the participation ratio of the eigenvalues of
+$N^{-1}S$. Replacing $N$ by its diagonal degrades the threshold by
+$\diagPenalty$.
+
+The signal is a Gaussian field of known normalised shape $\hat H$ and
+unknown amplitude $A$, with the frequency covariance
+$S_{ij}$ of Equation~\eqref{eq:sij} --- the depth transform read on the
+channel separation --- normalised so $\sum_b \hat H_b = 1$ and hence
+$\mathrm{diag}(S) = 1$. For $M$ LST samples and $n$ coherent nights
 \begin{equation}
   A_{5\sigma} = \sqrt{\frac{5}{n\sqrt{M\operatorname{tr}[(N^{-1}S)^2]}}}.
   \label{eq:mf}
@@ -683,8 +1129,8 @@ $\sum_b \hat H_b = 1$, and for $M$ LST samples and $n$ coherent nights
 Equation~\eqref{eq:mf} carries Equation~\eqref{eq:noisecov} rather than
 assuming independent modes; replacing $N$ by its diagonal and holding
 everything else fixed degrades the threshold by a measured
-$\mathbf{1.160}$. That ratio, and not any comparison to a closed form,
-is the cost of the overlap.
+$\mathbf{\diagPenalty}$. That ratio, and not any comparison to a closed
+form, is the cost of the overlap.
 
 A closed form on \emph{different} assumptions --- noise per coherence
 cell, independent modes --- is carried as a sanity check. It agrees to
@@ -692,6 +1138,19 @@ $2\%$ at 30\,MHz and diverges at the other bands (the matched filter is
 $16\%$ worse at 50\,MHz and $46\%$ better at 10\,MHz), because a fixed
 coherence bandwidth is a poor description of the real signal covariance
 there. It is a check, not a bound.
+
+Figure~\ref{fig:sensitivity} gives the threshold curve against
+lunations, with the bracket overlaid.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.78\textwidth]{step5_sensitivity.pdf}
+  \caption{The $5\sigma$ threshold against lunations for the
+  \emph{full} template, with the closed form dotted and the bracket
+  shaded. Section~\ref{sec:detection} is the version with the
+  systematics cut applied; this figure is the uncut reference.}
+  \label{fig:sensitivity}
+\end{figure}
 
 \section{Detection SNR against the systematics cut}
 \label{sec:detection}
@@ -752,10 +1211,13 @@ At the systematics-safe cut, retaining $\keepFracThirty$\% of the
 template power:
 
 \begin{itemize}
-  \item \textbf{At the uniform-slab floor the signal is detectable} ---
-    $\detSafeSlabThirty\times$ threshold at 30\,MHz,
-    $\detSafeSlabFifty\times$ at 50\,MHz, $\detSafeSlabTen\times$ at
-    10\,MHz.
+  \item \textbf{At the uniform-slab floor the signal is detectable} at
+    30 and 50\,MHz --- $\detSafeSlabThirty\times$ threshold and
+    $\detSafeSlabFifty\times$. At 10\,MHz it is
+    $\detSafeSlabTen\times$, which is above threshold but marginal:
+    it does not survive the coherent limit of
+    Section~\ref{sec:tilt}, and 10\,MHz is also the band whose delay
+    basis aliases (Appendix~\ref{sec:bases}).
   \item \textbf{At the internal-dispersion floor it is not}, at any
     band: $\detSafeDispThirty$ at 30\,MHz, $\detSafeDispFifty$ at
     50\,MHz, $\detSafeDispTen$ at 10\,MHz.
@@ -768,7 +1230,7 @@ template power:
 \subsection{What does not decide it}
 
 \paragraph{Not the basis.} Every row of Table~\ref{tab:detection} is a
-cut in delay as much as in depth (Section~\ref{sec:bases}); the safe cut
+cut in delay as much as in depth (Appendix~\ref{sec:bases}); the safe cut
 is $\tauSafeThirty\,\mu$s at 30\,MHz and $\tauSafeFifty\,\mu$s at
 50\,MHz.
 
@@ -836,82 +1298,21 @@ are an order of magnitude larger at the same cut.
   \label{fig:knee}
 \end{figure}
 
-\section{The template, and how robust its shape is}
-\label{sec:robust}
-
-Figure~\ref{fig:family} is the template that Equation~\eqref{eq:mf}
-matches against. The roll-off statistic is the \textbf{90\%-mass
-quantile} of the folded template --- a CDF quantile, not a half-power
-crossing, because a half-power statistic pins to the narrow spike the
-$k=0$ slab piles up at the origin.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{step5_template_family.pdf}
-  \caption{The normalised template for three bands and the emissivity
-  geometries of Section~\ref{sec:pushforward}. Colour is the geometry
-  and linestyle the treatment. $k\to-1$ is $\delta(\phi)$ by
-  construction and is marked rather than drawn.}
-  \label{fig:family}
-\end{figure}
-
-\begin{table}[htbp]
-  \centering
-  \caption{The 90\%-mass knee at $k=0$ under two perturbations. Units
-  \rmu.}
-  \label{tab:robust}
-  \begin{tabular}{lccccc}
-    \toprule
-    Band & knee & plane-tapered & taper factor & two-port arm & arm swap \\
-    \midrule
-    \RobustnessRows
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-\paragraph{Plane taper.} Down-weighting the Galactic plane by
-$\sin^2|b|$ moves the knee by a factor $\taperFactorThirty$ at 30\,MHz,
-so \textbf{the roll-off is carried by the plane}. That is the
-\emph{unfavourable} branch: long in-plane paths are where
-$B_\parallel$ reverses and the linear $\phi(f)$ ansatz of
-Section~\ref{sec:pushforward} is weakest, so \textbf{the amplitude
-bracket must be read as wider, not narrower}, than
-Table~\ref{tab:bracket} suggests. The direction of the reversal effect
-is favourable --- reversals broaden $F$ outward --- but its size is not
-bounded by anything computed here.
-
-\paragraph{Two arms.} Swapping the four-port $|w|^2$ for the symmetric
-two-port one moves the knee by $\armSwapFifty$\% at 50\,MHz and
-$\armSwapTen$\% at 10\,MHz, but only $\armSwapThirty$\% at 30\,MHz. The
-beams weight different declination strips; at the band that owns the
-knee they agree. Figure~\ref{fig:twoarm} shows the templates.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{step5_two_arm.pdf}
-  \caption{The $k=0$ template through the as-built four-port response
-  and the symmetric two-port pseudo-dipole.}
-  \label{fig:twoarm}
-\end{figure}
-
-Figure~\ref{fig:sensitivity} gives the threshold curve against
-lunations, with the bracket overlaid.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.78\textwidth]{step5_sensitivity.pdf}
-  \caption{The $5\sigma$ threshold against lunations for the
-  \emph{full} template, with the closed form dotted and the bracket
-  shaded. Section~\ref{sec:detection} is the version with the
-  systematics cut applied; this figure is the uncut reference.}
-  \label{fig:sensitivity}
-\end{figure}
-
 \section{What this map cannot decide}
 \label{sec:cannot}
 
 \subsection{The bracket's upper end}
 \label{sec:clamp}
+
+$\theta_c$ is the separation beyond which the sky's polarization angle
+no longer stays coherent after rotation. With the RM structure function
+$D(\theta) = \langle({\rm RM}(\hat n_1)-{\rm RM}(\hat n_2))^2\rangle$,
+two sightlines separated by $\theta$ differ in angle by
+$2\sqrt{D(\theta)}\,\lamsq$ in the RMS; setting that to $\sqrt2$
+radians gives Equation~\eqref{eq:thetac}. It is a \emph{two-point}
+statistic, which is why it cannot be recovered from the template at all
+--- $F$ is a one-point object (Section~\ref{sec:depthdist}) and
+\code{structure\_function} has to return to the map itself.
 
 Equation~\eqref{eq:thetac} is solved by inverting a Monte-Carlo
 $D(\theta)$ on a grid spanning $0.2^\circ$--$30^\circ$. At every band
@@ -932,6 +1333,81 @@ decades below the $412''$ pixel scale of the Faraday map itself. The
 internal evidence that the extrapolation is unquotable is that it
 inverts the bracket: at 30\,MHz it gives $7.1\times10^{-6}$, below
 $A_{\rm slab} = \bracketSlabThirty$.
+
+\subsection{The coherent limit of the template shape}
+\label{sec:tilt}
+
+Equation~\eqref{eq:deposit} adds contributions to a depth bin in
+\emph{power}. The opposite limit adds them in amplitude, so a bin fed
+by $N$ coherence patches gains $N^2$ where the incoherent sum gains
+$N$. Were $N$ the same in every bin this would be one global factor and
+would vanish under normalisation; it does not vanish, because $N$ falls
+steeply with depth --- low depths draw on the whole high-latitude sky,
+high depths only on the narrow Galactic plane. The coherent limit is
+therefore a statement about the template's \emph{shape}, and a large
+one: at 30\,MHz it would cut the retained fraction to \tiltFracThirty,
+move the 90\%-mass knee to \tiltKneeThirty\,\rmu, and cost a factor
+\tiltFactorThirty{} in detection ratio at the slab floor, taking
+\detSafeSlabThirty{} to \tiltAppliedThirty. At 10\,MHz the factor is
+\tiltFactorTen, taking \detSafeSlabTen{} to \tiltAppliedTen{} ---
+below threshold.
+
+It is quoted as a \emph{factor} deliberately. The tilt is a folded
+shape statement with no signed twin stored, so its own threshold is
+built on the folded template, whereas
+Table~\ref{tab:detection} is built on the signed one
+(Section~\ref{sec:roadmap}). Dividing two folded numbers cancels that
+difference; comparing a folded tilt against a signed baseline would
+conflate the coherence question with the basis convention and
+understate the tilt by about a fifth.
+
+\textbf{It is not computable here, for exactly the reason of
+Section~\ref{sec:clamp}.} The patch count needs $\theta_c$, which
+clamps (\tiltThetaCDeg$^\circ$; all clamped: \tiltThetaCClamped) with
+its true root below the grid and below the nside-512 pixel scale of
+\pixelScaleDeg$^\circ$, so the map cannot resolve the patches the
+construct is built from. This is the shape-space sibling of
+$A_{\rm upper}$, it has the identical defect, and it is treated the
+same way: quantified here, and entering no verdict. It is deliberately
+not drawn in Figure~\ref{fig:family}, where a peer curve would read as
+a live alternative.
+
+Section~\ref{sec:identity} does not settle this. That identity holds
+even for a maximally coherent sky ($\alpha_n \equiv 0$ passes at
+$0.889$), because at nside 512 neighbouring pixels sit hundreds of
+carrier turns apart and their cross terms cancel by oscillation rather
+than by phase randomness. It therefore validates
+Equation~\eqref{eq:deposit} at and above the pixel scale and says
+nothing about coherent structure below it --- which is the regime
+$\theta_c$ parameterises.
+
+\subsection{Turbulence enters the amplitude but not the shape}
+\label{sec:sigmashape}
+
+Section~\ref{sec:bracket}'s dispersion floor asserts turbulent Faraday
+depth of dispersion $\sigma_{\rm eff}$ co-spatial with the emission.
+The template does not contain it. $F$ is built from the map's resolved
+column depths and the $f^k$ geometry
+(Equation~\eqref{eq:deposit}); $\sigma_{\rm eff}$ enters only
+Equation~\eqref{eq:disp}, as an amplitude.
+
+That is inconsistent. If the turbulence is there it should broaden $F$
+as well, and broadening moves mass across the low-depth cut: convolving
+the fiducial template with a Gaussian of the fiducial
+$\sigma_{\rm eff} = \sigmaEff$\,\rmu{} raises the detection ratio by
+$\sigmaBroadenOne\%$, and by twice that dispersion, by
+$\sigmaBroadenTwo\%$. The effect is favourable and modest at
+the fiducial value, but the direction is not the point --- the same
+physical assumption is being used in one place and ignored in another.
+
+Two things bound how much this can matter. The correct kernel is not a
+uniform convolution: for co-spatial turbulence the scatter accumulates
+along the path, so it should grow with $f$ rather than apply equally to
+every depth. And $\sigma_{\rm eff}$ is an assumed input, not a measured
+one --- unlike $k$, which Section~\ref{sec:kscan} scans, it is a single
+default value carrying the factor \floorRatioThirty{} between the two
+floors. \textbf{The least-scrutinised input in this report is the one
+the verdict is most sensitive to.}
 
 \subsection{Sky domination at 50\,MHz}
 
@@ -966,7 +1442,8 @@ Step 3, 10 and 50\,MHz bands & stands & unchanged \\
 Perfect-depolarisation ($I$-only) limit & stands & unchanged \\
 \midrule
 Step 2, the real sky at 30\,MHz & \textbf{refuted} & \S\ref{sec:randomwalk}--\ref{sec:depthdist} \\
-Step 4, delay-space signature & \textbf{superseded} & \S\ref{sec:bases}, \S\ref{sec:detection} \\
+Step 4, delay-space signature & \textbf{superseded}
+  & App.~\ref{sec:bases}, \S\ref{sec:detection} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -975,7 +1452,7 @@ The distinction in the last two rows is deliberate. Step 2 is
 \emph{refuted}: its diffuse signature was a pixelisation artifact, and
 the quantity $|\Delta P|/I \sim 1.7\times10^{-4}$ does not appear here
 in any form. Step 4 is \emph{superseded} but not wrong about its
-basis: Section~\ref{sec:bases} finds the delay axis it used to be
+basis: Appendix~\ref{sec:bases} finds the delay axis it used to be
 sound at 30 and 50\,MHz, and its own $\tau_{\rm FD}$ scale --- 5\,ms at
 30\,MHz and 1.1\,ms at 50\,MHz for $\phi_{\max}\approx2400$ ---
 reproduces Equation~\eqref{eq:taufd} exactly. What it inherited from
@@ -1045,7 +1522,7 @@ $\theta_c$ clamps below the grid, \S\ref{sec:clamp}
   & \code{test\_coherence\_angle\_clamps\_below\_the\_sampled\_range} \\
 Bracket closed forms, Eqs.~\eqref{eq:slab},~\eqref{eq:disp}
   & \code{test\_amplitude\_bracket\_closed\_forms} \\
-Overlap degradation $1.160\times$
+Overlap degradation $\diagPenalty\times$
   & \code{test\_overlap\_correlation\_degrades\_the\_threshold} \\
 Matched filter, Eq.~\eqref{eq:mf}
   & \code{test\_matched\_filter\_monte\_carlo} \\
@@ -1061,6 +1538,98 @@ Matched filter, Eq.~\eqref{eq:mf}
     uv run python scripts/step5_plots.py         # the figures
     cd report/faraday_depth_template && make
 \end{verbatim}
+
+\appendix
+
+\section{Faraday depth and delay are the same measurement}
+\label{sec:bases}
+
+Faraday depth $\phi$ is the Fourier conjugate of $\lamsq$. Delay $\tau$
+is the Fourier conjugate of $\nu$. They are not the same axis, and this
+report keeps them distinct --- but for detection they carry the same
+information, and it is worth saying why, because the earlier analysis
+worked in $\tau$ and the argument against it has been overstated.
+
+\subsection{The mapping}
+
+The phase of a single depth is $\Theta(\nu) = 2\phi c^2/\nu^2$, so
+against an FFT kernel $e^{-2\pi i\nu\tau}$ its local delay is
+\begin{equation}
+  \tau_{\rm FD}(\phi,\nu)
+  = -\frac{1}{2\pi}\frac{\mathrm d\Theta}{\mathrm d\nu}
+  = \frac{2\phi c^2}{\pi\nu^3}.
+  \label{eq:taufd}
+\end{equation}
+Equation~\eqref{eq:taufd} is \emph{monotonic} in $\phi$, so a cut at
+$\phi \ge \phi_{\min}$ is exactly a cut at
+$\tau \ge \tau_{\rm FD}(\phi_{\min})$ and retains identically the same
+power. Every detection number in Section~\ref{sec:detection} is
+therefore a statement about the measurement, not about the basis. (It
+is also $\nu$-dependent, which is the one thing that does not transfer:
+the same sky sits at different delays in different bands, so 30 and
+50\,MHz cannot be combined on one delay axis.)
+
+\subsection{The chirp is negligible against a broad template}
+
+Because $\tau_{\rm FD} \propto \nu^{-3}$, a single depth drifts in
+delay across the band --- the chirp. The relevant question is not
+whether the chirp exists but whether it is large compared with the
+structure being measured, and it is not:
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+Band & extent & chirp smear & \textbf{smear/extent}
+  & aliasing wall & aliased/kept \\
+ & \multicolumn{2}{c}{(delay resolution elements)} &
+  & (\rmu) & signal \\
+\midrule
+\BasisRows
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Our signal is not a peak.} It is a broad, monotonically falling
+distribution spanning hundreds of resolution elements; smearing it by
+1--2\% of its own width changes nothing. The chirp destroys information
+only when a \emph{narrow} feature must be resolved --- that is,
+localisation. Figure~\ref{fig:chirp} shows the effect on a single
+injected depth, which is the case where it matters most.
+
+The one genuine failure is 10\,MHz, and it fails on \emph{aliasing},
+not the chirp: $30\%$ of its template power sits beyond the
+delay-Nyquist wall and folds back onto the signal. At 30 and 50\,MHz
+that contamination is \aliasPctThirty\% and \aliasPctFifty\%. Notably
+the aliasing wall (\aliasWallThirty{} and \aliasWallFifty\,\rmu) and
+the instrument's own depth horizon (\zoomHorThirty{} and
+\zoomHorFifty, Section~\ref{sec:horizon}) coincide to $0.1\%$ at all
+three bands --- measured, and not something this work explains --- so
+aliasing never binds where the bin response has not already
+attenuated.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.62\textwidth]{step5_chirp_coherence.pdf}
+  \caption{A single Faraday depth at $\phi_0 = 600$\,\rmu, 30\,MHz,
+  transformed on the true \lamsq{} nodes and by an FFT on a uniform
+  $\nu$ grid. This is the worst case for the delay basis --- one narrow
+  feature. Against the broad template of Figure~\ref{fig:family} the
+  same chirp is 2\% of the extent.}
+  \label{fig:chirp}
+\end{figure}
+
+\subsection{Which basis to use}
+
+For \textbf{detection}, either. The matched filter of
+Section~\ref{sec:noise} builds its signal covariance from the true
+\lamsq{} of the bins, so it carries the exact chirped phases and is the
+optimal statistic regardless of how the result is plotted.
+
+For everything else, $\phi$: it is in \rmu{} and comparable with the RM
+literature, the deconvolution kernel is shift-invariant in $\phi$ but
+$\phi$-dependent in $\tau$, and bands can be combined. This work
+computes in $\phi$ for those reasons and not because the delay basis
+fails.
 
 \section*{Acknowledgements}
 

@@ -116,8 +116,20 @@ def main():
 
     coarse = np.arange(0.0, 2500.0 + COARSE_DPHI, COARSE_DPHI)
     ccent = 0.5 * (coarse[1:] + coarse[:-1])
+    # The SIGNED grid, on the same bin width.  Every |phi| statistic --
+    # the knee, the retained fraction, the RMSF and horizon -- is
+    # correctly a folded quantity and keeps using ``coarse``.  The
+    # matched filter is NOT: the observable is the complex P = Q + iU,
+    # whose frequency covariance is the complex transform of the SIGNED
+    # depth distribution.  Feeding it the folded template models a sky
+    # whose every column has one sign of RM and understates A_5sigma by
+    # ~18%.  Both grids are therefore stored, and only the covariance
+    # construction reads the signed one.
+    coarse_s = np.arange(-2500.0, 2500.0 + COARSE_DPHI, COARSE_DPHI)
+    scent = 0.5 * (coarse_s[1:] + coarse_s[:-1])
     nb, nk = len(args.bands), len(KS)
     H_out = np.zeros((nb, nk, ccent.size))
+    Hs_out = np.zeros((nb, nk, scent.size))
     Hc_out = np.zeros_like(H_out)
     knee = np.zeros((nb, nk))
     knee_taper = np.zeros((nb, nk))
@@ -131,6 +143,10 @@ def main():
     # for two curves nothing quotes.
     kf = int(np.argmin([abs(k) if np.isfinite(k) else np.inf for k in KS]))
     H_lst = np.zeros((nb, args.lst, ccent.size))
+    # The transit leg of step5_detection.py builds a matched-filter
+    # threshold from H_lst, so it needs the signed form for the same
+    # reason H_signed exists.  3 x 128 x 5000 float64 = 15 MB.
+    H_lst_signed = np.zeros((nb, args.lst, scent.size))
     theta_cs = np.zeros(nb)
     clamped = np.zeros(nb, dtype=bool)
     bracket = np.zeros((nb, 3))
@@ -185,6 +201,8 @@ def main():
                     pa_l, Hf_l = dsp.fold_template(cent, H)
                     rb_l, _ = np.histogram(pa_l, bins=coarse, weights=Hf_l)
                     H_lst[ib, il] = rb_l / max(rb_l.sum(), 1e-300)
+                    rs_l, _ = np.histogram(cent, bins=coarse_s, weights=H)
+                    H_lst_signed[ib, il] = rs_l / max(rs_l.sum(), 1e-300)
             tail_hist[il] = np.bincount(rm_idx, weights=w2, minlength=2000)
             print(f"band {band} LST {il + 1}/{args.lst}", flush=True)
 
@@ -217,6 +235,8 @@ def main():
             for target, src in ((H_out, Hf), (Hc_out, Hfc)):
                 rb, _ = np.histogram(pa, bins=coarse, weights=src)
                 target[ib, ik] = rb / max(rb.sum(), 1e-300)
+            rbs, _ = np.histogram(cent, bins=coarse_s, weights=Hsum[ik])
+            Hs_out[ib, ik] = rbs / max(rbs.sum(), 1e-300)
 
         wpct_band = dsp.weighted_percentiles(
             rm_abs, w2_band, [50.0, 90.0, 99.0, 99.9]
@@ -241,6 +261,9 @@ def main():
         out,
         phi=ccent,
         H=H_out,
+        phi_signed=scent,
+        H_signed=Hs_out,
+        H_lst_signed=H_lst_signed,
         H_coh=Hc_out,
         ks=np.array([100.0, 0.0, -1.0]),
         bands=np.array(args.bands),

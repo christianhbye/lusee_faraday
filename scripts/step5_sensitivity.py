@@ -85,11 +85,29 @@ def template_for(band):
         d = np.load(f)
         ib = int(np.argmin(np.abs(d["bands"] - band)))
         clamped = bool(d["theta_c_clamped"][ib])
-        return d["phi"], d["H"][ib, 1], d["bracket"][ib], clamped
+        # Folded AND signed: |phi| statistics use the first, the
+        # matched-filter covariance the second (S4.10).
+        return (
+            d["phi"],
+            d["H"][ib, 1],
+            d["phi_signed"],
+            d["H_signed"][ib, 1],
+            d["bracket"][ib],
+            clamped,
+        )
     # standalone fallback: uniform slab to the map median depth
     phi = np.arange(0.0, 2500.0, 1.0)
     H = np.where(phi < 18.4, 1.0, 0.0)
-    return phi, H / H.sum(), np.array([5.4e-4, 1.0e-4, 5.2e-7]), None
+    phis = np.arange(-2500.0, 2500.0, 1.0)
+    Hs = np.where(np.abs(phis) < 18.4, 1.0, 0.0)
+    return (
+        phi,
+        H / H.sum(),
+        phis,
+        Hs / Hs.sum(),
+        np.array([5.4e-4, 1.0e-4, 5.2e-7]),
+        None,
+    )
 
 
 def tsys_over_tsky(band, t_amp_k):
@@ -151,7 +169,7 @@ def main():
         fine, bins, W = dsp.zoom_bin_matrix(band)
         sigma_bin = noise.radiometer_sigma(1.0, 563.4, TAU_S)
         N = noise.zoom_noise_covariance(W, sigma_bin)
-        phi, H, bracket[ib], clamped = template_for(band)
+        phi, H, phis, Hs, bracket[ib], clamped = template_for(band)
         if clamped:
             print(
                 f"{band:.0f} MHz: theta_c is CLAMPED at the grid's low "
@@ -161,8 +179,13 @@ def main():
                 f"lower ends are theta_c-free and stand"
             )
         lam2b = np.asarray(lambda_squared(bins), dtype=float)
-        keep = H > H.max() * 1e-6
-        S = noise.faraday_signal_covariance(phi[keep], H[keep], lam2b)
+        # SIGNED template: the observable is the complex P = Q + iU, so
+        # S is the complex transform of the signed depth distribution.
+        # The folded template understates A_5sigma by ~18% (S4.10).
+        # no amplitude floor: it can amputate one sign of the signed
+        # grid (see step5_detection.threshold_for)
+        keep = np.ones(Hs.size, dtype=bool)
+        S = noise.faraday_signal_covariance(phis[keep], Hs[keep], lam2b)
         n_modes_cf = 75000.0 / COH_BW_HZ[band]
         for j, L in enumerate(lun):
             n_coh, n_lst = schedule(int(L))

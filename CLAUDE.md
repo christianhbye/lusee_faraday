@@ -15,7 +15,7 @@ Two arms, with different jobs. Confusing them is the main way to go wrong here.
 work goes. It currently covers instrumental `I -> Q,U` leakage, the zenith
 polarimeter calibration, the transiting point source, and — since the
 `faraday-delay-template` branch — the diffuse sky as a depth-space **shape**
-template (`dispersion.py`, `noise.py`, the six `step5_*` scripts). That is
+template (`dispersion.py`, `noise.py`, the nine `step5_*` scripts). That is
 the ensemble two-point prediction the audit left open, not a re-run of the
 refuted approach: the amplitude is quoted as a bracket with its reasons and
 never as a value.
