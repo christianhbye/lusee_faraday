@@ -166,6 +166,76 @@ def main():
     LINES.extend(rows)
     LINES.append("}")
 
+    # ------------------------------------------------- slope (S4.11)
+    # The two floors carry DIFFERENT spectral slopes -- nu^2 against
+    # nu^4 -- so a RATIO between bands discriminates them needing no
+    # absolute scale and no assumed intrinsic polarization fraction.
+    # What is emitted is the calibration REQUIREMENT, not a capability:
+    # a power law's slope carries its exponent, not its amplitude, and
+    # the amplitude is degenerate with p_0 (S4.11.3).
+    PAIR = {"FiftyThirty": "50/30", "ThirtyTen": "30/10"}
+    rows = []
+    for ilo, ihi, tag in ((0, 1, "FiftyThirty"), (2, 0, "ThirtyTen")):
+        blo = {
+            "lower_slab": float(d["bracket"][ilo, 1]),
+            "lower_dispersion": float(d["bracket"][ilo, 2]),
+        }
+        bhi = {
+            "lower_slab": float(d["bracket"][ihi, 1]),
+            "lower_dispersion": float(d["bracket"][ihi, 2]),
+        }
+        # SNR at the SLAB floor.  The detection ratio is referred to the
+        # 5-sigma amplitude, so SNR = 5 x ratio.  The dispersion floor
+        # gets no entry on purpose: there is no detection there, hence
+        # no ratio to take, and the branch in which the slope exists is
+        # the branch in which the slab floor holds.
+        snr_lo = 5.0 * float(det["ratio_slab"][ilo, ics])
+        snr_hi = 5.0 * float(det["ratio_slab"][ihi, ics])
+        l2lo = float(np.asarray(lambda_squared(bands[ilo]), float)[0])
+        l2hi = float(np.asarray(lambda_squared(bands[ihi]), float)[0])
+        nu2 = l2lo / l2hi
+        r3 = dsp.slope_requirement(blo, bhi, snr_lo, snr_hi, n_sigma=3.0)
+        r5 = dsp.slope_requirement(blo, bhi, snr_lo, snr_hi, n_sigma=5.0)
+        macro(f"slopeSlab{tag}", f"{r5['ratio_slab']:.3f}")
+        macro(f"slopeNuTwo{tag}", f"{nu2:.3f}")
+        macro(f"slopeDisp{tag}", f"{r5['ratio_dispersion']:.3f}")
+        macro(f"slopeNuFour{tag}", f"{nu2**2:.3f}")
+        # Signed: a RISING beam-weighted phi_med pushes the slab ratio
+        # BELOW nu^2, and the direction is the evidence that the drift
+        # is physical and not a rounding artefact.
+        macro(
+            f"slopeDepartSlab{tag}",
+            f"{100 * (r5['ratio_slab'] / nu2 - 1.0):+.1f}",
+        )
+        macro(
+            f"slopeDepartDisp{tag}",
+            f"{100 * (r5['ratio_dispersion'] / nu2**2 - 1.0):+.2f}",
+        )
+        macro(f"slopeSep{tag}", f"{r5['separation']:.2f}")
+        macro(f"slopeStat{tag}", f"{100 * np.expm1(r5['sigma_stat']):.1f}")
+        macro(f"slopeBudgetThree{tag}", f"{100 * r3['tolerance']:.0f}")
+        macro(f"slopeBudgetFive{tag}", f"{100 * r5['tolerance']:.0f}")
+        # Quoted as a FACTOR and not a percentage.  The budget lives in
+        # log space and is asymmetric, so a "108%" 1-sigma fractional
+        # error invites reading the gain as consistent with zero; the
+        # multiplicative form exp(sigma_sys) says what it means and
+        # does not break above 100%.  It is also how a gain
+        # requirement is written down.
+        f3, f5 = np.exp(r3["sigma_sys"]), np.exp(r5["sigma_sys"])
+        macro(f"slopeFactorThree{tag}", f"{f3:.2f}")
+        macro(f"slopeFactorFive{tag}", f"{f5:.2f}")
+        rows.append(
+            f"{PAIR[tag]}\\,MHz & {r5['ratio_slab']:.3f} ({nu2:.3f}) & "
+            f"{r5['ratio_dispersion']:.3f} ({nu2**2:.3f}) & "
+            f"{100 * np.expm1(r5['sigma_stat']):.1f}\\% & "
+            f"{f3:.2f}$\\times$ & {f5:.2f}$\\times$ \\\\"
+        )
+    LINES.append(r"\newcommand{\SlopeRows}{%")
+    LINES.extend(rows)
+    LINES.append("}")
+    for ib, b in enumerate(bands):
+        macro(f"snrSlab{WORD[b]}", f"{5.0 * det['ratio_slab'][ib, ics]:.0f}")
+
     # ---------------------------------------------------- resolution
     rows = []
     for band, half in ((30.0, 40.0), (50.0, 150.0), (10.0, 2.0)):
@@ -267,8 +337,16 @@ def main():
     phi = d["phi"]
     ib0 = int(np.argmin(np.abs(np.array(bands) - 30)))  # the lead band
     rows = []
-    for lo, hi in ((0, 1), (1, 3), (3, 10), (10, 30), (30, 100),
-                   (100, 300), (300, 1000), (1000, 2500)):
+    for lo, hi in (
+        (0, 1),
+        (1, 3),
+        (3, 10),
+        (10, 30),
+        (30, 100),
+        (100, 300),
+        (300, 1000),
+        (1000, 2500),
+    ):
         m = (phi >= lo) & (phi < hi)
         cells = [f"${lo}$--${hi}$"] + [
             f"{d['H'][ib0, ik][m].sum():.4f}" for ik in (ki, kf, kd)
@@ -299,7 +377,7 @@ def main():
         ksc = np.load(ksc_path)
         kg, kcuts = ksc["ks"], ksc["cuts"]
         icut = int(np.argmin(np.abs(kcuts - float(ksc["safe_cut"]))))
-        i0 = int(np.argmin(np.abs(kg)))       # k = 0
+        i0 = int(np.argmin(np.abs(kg)))  # k = 0
         ilo = int(np.argmin(np.abs(kg + 0.9)))  # k = -0.9
         macro("kscanKLow", f"{kg[ilo]:.2f}")
         macro("tiltThetaCDeg", f"{np.degrees(float(ksc['theta_c'][0])):.3f}")

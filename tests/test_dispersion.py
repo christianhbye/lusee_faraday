@@ -400,3 +400,96 @@ def test_zoom_fold_is_unreachable_because_the_envelope_nulls_there():
     print(f"power at wrap {wrap:.1f}: {power_wrap:.2e}")
     print(f"power at reference (100): {power_ref:.2e}")
     print(f"ratio (wrap/ref): {ratio:.2e}")
+
+
+def test_floor_slopes_are_nu2_and_nu4():
+    """The two bracket floors carry DIFFERENT spectral slopes.
+
+    A_slab = 1/(|phi_med| lam2) ~ nu^2 and
+    A_disp = 1/(2 sigma_eff^2 lam2^2) ~ nu^4, so their band-to-band
+    ratios differ by one power of lam2.  That difference is the whole
+    content of S4.11: it discriminates the two floors from a RATIO
+    between bands, needing no absolute calibration and no assumed
+    intrinsic polarization fraction.
+
+    Held at FIXED phi_med and sigma_eff the slopes are exact.  On the
+    real sky phi_med is beam-weighted and drifts with frequency, which
+    is the departure the next test pins; sigma_eff does not drift only
+    because ``amplitude_bracket`` hard-codes it (S6.5.3).
+    """
+    lam2_lo, lam2_hi = 898.76, 99.86  # 10 and 30 MHz
+    kw = dict(theta_c=0.00349066, omega_beam=1.0, phi_med=23.0)
+    lo = dsp.amplitude_bracket(lam2_lo, **kw)
+    hi = dsp.amplitude_bracket(lam2_hi, **kw)
+
+    r = lam2_lo / lam2_hi
+    assert np.isclose(hi["lower_slab"] / lo["lower_slab"], r, rtol=1e-12)
+    assert np.isclose(
+        hi["lower_dispersion"] / lo["lower_dispersion"], r**2, rtol=1e-12
+    )
+    # and the upper end carries NO slope at all -- it is theta_c-set
+    assert np.isclose(hi["upper"], lo["upper"], rtol=1e-12)
+
+
+def test_slab_slope_departs_by_exactly_the_phi_med_drift():
+    """Why the computed bracket is not on the analytic nu^2 line.
+
+    phi_med enters A_slab as a per-band beam-weighted number, so the
+    measured slab ratio is nu^2 times (phi_med_lo / phi_med_hi).  The
+    report quotes the departure rather than the idealised slope
+    because the drift (22.5 -> 23.8 rad/m^2 over 10-50 MHz) is larger
+    than the statistical error on the ratio.
+    """
+    lam2_lo, lam2_hi = 898.76, 99.86
+    kw = dict(theta_c=0.00349066, omega_beam=1.0)
+    lo = dsp.amplitude_bracket(lam2_lo, phi_med=22.47, **kw)
+    hi = dsp.amplitude_bracket(lam2_hi, phi_med=23.46, **kw)
+
+    measured = hi["lower_slab"] / lo["lower_slab"]
+    analytic = lam2_lo / lam2_hi
+    assert np.isclose(measured / analytic, 22.47 / 23.46, rtol=1e-12)
+    # the sign matters: rising phi_med SUPPRESSES the ratio below nu^2
+    assert measured < analytic
+    print(f"slab ratio {measured:.3f} vs nu^2 {analytic:.3f}")
+
+
+def test_slope_requirement_is_a_relative_gain_budget():
+    """S4.11: what calibration the discriminant actually demands.
+
+    The hypotheses sit ln(R_disp / R_slab) apart in log-ratio space,
+    which for fixed phi_med is exactly ln(lam2_lo / lam2_hi).  An
+    N-sigma separation needs the total log error below that over N;
+    the statistical part comes off in quadrature and the remainder is
+    the systematic budget.
+    """
+    lam2_lo, lam2_hi = 898.76, 99.86
+    kw = dict(theta_c=0.00349066, omega_beam=1.0, phi_med=23.0)
+    lo = dsp.amplitude_bracket(lam2_lo, **kw)
+    hi = dsp.amplitude_bracket(lam2_hi, **kw)
+
+    # noiseless: the whole separation is available to systematics
+    req = dsp.slope_requirement(lo, hi, np.inf, np.inf, n_sigma=5.0)
+    assert np.isclose(req["separation"], np.log(lam2_lo / lam2_hi))
+    assert np.isclose(req["sigma_stat"], 0.0)
+    assert np.isclose(req["sigma_sys"], req["separation"] / 5.0)
+    assert np.isclose(req["tolerance"], np.expm1(req["separation"] / 5.0))
+
+    # statistics exactly exhausting the budget leaves nothing.  The
+    # tolerance is 1e-6 and not 1e-12 because sigma_sys is a SQUARE
+    # ROOT of a difference that cancels to one ulp: the residual is
+    # ~1e-16, and sqrt turns that into ~1e-8.  Tightening this asserts
+    # something about float cancellation, not about the budget.
+    s = req["separation"] / 5.0
+    snr = 1.0 / np.expm1(s / np.sqrt(2.0))
+    spent = dsp.slope_requirement(lo, hi, snr, snr, n_sigma=5.0)
+    assert np.isclose(spent["sigma_sys"], 0.0, atol=1e-6)
+    assert np.isclose(spent["tolerance"], 0.0, atol=1e-6)
+
+    # a tighter demand is a tighter budget, monotonically
+    three = dsp.slope_requirement(lo, hi, 57.5, 223.0, n_sigma=3.0)
+    five = dsp.slope_requirement(lo, hi, 57.5, 223.0, n_sigma=5.0)
+    assert three["tolerance"] > five["tolerance"] > 0.0
+    print(
+        f"3sigma {100 * three['tolerance']:.0f}%, "
+        f"5sigma {100 * five['tolerance']:.0f}%"
+    )

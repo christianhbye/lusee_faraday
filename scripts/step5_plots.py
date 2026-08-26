@@ -903,6 +903,129 @@ def fig_weight_map(d):
     return plt.gcf()
 
 
+def fig_slope(d, det, cut=27.5):
+    """The bracket read backwards: the floors' spectral slopes (S4.11).
+
+    Left: the two floors against frequency.  A_slab ~ nu^2 and
+    A_disp ~ nu^4, so the floors are not two guesses at one number --
+    they are two different SPECTRA, and the gap between them widens
+    with frequency.  Lines are the analytic power laws anchored on the
+    30 MHz computed values; markers are the computed bracket.  The
+    slab markers sit slightly OFF their line because phi_med is
+    beam-weighted and drifts with frequency; the dispersion markers sit
+    exactly on theirs only because ``amplitude_bracket`` hard-codes
+    sigma_eff (S4.11.1).  Error bars are 1/SNR at the slab floor and
+    are invisible at 50 MHz, where SNR is ~220.
+
+    Right: the deliverable.  The requirement is on the band-to-band
+    gain RATIO, so it is quoted as a factor, and it is plotted against
+    the significance demanded rather than at one significance -- the
+    section's claim is a specification, not a capability.
+    """
+    bands = [int(b) for b in d["bands"]]
+    ics = int(np.argmin(np.abs(det["cuts"] - cut)))
+    i30 = bands.index(30)
+    l2 = {b: float(np.asarray(lambda_squared(b), float)[0]) for b in bands}
+
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(9.6, 4.0))
+
+    nu = np.linspace(8.0, 55.0, 400)
+    l2nu = np.asarray(lambda_squared(nu), float)
+    for lvl, color, style, lab, power in (
+        (1, "C0", "-", r"$A_{\rm slab}\ \propto\nu^{2}$", 1),
+        (2, "C3", "--", r"$A_{\rm disp}\ \propto\nu^{4}$", 2),
+    ):
+        anchor_a = float(d["bracket"][i30, lvl])
+        axL.plot(
+            nu,
+            anchor_a * (l2[30] / l2nu) ** power,
+            style,
+            color=color,
+            lw=1.4,
+            label=lab,
+        )
+        a = np.array([float(d["bracket"][bands.index(b), lvl]) for b in bands])
+        # 1/SNR at the SLAB floor: the only branch with a detection to
+        # take a ratio of.  Applied to both curves so the two are
+        # compared on the same measurement, not on two different ones.
+        snr = np.array(
+            [
+                5.0 * float(det["ratio_slab"][bands.index(b), ics])
+                for b in bands
+            ]
+        )
+        axL.errorbar(
+            bands,
+            a,
+            yerr=a / snr,
+            fmt="o" if lvl == 1 else "s",
+            color=color,
+            ms=5,
+            capsize=2.5,
+            lw=1.0,
+            ls="none",
+        )
+    axL.set(
+        xscale="log",
+        yscale="log",
+        xlabel="frequency (MHz)",
+        ylabel="fractional polarized amplitude",
+        title="the floors are two spectra, not two numbers",
+    )
+    axL.xaxis.set_major_locator(FixedLocator([10, 20, 30, 50]))
+    axL.xaxis.set_major_formatter(plt.ScalarFormatter())
+    axL.xaxis.set_minor_locator(NullLocator())
+    axL.legend(fontsize=7.5, loc="upper left", framealpha=0.9)
+
+    # to 16 and not 10: the 30/10 budget collapses to 1.0 at N = 14.5,
+    # where the 10 MHz statistics alone exhaust the separation.  That
+    # wall is the point of the panel and a 10-sigma axis hides it.
+    n_sig = np.linspace(1.0, 16.0, 300)
+    for (ilo, ihi), color, lab in (
+        ((i30, bands.index(50)), "C0", "50/30 MHz"),
+        ((bands.index(10), i30), "C2", "30/10 MHz"),
+    ):
+        blo, bhi = (
+            {
+                "lower_slab": float(d["bracket"][i, 1]),
+                "lower_dispersion": float(d["bracket"][i, 2]),
+            }
+            for i in (ilo, ihi)
+        )
+        snr_lo = 5.0 * float(det["ratio_slab"][ilo, ics])
+        snr_hi = 5.0 * float(det["ratio_slab"][ihi, ics])
+        f = [
+            np.exp(
+                dsp.slope_requirement(blo, bhi, snr_lo, snr_hi, n)["sigma_sys"]
+            )
+            for n in n_sig
+        ]
+        axR.plot(n_sig, f, "-", color=color, lw=1.5, label=lab)
+    # Where the budget hits 1.0 the statistics alone exhaust the
+    # separation and NO calibration is good enough: that wall is the
+    # 10 MHz SNR of 6, not a calibration statement.
+    axR.axhline(1.0, color="k", lw=0.9, ls=":")
+    axR.annotate(
+        "no calibration suffices",
+        xy=(14.6, 1.0),
+        xytext=(10.4, 2.1),
+        fontsize=7,
+        ha="center",
+        arrowprops=dict(arrowstyle="->", lw=0.8, color="0.4"),
+    )
+    for n in (3.0, 5.0):
+        axR.axvline(n, color="0.6", lw=0.8, ls="--", zorder=0)
+    axR.set(
+        xlabel=r"significance demanded, $N\sigma$",
+        ylabel="tolerable band-to-band gain error (factor)",
+        title="what the discriminant requires",
+        ylim=(1.0, None),
+    )
+    axR.legend(fontsize=7.5, loc="upper right", framealpha=0.9)
+    fig.tight_layout()
+    return fig
+
+
 def save(fig, name, pad=0.25):
     """Write one figure to FIG_DIR/<name>.pdf and close it.
 
@@ -946,6 +1069,7 @@ def main():
     det = GEN_DIR / "step5_detection.npz"
     if det.exists():
         save(fig_detection(np.load(det)), "step5_detection", pad=0.4)
+        save(fig_slope(d, np.load(det)), "step5_slope")
     two = GEN_DIR / "step5_template_two_port.npz"
     if two.exists():
         save(fig_two_arm(d, np.load(two)), "step5_two_arm")

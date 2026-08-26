@@ -463,6 +463,23 @@ state and the distinction matters if figures move to the paper.
 - [x] `.gitignore`: `report/` -> `report/*` plus exceptions. git does
   not descend into an excluded DIRECTORY, so a bare `report/` makes the
   exceptions impossible to express. Verified with `git check-ignore -v`.
+- [x] Report S11 "Reading the bracket backwards", plus
+  `dispersion.slope_requirement`, `step5_plots.fig_slope` and 3 tests.
+  The two floors
+  carry DIFFERENT spectral slopes -- `A_slab ~ nu^2`, `A_disp ~ nu^4` --
+  so a band-to-band RATIO discriminates the geometry with no absolute
+  scale and no assumed `p_0`. Requirement: 50/30 amplitude ratio known
+  to a factor **1.23 (5 sigma) / 1.41 (3 sigma)**; statistics contribute
+  only **1.8%**, so this is a systematics spec, not a sensitivity one.
+  Framed as required future work -- it enters NO verdict, and
+  Table `tab:detection` is unchanged. Two caveats found in the doing:
+  `A_disp` is exactly `nu^4` (**+0.00%** at both band pairs) only because
+  `sigma_eff` is a hard-coded scalar while `phi_med` is beam-weighted
+  (departs **-1.4% / -4.2%**), which sharpens the `sigma_eff` follow-up;
+  and the slope carries the EXPONENT only, since `phi_med`/`sigma_eff`
+  are degenerate with `p_0` in the amplitude. The closure is
+  shape -> `phi_med` (the amplitude-free knee) -> `p_0`, blocked on the
+  coherence tilt (moves the 30 MHz knee 89.6 -> 18 rad/m^2).
 
 ## Possible follow-ups
 - [ ] Transfer selected figures/text into the paper (explicitly out of

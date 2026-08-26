@@ -1276,6 +1276,240 @@ $\dispTimeSafeThirty$, which is out of reach.
 
 \paragraph{Not the instrument arm.} See Section~\ref{sec:robust}.
 
+\section{Reading the bracket backwards}
+\label{sec:backwards}
+
+Section~\ref{sec:detection} answers the detection question with the
+bracket treated as its name suggests: two ends of an interval around
+one unknown amplitude. But the two ends do not differ only in
+magnitude. Equations~\eqref{eq:slab} and~\eqref{eq:disp} differ by one
+power of $\lamsq$, so they are not two guesses at a number --- they are
+two different \emph{spectra}. A detection at more than one band
+therefore measures something the single-band verdict cannot: which
+geometry the interstellar medium sets, which
+Section~\ref{sec:bracket} calls the single unknown the science case
+turns on.
+
+This section derives what that measurement would demand and stops
+there. It quotes a \textbf{requirement, not a capability}. The
+systematics that would actually limit it are not modelled anywhere in
+this report, so nothing here enters a verdict, and
+Table~\ref{tab:detection} is unchanged by it.
+
+\subsection{The floors are two spectra}
+\label{sec:twoslopes}
+
+$A_{\rm slab} = 1/(|\phi_{\rm med}|\lamsq) \propto \nu^{2}$ against
+$A_{\rm disp} = 1/(2\sigma_{\rm eff}^{2}\lambda^{4}) \propto \nu^{4}$,
+so between any two bands the floors predict different amplitude
+ratios. Between 30 and 50\,MHz the slab floor rises by
+\slopeSlabFiftyThirty{} and the dispersion floor by
+\slopeDispFiftyThirty; between 10 and 30\,MHz, by
+\slopeSlabThirtyTen{} against \slopeDispThirtyTen.
+Figure~\ref{fig:slope} draws both against frequency. Two departures
+from the idealised slopes matter, in opposite directions.
+
+\paragraph{The slab floor is not exactly $\nu^{2}$.} $\phi_{\rm med}$
+is beam-weighted, and the beam changes with frequency: over
+10--50\,MHz it runs $22.5 \to 23.8$\,\rmu, which shifts the computed
+ratios from the analytic ones by \slopeDepartSlabFiftyThirty\% and
+\slopeDepartSlabThirtyTen\%. Those are small against the factor
+separating the floors, but they are \emph{larger than the statistical
+error on the ratio} (below), so the analytic slope is not an adequate
+model of the slab floor at the precision the measurement reaches.
+
+\paragraph{The dispersion floor is exactly $\nu^{4}$, and that is a
+defect rather than a virtue.} Its departure is
+\slopeDepartDispFiftyThirty\% and \slopeDepartDispThirtyTen\% --- zero
+to the quoted precision, at both band pairs. That is not a statement
+about the interstellar medium. It is what
+\code{dispersion.amplitude\_bracket} does: $\sigma_{\rm eff}$ enters as
+a single hard-coded constant (\sigmaEff\,\rmu) with no beam weighting
+and no band dependence, so $A_{\rm disp}$ is a pure power law by
+construction. Were $\sigma_{\rm eff}$ built from the map the way
+$\phi_{\rm med}$ is, it would drift too. This is the same input
+Section~\ref{sec:sigmashape} identifies as the least-scrutinised in the
+report, seen from a second direction, and it is the first thing a
+serious version of this measurement would have to fix.
+
+\subsection{What the discriminant requires}
+\label{sec:sloperequirement}
+
+The observable is a \emph{ratio} between bands, which is why the
+discriminant is cheap: it needs no absolute flux scale, and --- as
+Section~\ref{sec:pnought} shows it must --- no assumed intrinsic
+polarization fraction. Work in logarithms, where the two hypotheses sit
+a fixed distance apart,
+\begin{equation}
+  \Delta = \ln\frac{R_{\rm disp}}{R_{\rm slab}},
+  \qquad
+  R = \frac{A(\nu_{\rm hi})}{A(\nu_{\rm lo})},
+  \label{eq:separation}
+\end{equation}
+$\Delta = \slopeSepFiftyThirty$ for the 50/30 pair and \slopeSepThirtyTen{}
+for 30/10. An $N\sigma$ call needs the total log error on the measured
+ratio below $\Delta/N$; the statistical part subtracts in quadrature and
+what remains is the budget for everything else,
+\begin{equation}
+  \sigma_{\rm sys} = \sqrt{(\Delta/N)^{2} - \sigma_{\rm stat}^{2}},
+  \qquad
+  \sigma_{\rm stat}^{2} = \ln^{2}\!\left(1 + \frac{1}{{\rm SNR}_{\rm lo}}\right)
+  + \ln^{2}\!\left(1 + \frac{1}{{\rm SNR}_{\rm hi}}\right).
+  \label{eq:slopebudget}
+\end{equation}
+The SNRs are those achieved \emph{at the slab floor} --- $5\times$ the
+detection ratios of Table~\ref{tab:detection}, so \snrSlabThirty{} at
+30\,MHz, \snrSlabFifty{} at 50 and \snrSlabTen{} at 10. That choice is
+not a convenience, and Section~\ref{sec:asymmetry} is about why.
+
+\begin{table}[htbp]
+  \centering
+  \caption{The slope discriminant and what it demands. Band-to-band
+  amplitude ratios are given with the idealised $\nu^{2}$ / $\nu^{4}$
+  values in parentheses. The last two columns are the tolerable
+  band-to-band gain error, as a factor, for a $3\sigma$ and a
+  $5\sigma$ call. Statistical errors are at the slab floor.}
+  \label{tab:slope}
+  \begin{tabular}{lccccc}
+    \toprule
+    Bands & $R_{\rm slab}$ ($\nu^{2}$) & $R_{\rm disp}$ ($\nu^{4}$)
+      & $\sigma_{\rm stat}$ & $3\sigma$ & $5\sigma$ \\
+    \midrule
+    \SlopeRows
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{step5_slope.pdf}
+  \caption{The bracket read backwards. Left: the two floors are two
+  spectra, and the gap between them widens with frequency. Lines are
+  the analytic power laws anchored on the 30\,MHz computed values,
+  markers the computed bracket; the slab markers sit off their line by
+  the $\phi_{\rm med}$ drift of Section~\ref{sec:twoslopes} while the
+  dispersion markers sit exactly on theirs, for the reason given
+  there. Error bars are $1/{\rm SNR}$ at the slab floor and are
+  invisible at 50\,MHz. Right: the requirement,
+  Equation~\eqref{eq:slopebudget}, against the significance demanded.
+  Where a curve reaches unity the statistics alone exhaust $\Delta$ and no
+  calibration is good enough --- for 30/10 that is $N = 14.5$, set by
+  the 10\,MHz SNR of \snrSlabTen{} and not by any calibration
+  property.}
+  \label{fig:slope}
+\end{figure}
+
+\textbf{The requirement is loose, and it is relative.} A $5\sigma$
+discrimination on the 50/30 pair tolerates a band-to-band gain error of
+a factor \slopeFactorFiveFiftyThirty{} (\slopeBudgetFiveFiftyThirty\%);
+$3\sigma$ tolerates \slopeFactorThreeFiftyThirty{}
+(\slopeBudgetThreeFiftyThirty\%). The 30/10 pair is looser still ---
+\slopeFactorFiveThirtyTen{} and \slopeFactorThreeThirtyTen{} --- because
+its lever arm in $\lamsq$ is longer, though it pays for that with the
+10\,MHz SNR. Statistics contribute \slopeStatFiftyThirty\% and
+\slopeStatThirtyTen\% and are nowhere near binding. \textbf{This is
+therefore a systematics specification and not a sensitivity one},
+which is the useful thing about it: closing a sensitivity gap costs
+observing time as its square (Section~\ref{sec:detection}), while a
+factor-\slopeFactorFiveFiftyThirty{} relative gain requirement is an
+ordinary calibration statement.
+
+It is stated as a floor on what must be controlled, not as an achieved
+error. Relative gain is one term; a spatially varying spectral index is
+another, and Section~\ref{sec:inputsens} bounds only the effect of an
+overall index on the template shape, not the effect of index structure
+on a band-to-band amplitude ratio. Neither is modelled here. Whether
+the true budget is comfortably inside a factor
+\slopeFactorFiveFiftyThirty{} is an instrument question this report
+cannot answer, and until it is answered the discriminant is a
+specification and not a result.
+
+\subsection{The two branches are not symmetric}
+\label{sec:asymmetry}
+
+The slope exists only where there is a detection to take a ratio of,
+and by Table~\ref{tab:detection} that is the slab branch alone: at the
+dispersion floor the detection ratio is \detSafeDispThirty{} at
+30\,MHz and \detSafeDispFifty{} at 50, so there is no measured
+amplitude at either band and no ratio to form. The discriminant is
+therefore asymmetric, and usefully so:
+
+\begin{itemize}
+  \item \textbf{Slab branch.} Detection at 30 and 50\,MHz at
+    \detSafeSlabThirty$\times$ and \detSafeSlabFifty$\times$
+    threshold. The ratio is then measurable and the $\nu^{2}$ slope is
+    a \emph{confirmation} --- an internal consistency check on the
+    geometry, available for the price of the calibration above.
+  \item \textbf{Dispersion branch.} No detection at any band. The
+    discrimination is carried entirely by the non-detection, which
+    excludes the slab floor at high confidence without any slope being
+    measured at all.
+\end{itemize}
+
+So the slope is not the instrument that decides between the floors in
+the case where they are hardest to tell apart. It is a check that the
+detected case is what it appears to be, and a way of catching an
+intermediate geometry --- one whose amplitude sits between the floors
+--- which the two-branch reading of Table~\ref{tab:detection} would
+otherwise report simply as a weak slab detection.
+
+\subsection{What the slope cannot do}
+\label{sec:pnought}
+
+It cannot measure the Faraday strength. The observable is
+\begin{equation}
+  A_{\rm obs}(\nu) = p_{0}\,A_{\rm floor}(\nu),
+  \label{eq:pnought}
+\end{equation}
+with $p_{0}$ the emission-weighted intrinsic polarization fraction
+along the column, and \textbf{a power law's slope carries its exponent,
+not its amplitude}. The slope returns the exponent, which is the
+geometry; $\phi_{\rm med}$ and $\sigma_{\rm eff}$ live in the
+amplitude, where they are exactly degenerate with $p_{0}$. Nothing in
+this report determines $p_{0}$: it is not the $0.7$ of optically thin
+synchrotron, because the emission is weighted along a column that is
+already partly depolarised before the beam sees it.
+
+This also disposes of a tempting shortcut. One cannot measure
+depolarisation directly, because the undepolarised state is never
+observed at these wavelengths --- Section~\ref{sec:bracket}'s external
+screen is suppressed by $e^{-2\sigma^{2}\lambda^{4}}$ with an exponent
+of $\approx1.9\times10^{6}$ at 30\,MHz, so a beam-averaged
+polarization fraction is not small, it is zero, and so is its
+derivative with respect to $\sigma$. What is observed is the residual
+of Equation~\eqref{eq:pnought}, and converting that residual to a
+Faraday strength requires $p_{0}$ from outside.
+
+\subsection{The shape closes it, and that is the work}
+\label{sec:shapecloses}
+
+There is a route, and it uses machinery this report already has. The
+predicted template \emph{shape} is amplitude-free by construction ---
+Section~\ref{sec:depthdist} normalises it, and every shape statistic
+here is a CDF quantile that never references the peak --- yet it is
+built from the same column depths that set $\phi_{\rm med}$. The
+90\%-mass knee is \kneeThirty\,\rmu{} at 30\,MHz, \kneeFifty{} at 50
+and \kneeTen{} at 10. So the shape constrains the Faraday strength
+with no amplitude information at all, and
+Equation~\eqref{eq:pnought} then reads in the other direction:
+\begin{equation}
+  \text{shape} \;\longrightarrow\; \phi_{\rm med},
+  \qquad
+  \frac{A_{\rm obs}}{A_{\rm floor}(\phi_{\rm med})}
+  \;\longrightarrow\; p_{0}.
+  \label{eq:closure}
+\end{equation}
+Read forwards it measures $p_{0}$; read as a consistency check it tests
+whether an assumed $p_{0}$ and the measured amplitude agree with the
+depth structure the same data show. \textbf{Neither is built here.}
+Equation~\eqref{eq:closure} needs an error model on the shape-derived
+$\phi_{\rm med}$, which needs the coherence question of
+Section~\ref{sec:tilt} settled, since the tilt moves the knee to
+\tiltKneeThirty\,\rmu{} at 30\,MHz --- a factor of five. That is a
+larger effect than everything else in this section combined, and it is
+the reason the closure is named here and not evaluated. It enters no
+verdict.
+
 \section{Localisation: the tail gate}
 \label{sec:tail}
 
@@ -1550,6 +1784,12 @@ $\theta_c$ clamps below the grid, \S\ref{sec:clamp}
   & \code{test\_coherence\_angle\_clamps\_below\_the\_sampled\_range} \\
 Bracket closed forms, Eqs.~\eqref{eq:slab},~\eqref{eq:disp}
   & \code{test\_amplitude\_bracket\_closed\_forms} \\
+The $\nu^2$/$\nu^4$ slopes, \S\ref{sec:twoslopes}
+  & \code{test\_floor\_slopes\_are\_nu2\_and\_nu4} \\
+$\phi_{\rm med}$ drift off $\nu^2$, \S\ref{sec:twoslopes}
+  & \code{test\_slab\_slope\_departs\_by\_exactly\_the\_phi\_med\_drift} \\
+Slope budget, Eq.~\eqref{eq:slopebudget}
+  & \code{test\_slope\_requirement\_is\_a\_relative\_gain\_budget} \\
 Overlap degradation $\diagPenalty\times$
   & \code{test\_overlap\_correlation\_degrades\_the\_threshold} \\
 Matched filter, Eq.~\eqref{eq:mf}
