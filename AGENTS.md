@@ -236,7 +236,7 @@ below too; it was missing from earlier revisions of this table.
     report quotes, straight from the npz (seconds). **No number is
     typed into the `.tex` by hand**; two published errors were
     hand-transcription drifting from the products.
-  - `scripts/step5_plots.py` — all fifteen step-5 figures from the npz
+  - `scripts/step5_plots.py` — all sixteen step-5 figures from the npz
     files. Re-run it after ANY figure-text change (seconds).
 - `tests/testpixel_arm.py` — data-free unit tests for the pixel arm.
 - Report: `report/faraday_depth_template/` (`make`; pdflatex twice,

@@ -651,3 +651,58 @@ def amplitude_bracket(lam2, theta_c, omega_beam, phi_med, sigma_eff=9.8):
         "lower_slab": 1.0 / (abs(float(phi_med)) * lam2),
         "lower_dispersion": 1.0 / (2.0 * float(sigma_eff) ** 2 * lam2**2),
     }
+
+
+def slope_requirement(bracket_lo, bracket_hi, snr_lo, snr_hi, n_sigma=5.0):
+    """Calibration budget for discriminating the floors by slope (S4.11).
+
+    ``bracket_lo``/``bracket_hi`` are ``amplitude_bracket`` outputs at
+    the lower and higher frequency (so ``lam2_lo > lam2_hi``); the
+    dicts are taken whole rather than re-deriving the floors here, so
+    this cannot drift from the bracket the report quotes.
+
+    The two floors predict different band-to-band amplitude ratios --
+    ``nu^2`` against ``nu^4`` -- and the observable is the RATIO, which
+    is why the discriminant needs no absolute scale.  Everything is
+    done in log space: the hypotheses sit ``separation`` apart, an
+    N-sigma call needs the total log error below ``separation/n_sigma``,
+    and the statistical part comes off in quadrature.
+
+    ``snr_lo``/``snr_hi`` are the amplitude SNRs actually achieved --
+    at the SLAB floor, since at the dispersion floor there is no
+    detection to take a ratio of, and the branch where the slope
+    exists is the branch where the slab floor holds.  Pass ``np.inf``
+    for the noiseless limit.
+
+    Returns ``separation``, ``sigma_stat`` and ``sigma_sys`` as log
+    errors, plus ``tolerance`` -- ``sigma_sys`` as a fractional error
+    on the ratio, which is the form an instrument requirement takes.
+    Log space and not a linearisation: at the 3-sigma end the budget
+    reaches tens of percent, where ``ln(1+x) ~ x`` is good only to
+    ~15%, and the report quotes a gain tolerance rather than a
+    perturbation.
+
+    This function does NOT return phi_med or sigma_eff.  A power law's
+    slope carries its exponent, not its amplitude, and the amplitude
+    is degenerate with the emission-weighted intrinsic polarization
+    fraction (S4.11.3).  The slope buys the geometry; the strength
+    needs the template SHAPE, which is amplitude-free.
+    """
+    r_slab = bracket_hi["lower_slab"] / bracket_lo["lower_slab"]
+    r_disp = bracket_hi["lower_dispersion"] / bracket_lo["lower_dispersion"]
+    separation = abs(np.log(r_disp / r_slab))
+    # log1p, not 1/snr: at the 10 MHz SNR of ~6 the difference is 8%,
+    # and it enters a budget quoted to two figures.
+    sigma_stat = float(
+        np.hypot(np.log1p(1.0 / snr_lo), np.log1p(1.0 / snr_hi))
+    )
+    total = separation / float(n_sigma)
+    sigma_sys = float(np.sqrt(max(total**2 - sigma_stat**2, 0.0)))
+    return {
+        "ratio_slab": float(r_slab),
+        "ratio_dispersion": float(r_disp),
+        "separation": float(separation),
+        "sigma_stat": sigma_stat,
+        "sigma_sys": sigma_sys,
+        "tolerance": float(np.expm1(sigma_sys)),
+    }
