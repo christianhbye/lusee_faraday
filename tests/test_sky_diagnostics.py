@@ -233,3 +233,35 @@ def test_component_construction_logs_the_resolved_engine(caplog):
             ones, 0 * ones, 0 * ones, phi_fd=0.0, lmax=LMAX
         )
     assert any("transform engines" in r.message for r in caplog.records)
+
+
+def test_effective_pixel_count_is_npix_for_equal_weights():
+    """The equal-weight case is the one the N^-1/2 derivation assumes."""
+    w = np.full(1024, 3.7)
+    assert sky_mod.effective_pixel_count(w) == pytest.approx(1024.0)
+
+
+def test_effective_pixel_count_falls_under_concentration():
+    """One pixel carrying everything is one effective pixel."""
+    w = np.zeros(1024)
+    w[0] = 1.0
+    assert sky_mod.effective_pixel_count(w) == pytest.approx(1.0)
+
+
+def test_effective_pixel_count_is_the_random_walk_floor():
+    """1/sqrt(N_eff) is the RMS of the normalised coherent pixel sum.
+
+    This is the floor report Figure 1 is drawn against.  The
+    N_pix^-1/2 of the report's Equation (nhalf) is the equal-weight
+    special case; the beam-weighted sky is concentrated enough that
+    the two differ by more than a decade, so the guide has to be the
+    N_eff form or the measured curve looks like a failed prediction.
+    """
+    rng = np.random.default_rng(0)
+    w = rng.pareto(1.5, 2000) + 1e-3
+    n_eff = sky_mod.effective_pixel_count(w)
+    phases = rng.uniform(0.0, 2.0 * np.pi, (2000, w.size))
+    amp = np.abs((w * np.exp(1j * phases)).sum(axis=1)) / w.sum()
+    rms = float(np.sqrt(np.mean(amp**2)))
+    assert rms == pytest.approx(1.0 / np.sqrt(n_eff), rel=0.05)
+    assert n_eff < 0.5 * w.size

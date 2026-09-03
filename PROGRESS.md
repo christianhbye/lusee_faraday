@@ -1,9 +1,16 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
-Updated: 2026-08-19 — **refactored onto luseepy + croissant** (see the
-section below); the five analysis steps and the report were complete
-before that on the pixel-space engine. Report in `report/report.tex`
-(14 pp, compiles clean, all figures referenced in text).
+Updated: 2026-09-03. The current write-up is
+`report/faraday_depth_template/` (`cd report/faraday_depth_template &&
+make`), on branch `faraday-delay-template`. **`report/report.tex` is
+not on `main`**: it and the diffuse-Faraday results it reports live at
+the `audit-2026-08-18` tag, which the audit recorded below refutes.
+Cite the tag, not a branch — and read every `report.tex` reference in
+the older entries here as pointing there.
+
+The 2026-08-19 entry below is the refactor onto luseepy + croissant;
+the five original analysis steps and that earlier report were complete
+before it, on the pixel-space engine.
 
 ## Refactor onto luseepy + croissant (2026-08-18 → 2026-08-19)
 
@@ -103,8 +110,11 @@ state and the distinction matters if figures move to the paper.
   (+`--calibrated`), `step2_plots.py --center {30,10,50}`,
   `step_ionly.py --centers 30 10 50 --analyze`,
   `step4_power_spectra.py --centers 30 10 50`; then pdflatex twice
-  in `report/`.  Run under `ulimit -v 16000000` with absolute log
-  paths; 12 GB is not enough.
+  in `report/`.  (The `step2_*`/`step4_*` scripts live at the
+  `audit-2026-08-18` tag, not on this branch.)  Run heavy jobs under
+  `systemd-run --user --scope -p MemoryMax=10G` with absolute log
+  paths; `ulimit -v 16000000` is an address-space guard only (12 GB is
+  not enough for it) and does not cap RSS — see AGENTS.md.
 - Read AGENTS.md for pinned conventions, OOM/memory rules, the PSD
   sanity invariant, and the script inventory.
 - Next natural tasks (not started): transfer report content into the
@@ -269,13 +279,275 @@ state and the distinction matters if figures move to the paper.
   (setup, steps 1-4, practical conclusions on parent vs zoom bins and
   the delay window; figures in `report/figures/`).
 
+## Step 5b: the Faraday depth template (branch faraday-delay-template)
+- [x] `dispersion.py` (depth distributions, NUFFT transforms, real-response
+  RMSF, depth horizon, geometry knob, coherence bracket) + `noise.py`
+  (ported + matched filter) + `response.pair_weight_maps` (basis-independent
+  weight combining both Faraday branches, `sqrt(0.5*(|K_Q|^2+|K_U|^2))`,
+  not one branch alone).
+- [x] Acceptance gates passed: normalised template invariant under nside
+  256–2048 refinement and under a null rotation (the audit's two findings,
+  rebutted); converged-regime control reproduced through the NUFFT path.
+- [x] `step5_instrument_envelope.py` / `step5_template.py` /
+  `step5_sensitivity.py` / `step5_plots.py`; figures in report/figures/.
+- [x] Tail gate (S4.2.2), measured: from the full `--lst 128` run, the
+  `|w|^2`-weighted tail fraction above the fixed beam-weighted-p99
+  threshold, resolved over LST. Four-port arm GC-transit maxima per band:
+  **2.16% (30 MHz), 3.15% (50 MHz), 2.39% (10 MHz)**; two-port arm:
+  **2.18% (30 MHz), 3.70% (50 MHz), 2.69% (10 MHz)**. Away from transit the
+  fraction falls to ~1e-6; the LST mean sits near ~0.8% at every band and
+  arm, close to the ~1% the p99 definition implies at a typical LST, and
+  GC transit lifts it only 2-4x above that floor, not by orders of
+  magnitude. Read from `generated_data/step5_template.npz["tail_frac_lst"]`
+  and `step5_template_two_port.npz["tail_frac_lst"]`, both shape `(3, 128)`.
+- [x] **Tail-gate verdict against the S4.10 threshold.** Convention
+  first, because it moves every number: `tail_frac_lst` is a fraction
+  of the template's **power** while the bracket is an **amplitude**, and
+  spec S4.2.2 says detection and localisation are "separated by roughly
+  the square root of the tail's power fraction". So the tail's amplitude
+  is `bracket x sqrt(f)`, not `bracket x f`. At 30 MHz
+  `sqrt(0.0216) = 0.147` against `f = 0.0216` — a factor **6.8x on every
+  ratio**, which an earlier version of this entry lost. Against `A_mf` at
+  24 lunations (1.33e-5 / 1.07e-5 / 1.67e-5, four-port maxima):
+
+  | band | at `lower_slab` | ratio | at `lower_dispersion` | ratio |
+  |---|---|---|---|---|
+  | 30 MHz | 6.26e-5 | **4.7 OPEN** | 7.7e-8 | 0.006 closed |
+  | 50 MHz | 2.07e-4 | **19.3 OPEN** | 7.2e-7 | 0.067 closed |
+  | 10 MHz | 7.7e-6 | 0.46 closed | 1.0e-9 | 6e-5 closed |
+
+  (the two-port arm, taken consistently -- its own bracket with its own
+  `sqrt(f)`, not the four-port bracket -- gives 4.77 / 19.92 / 0.47, at
+  most 3% away, same OPEN/closed calls.) The bracket's
+  `upper` level is deliberately **not** in the table: it is
+  clamp-derived and not computable from this map (below). So the gate
+  **opens at 30 and 50 MHz if the diffuse amplitude sits at the
+  uniform-slab floor, and closes at every band if it sits at the
+  internal-dispersion floor** — it is decided by which depolarisation
+  floor the medium sets, a mixed-vs-external-screen geometry question.
+  It is *not* decided by the tail measurement (solid at 2.2-3.7% in both
+  arms), *not* by `theta_c`, and *not* by integration time: with
+  `A ~ n^-1/2 N^-1/4`, closing the 30 MHz dispersion-floor gap of 173x
+  would take ~3e4 times more nights. **This supersedes the earlier
+  entry**, which recorded the gate as decided by the grid-clamped
+  `theta_c` with a wider `structure_function` grid as the fix. Only
+  `upper` contains `theta_c`; both floors above are `theta_c`-free.
+  Also written up in `docs/measurement-model.md` §12 — this is the
+  branch's headline decision and must not live only in the ledger.
+- [x] Coherence angle / the bracket's upper end: `theta_c_clamped` is
+  `[True True True]` in both npz files — the coherence angle hit the
+  0.2 deg edge of the `structure_function` search grid at every band and
+  both arms. Two consequences, both recorded late:
+  **(1) the clamp OVERSTATES.** `coherence_angle` returns the grid edge
+  when the root lies *below* it, so a clamped return is an upper bound
+  on `theta_c`, and `upper ~ theta_c` inherits that. Measured with the
+  script's own grid: `D(0.2 deg) = 96.2 (rad/m^2)^2` against targets
+  5.01e-5 / 3.87e-4 / 6.19e-7, i.e. a root 1385x / 499x / 12465x below
+  the grid edge under `D ~ theta^2`. The shipped `upper` (9.9e-3 at
+  30 MHz) is therefore overstated by ~3 orders of magnitude; a `theta^2`
+  extrapolation gives 7.1e-6, which is *below* `lower_slab` — the
+  bracket inverts, which is itself the proof the extrapolation is not
+  quotable. (Spec S4.4 says the bracket runs "1e-4 down to 1e-6"; the
+  code produces 1e-2. The spec and the code disagreed all along.)
+  **(2) widening the grid cannot fix it.** The root sits at 0.52 / 1.44
+  / 0.058 arcsec, three decades below `faraday2020v2`'s own nside-512
+  resolution; a wider grid would extrapolate `D ~ theta^2`, not measure.
+  **The incoherent-patch upper bound is not determinable from this map**
+  and must be quoted as such, never as ~1e-2. The two lower levels
+  (`lower_slab`, `lower_dispersion`) contain no `theta_c` and stand.
+- [x] `T_sys/T_sky` (S4.10 risk item), **partial**: 1.0044 (30 MHz),
+  1.0170 (50), 1.0006 (10). Read it as `1 + T_loading/T_sky` and nothing
+  more — `step5_sensitivity.py --t-amp` defaults to 0 and the luseepy
+  chain carries no amplifier noise, so the term the spec's risk item is
+  actually about (receiver noise through a short mismatched dipole on
+  regolith at 50 MHz) is set to zero. It is a genuine lower bound, not a
+  computed sky-domination check, and `t_sky = mean(I_sky)` is an all-sky
+  mean rather than a beam-weighted antenna temperature. **Sky domination
+  at 50 MHz stays open** until the collaboration supplies a receiver
+  noise temperature; re-run with `--t-amp` when it does.
+- [x] Template robustness, reported numbers (S6.5, S6.11): the
+  `sin^2|b|` plane taper moves the 90%-mass knee by **4.3-5.5x** (30 MHz
+  `k=0`: 89.6 -> 17.9 rad/m^2), so the roll-off is carried by the
+  Galactic plane — per S4.2.1 the branch's *worst* case for the linear
+  `phi(f)` ansatz, and a reason to read the amplitude bracket as wider
+  rather than narrower. The two-arm swap (S4.9) moves the same knee by
+  **+24% at 50 MHz**, +12% at 10 MHz, and **<1% at 30 MHz**, the band
+  that owns the knee. Both are in `docs/measurement-model.md` §9.
+- [x] Window dynamic-range budget (S4.8), reported: a `phi ~ 0`
+  foreground at `|P|/I = 0.15` through BH4 leaks **3.7e-6 peak** (first
+  sidelobe, `phi ~ 10.8`), **<=1e-6 beyond `phi = 27.5`**, **1.4e-7
+  across the 30 MHz knee** and **<=8.8e-8 beyond `phi = 200`**. BH4 is
+  therefore *adequate* against both bracket ends everywhere the roll-off
+  lives, and inadequate only inside its own main lobe (`phi <~ 10`).
+  The spec's "3.8e-6 everywhere, inadequate against the 1e-6 floor" read
+  a single peak-sidelobe level as a flat floor. Table in
+  `docs/measurement-model.md` §12; measured by
+  `tests/test_dispersion.py::test_foreground_sidelobe_budget`.
+- Figure provenance: all step-5 figures regenerate from committed scripts
+  on this branch; the refuted Step 2/4 figures live only at the
+  audit-2026-08-18 tag. The mixed-provenance list is empty here.
+- [x] **Reframed from shape/localisation to DETECTION.** The user's
+  point, and it is right: we will never resolve a peak in Faraday depth
+  and map it to real Galactic structure. What matters is the SNR of
+  *any* evidence of Faraday rotation and whether that evidence is
+  degenerate with systematics. Those are different statistics from the
+  tail gate and they give different answers, and the earlier write-up
+  led with a localisation verdict as though it were the detection one.
+- [x] **`scripts/step5_detection.py`** -- detection SNR against the
+  low-depth systematics cut. Instrumental `I -> Q,U` leakage is
+  spectrally smooth and sits at `phi ~ 0`, so a statistic integrating
+  all depths is degenerate with it; the cut is what breaks the
+  degeneracy, and the BH4 window budget puts it at `phi >= 27.5`
+  (leakage `<= 1e-6` of I beyond there). **The cut is cheap: it keeps
+  ~27% of template power and costs only ~2.2x in sensitivity at every
+  band**, because the truncated template still spans most of the axis.
+- [x] **Tail-gate error, corrected.** The published gate compared
+  `A_bracket x sqrt(f)` -- a TRUNCATED signal -- against `A_mf` for the
+  FULL template. Inconsistent: a statistic that looks only above the
+  cut has only the truncated shape to match against, and its threshold
+  is 28-35% higher. `step5_detection.py` recomputes the threshold on
+  the truncated template at every cut. Verdicts unchanged, numbers
+  ~26% lower.
+- [x] **`H_lst`** added to `step5_template.npz` (fiducial `k` only,
+  3 x 128 x 2500, 7.7 MB) so the transit-time tail numbers are exact
+  rather than a GC-transit power fraction against an LST-averaged
+  threshold. **Both arms re-run.** Note the trap this exposed:
+  `step5_template.py` writes the same path regardless of `--lst`, so a
+  smoke run overwrites the production product -- it did, once.
+- [x] **Delay (`tau`) is FEASIBLE, and the argument against it was
+  overstated.** `tau_FD = 2 phi c^2 / (pi nu^3)` is monotonic in `phi`,
+  so a cut in one basis is exactly a cut in the other with an identical
+  retained power fraction: every detection number is basis-independent.
+  The chirp smears by **2.0% (30 MHz) / 1.2% (50 MHz)** of the
+  template's OWN extent, because the signal is a broad distribution
+  spanning hundreds of resolution elements, not a peak -- the chirp
+  only destroys a *narrow* feature, i.e. localisation. Aliasing costs
+  1.8% / 0.0% of the kept signal at 30 / 50 MHz. Only 10 MHz fails, on
+  **aliasing** (115%), and it was already out. Measured and unexplained:
+  the delay-Nyquist wall and the zoom depth horizon agree to 0.1% at all
+  three bands (2796.4/2796.9, 604.0/604.1, 22.4/22.4).
+- [x] **The cut's separation from the origin is basis-independent and
+  ranks the bands.** At 30 MHz `phi >= 27.5` is 3.6 amplitude
+  resolution elements out; at 50 MHz only 0.8 -- inside one element.
+  So although 50 MHz has the larger raw SNR, **30 MHz is the band where
+  the cut is cleanly executable**; at 50 MHz the separation from
+  `phi ~ 0` leakage rests entirely on window sidelobe control. A better
+  reason to lead with 30 MHz than the knee.
+- [x] **Renamed `delay` -> `depth` through the code and docs.** The
+  axis is `phi` in rad/m^2, the conjugate of `lambda^2`; it is NOT the
+  `tau` in milliseconds that the refuted Step 4 transformed onto.
+  `dispersion.delay_power` -> `depth_power`; prose in `dispersion.py`
+  (which now carries an explicit naming warning), `response.py`,
+  `instrument.py`, both step5 scripts, `docs/measurement-model.md`,
+  `CLAUDE.md`, `AGENTS.md`. **Deliberately NOT renamed**: the
+  PROGRESS.md lines describing the old Step 2/4 work, which are a
+  genuine record of a genuine delay analysis. The branch name keeps the
+  old word because PR #4 is open on it.
+- [x] **`report/faraday_depth_template/`** (was `report/delay_template/`)
+  -- restructured around detection: SNR-vs-cut as the headline section
+  and figure, the two bases as their own section, shape / resolution /
+  knee demoted to what sets the template, the tail gate moved to a
+  localisation section with corrected numbers. `cd
+  report/faraday_depth_template && make`.
+- [x] **No number in the report is typed by hand.**
+  `scripts/step5_tables.py` writes `generated.tex` -- macros and table
+  bodies -- straight from the npz, and the `.tex` `\input`s it.
+  Transcription had failed twice (the tail gate above; the closed-form
+  "within a few percent" claim, which is really 0.980 / 1.161 / 0.542).
+  `generated.tex` is TRACKED, like the figures, so the report builds
+  from a fresh clone.
+- [x] **`notebooks/faraday_depth_template.ipynb`** (was
+  `faraday_delay_template.ipynb`) -- executable companion, committed
+  executed, restructured to match the report and deriving the detection
+  table, the chirp/aliasing table and the resolution table live.
+- [x] `step5_plots.fig_detection` and `fig_weight_map` added;
+  `fig_template_family` rewritten after review -- colour now means
+  geometry and linestyle means treatment (they were two apart in the
+  property cycle, so the fiducial's solid was green and its own dotted
+  companion red, with the dotted curves absent from the legend), and
+  `k -> -1` is drawn as a marked point with a legend entry saying it is
+  `delta(phi)` rather than as an invisible curve at the axis edge.
+- [x] `.gitignore`: `report/` -> `report/*` plus exceptions. git does
+  not descend into an excluded DIRECTORY, so a bare `report/` makes the
+  exceptions impossible to express. Verified with `git check-ignore -v`.
+- [x] Report S11 "Reading the bracket backwards", plus
+  `dispersion.slope_requirement`, `step5_plots.fig_slope` and 3 tests.
+  The two floors
+  carry DIFFERENT spectral slopes -- `A_slab ~ nu^2`, `A_disp ~ nu^4` --
+  so a band-to-band RATIO discriminates the geometry with no absolute
+  scale and no assumed `p_0`. Requirement: 50/30 amplitude ratio known
+  to a factor **1.23 (5 sigma) / 1.41 (3 sigma)**; statistics contribute
+  only **1.8%**, so this is a systematics spec, not a sensitivity one.
+  Framed as required future work -- it enters NO verdict, and
+  Table `tab:detection` is unchanged. Two caveats found in the doing:
+  `A_disp` is exactly `nu^4` (**+0.00%** at both band pairs) only because
+  `sigma_eff` is a hard-coded scalar while `phi_med` is beam-weighted
+  (departs **-1.4% / -4.2%**), which sharpens the `sigma_eff` follow-up;
+  and the slope carries the EXPONENT only, since `phi_med`/`sigma_eff`
+  are degenerate with `p_0` in the amplitude. The closure is
+  shape -> `phi_med` (the amplitude-free knee) -> `p_0`, blocked on the
+  coherence tilt (moves the 30 MHz knee 89.6 -> 18 rad/m^2).
+
+## Report currency pass (2026-09-03)
+
+Three gaps between the report and what was known after it was last
+built, plus the ledger's own stale header.
+
+- [x] **The random walk's floor is `1/sqrt(N_eff)`, not
+  `1/sqrt(N_pix)`.** `N_eff = (sum|w|)^2 / sum|w|^2` is the number of
+  pixels the WEIGHTED sum actually averages, and `N_eff = N_pix` only
+  for equal weights. On the beam- and emissivity-weighted sky it is
+  **1100 at nside 64 and 30870 at nside 512** -- 2.2% and 1.0% of the
+  pixels present, since 0.01% of pixels carry 5.1% of the weight -- so
+  the equal-weight guide sits a **factor 10** low at nside 512. Report
+  Figure 2's dotted line was that guide, which made an estimator lying
+  exactly on its floor read as one that failed to reach it. The line is
+  now the floor itself, an ABSOLUTE prediction with nothing fitted,
+  with the 16-84% Rayleigh band of the single `lambda^2` sample plotted
+  behind it. `N_eff ~ N_pix^0.81`, so the floor falls as
+  `N_pix^-0.40`; measured `N_pix^-0.38`, and all four points sit at
+  0.53-1.31x the floor. New `sky.effective_pixel_count` + 3 tests, new
+  `coherent_n_eff` in `step5_intuition.npz`, Equation (7) generalised,
+  and the abstract no longer names the exponent.
+  **The Section 5.6 gates are untouched**: they weight every pixel
+  equally, so `N_eff = N_pix` there and the 134x-against-64 comparison
+  stands as written.
+- [x] **Section 6.1's "Only one of them matters" was an
+  overstatement.** It bounded four perturbations and read as though it
+  bounded the inputs. The one it cannot bound is a spatially VARYING
+  spectral index, and the lever arm is the whole extrapolation: the
+  weighting carries WMAP K from 23 GHz to 30 MHz, a factor **767**, and
+  `|w|^2` carries the emissivity squared, so `d_beta = 0.1` between two
+  regions moves their relative weight by **3.8x** and `d_beta = 0.2` by
+  **14x**. Stated as arithmetic (generated, like every other number),
+  NOT as a measured `|dS|` -- measuring it is the next task, and this
+  entry does not pre-empt it.
+- [x] **The notebook was three commits stale** -- last executed at
+  `38d9906`, before the signed-covariance fix, the money-plot rerun and
+  the slope discriminant. Re-executed, and three things fixed rather
+  than merely re-run: the refuted "order 1e3 rad/m^2 between
+  neighbouring pixels" premise (it is 0.56 median, 4.3 p90 -- the
+  conclusion survives via 18 turns of the carrier at 30 MHz, not via
+  the gradient), a new N_eff section carrying the above, and a new
+  Section 11 for the slope discriminant. Sections renumbered 11->12,
+  12->13.
+- [x] **Ledger header.** It still said "Report in `report/report.tex`
+  (14 pp)", which is not on `main` -- that report and the results it
+  carries are at the `audit-2026-08-18` tag.
+
+Verified: `generated.tex` regenerates byte-identical apart from the 15
+new macros; 15 of the 16 figures re-render bit-identical (only
+`step5_bridge` changed, and the other 15 were restored so the diff
+carries no timestamp churn); report builds clean at 34 pp with no
+undefined references.
+
 ## Possible follow-ups
 - [ ] Transfer selected figures/text into the paper (explicitly out of
   scope per INSTRUCTIONS-LPY.md: "don't change the paper yet").
 - [ ] Ionospheric-regime study: dedicated run with small phi (1-30
   rad/m^2) uniform screen to emulate the lunar ionosphere at 10 MHz.
 - [ ] Noise: propagate radiometer noise through the zoom bins to turn
-  the delay-space signature into a detectability forecast.
+  the depth-space signature into a detectability forecast.
 
 ## Key decisions / conventions (pinned)
 - Response frame: x=East, y=North, z=zenith (proper rotation);
@@ -283,7 +555,7 @@ state and the distinction matters if figures move to the paper.
 - Sky Q/U in healpy/COSMO convention; U_IAU = −U_COSMO when feeding
   croissant. Faraday: (Q+iU) e^{+2iφλ²}.
 - Fixed 30/10/50 MHz beam across the narrow band; only the Faraday
-  phase is chromatic → all delay-space power is Faraday-induced.
+  phase is chromatic → all depth-space power is Faraday-induced.
 - Real maps at native nside=512 RING, never degraded; Haslam file is
   RING, WMAP K NESTED (check ORDERING headers!).
 - Time: 1024 samples over one lunar sidereal day (periodic).
