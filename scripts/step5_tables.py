@@ -24,6 +24,7 @@ import numpy as np
 
 from common import GEN_DIR, REPO
 from lusee_faraday import dispersion as dsp
+from lusee_faraday.config import FREQ_REF_QU
 from lusee_faraday.conventions import lambda_squared
 
 OUT = REPO / "report" / "faraday_depth_template" / "generated.tex"
@@ -441,6 +442,16 @@ def main():
         vr = q["toy_var"][3, 1] / q["toy_var"][3, 0]
         macro("cvVarRatioHutschenreuter", f"{vr:.3f}")
         macro("betaShift", sci(float(q["beta_shift"]), 2))
+        # A spatially VARYING index does not cancel, and the lever
+        # arm is the whole extrapolation: w2 ~ P_emis^2, so two
+        # regions differing by d_beta have their relative weight
+        # changed by (nu_ref/nu)^(2 d_beta).  Arithmetic rather than a
+        # measurement -- but generated, because sec:inputsens quotes
+        # it and the report types no numbers by hand.
+        lever = float(FREQ_REF_QU) / 30.0
+        macro("betaExtrapFactor", f"{lever:.0f}")
+        macro("betaLeverPointOne", f"{lever ** 0.2:.1f}")
+        macro("betaLeverPointTwo", f"{lever ** 0.4:.0f}")
         # The random-walk argument's own input.  It was asserted as
         # "order 1e3 rad/m^2" and is actually ~0.6; generated so it
         # cannot drift again.
@@ -449,6 +460,40 @@ def main():
         for i, w in enumerate(("Ten", "Thirty", "Fifty")):
             macro(f"adjTurns{w}", f"{q['adj_turns'][i]:.0f}")
         macro("cohValidMHz", f"{float(q['coherent_valid_above_mhz']):.0f}")
+        # The floor the coherent sum decays TO.  It is 1/sqrt(N_eff),
+        # an absolute prediction with nothing fitted, and NOT the
+        # equal-weight 1/sqrt(N_pix): the beam-weighted sky is
+        # concentrated, so the two differ by a factor walkFloorGap and
+        # the naive guide turns an exact match into an apparent
+        # shortfall.  Generated because the report quotes all of it.
+        ns_w, neff = q["nsides"], q["coherent_n_eff"]
+        npix = 12.0 * ns_w.astype(float) ** 2
+        meas = q["coherent_norm"][-1]  # the real RM map
+        macro("walkNsideLo", f"{int(ns_w[0])}")
+        macro("walkNsideHi", f"{int(ns_w[-1])}")
+        macro("walkNEffLo", f"{neff[0]:.0f}")
+        macro("walkNEffHi", f"{neff[-1]:.0f}")
+        macro("walkNEffFracLo", f"{100 * neff[0] / npix[0]:.1f}")
+        macro("walkNEffFracHi", f"{100 * neff[-1] / npix[-1]:.1f}")
+        macro(
+            "walkNEffExponent",
+            f"{np.polyfit(np.log(npix), np.log(neff), 1)[0]:.2f}",
+        )
+        macro(
+            "walkFloorGap",
+            f"{np.sqrt(neff[-1] / npix[-1]) ** -1:.0f}",
+        )
+        macro(
+            "walkSlopeMeasured",
+            f"{np.polyfit(np.log(npix), np.log(meas), 1)[0]:.2f}",
+        )
+        macro(
+            "walkSlopePredicted",
+            f"{np.polyfit(np.log(npix), -0.5 * np.log(neff), 1)[0]:.2f}",
+        )
+        floor_ratio = meas * np.sqrt(neff)
+        macro("walkFloorRatioLo", f"{floor_ratio.min():.2f}")
+        macro("walkFloorRatioHi", f"{floor_ratio.max():.2f}")
         macro("rmStdMedian", f"{float(q['rm_std_median']):.1f}")
         macro("rmAbsMedian", f"{float(q['rm_abs_median']):.1f}")
         rm_pct = 100 * float(q["rm_std_median"]) / float(q["rm_abs_median"])
