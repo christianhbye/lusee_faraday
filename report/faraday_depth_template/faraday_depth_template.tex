@@ -30,7 +30,7 @@
 \title{Detecting Galactic Faraday rotation with LuSEE-Night:\\
   sensitivity, systematics separation, and the depolarisation floor}
 \author{Christian Hellum Bye}
-\date{2026-08-21}
+\date{2026-09-03}
 
 \begin{document}
 \maketitle
@@ -45,8 +45,8 @@ and what limits that detection.
 
 The central methodological result is an estimator. The earlier diffuse
 calculation summed the Faraday phasor pixel by pixel over a HEALPix
-map; that is a random walk whose amplitude falls as
-$N_{\rm pix}^{-1/2}$, so it was measuring pixelisation shot noise
+map; that is a random walk whose amplitude falls without limit as the
+sphere is refined, so it was measuring pixelisation shot noise
 rather than sky. Binning the beam- and emissivity-weighted sky
 \emph{in Faraday depth first} and transforming second gives a
 distribution $F(\phi)$ whose shape is invariant under refinement, and
@@ -235,21 +235,42 @@ Then
   = \sum_{n} |w_n|^2 ,
   \label{eq:walk}
 \end{equation}
-every cross term averaging to zero, and for $N$ pixels of comparable
-weight the \emph{normalised} amplitude behaves as
+every cross term averaging to zero. The \emph{normalised} amplitude
+therefore has a floor with nothing fitted in it,
 \begin{equation}
   \frac{\sqrt{\langle |P|^2\rangle}}{\sum_n |w_n|}
-  = \frac{\sqrt{N}|w|}{N|w|} = N^{-1/2}.
+  = \frac{\sqrt{\sum_n |w_n|^2}}{\sum_n |w_n|}
+  = N_{\rm eff}^{-1/2},
+  \qquad
+  N_{\rm eff} \equiv
+  \frac{\bigl(\sum_n |w_n|\bigr)^{2}}{\sum_n |w_n|^{2}} ,
   \label{eq:nhalf}
 \end{equation}
+which for $N$ pixels of comparable weight is the familiar $N^{-1/2}$.
+
+The beam- and emissivity-weighted sky is emphatically not that case,
+and the distinction is not cosmetic. $N_{\rm eff}$ is only
+\walkNEffLo{} at nside \walkNsideLo{} and \walkNEffHi{} at nside
+\walkNsideHi{} --- \walkNEffFracLo\% and \walkNEffFracHi\% of the
+pixels present --- because the weight is concentrated on the Galactic
+plane and on a few compact sources. Writing $N_{\rm pix}^{-1/2}$ there
+understates the floor by a factor \walkFloorGap{} at nside
+\walkNsideHi{}, which is enough to make an estimator sitting exactly on
+its floor look like one that failed to reach it.
 
 Equation~\eqref{eq:nhalf} is a statement about the estimator, not the
 sky: its value is set by how finely the sphere is pixelised and it goes
-to zero under refinement. The direct demonstration is the acceptance
-gate of Section~\ref{sec:gates}, where nside $256 \to 2048$ collapses
-the coherent power by a factor $134$ --- close to the factor $64$
-Equation~\eqref{eq:nhalf} predicts, and nothing like the invariance a
-physical signal would show.
+to zero under refinement. Concentration slows that decay without
+stopping it --- $N_{\rm eff} \propto N_{\rm pix}^{\walkNEffExponent}$
+across the nsides above, so the floor falls as
+$N_{\rm pix}^{\walkSlopePredicted}$ rather than as
+$N_{\rm pix}^{-1/2}$, and Figure~\ref{fig:bridge} measures
+$N_{\rm pix}^{\walkSlopeMeasured}$. The direct demonstration is the
+acceptance gate of Section~\ref{sec:gates}, where nside $256 \to 2048$
+collapses the coherent power by a factor $134$. Those gates weight
+every pixel equally, so $N_{\rm eff} = N_{\rm pix}$ there and
+Equation~\eqref{eq:nhalf} predicts $64$: the same order, and nothing
+like the invariance a physical signal would show.
 
 The sum in Equation~\eqref{eq:pixelsum} is computed correctly, and it
 is not wrong in general --- it is the standard RM-synthesis estimator,
@@ -276,12 +297,17 @@ be replaced rather than repaired.
   \caption{Scaling the Galactic RM map down moves it from the regime
   where the coherent pixel sum converges to the regime where it is a
   random walk. Left: the estimator against pixelisation --- flat means
-  it converges, sloped means it is measuring $N_{\rm pix}$. Intrinsic
-  angles are set to zero (maximally coherent), so any decay is the
-  Faraday phase decorrelating and not the sky's angles. Middle and
-  right: the depth distribution that replaces it, and the channel
-  covariance that follows. Reading one colour left to right is one
-  sky.}
+  it converges, tracking the dotted line means it is measuring
+  $N_{\rm eff}$. That line is Equation~\eqref{eq:nhalf} on the actual
+  weights, with no normalisation fitted, and the band is the 16--84\%
+  spread of the single \lamsq{} sample plotted, whose $|P|$ is
+  Rayleigh --- so a third of all points belong outside it. The real-RM
+  points sit at \walkFloorRatioLo--\walkFloorRatioHi$\times$ the
+  floor, i.e. inside. Intrinsic angles are set to zero (maximally coherent), so any
+  decay is the Faraday phase decorrelating and not the sky's angles.
+  Middle and right: the depth distribution that replaces it, and the
+  channel covariance that follows. Reading one colour left to right is
+  one sky.}
   \label{fig:bridge}
 \end{figure}
 
@@ -850,13 +876,17 @@ control}
 \label{sec:inputsens}
 
 $S$ is built from the RM map, the polarized emissivity, the beam and
-the emissivity geometry. Only one of them matters.
+the emissivity geometry. Only one of the perturbations tested below
+moves it appreciably --- but that list is not exhaustive, and the one
+input this section cannot bound is not the one least likely to matter.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.62\textwidth]{step5_robustness.pdf}
-  \caption{Sensitivity of $|S_{ij}|$ to its inputs. Everything except
-  the emissivity geometry lies on the fiducial curve.}
+  \caption{Sensitivity of $|S_{ij}|$ to the inputs perturbed here.
+  Everything except the emissivity geometry lies on the fiducial
+  curve. A spatially varying spectral index is not among them, and is
+  the exception discussed in the text.}
   \label{fig:robustness}
 \end{figure}
 
@@ -873,8 +903,22 @@ than measured: $(\nu/\nu_{\rm ref})^\beta$ is a spatially \emph{uniform}
 rescaling of the emissivity, so it multiplies $|w|^2$ by a constant and
 cancels in the normalised template (measured residual $\betaShift$).
 Only the spatial \emph{pattern} of the polarized sky enters, never its
-overall scale or spectral index. A spatially \emph{varying} index would
-reweight pixels against each other and is not tested here.
+overall scale or spectral index.
+
+A spatially \emph{varying} index is a different matter, and it is the
+input this section leaves unbounded. The weighting extrapolates the
+WMAP K polarized map from $23$\,GHz down to the observing band --- a
+factor \betaExtrapFactor{} in frequency at 30\,MHz --- and $|w|^2$
+carries the emissivity \emph{squared}. Two regions whose indices
+differ by only $\Delta\beta = 0.1$ therefore have their relative
+weight changed by
+$(\nu_{\rm ref}/\nu)^{2\Delta\beta} \approx \betaLeverPointOne$, and
+by $\approx \betaLeverPointTwo$ at $\Delta\beta = 0.2$. That is a
+reweighting of the sky against itself, which is precisely what $F$
+responds to, and the lever arm is long enough that it cannot be
+assumed small on the strength of the uniform case above. How much of
+it reaches $|S|$ depends on how the index varies \emph{relative to}
+the depth structure, and is not measured anywhere in this report.
 
 Two caveats travel with this. The RM redraw uses independent per-pixel
 noise, whereas the reconstruction's errors are correlated; the coherent
@@ -1764,6 +1808,8 @@ data products. A companion notebook,
 \toprule
 Claim & Test \\
 \midrule
+The walk's floor, Eq.~\eqref{eq:nhalf}
+  & \code{test\_effective\_pixel\_count\_is\_the\_random\_walk\_floor} \\
 Shape stable under refinement
   & \code{test\_gate1\_shape\_invariance\_under\_refinement} \\
 Shape stable under null rotation
@@ -1802,6 +1848,7 @@ Matched filter, Eq.~\eqref{eq:mf}
 
 \begin{verbatim}
     uv run python scripts/step5_detection.py     # the detection npz
+    uv run python scripts/step5_intuition.py     # needs data/
     uv run python scripts/step5_tables.py        # generated.tex
     uv run python scripts/step5_plots.py         # the figures
     cd report/faraday_depth_template && make

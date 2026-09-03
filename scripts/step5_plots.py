@@ -21,6 +21,14 @@ from lusee_faraday import dispersion as dsp  # noqa: E402
 from lusee_faraday.config import fine_freqs  # noqa: E402
 from lusee_faraday.conventions import lambda_squared  # noqa: E402
 
+# |P| from a sum of many random phasors is Rayleigh, so ONE lambda^2
+# sample scatters about its own rms by these factors (the 16th and 84th
+# percentiles of sqrt(-ln U)).  fig_bridge measures the coherent sum at
+# a single lambda^2, so this is the band its points must fall in for
+# the 1/sqrt(N_eff) floor to be the right prediction.
+RAYLEIGH_16 = 0.41756
+RAYLEIGH_84 = 1.35373
+
 K_LABELS = {
     0: "$k\\to\\infty$ (all far)",
     1: "$k=0$ (slab, fiducial)",
@@ -331,18 +339,31 @@ def fig_bridge(q):
                 label=lab)
         a2.plot(phi, q["scan_H"][i], color=col, lw=1.3)
         a3.plot(dl2, q["scan_S"][i], color=col, lw=1.4)
-    ref = q["coherent_norm"][-1, 0] * (ns / ns[0]) ** -1.0
-    a1.plot(ns, ref, "k:", lw=1.2, label=r"$N_{\rm pix}^{-1/2}$ slope")
-    a1.set(xscale="log", yscale="log", xlabel="nside",
+    # The floor is 1/sqrt(N_eff), and it is an ABSOLUTE prediction with
+    # no normalisation to fit: sqrt(<|P|^2>)/sum|w| = sqrt(sum|w|^2)/
+    # sum|w|.  The equal-weight N_pix^-1/2 is the special case, and it
+    # is the wrong line here -- the beam-weighted sky is concentrated
+    # enough (N_eff/N_pix runs 2.2% to 1.0% over these nsides) that it
+    # sits a factor 10 low at nside 512 and makes an exact match read
+    # as a failed prediction.  A single lambda^2 sample is Rayleigh, so
+    # the 16-84% band is what the points should scatter within.
+    floor = 1.0 / np.sqrt(q["coherent_n_eff"])
+    a1.fill_between(ns, RAYLEIGH_16 * floor, RAYLEIGH_84 * floor,
+                    color="0.85", zorder=0,
+                    label="Rayleigh 16-84% of one sample")
+    a1.plot(ns, floor, "k:", lw=1.2, label=r"$N_{\rm eff}^{-1/2}$ floor")
+    # Room under the curves for the legend: without it the seven
+    # entries sit on top of the Rayleigh band they explain.
+    a1.set(xscale="log", yscale="log", xlabel="nside", ylim=(4e-4, 2.0),
            ylabel=r"$|\sum_n w_n e^{2i\phi_n\lambda^2}|\,/\,\sum_n w_n$")
-    a1.set_title("(1) the coherent sum:\nflat = converges, sloped = shot "
-                 "noise", fontsize=10)
+    a1.set_title("(1) the coherent sum:\nflat = converges, on the floor = "
+                 "shot noise", fontsize=10)
     # a log axis lays its own minor ticks under the manual ones and the
     # two label sets overprint; kill the minors explicitly.
     a1.xaxis.set_minor_locator(NullLocator())
     a1.xaxis.set_major_locator(FixedLocator(ns))
     a1.set_xticklabels([str(int(n)) for n in ns])
-    a1.legend(fontsize=6.5, loc="lower left")
+    a1.legend(fontsize=6.5, loc="lower left", ncol=2)
     a2.set(xscale="log", yscale="log", xlim=(0.4, 2600), ylim=(1e-8, 3),
            xlabel=r"$|\phi|$ [rad m$^{-2}$]",
            ylabel=r"$\hat H(|\phi|)$")

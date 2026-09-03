@@ -102,6 +102,34 @@ def nyquist_nside(rm_map, freq_mhz, percentile=99.9):
     return nside0 * max(1.0, phase_step / np.pi)
 
 
+def effective_pixel_count(weights):
+    """The number of pixels a weighted coherent sum actually averages.
+
+    ``N_eff = (sum w)^2 / sum w^2``.  Under random phases the
+    normalised coherent pixel sum has
+
+        sqrt(<|P|^2>) / sum_n |w_n|
+            = sqrt(sum_n |w_n|^2) / sum_n |w_n|
+            = N_eff^{-1/2},
+
+    which is the random walk's floor with no free parameter in it.
+    ``N_eff = N_pix`` only when the weights are equal, and that is the
+    case the textbook ``N_pix^{-1/2}`` assumes.  The beam- and
+    emissivity-weighted sky is not that case -- it is concentrated
+    enough that at nside 512 the two differ by a factor 10 -- so a
+    convergence plot drawn against ``N_pix^{-1/2}`` shows a shortfall
+    that is an artefact of the guide rather than of the estimator.
+
+    Takes ``|w|`` or ``|w|^2``: whichever quantity enters the sum
+    linearly is the one to pass.
+    """
+    w = np.abs(np.asarray(weights, dtype=float))
+    total = w.sum()
+    if total <= 0.0:
+        raise ValueError("effective_pixel_count needs positive weight")
+    return float(total**2 / np.square(w).sum())
+
+
 def _both_criteria(
     used_nside, needed_nside, freq_mhz, n_needed, max_components
 ):

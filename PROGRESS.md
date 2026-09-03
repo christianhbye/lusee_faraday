@@ -1,9 +1,16 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
-Updated: 2026-08-19 — **refactored onto luseepy + croissant** (see the
-section below); the five analysis steps and the report were complete
-before that on the pixel-space engine. Report in `report/report.tex`
-(14 pp, compiles clean, all figures referenced in text).
+Updated: 2026-09-03. The current write-up is
+`report/faraday_depth_template/` (`cd report/faraday_depth_template &&
+make`), on branch `faraday-delay-template`. **`report/report.tex` is
+not on `main`**: it and the diffuse-Faraday results it reports live at
+the `audit-2026-08-18` tag, which the audit recorded below refutes.
+Cite the tag, not a branch — and read every `report.tex` reference in
+the older entries here as pointing there.
+
+The 2026-08-19 entry below is the refactor onto luseepy + croissant;
+the five original analysis steps and that earlier report were complete
+before it, on the pixel-space engine.
 
 ## Refactor onto luseepy + croissant (2026-08-18 → 2026-08-19)
 
@@ -480,6 +487,59 @@ state and the distinction matters if figures move to the paper.
   are degenerate with `p_0` in the amplitude. The closure is
   shape -> `phi_med` (the amplitude-free knee) -> `p_0`, blocked on the
   coherence tilt (moves the 30 MHz knee 89.6 -> 18 rad/m^2).
+
+## Report currency pass (2026-09-03)
+
+Three gaps between the report and what was known after it was last
+built, plus the ledger's own stale header.
+
+- [x] **The random walk's floor is `1/sqrt(N_eff)`, not
+  `1/sqrt(N_pix)`.** `N_eff = (sum|w|)^2 / sum|w|^2` is the number of
+  pixels the WEIGHTED sum actually averages, and `N_eff = N_pix` only
+  for equal weights. On the beam- and emissivity-weighted sky it is
+  **1100 at nside 64 and 30870 at nside 512** -- 2.2% and 1.0% of the
+  pixels present, since 0.01% of pixels carry 5.1% of the weight -- so
+  the equal-weight guide sits a **factor 10** low at nside 512. Report
+  Figure 2's dotted line was that guide, which made an estimator lying
+  exactly on its floor read as one that failed to reach it. The line is
+  now the floor itself, an ABSOLUTE prediction with nothing fitted,
+  with the 16-84% Rayleigh band of the single `lambda^2` sample plotted
+  behind it. `N_eff ~ N_pix^0.81`, so the floor falls as
+  `N_pix^-0.40`; measured `N_pix^-0.38`, and all four points sit at
+  0.53-1.31x the floor. New `sky.effective_pixel_count` + 3 tests, new
+  `coherent_n_eff` in `step5_intuition.npz`, Equation (7) generalised,
+  and the abstract no longer names the exponent.
+  **The Section 5.6 gates are untouched**: they weight every pixel
+  equally, so `N_eff = N_pix` there and the 134x-against-64 comparison
+  stands as written.
+- [x] **Section 6.1's "Only one of them matters" was an
+  overstatement.** It bounded four perturbations and read as though it
+  bounded the inputs. The one it cannot bound is a spatially VARYING
+  spectral index, and the lever arm is the whole extrapolation: the
+  weighting carries WMAP K from 23 GHz to 30 MHz, a factor **767**, and
+  `|w|^2` carries the emissivity squared, so `d_beta = 0.1` between two
+  regions moves their relative weight by **3.8x** and `d_beta = 0.2` by
+  **14x**. Stated as arithmetic (generated, like every other number),
+  NOT as a measured `|dS|` -- measuring it is the next task, and this
+  entry does not pre-empt it.
+- [x] **The notebook was three commits stale** -- last executed at
+  `38d9906`, before the signed-covariance fix, the money-plot rerun and
+  the slope discriminant. Re-executed, and three things fixed rather
+  than merely re-run: the refuted "order 1e3 rad/m^2 between
+  neighbouring pixels" premise (it is 0.56 median, 4.3 p90 -- the
+  conclusion survives via 18 turns of the carrier at 30 MHz, not via
+  the gradient), a new N_eff section carrying the above, and a new
+  Section 11 for the slope discriminant. Sections renumbered 11->12,
+  12->13.
+- [x] **Ledger header.** It still said "Report in `report/report.tex`
+  (14 pp)", which is not on `main` -- that report and the results it
+  carries are at the `audit-2026-08-18` tag.
+
+Verified: `generated.tex` regenerates byte-identical apart from the 15
+new macros; 15 of the 16 figures re-render bit-identical (only
+`step5_bridge` changed, and the other 15 were restored so the diff
+carries no timestamp churn); report builds clean at 34 pp with no
+undefined references.
 
 ## Possible follow-ups
 - [ ] Transfer selected figures/text into the paper (explicitly out of

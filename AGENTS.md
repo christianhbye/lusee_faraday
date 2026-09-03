@@ -210,9 +210,14 @@ below too; it was missing from earlier revisions of this table.
     it writes is ud_grade'd for DISPLAY only; nothing downstream of it
     computes anything.
   - `scripts/step5_intuition.py [--band 30]` — precomputes everything
-    the intuition figures need (toy skies, the RM-scale scan, the
-    input-sensitivity variants, the measured-data realizations, the
-    Crab diagnostics, the matched filter's effective mode count).
+    the intuition figures need (toy skies, the RM-scale scan and its
+    `coherent_n_eff` floor, the input-sensitivity variants, the
+    measured-data realizations, the Crab diagnostics, the matched
+    filter's effective mode count).  Two DIFFERENT effective counts
+    live in this npz and must not be confused: `coherent_n_eff` is
+    `sky.effective_pixel_count` per nside, the floor the refuted pixel
+    sum decays to, while `n_eff_modes` is the matched filter's mode
+    count.
     Needs `data/` but NOT the response artifact, ~1 min. It exists so
     that `step5_plots.py` stays data-free: every figure must regenerate
     from the npz products alone. Everything it writes is for figures

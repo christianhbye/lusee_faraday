@@ -47,6 +47,7 @@ from lusee_faraday import noise
 from lusee_faraday.config import FREQ_REF_QU
 from lusee_faraday.conventions import lambda_squared
 from lusee_faraday.config import SIDEREAL_DAY_S
+from lusee_faraday.sky import effective_pixel_count
 
 NSIDES = np.array([64, 128, 256, 512])
 SCALES = np.array([1e-5, 1e-3, 1e-2, 1e-1, 1.0])
@@ -138,11 +139,18 @@ def main():
     coh = np.zeros((SCALES.size, NSIDES.size))
     scan_H = np.zeros((SCALES.size, ccent.size))
     scan_S = np.zeros((SCALES.size, len(bins)))
+    # The floor the coherent sum decays TO is 1/sqrt(N_eff), not
+    # 1/sqrt(N_pix): the beam-weighted sky is concentrated, so the two
+    # differ by more than a decade and the equal-weight guide makes an
+    # exact match look like a shortfall.  N_eff depends only on the
+    # weights, so it is computed once per nside rather than per scale.
+    w_ns = [w2 if n == 512 else hp.ud_grade(w2, n) for n in NSIDES]
+    coh_neff = np.array([effective_pixel_count(w) for w in w_ns])
     for i, s in enumerate(SCALES):
         x = rm * s
         for j, n in enumerate(NSIDES):
             r = x if n == 512 else hp.ud_grade(x, n)
-            w = w2 if n == 512 else hp.ud_grade(w2, n)
+            w = w_ns[j]
             # alpha = 0: MAXIMALLY coherent, so any decay is the Faraday
             # phase decorrelating and not the intrinsic angles.
             coh[i, j] = abs((w * np.exp(2j * r * lam2_0)).sum()) / w.sum()
@@ -370,6 +378,7 @@ def main():
         nsides=NSIDES,
         scales=SCALES,
         coherent_norm=coh,
+        coherent_n_eff=coh_neff,
         scan_H=scan_H,
         scan_S=scan_S,
         S_fiducial=S_fid,
@@ -420,6 +429,12 @@ def main():
           f"rad/m^2; turns 10/30/50 MHz = "
           + "/".join(f"{t:.1f}" for t in adj_turns))
     print(f"coherent pixel sum valid above ~{coh_freq_mhz:.0f} MHz")
+    print("N_eff / N_pix per nside: "
+          + ", ".join(f"{int(n)}: {e:.0f}/{12 * int(n) ** 2}"
+                      for n, e in zip(NSIDES, coh_neff)))
+    print("coherent sum vs the 1/sqrt(N_eff) floor: "
+          + ", ".join(f"{coh[-1, j] * np.sqrt(e):.2f}x"
+                      for j, e in enumerate(coh_neff)))
     print("per-band single-sample SNR: "
           + ", ".join(f"{b:.0f} MHz {v:.2f}"
                       for b, v in zip(all_bands, band_snr)))
