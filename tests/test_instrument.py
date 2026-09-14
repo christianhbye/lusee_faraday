@@ -1,0 +1,126 @@
+import os
+
+os.environ.setdefault("JAX_ENABLE_X64", "1")
+
+import numpy as np  # noqa: E402
+import pytest  # noqa: E402
+
+from lusee_faraday import instrument as inst  # noqa: E402
+
+
+@pytest.fixture(scope="module")
+def pieces():
+    lusee = pytest.importorskip("lusee")
+    import jax
+
+    jax.config.update("jax_enable_x64", True)
+    from lusee.ReceiverImpedance import JFETReceiver
+
+    resp = lusee.synthetic_four_port_response(freq_mhz=(10.0, 20.0))
+    return resp, JFETReceiver()
+
+
+def test_channels_roundtrip_through_unpack():
+    rng = np.random.default_rng(0)
+    A = rng.normal(size=(3, 5, 4, 4)) + 1j * rng.normal(size=(3, 5, 4, 4))
+    C = 0.5 * (A + np.conj(np.swapaxes(A, -1, -2)))
+    ch, labels = inst.channels(C)
+    assert ch.shape == (3, 5, 16)
+    assert len(labels) == 16
+    assert np.allclose(inst.unpack_channels(ch), C)
+
+
+def test_channels_match_luseepy_pack_covariance():
+    """Pin the local packing loop against luseepy's own packer.
+
+    ``instrument.channels`` is a hand-written loop over ``PORT_PAIRS``,
+    not a delegation: ``lusee.Covariance.pack_covariance`` exists and is
+    never called, because it stacks the channel axis at ``-2`` rather
+    than last and returns a jax array.  The values are meant to be
+    identical, so assert that rather than leaving it as a claim in a
+    document -- if either side's ordering or real/imag choice drifts,
+    this goes red.
+    """
+    lusee_cov = pytest.importorskip("lusee.Covariance")
+    import jax
+
+    jax.config.update("jax_enable_x64", True)
+
+    rng = np.random.default_rng(4)
+    A = rng.normal(size=(3, 5, 4, 4)) + 1j * rng.normal(size=(3, 5, 4, 4))
+    C = 0.5 * (A + np.conj(np.swapaxes(A, -1, -2)))
+
+    ours, our_labels = inst.channels(C)
+    theirs, their_labels = lusee_cov.pack_covariance(C)
+    theirs = np.moveaxis(np.asarray(theirs), -2, -1)  # (3,16,5)->(3,5,16)
+
+    assert tuple(our_labels) == tuple(their_labels)
+    assert ours.shape == theirs.shape == (3, 5, 16)
+    np.testing.assert_array_equal(ours, theirs)
+
+
+def test_channel_labels_match_luseepy():
+    lusee_cov = pytest.importorskip("lusee.Covariance")
+    rng = np.random.default_rng(1)
+    C = np.zeros((1, 1, 4, 4), dtype=complex)
+    C[..., 0, 0] = 1.0
+    _, labels = inst.channels(C)
+    assert labels == lusee_cov.default_product_labels()
+
+
+def test_covariance_is_hermitian(pieces):
+    resp, receiver = pieces
+    rng = np.random.default_rng(2)
+    freqs = np.array([10.0, 12.0, 20.0])
+    pair = rng.normal(size=(4, 3, 10)) + 1j * rng.normal(size=(4, 3, 10))
+    C = inst.covariance(pair, resp, receiver, freqs)
+    assert C.shape == (4, 3, 4, 4)
+    assert np.allclose(C, np.conj(np.swapaxes(C, -1, -2)))
+
+
+def test_covariance_is_linear_in_the_pair_integrals(pieces):
+    """T_moon and T_ant are additive offsets; the sky term must be linear."""
+    resp, receiver = pieces
+    rng = np.random.default_rng(3)
+    freqs = np.array([10.0, 20.0])
+    a = rng.normal(size=(2, 2, 10)) + 1j * rng.normal(size=(2, 2, 10))
+    b = rng.normal(size=(2, 2, 10)) + 1j * rng.normal(size=(2, 2, 10))
+    kw = dict(T_moon=0.0, T_ant=0.0)
+    Ca = inst.covariance(a, resp, receiver, freqs, **kw)
+    Cb = inst.covariance(b, resp, receiver, freqs, **kw)
+    Cab = inst.covariance(2 * a + 3 * b, resp, receiver, freqs, **kw)
+    assert np.allclose(Cab, 2 * Ca + 3 * Cb)
+
+
+def test_blackbody_normalization_shape(pieces):
+    resp, receiver = pieces
+    freqs = np.array([10.0, 15.0, 20.0])
+    B = inst.blackbody_normalization(resp, receiver, freqs)
+    assert B.shape == (3, 4, 4)
+
+
+def test_blackbody_normalization_freezes_like_covariance(pieces):
+    """The blackbody has to be freezable, or the ratio unfreezes.
+
+    ``covariance`` grew ``impedance_freq_mhz`` so a Faraday run could
+    hold ``Z_A`` fixed across the band; dividing such a covariance by a
+    blackbody that still followed the band would reintroduce the same
+    chromatic ramp in the quotient.  Two things have to hold: the
+    keyword must reproduce a constant grid exactly, and it must not be
+    a no-op -- ``Z_A`` really does move across these frequencies.
+    """
+    resp, receiver = pieces
+    freqs = np.array([10.0, 15.0, 20.0])
+
+    frozen = inst.blackbody_normalization(
+        resp, receiver, freqs, impedance_freq_mhz=10.0
+    )
+    constant = inst.blackbody_normalization(
+        resp, receiver, np.full(freqs.size, 10.0)
+    )
+    assert frozen.shape == (3, 4, 4)
+    np.testing.assert_allclose(frozen, constant, rtol=1e-14, atol=0.0)
+
+    chromatic = inst.blackbody_normalization(resp, receiver, freqs)
+    rel = np.abs(chromatic - frozen).max() / np.abs(frozen).max()
+    assert rel > 1e-2, f"freezing the blackbody changed nothing ({rel:.2e})"

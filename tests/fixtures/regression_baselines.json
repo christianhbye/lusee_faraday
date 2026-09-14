@@ -1,0 +1,65 @@
+{
+  "_comment": "Prior results the refactor must reproduce, transcribed from report/report.tex and PROGRESS.md at the audit-2026-08-18 tag (afb3290). report.tex is NOT on main -- it is Slosar's write-up, whose diffuse-Faraday sections the audit refutes; every number pinned here is from a section the audit left standing (leakage, zenith calibration, point source). Line numbers below refer to report.tex at that tag. generated_data/ was empty when these were taken, so they are the committed values, not re-derived.",
+  "point_source_phi_fd": 250.0,
+  "band_centers_mhz": [30.0, 10.0, 50.0],
+  "q_oscillation_period_khz": {
+    "value": 1.89,
+    "rtol": 0.01,
+    "source": "PROGRESS.md Step 1"
+  },
+  "unpolarized_transit_leakage_raw": {
+    "value": 0.134,
+    "rtol": 0.02,
+    "source": "report.tex sec Step 0 @ audit-2026-08-18"
+  },
+  "unpolarized_transit_leakage_gains": {
+    "value": 0.096,
+    "rtol": 0.05,
+    "source": "PROGRESS.md zenith-calibrated polarimeter"
+  },
+  "unpolarized_transit_leakage_ortho": {
+    "value": 7e-4,
+    "rtol": 0.5,
+    "source": "PROGRESS.md zenith-calibrated polarimeter"
+  },
+  "zenith_null_ortho_max": {
+    "value": 1e-15,
+    "source": "PROGRESS.md: ortho nulls zenith Q=U=V to ~1e-16"
+  },
+  "zoom_recovery_real": {
+    "value": 0.79,
+    "rtol": 0.03,
+    "source": "report.tex line 235 @ audit-2026-08-18"
+  },
+  "zoom_recovery_ideal": {
+    "value": 0.86,
+    "rtol": 0.03,
+    "source": "report.tex line 235 @ audit-2026-08-18"
+  },
+  "parent_stokes_over_i_30mhz": {
+    "q": 0.146,
+    "u": -0.032,
+    "atol": 2e-4,
+    "source": "report.tex line 425 @ audit-2026-08-18"
+  },
+  "zenith_ortho_vectors_table1": {
+    "_comment": "Zenith-calibrated ortho-mode polarimeter vectors x_p, y_p per band, ports [N, E, S, W], each entry [real, imag].",
+    "atol": 1e-3,
+    "source": "report.tex Table 1 (tab:weights), lines 160-165 @ audit-2026-08-18",
+    "ports": ["N", "E", "S", "W"],
+    "bands": {
+      "10": {
+        "x_p": [[-0.011, -0.001], [0.958, 0.0], [0.009, 0.001], [-1.071, 0.0]],
+        "y_p": [[1.089, 0.0], [-0.010, 0.001], [-0.895, 0.0], [0.011, -0.001]]
+      },
+      "30": {
+        "x_p": [[0.046, 0.004], [1.023, 0.0], [-0.046, -0.004], [-1.082, 0.0]],
+        "y_p": [[0.955, 0.0], [0.049, -0.004], [-0.959, 0.0], [-0.052, 0.004]]
+      },
+      "50": {
+        "x_p": [[-0.060, -0.001], [0.965, 0.0], [0.057, 0.001], [-1.041, 0.0]],
+        "y_p": [[1.037, 0.0], [-0.056, 0.001], [-0.979, 0.0], [0.061, -0.001]]
+      }
+    }
+  }
+}

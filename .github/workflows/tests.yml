@@ -1,0 +1,79 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      # Report every version's real result; do not let one failure mask
+      # the others.  3.12 is the version this code has actually been run
+      # on; 3.13 and 3.14 are here to find out, not because they are
+      # known to work -- see the note in the install step.
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.13", "3.14"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Point the editable local deps at their pinned remotes
+        # pyproject's [tool.uv.sources] resolves luseepy and croissant
+        # from local checkouts, which is right for development and
+        # impossible in CI.  The revisions below are the ones every
+        # number in this repository was validated against: luseepy is on
+        # branch deps/croissant-v5.3.0.dev1, NOT main, and croissant is
+        # ahead of the rev luseepy itself pins (hence override-dependencies).
+        # This edit is not committed; it exists only for this run.
+        run: |
+          python - <<'EOF'
+          import pathlib
+          p = pathlib.Path("pyproject.toml")
+          s = p.read_text()
+          for old, new in [
+              (
+                  'lusee = { path = "../luseepy", editable = true }',
+                  'lusee = { git = "https://github.com/lusee-night/luseepy.git",'
+                  ' rev = "52b96bc" }',
+              ),
+              (
+                  'croissant-sim = { path = '
+                  '"/home/christian/Documents/projects/croissant-main",'
+                  ' editable = true }',
+                  'croissant-sim = { git ='
+                  ' "https://github.com/christianhbye/croissant.git",'
+                  ' rev = "1c4d6c5" }',
+              ),
+          ]:
+              assert s.count(old) == 1, f"anchor moved: {old[:40]}"
+              s = s.replace(old, new)
+          p.write_text(s)
+          EOF
+
+      - name: Install
+        # The dev extra is not optional: pytest's addopts always passes
+        # --cov=src, so a plain `uv sync` installs a tree that cannot run
+        # the tests.
+        run: uv sync --extra dev
+
+      - name: Lint
+        run: |
+          uv run flake8 src/
+          uv run black --check src/ tests/
+
+      - name: Tests
+        # Tests marked `slow` need the 631 MB BGL_v16 response artifact,
+        # which is not in git -- they skip here.  A green run therefore
+        # means the data-free tests pass, not that the published-number
+        # regressions were checked.  Those still have to be run locally
+        # against data/BGL_v16/.
+        env:
+          JAX_ENABLE_X64: "1"
+        run: uv run pytest -q
