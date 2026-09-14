@@ -13,9 +13,6 @@ resolution-markers = [
     "python_full_version < '3.13' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 
-[manifest]
-overrides = [{ name = "croissant-sim", editable = "../../../projects/croissant-main" }]
-
 [[package]]
 name = "antlr4-python3-runtime"
 version = "4.9.3"
@@ -550,7 +547,7 @@ wheels = [
 [[package]]
 name = "croissant-sim"
 version = "5.2.1"
-source = { editable = "../../../projects/croissant-main" }
+source = { git = "https://github.com/christianhbye/croissant.git?rev=v5.3.0.dev1#0ac2f868cf52a10f54e59af0574fa0e73669d945" }
 dependencies = [
     { name = "astropy" },
     { name = "equinox" },
@@ -560,33 +557,6 @@ dependencies = [
     { name = "s2fft" },
     { name = "scipy" },
     { name = "spiceypy" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "astropy" },
-    { name = "equinox" },
-    { name = "jax" },
-    { name = "lunarsky" },
-    { name = "numpy" },
-    { name = "s2fft", git = "https://github.com/slosar/s2fft.git?rev=cefdf468ec2540818bafb37ed60d7b1fbba2f21f" },
-    { name = "scipy" },
-    { name = "spiceypy" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "healpy", specifier = ">=1.19.0" },
-    { name = "ipympl", specifier = ">=0.10.0" },
-    { name = "jupyterlab", specifier = ">=4.5.4" },
-    { name = "jupyterlab-vim", specifier = ">=4.1.4" },
-    { name = "matplotlib", specifier = ">=3.10.8" },
-    { name = "pre-commit", specifier = ">=4.5.1" },
-    { name = "pygdsm", specifier = ">=1.6.4" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "pytest-timeout" },
-    { name = "ruff" },
 ]
 
 [[package]]
@@ -1524,6 +1494,7 @@ dependencies = [
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "pytest" },
+    { name = "s2fft" },
     { name = "scipy" },
 ]
 
@@ -1539,7 +1510,7 @@ dev = [
 requires-dist = [
     { name = "astropy" },
     { name = "black", marker = "extra == 'dev'" },
-    { name = "croissant-sim", editable = "../../../projects/croissant-main" },
+    { name = "croissant-sim", git = "https://github.com/christianhbye/croissant.git?rev=v5.3.0.dev1" },
     { name = "finufft" },
     { name = "fitsio" },
     { name = "flake8", marker = "extra == 'dev'" },
@@ -1555,6 +1526,7 @@ requires-dist = [
     { name = "pytest", specifier = ">=8.4.2" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-cov", marker = "extra == 'dev'" },
+    { name = "s2fft", git = "https://github.com/slosar/s2fft.git?rev=cefdf468ec2540818bafb37ed60d7b1fbba2f21f" },
     { name = "scipy" },
 ]
 provides-extras = ["dev"]

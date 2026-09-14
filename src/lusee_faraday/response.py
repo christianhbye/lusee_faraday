@@ -16,7 +16,7 @@ being pushed through a band-limited harmonic transform.
 
 import numpy as np
 
-from .conventions import PORT_PAIRS, lambda_squared
+from .conventions import PORT_PAIRS, lambda_squared, topo_rotation_matrix
 
 
 def load_response(path):
@@ -60,7 +60,7 @@ def native_channel_index(resp, freq_mhz):
     The fixed-beam approximation is an assertion, not a default: an
     off-grid frequency would be silently interpolated by luseepy's
     ``FrequencyMap``, smearing the beam across the band and putting
-    non-Faraday structure into delay space.
+    non-Faraday structure into Faraday depth space.
     """
     freq = np.asarray(resp.freq, dtype=float)
     idx = int(np.argmin(np.abs(freq - freq_mhz)))
@@ -273,3 +273,27 @@ def two_port_pair_alms(h_theta, h_phi, theta_deg, phi_deg, lmax):
         frame="topo",
     )
     return np.asarray(beam.compute_alm(lmax=int(lmax)))[:, 0]
+
+
+def pair_weight_maps(kernel, time, loc, nside):
+    """Per-pair Faraday weight on the galactic HEALPix grid -> (npair, npix).
+
+    The Faraday-active weight from both branches of the pair-Stokes
+    decomposition: weight^2 = |W^+|^2 + |W^-|^2 = 0.5 * (|K_Q|^2 + |K_U|^2),
+    where W^± = (K_Q ± i K_U) / 2. Both branches contribute to the full
+    Faraday phase range; fold_template combines ±phi downstream. The form is
+    basis-independent. Zero below the horizon.  RING ordering, galactic frame.
+    """
+    import healpy as hp
+
+    R = topo_rotation_matrix(time, loc)
+    npix = hp.nside2npix(nside)
+    vec = np.array(hp.pix2vec(nside, np.arange(npix)))
+    n_resp = R @ vec
+    up = n_resp[2] > 0.0
+    theta = np.arccos(np.clip(n_resp[2, up], -1.0, 1.0))
+    phi = np.mod(np.arctan2(n_resp[1, up], n_resp[0, up]), 2.0 * np.pi)
+    K = np.asarray(kernel.sample(theta, phi))  # (npair, 4, Nup), I Q U V
+    w = np.zeros((K.shape[0], npix))
+    w[:, up] = np.sqrt(0.5 * (np.abs(K[:, 1]) ** 2 + np.abs(K[:, 2]) ** 2))
+    return w

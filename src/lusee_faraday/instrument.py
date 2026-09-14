@@ -12,7 +12,7 @@ A Faraday run must freeze them.  The antenna is near resonance at
 30 MHz: one 0.5 MHz native step moves ``Z_A`` by 12%, and letting the
 impedances follow the +-0.1 MHz fine grid moves the loading matrix by
 11% across the band.  That is a smooth chromatic ramp of exactly the
-kind the step-1 delay-space argument asserts is absent, so the
+kind the step-1 depth-space argument asserts is absent, so the
 fixed-beam approximation has to cover the receiver loading too, not
 only the response alms.
 """

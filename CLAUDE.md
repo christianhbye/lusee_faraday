@@ -13,9 +13,12 @@ Two arms, with different jobs. Confusing them is the main way to go wrong here.
 **The production arm** — `sky` + `response` + `engine` + `instrument` +
 `polarimeter` + `channelization`, on luseepy and croissant. This is where new
 work goes. It currently covers instrumental `I -> Q,U` leakage, the zenith
-polarimeter calibration, and the transiting point source; the diffuse sky is
-future work (the ensemble two-point prediction), not a gap to be filled by
-re-running the refuted approach.
+polarimeter calibration, the transiting point source, and — since the
+`faraday-delay-template` branch — the diffuse sky as a depth-space **shape**
+template (`dispersion.py`, `noise.py`, the nine `step5_*` scripts). That is
+the ensemble two-point prediction the audit left open, not a re-run of the
+refuted approach: the amplitude is quoted as a bracket with its reasons and
+never as a value.
 
 **The reproduction arm** — `pixel_arm.py`, an independent pixel-space
 quadrature. Its job is *not* to be superseded code awaiting deletion. It makes
@@ -58,20 +61,35 @@ luseepy silently drop to complex64. `scripts/common.py` does this with an
 test modules set it themselves at the top, and `tests/conftest.py` sets it as a
 backstop.
 
-Heavy jobs run in the background under `ulimit -v 16000000` with **absolute**
-log paths under `generated_data/`. 12 GB is not enough — three of the zenith
-tests OOM inside jax.
+Heavy jobs run in the background with **absolute** log paths under
+`generated_data/`, capped by a **cgroup on physical memory**:
+
+```bash
+systemd-run --user --scope -q -p MemoryMax=10G -- uv run python scripts/… \
+    > /abs/path/generated_data/foo.log 2>&1 &
+```
+
+`ulimit -v 16000000` is the documented **address-space** guard and is fine to
+keep — jax/BLAS/numpy reserve far more address space than they commit, which is
+why 12 GB is not enough there (three zenith tests OOM inside jax) — but it caps
+`RLIMIT_AS`, not RSS, so it protects the desktop from nothing. Lowering it just
+kills jobs early on reservation (measured: `ulimit -v 8000000` killed
+`step5_template.py` 13.7 s in at a 960 MiB allocation, RSS 4.9 GiB).
+`MemoryMax` is the real cap: it OOM-kills the offending job alone. Always
+report peak RSS from `/usr/bin/time -v`.
 
 ## Architecture
 
 The pipeline flows: **Sky components → Faraday coefficients → harmonic contraction → luseepy covariance → polarimeter → channelization**
 
-- **`FaradaySky`** (`sky.py`): the sky as a sum of constant-Faraday-depth components, each a frequency-independent alm plus a per-frequency, per-block coefficient. Constructors: `from_maps`, `uniform_screen`, `point_source`, `i_only` (perfect depolarization), `binned_screen` and `from_rm_map`. The last two are the only ones that turn a map of Faraday depths into components, and `binned_screen` — which `from_rm_map` merely wraps — runs `sky.audit_screen`: it logs both audit numbers on every build and refuses an unresolved screen unless the caller passes `allow_pixelwise=True`. The 2026-08-18 pixelization audit lives in the API, not in a paragraph.
+- **`FaradaySky`** (`sky.py`): the sky as a sum of constant-Faraday-depth components, each a frequency-independent alm plus a per-frequency, per-block coefficient. Constructors: `from_maps`, `uniform_screen`, `point_source`, `i_only` (perfect depolarization), `binned_screen` and `from_rm_map`. The last two are the only ones that turn a map of Faraday depths into components, and `binned_screen` — which `from_rm_map` merely wraps — runs `sky.audit_screen`: it logs both audit numbers on every build and refuses an unresolved screen unless the caller passes `allow_pixelwise=True`. The 2026-08-18 pixelization audit lives in the API, not in a paragraph. `effective_pixel_count` is that audit's quantitative form for the *refuted* estimator: the coherent pixel sum's floor is `1/sqrt(N_eff)` with `N_eff = (sum|w|)^2 / sum|w|^2`, **not** `1/sqrt(N_pix)` — on the beam-weighted sky the two differ by a factor 10 at nside 512, so the equal-weight guide turns an exact match into an apparent shortfall.
 - **`response.py`**: instrument model → pair-Stokes alms. `load_response` reads a BGL_v16 artifact through `lusee.InstrumentResponse`; `four_port_pair_alms` is the as-built arm, `two_port_pair_alms` the symmetric pseudo-dipole (paper Fig. 4) arm through croissant. `FixedChannelKernel` slices ONE native channel and samples many directions out of it — luseepy's `pair_stokes_at` re-materializes all 150 channels (2.94 GB) per call and is scalar-only, so this is a real capability, not a wrapper.
 - **`engine.py`**: the block-resolved contraction of sky duals against response duals, and the spectral expansion onto the fine grid.
 - **`instrument.py`**: covariance assembly, receiver loading and Hermitian projection — all luseepy. The 16-channel packing is *not*: `channels` is a local loop, and `test_channels_match_luseepy_pack_covariance` pins it elementwise against `lusee.Covariance.pack_covariance` (which stacks the channel axis at `-2`, so the pin transposes). `impedance_freq_mhz` freezes `Z_A`, `Z_L`, `R_moon`, `R_loss` at one frequency; a Faraday run **must** pass it, and must pass `T_moon=0.0, T_ant=0.0` where the legacy assembler had no thermal terms.
 - **`polarimeter.py`**: zenith calibration (`zenith_port_weights`, `orthonormalize_xy`) and pseudo-Stokes. `check_psd` is a runtime invariant, not only a test.
 - **`channelization.py`**: parent (25 kHz) and zoom (64 sub-bin) integration on luseepy's spectrometer response. Zoom bins use FFT ordering (0 = center, 1–32 positive, 33–63 negative).
+- **`dispersion.py`**: the Faraday-depth layer (branch `faraday-delay-template`; the axis is `phi` in rad/m^2, NOT the delay `tau` of the refuted Step 4 -- the two differ by the monotonic `tau_FD = 2 phi c^2 / (pi nu^3)`). Owns the Faraday-depth distribution `F(phi)` and its transforms — `depth_distribution` (the `rho(f) ~ f^k` geometry knob), `transform`/`depth_power` (type-3 NUFFTs on the true `lambda^2` nodes; an FFT onto uniform-`nu` delay is a *different basis*, not a wrong one -- see `docs/measurement-model.md`), the folded template and its `mass_quantile_knee`, the real-response `rmsf`/`bin_envelope`/`depth_horizon` built on `channelization`, and the coherence and amplitude brackets. **Bin in depth first, transform second** — that is the whole design, and why it converges where the pixel-by-pixel coherent sum does not (`docs/measurement-model.md` §9). Does not import `pixel_arm`. Two traps: `rmsf` returns *power* (a width read off it is a power FWHM — state the convention), and `amplitude_bracket`'s `upper` is the only level containing `theta_c`, which this map cannot determine (§12).
+- **`noise.py`**: radiometer noise (`radiometer_sigma`, `add_noise`, ported verbatim from `faraday-fisher-forecast`) plus the whitened matched filter on the zoom-bin covariance — `zoom_noise_covariance`, `faraday_signal_covariance`, `matched_filter_threshold`, and `closed_form_threshold` as the sanity check. The 1.44x zoom-bin ENBW overlap makes adjacent bins correlated; the matched filter carries that covariance rather than assuming independent modes.
 - **`conventions.py`**, **`config.py`**: the single source of truth for COSMO/IAU, the Faraday phase, port and channel ordering, the site, the time grid and the fine frequency grid. Do not re-derive any of it inline.
 
 **`pixel_arm.py` is the reproduction arm** (see "What this repository is"). Import it only from the reproduction and cross-check scripts — `crosscheck_pixel_arm.py`, `validate_engine.py`, `beam_ablation.py`, `compare_main_vs_asbuilt.py`, `step_ionly.py --engine legacy` — and from tests that compare the two arms. `scripts/common.py` deliberately does not import it, so an ordinary script does not depend on it transitively; `topo_rotation_matrix` lives in `conventions.py` for that reason, since it defines the response frame rather than either engine's quadrature.
