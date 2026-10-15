@@ -1,5 +1,77 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Audit preparation branch — 2026-10-15
+
+`audit-preparation` contains the corrected, bounded BGL v2 audit package
+and the editable croissant source/lockfile update in separate commits.
+It shares the workflow-note commit with `gaussian-screen-step1`, but
+does not contain that branch's derivation or notebook. The Gaussian
+step-1 delivery remains at `9ee8033`; its physical validation is pending.
+The queue and handoff below preserve the audit preparation context.
+
+The installed croissant path, version and pyerfa dependency match the
+committed project/lock metadata; no sync or upstream edit was made.
+All 12 small audit tests pass, and restoring either the negative-branch
+sign defect or the cancellation-based count makes its regression test
+fail. Formatting/lint, shell syntax and the read-only launcher plan pass.
+The historical briefing and scalar-lobe plot script are retained with
+their limitations noted in `audit/README.md`; the October survey JSON
+remains the original dated snapshot. No smoke/full service or large
+scientific computation has been launched. `main` is unchanged.
+
+## Current handoff 2026-10-15
+
+Christian agreed to the Gaussian-screen benchmark and validation sequence.
+[TODO.md](TODO.md) now makes this the next scientific task: derive the off/on
+statistics, recover converged deterministic ensembles at weak rotation,
+demonstrate covariance convergence at strong rotation, then introduce the
+LuSEE response and assess physical uncertainty. The real-beam audit remains
+a separate track pending execution review. This update changes the work queue;
+no benchmark or long computation has been run.
+
+**Prepared for Christian's review; the long run has not started.** Read
+[docs/paper-preparation.md](docs/paper-preparation.md) for the consolidated
+survey, paper outline, evidence requirements, environment drift and proposed
+staged commands. [TODO.md](TODO.md) is the current queue;
+[the generated snapshot](docs/paper-preparation-status.json) records exact
+input/code/dependency fingerprints and saved-product values.
+
+The instrument refactor is merged on main (`33c8730`, PR 3). The replacement
+Faraday-depth template, detection forecast, executed notebook and report are
+implemented on `faraday-delay-template` (`adb4024`, open PR 4 based on main).
+The historical August status below does not describe that later branch.
+
+The September BGL follow-up saved 48 entries at each of nside 512 and 1024,
+none at 2048; its log stops after the 2048 maps. An OOM interruption is
+plausible but not confirmed by retained journal evidence. Preparation found
+and corrected a negative-branch exponent error and a complex-cancellation
+statistic mislabeled as effective pixel count. September results remain
+unchanged as legacy evidence. The prepared v2 audit uses disk-backed weights,
+bounded kernel/NUFFT batches, a read-only preflight, fingerprinted atomic
+checkpoints, and a resource-limited launcher. Recompute every resolution
+before interpreting the real-beam audit.
+
+The subsequent mathematical review is recorded in the handoff's
+"Mathematical and physical basis review" section. The covariance forecast
+needs a physical ensemble and a derivation of angular/depth correlations;
+a stable RM histogram alone does not validate it. Slab envelopes are not
+amplitude floors, mean polarization differs from polarization power, and
+channel integration and data foreground treatment need explicit propagation.
+These are foundational checks before interpreting saved forecasts, separate
+from the numerical audit. No long computation was started.
+The handoff now specifies a Gaussian-screen benchmark to test whether analytic
+phase averaging removes the numerical cancellation problem. Its derivation
+and validation sequence are proposed; no benchmark results are claimed.
+
+The report still needs its separate coherent-sum amplitude/power-weight
+correction and the previously scoped spectral-index, turbulence/dispersion,
+relative gain and receiver-noise work. Its saved forecast remains conditional
+on physical amplitude scenarios. No upstream dependency, external manuscript,
+scientific result product or old audit ledger was changed by preparation.
+All 12 targeted synthetic checks pass; injecting each discovered algebra
+mistake makes its regression check fail. Lint, formatting, launcher syntax
+and read-only preflight pass. Full-resolution memory remains to be demonstrated.
+
 Updated: 2026-08-19 — **refactored onto luseepy + croissant** (see the
 section below); the five analysis steps and the report were complete
 before that on the pixel-space engine. Report in `report/report.tex`
