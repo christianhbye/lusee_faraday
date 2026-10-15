@@ -14,7 +14,7 @@ resolution-markers = [
 ]
 
 [manifest]
-overrides = [{ name = "croissant-sim", editable = "../../../projects/croissant-main" }]
+overrides = [{ name = "croissant-sim", editable = "../../../projects/croissant" }]
 
 [[package]]
 name = "antlr4-python3-runtime"
@@ -550,13 +550,14 @@ wheels = [
 [[package]]
 name = "croissant-sim"
 version = "5.2.1"
-source = { editable = "../../../projects/croissant-main" }
+source = { editable = "../../../projects/croissant" }
 dependencies = [
     { name = "astropy" },
     { name = "equinox" },
     { name = "jax" },
     { name = "lunarsky" },
     { name = "numpy" },
+    { name = "pyerfa" },
     { name = "s2fft" },
     { name = "scipy" },
     { name = "spiceypy" },
@@ -569,6 +570,7 @@ requires-dist = [
     { name = "jax" },
     { name = "lunarsky" },
     { name = "numpy" },
+    { name = "pyerfa" },
     { name = "s2fft", git = "https://github.com/slosar/s2fft.git?rev=cefdf468ec2540818bafb37ed60d7b1fbba2f21f" },
     { name = "scipy" },
     { name = "spiceypy" },
@@ -1539,7 +1541,7 @@ dev = [
 requires-dist = [
     { name = "astropy" },
     { name = "black", marker = "extra == 'dev'" },
-    { name = "croissant-sim", editable = "../../../projects/croissant-main" },
+    { name = "croissant-sim", editable = "../../../projects/croissant" },
     { name = "finufft" },
     { name = "fitsio" },
     { name = "flake8", marker = "extra == 'dev'" },
