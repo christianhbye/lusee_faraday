@@ -34,16 +34,28 @@ Galaxy or that the existing depth-histogram forecast is valid.
 - [x] Record the two-sky versus ensemble distinction and physical corrections.
 - [x] Agree on the first benchmark: a smooth deterministic polarized source,
   a simple beam and a correlated Gaussian foreground Faraday screen.
-- [ ] Specify an admissible screen covariance, its variance and physical
+- [x] Specify an admissible screen covariance, its variance and physical
   correlation length, the intrinsic sky and beam, and the frequency range.
   Keep physical correlation scales independent of numerical pixel size.
-- [ ] Derive off/on means, second moments and centered frequency covariance
+- [x] Derive off/on means, second moments and centered frequency covariance
   from that same model. Retain the mean contribution to squared differences.
-- [ ] Reduce the angular integral to a separation integral where symmetry
+- [x] Reduce the angular integral to a separation integral where symmetry
   permits. Resolve the narrow coherence region analytically or with rescaled
   quadrature; avoid a dense all-pixel-pairs matrix.
-- [ ] Define convergence criteria and falsifiable comparisons before running
+- [x] Define convergence criteria and falsifiable comparisons before running
   the benchmark; record configuration and provenance with each result.
+
+Step 1 is delivered for review in the executed
+[notebook](notebooks/gaussian_screen_step1.ipynb), with a
+[specification](docs/specs/2026-10-15-gaussian-screen-step1.md),
+[implementation and step-2 plan](docs/plans/2026-10-15-gaussian-screen-step1.md),
+and [generated check/provenance record](docs/gaussian-screen-step1-results.json).
+The model is an admissible Gaussian screen on a flat plane, with physical
+correlation length, a smooth Gaussian source and beam, and a realizable ideal
+complex Jones pair. Checks cover algebra, constant-screen limits and the
+reduced separation integral. They do not validate spatially varying screen
+simulations, the Galaxy, real-beam amplitudes or the depth-histogram forecast.
+**Stop here for Christian's review; steps 2--4 remain unexecuted.**
 
 ### 2. Recover converged deterministic simulations at weak rotation
 

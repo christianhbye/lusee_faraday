@@ -1,5 +1,40 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Gaussian-screen step 1 delivered for review — 2026-10-15
+
+The executed [notebook](notebooks/gaussian_screen_step1.ipynb) keeps the
+original Faraday-off/on complex visibility central. The
+[specification](docs/specs/2026-10-15-gaussian-screen-step1.md) defines a
+smooth deterministic Gaussian source and normalized beam on a tangent plane,
+an admissible Gaussian foreground-screen covariance with physical transverse
+correlation length, and a realizable ideal complex Jones pair. Both
+polarization branches and their joint statistics enter the off/on means,
+raw second moments, centered frequency covariance, nonconjugated moments,
+and expected squared on-minus-off difference, including its mean term.
+
+Reusable code is in `src/lusee_faraday/gaussian_screen.py`; regenerate all
+notebook outputs and three captioned figure pairs with
+`.venv/bin/python scripts/gaussian_screen_step1.py`. The Gaussian angular
+weight reduces the pair integral to a nonoscillatory separation integral.
+Rescaled adaptive quadrature is checked against its special-function form;
+no dense angular pixel-pair array or real-sky map is used. The notebook
+separates physical correlation-length/wavelength sweeps from numerical
+refinement, and records source/configuration hashes, environment, UTC,
+resource use and the worst check discrepancies in the
+[generated results record](docs/gaussian-screen-step1-results.json).
+
+Four targeted tests pass. Zero rotation, deterministic constant depth and
+random spatially constant depth controls pass. The independent Gaussian
+depth/Jones calculation rejects deliberately injected conjugate-branch and
+centering mistakes. These are algebra and reduced-integration checks only.
+The [plan](docs/plans/2026-10-15-gaussian-screen-step1.md) specifies the next
+independently converged deterministic spatial-screen comparison, with
+separate angular, domain/spectrum and ensemble-error gates. No such ensemble
+has run. The depth-histogram reduction, Galactic correlations, strong-rotation
+deterministic convergence, actual beam/loading, channels, noise, foreground
+treatment and production forecast remain unvalidated. **Stop for review.**
+No long real-beam audit, upstream edit or external manuscript edit was made.
+
 ## Audit preparation branch — 2026-10-15
 
 `audit-preparation` contains the corrected, bounded BGL v2 audit package
@@ -27,7 +62,9 @@ statistics, recover converged deterministic ensembles at weak rotation,
 demonstrate covariance convergence at strong rotation, then introduce the
 LuSEE response and assess physical uncertainty. The real-beam audit remains
 a separate track pending execution review. This update changes the work queue;
-no benchmark or long computation has been run.
+no spatial-screen benchmark simulation or long computation has been run.
+The step-1 derivation and reduced-integral checks above now supersede the
+previous unexecuted-derivation status.
 
 **Prepared for Christian's review; the long run has not started.** Read
 [docs/paper-preparation.md](docs/paper-preparation.md) for the consolidated
