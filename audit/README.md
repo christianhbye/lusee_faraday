@@ -10,6 +10,14 @@ A formatted version with the same content is published at
 
 ---
 
+Historical artifacts are retained for traceability. The unchanged
+[August briefing](<../The Pixel Sum Never Converged.pdf>) contains a
+superseded amplitude/power-weight explanation; use the
+[October handoff](../docs/paper-preparation.md) for the corrections and
+current limitations. `scripts/plot_shuffle.py` reproduces the original
+scalar-lobe stored-results plot; it does not plot the corrected BGL v2
+audit. Committing these artifacts does not complete the pending audit.
+
 ## 1. Scope
 
 The finding applies to one quantity: the beam-integrated polarization of the
@@ -382,11 +390,14 @@ template whose per-pixel S/N is 1.45.
 - **The physics of the superposition.** A broadband ripple from many superposed
   RMs is real physics. Nothing here says the effect does not exist — only that
   this calculation is not measuring it.
-- **Beam realism.** Tests used a `cos²` lobe, not the BGL_v16 four-port kernel.
-  The shot-noise diagnostic is beam-independent by construction — it compares
-  measured power to `Σ|w_p|²` for whatever weights are supplied — but confirming
-  through the real response is cheap (~40 lines reusing
-  `fourport.FixedFreqKernel` and `transport`) and worth doing.
+- **Beam realism.** The original tests used a `cos²` lobe. The September
+  BGL_v16 follow-up completed nside 512/1024 but stopped before any 2048 result.
+  Its script also used the wrong negative-branch exponent and mislabeled a
+  complex-cancellation statistic as effective pixel count. Keep that ledger
+  as legacy evidence. A corrected, memory-bounded v2 script and staged launcher
+  are prepared for review; no v2 long run has started. See
+  [the October handoff](../docs/paper-preparation.md) for provenance, commands
+  and the positive controls required before closing this item.
 - **The point-source result.** Argued, not re-run: a single Faraday depth has no
   spatial gradient, so none of this applies. Steps 0–1 should be unaffected.
 

@@ -1,0 +1,198 @@
+{
+  "current_audit_provenance": {
+    "branch_signs": {
+      "negative": -1,
+      "positive": 1
+    },
+    "fingerprint": "aa2b356eeb440a847a23ea6bda5440e7bcded9642ba56866b5095e7b350a8c02",
+    "fractions": [
+      1.0,
+      0.1,
+      0.02
+    ],
+    "frequency_mhz": 30.0,
+    "inputs_sha256": {
+      "/home/christian/Documents/research/lusee/lusee_faraday/data/BGL_v16/lusee_bgl_v16_response_v3.fits": "8f79a754fc60c93b72cbd33f4fa9fefd88762142fe660fc68147d66524997da3",
+      "/home/christian/Documents/research/lusee/lusee_faraday/generated_data/cache/sky_maps_native.npz": "f55861acf3fe8879d1c1264b6fd5efb52caac5615fd4e343e86dee25bcb9e083"
+    },
+    "lmax": 1023,
+    "n_eff_definition": "sum(abs(w))**2 / sum(abs(w)**2)",
+    "packages": {
+      "astropy": {
+        "version": "7.2.0"
+      },
+      "croissant-sim": {
+        "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "direct_url": {
+          "dir_info": {
+            "editable": true
+          },
+          "url": "file:///home/christian/Documents/projects/croissant"
+        },
+        "git_revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c",
+        "version": "5.2.1"
+      },
+      "finufft": {
+        "version": "2.5.1"
+      },
+      "fitsio": {
+        "version": "1.4.2"
+      },
+      "h5py": {
+        "version": "3.15.1"
+      },
+      "healpy": {
+        "version": "1.19.0"
+      },
+      "jax": {
+        "version": "0.11.1"
+      },
+      "jaxlib": {
+        "version": "0.11.1"
+      },
+      "lunarsky": {
+        "version": "1.0.1.post2"
+      },
+      "lusee": {
+        "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "direct_url": {
+          "dir_info": {
+            "editable": true
+          },
+          "url": "file:///home/christian/Documents/research/lusee/luseepy"
+        },
+        "git_revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef",
+        "version": "2.1.dev0"
+      },
+      "numpy": {
+        "version": "2.4.2"
+      },
+      "scipy": {
+        "version": "1.17.1"
+      }
+    },
+    "pair_indices": [
+      0,
+      1
+    ],
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "response_path": "/home/christian/Documents/research/lusee/lusee_faraday/data/BGL_v16/lusee_bgl_v16_response_v3.fits",
+    "rng_seed": 20260818,
+    "schema_version": 2,
+    "sky_cache_policy": "effective native cache bytes hashed",
+    "sources_sha256": {
+      "audit/scripts/shuffle_control_bgl.py": "b794fe84ee4283d108308520ce024ecfb1000f88b074dad030ad7d63c75f88ca",
+      "scripts/common.py": "6a67e8f3fa47970be630b77422be297cab7ac3da75bf807a89b7495ededfde45",
+      "src/lusee_faraday/__init__.py": "8b48e1f3e3b0e2e1d8e0862047c00eadce72ecd8e0982e307207197797d1f788",
+      "src/lusee_faraday/channelization.py": "481d750361e0e5c9fc62fc8725b5803322f20195c5375a4f3b113c1c070db34b",
+      "src/lusee_faraday/config.py": "4de2a0bade4d689ea1dfe1144bd0155f4127a26603bda428013321ab8c47b2ff",
+      "src/lusee_faraday/conventions.py": "4ce2c3ae851cdff6f21b6085dd96fbd8b4347fd16f6078390916cb4d21b46bbd",
+      "src/lusee_faraday/engine.py": "b3152af9087618c7b8f0d123ee4e7d30d2ef0ac4e1d9e122f8df9003e07dc949",
+      "src/lusee_faraday/instrument.py": "9ee06656728dc952128f998d09592064441cc52210412b6a634ac7c6fc84acac",
+      "src/lusee_faraday/pixel_arm.py": "99dfdf4ea56762025c712a85066f2fc407a97bea67dbb7af18fcd315c1b40576",
+      "src/lusee_faraday/polarimeter.py": "5cbb90dc311aa6c849499d2e7a8a52e9bcaef9c3bec666bfec8419a1f3a7582e",
+      "src/lusee_faraday/response.py": "92eeae1a28c7a97af198c8fa1b78d1a36acf014f71b2ee73cbfe4db413fe64ad",
+      "src/lusee_faraday/sky.py": "0cfd4424ffc49b26035c5c40c1900d42c511d560ab23b9b1e25b3a6a75ab650f"
+    }
+  },
+  "execution_status": {
+    "new_audit_execution_count": 0,
+    "new_audit_ledger_exists": false,
+    "snapshot_regenerates_forecast": false
+  },
+  "legacy_audit": {
+    "counts_by_nside": {
+      "512": 48,
+      "1024": 48
+    },
+    "metadata": {
+      "created_utc": "2026-09-19T15:49:42Z",
+      "fine_channels": 16384,
+      "fractions": [
+        1.0,
+        0.1,
+        0.02
+      ],
+      "frequency_mhz": 30.0,
+      "git_revision": "33c8730bca5816a2185ff3d13a8f5c3bc2999fa7",
+      "lmax": 1023,
+      "pair_indices": [
+        0,
+        1
+      ],
+      "purpose": "BGL_v16 complex-kernel shuffled-RM control",
+      "response_path": "data/BGL_v16/lusee_bgl_v16_response_v3.fits",
+      "resume": "Re-run the same command to fill missing runs; each run key is committed atomically immediately after its NUFFTs finish.",
+      "rng_seed": 20260818,
+      "snapshots": [
+        0,
+        682
+      ]
+    },
+    "missing_nsides": [
+      2048
+    ],
+    "mtime_utc": "2026-09-19T16:18:44.965151+00:00",
+    "n_eff_issue": "complex cancellation included in effective count",
+    "negative_branch_issue": "both branches used positive exponent",
+    "path": "audit/generated/shuffle_bgl_results.json",
+    "sha256": "f76be88d0835feca69c9b5aabdf0e561e09874423dd9c3bc8b2243beefe84a7e",
+    "status": "legacy only; branch exponent and N_eff need correction"
+  },
+  "observed_utc": "2026-10-15T16:34:41.001075+00:00",
+  "preparation_verification": {
+    "launcher_sha256": "27eaab5673d98697d588902e7313deda83adfb45c1b9b7302b82d97f16ce1097",
+    "logs": [
+      {
+        "mtime_utc": "2026-10-15T16:33:04.264731+00:00",
+        "path": "generated_data/paper_preparation_tests.log",
+        "sha256": "ead6ea1b45858fc3310646eaf3a52de2766c76a38864c6f36e0c8fd4e2fb10a3"
+      },
+      {
+        "mtime_utc": "2026-10-15T16:33:20.873700+00:00",
+        "path": "generated_data/paper_preparation_mutation_branch.log",
+        "sha256": "f39a98d8710675c3e9590202b3567587632a9b73ef70fe381c9ef3fb3169d5ee"
+      },
+      {
+        "mtime_utc": "2026-10-15T16:33:22.119697+00:00",
+        "path": "generated_data/paper_preparation_mutation_count.log",
+        "sha256": "ae8d1e54e3b37ca7e87d5e2412f99f10be673b69daebcd14913bbf05f8f0580f"
+      }
+    ],
+    "test_source_sha256": "b6a0ae8a1a3b7cdffc0e85140f7b083057a71d9e18923bd8cfa02180c903fc8d"
+  },
+  "repository_head": "33c8730bca5816a2185ff3d13a8f5c3bc2999fa7",
+  "saved_detection": {
+    "absolute_depth_cut_rad_m2": 27.5,
+    "lunations": 24,
+    "meaning": "amplitude divided by five-sigma amplitude threshold",
+    "mtime_utc": "2026-08-25T01:19:04.288142+00:00",
+    "path": "generated_data/step5_detection.npz",
+    "rows": [
+      {
+        "band_mhz": 30.0,
+        "dispersion_threshold_ratio": 0.014125465964938279,
+        "retained_power_fraction": 0.2700064386332195,
+        "slab_threshold_ratio": 11.545042200209787
+      },
+      {
+        "band_mhz": 50.0,
+        "dispersion_threshold_ratio": 0.153652301763065,
+        "retained_power_fraction": 0.26831921938723313,
+        "slab_threshold_ratio": 44.56933216994185
+      },
+      {
+        "band_mhz": 10.0,
+        "dispersion_threshold_ratio": 0.00015813050896383736,
+        "retained_power_fraction": 0.2625087957052473,
+        "slab_threshold_ratio": 1.214634547411187
+      }
+    ],
+    "sha256": "5b0365fd7561e29414f0b09ee05c5180d4a9a4ccb7c08d8e63edbccffdfddd25"
+  },
+  "template_branch_head": "adb40246a56965ea1b7247fe1865771c8a939384",
+  "template_report_source": {
+    "path": "report/faraday_depth_template/faraday_depth_template.tex",
+    "ref": "faraday-delay-template"
+  }
+}
