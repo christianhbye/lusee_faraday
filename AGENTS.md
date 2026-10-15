@@ -172,6 +172,9 @@ below too; it was missing from earlier revisions of this table.
 
 ## Workflow rules
 
+- Work on a task branch and commit completed, coherent increments as you
+  go. Keep commits scoped to the task; leave unrelated existing changes
+  out of them.
 - Waterfall outputs → `generated_data/` (npz); caches (rotation
   matrices, degraded sky maps, zenith weights) → `generated_data/cache/`.
 - Figures → `report/figures/`; report LaTeX → `report/`. Do not edit
