@@ -35,25 +35,27 @@ jobs:
         run: |
           python - <<'EOF'
           import pathlib
+          import re
+
           p = pathlib.Path("pyproject.toml")
           s = p.read_text()
-          for old, new in [
+          # Match on the source line's shape, not on the developer's
+          # local checkout path, which changes between machines.
+          for pattern, new in [
               (
-                  'lusee = { path = "../luseepy", editable = true }',
+                  r'^lusee = \{ path = "[^"]*", editable = true \}$',
                   'lusee = { git = "https://github.com/lusee-night/luseepy.git",'
                   ' rev = "52b96bc" }',
               ),
               (
-                  'croissant-sim = { path = '
-                  '"/home/christian/Documents/projects/croissant-main",'
-                  ' editable = true }',
+                  r'^croissant-sim = \{ path = "[^"]*", editable = true \}$',
                   'croissant-sim = { git ='
                   ' "https://github.com/christianhbye/croissant.git",'
                   ' rev = "1c4d6c5" }',
               ),
           ]:
-              assert s.count(old) == 1, f"anchor moved: {old[:40]}"
-              s = s.replace(old, new)
+              s, n = re.subn(pattern, lambda _: new, s, flags=re.M)
+              assert n == 1, f"anchor moved: {pattern[:40]}"
           p.write_text(s)
           EOF
 
