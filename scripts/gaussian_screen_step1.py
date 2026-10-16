@@ -37,8 +37,11 @@ model the Galaxy, or update the detection forecast.
 
 Rebuild and execute from the repository root with
 `.venv/bin/python scripts/gaussian_screen_step1.py`. The executor uses that
-same Python for the kernel. No external maps, real beam, or random seeds are
-needed. Figures are also regenerated under `report/figures/`; numerical
+same Python for the kernel. No external maps or real beam are needed.
+Sections 1--6 use no random numbers. Section 6b reads
+`generated_data/gaussian_screen_step1/draws.npz`, written once by
+`.venv/bin/python scripts/gaussian_screen_draws.py` (about 15 minutes, 2 GB,
+pinned seeds), and does not rerun it. Figures are also regenerated under `report/figures/`; numerical
 products and the source/configuration fingerprint are saved under
 `generated_data/gaussian_screen_step1/`.
 
@@ -716,6 +719,183 @@ that a magnitude-only comparison would discard. This is an ensemble model
 prediction without channel averaging or measured data.
 """)
     md(r"""
+## 6b. Drawn screens: Q, U and $V_{xx}$, $V_{yy}$, $V_{xy}$
+
+Sections 5 and 6 are averages over all screens. Here individual screens are
+**drawn** and the Faraday-off and Faraday-on readouts are summed pixel by
+pixel. The readout above, one generic Jones-pair cross product, is a mixture
+of the quantities an ideal pair of $x$ and $y$ dipoles measures. For
+$V_{\rm Stokes}=0$, $\langle EE^\dagger\rangle=\tfrac12\left(\begin{smallmatrix}
+I+Q&U\\U&I-Q\end{smallmatrix}\right)$, so
+\[
+V_{xx}=\tfrac12(I+Q),\quad V_{yy}=\tfrac12(I-Q),\quad V_{xy}=\tfrac12U,
+\]
+each beam-weighted, and $Q=V_{xx}-V_{yy}$, $U=2V_{xy}$. Faraday rotation
+changes only $Q$ and $U$; $I$ is untouched.
+
+Screens come from a spectral construction on a periodic $4096^2$ grid
+covering $8^\circ$ (pixel $0.002^\circ$), with the specified $S(k)$, and one
+screen is used at every frequency. The sum is
+$\sum_{\rm pix}B\,[k_I I+k_Q\,\mathrm{Re}\,P_{\rm on}+k_U\,\mathrm{Im}\,P_{\rm on}]$
+with $P_{\rm on}=P_0e^{2i\lambda^2\phi}$ at each pixel. It shares no code
+with the separation integral and does not use the Jones-branch algebra, so
+it is an independent route to the same expectation values. The steep source
+spectrum would hide everything, so each readout is divided by the known
+smooth unrotated polarized amplitude $A(\nu)=\eta P_{\rm ref}f(\nu)$,
+the same function for the drawn and predicted curves.
+""")
+    code(r"""
+draws = np.load(ROOT / "generated_data/gaussian_screen_step1/draws.npz")
+stored = json.loads(str(draws["config"]))
+assert stored["model"] == json.loads(json.dumps(asdict(model))), (
+    "draws.npz was made for a different model; rerun "
+    "scripts/gaussian_screen_draws.py"
+)
+dfreq = draws["freq"]
+amplitude = model.eta * model.p_ref_k * (dfreq / model.ref_mhz) ** model.beta
+readouts = ["Q", "U", "xx", "yy", "xy"]
+
+
+def draws_figure(names, labels):
+    fig, axes = plt.subplots(
+        len(names),
+        1,
+        figsize=(7.2, 2.4 * len(names) + 0.9),
+        sharex=True,
+        layout="constrained",
+    )
+    for ax, name, label in zip(np.atleast_1d(axes), names, labels):
+        mean = draws[f"analytic_mean_{name}"] / amplitude
+        sd = draws[f"analytic_std_{name}"] / amplitude
+        ax.fill_between(
+            dfreq,
+            mean - sd,
+            mean + sd,
+            color="#D55E00",
+            alpha=0.25,
+            lw=0,
+            label=r"prediction $\pm1\sigma$",
+        )
+        ax.plot(dfreq, mean, color="#D55E00", lw=2.0, label="prediction mean")
+        for k, on in enumerate(draws[f"on_{name}"]):
+            ax.plot(
+                dfreq,
+                on / amplitude,
+                color="#0072B2",
+                lw=0.8,
+                label="5 drawn screens, on" if k == 0 else None,
+            )
+        ax.plot(
+            dfreq,
+            draws[f"off_{name}"] / amplitude,
+            color="black",
+            lw=1.4,
+            ls="--",
+            label="Faraday off",
+        )
+        ax.set_ylabel(label)
+    np.atleast_1d(axes)[0].legend(fontsize=8, ncols=2)
+    np.atleast_1d(axes)[-1].set_xlabel("Frequency [MHz]")
+    return fig
+
+
+fig = draws_figure(
+    ["Q", "U"], [r"$Q\,/\,A(\nu)$", r"$U\,/\,A(\nu)$"]
+)
+figures.append(("gaussian_screen_step1_draws_qu", fig))
+plt.show()
+""")
+    md(r"""
+**Figure 4.** Beam-weighted Stokes $Q$ and $U$, each divided by
+$A(\nu)=\eta P_{\rm ref}f(\nu)$, versus frequency (10--50 MHz, 161 samples).
+Dashed: Faraday off. Thin blue: the Faraday-on readout of five drawn screens
+(seeds 11--15), each screen held fixed across frequency. Orange: the
+analytic mean and $\pm1\sigma$ of Section 3 for the same readout. The
+unrotated $Q/A=\cos2\chi$ and $U/A=\sin2\chi$ are constant. The mean
+on-curve is below $0.08$ of them at 40 MHz and below, and $U/A$ recovers to
+$0.35$ at 50 MHz. The band narrows towards low frequency, so there the drawn
+curves lie on the mean; at 10 MHz $\sigma/A\approx0.005$.
+Monochromatic, no noise, no channelization.
+""")
+    code(r"""
+fig = draws_figure(
+    ["xx", "yy", "xy"],
+    [r"$V_{xx}\,/\,A(\nu)$", r"$V_{yy}\,/\,A(\nu)$", r"$V_{xy}\,/\,A(\nu)$"],
+)
+figures.append(("gaussian_screen_step1_draws_xy", fig))
+plt.show()
+""")
+    md(r"""
+**Figure 5.** The same five screens read out as $V_{xx}$, $V_{yy}$ and
+$V_{xy}$, normalized and styled as Figure 4. Faraday rotation moves power
+between $V_{xx}$ and $V_{yy}$ and out of $V_{xy}$; when the polarized part
+is fully depolarized, $V_{xx}$ and $V_{yy}$ both approach $I/2$ and $V_{xy}$
+approaches zero. Here $I/P=2$, so that limit is $1$ in these units
+(for the unrotated case $V_{xx}/A=1.38$, $V_{yy}/A=0.62$, $V_{xy}/A=0.32$).
+""")
+    code(r"""
+# Evidence behind Figures 4--5, from the stored run (not recomputed here).
+convergence = max(
+    float(np.max(draws[f"convergence_{seed}"]))
+    for seed in stored["show_seeds"]
+)
+off_error = max(
+    float(
+        np.max(
+            abs(draws[f"off_{n}"] - draws[f"analytic_off_{n}"]) / amplitude
+        )
+    )
+    for n in readouts
+)
+pilot_freq = draws["pilot_freq"]
+n_pilot = draws["pilot_Q"].shape[0]
+print(f"drawn Faraday-off vs analytic off, max |diff|/A: {off_error:.1e}")
+print(
+    f"halving the pixel count (same screen), max |change|/A over "
+    f"5 screens x {stored['convergence_freq']} MHz: {convergence:.1e}"
+)
+print(f"pilot ensemble of {n_pilot} screens at {pilot_freq.tolist()} MHz")
+print("readout  mean z-score (sample mean vs prediction)   std ratio")
+pilot_z, pilot_ratio = [], []
+for n in readouts:
+    sample = draws[f"pilot_{n}"]
+    z = (
+        sample.mean(0) - np.interp(pilot_freq, dfreq, draws[f"analytic_mean_{n}"])
+    ) / (sample.std(0, ddof=1) / np.sqrt(n_pilot))
+    ratio = sample.std(0, ddof=1) / np.interp(
+        pilot_freq, dfreq, draws[f"analytic_std_{n}"]
+    )
+    pilot_z.append(z)
+    pilot_ratio.append(ratio)
+    print(f"{n:>5}    {np.round(z, 2)}                        {np.round(ratio, 3)}")
+checks["drawn_screens"] = dict(
+    seeds=stored["show_seeds"],
+    pilot_n=int(n_pilot),
+    off_vs_analytic_max_over_A=off_error,
+    pixel_halving_max_change_over_A=convergence,
+    pilot_max_abs_mean_z=float(np.max(abs(np.array(pilot_z)))),
+    pilot_std_ratio_range=[
+        float(np.min(pilot_ratio)),
+        float(np.max(pilot_ratio)),
+    ],
+    draws_sha256=hashlib.sha256(
+        (ROOT / "generated_data/gaussian_screen_step1/draws.npz").read_bytes()
+    ).hexdigest(),
+)
+""")
+    md(r"""
+**Pilot check.** Sixty-four further screens on a $2048^2$ grid (halved pixel
+count, which the convergence line above shows changes a drawn screen's
+readout by about $10^{-10}A$) give a sample mean and standard deviation at
+30, 40 and 50 MHz, compared with the prediction. With 64 screens the
+standard deviation is known to about 9%, and $Q$ and $V_{xx}-V_{yy}$ are the
+same measurement, as are $U$ and $2V_{xy}$, so the five rows hold only two
+independent readouts at three frequencies. This is a pilot: it can reveal a
+gross disagreement but cannot certify the formulas, and it does not meet the
+step-2 protocol (no pinned domain/spectrum refinement, no bootstrap errors,
+no covariance across frequency).
+""")
+    md(r"""
 ## 7. Why this does not yet recover the depth-histogram template
 
 For one branch, define
@@ -793,6 +973,8 @@ source_files = [
     "docs/specs/2026-10-15-gaussian-screen-step1.md",
     "docs/plans/2026-10-15-gaussian-screen-step1.md",
     "src/lusee_faraday/gaussian_screen.py",
+    "src/lusee_faraday/screen_draws.py",
+    "scripts/gaussian_screen_draws.py",
     "src/lusee_faraday/config.py",
     "src/lusee_faraday/conventions.py",
     "src/lusee_faraday/__init__.py",
@@ -953,8 +1135,8 @@ def main():
             for output in cell.outputs
             if "image/png" in output.get("data", {})
         ]
-        if len(image_outputs) != 3:
-            raise RuntimeError("Expected three embedded notebook figures")
+        if len(image_outputs) != 5:
+            raise RuntimeError("Expected five embedded notebook figures")
     finally:
         nbf.write(notebook, NOTEBOOK)
         manager.shutdown_kernel(now=True)

@@ -1,5 +1,30 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Gaussian-screen step 1: drawn screens and Stokes readouts — 2026-10-16
+
+After review feedback the notebook gained Section 6b. `ScreenModel.readout`
+now takes explicit `(k_I, k_Q, k_U)` (`READOUTS`: `xx`, `yy`, `xy`, `Q`, `U`)
+in place of the generic Jones pair, since ideal x/y dipoles give
+`Vxx=(I+Q)/2`, `Vyy=(I-Q)/2`, `Vxy=U/2`. `screen_draws.py` draws periodic
+spectral Gaussian screens and sums the Faraday-off/on readouts pixel by pixel
+from the Stokes brightness, independent of the separation integral and of the
+Jones-branch algebra. Figures 4--5 show five drawn screens (seeds 11--15,
+4096^2 grid over 8 degrees) against the analytic mean and 1-sigma band, each
+readout divided by the unrotated polarized amplitude `A(nu)`.
+`scripts/gaussian_screen_draws.py` (about 15 min, 2 GB) writes
+`generated_data/gaussian_screen_step1/draws.npz`; the notebook reads it.
+
+Measured: drawn Faraday-off readouts match the analytic off to 4e-6 A (box
+truncation); halving the pixel count of a fixed screen changes the on readout
+by at most 1.2e-10 A at 10--50 MHz, against the plan's 1e-4 gate (a floor set
+by the one-sided box edge). A 64-screen pilot on a 2048^2 grid at 30, 40,
+50 MHz gives |mean z| <= 1.44 and std ratios 0.80--1.06 against the
+prediction. That is consistent with the formulas, but with 64 screens the std
+is only known to ~9%, there are two independent readouts at three
+frequencies, and no frequency covariance, bootstrap errors or box/spectrum
+refinement were done: it is **not** the step-2 gate. Tests:
+`tests/test_screen_draws.py` (a flipped phase sign fails all five readouts).
+
 ## Gaussian-screen step 1 delivered for review — 2026-10-15
 
 The executed [notebook](notebooks/gaussian_screen_step1.ipynb) keeps the

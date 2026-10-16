@@ -56,6 +56,10 @@ complex Jones pair. Checks cover algebra, constant-screen limits and the
 reduced separation integral. They do not validate spatially varying screen
 simulations, the Galaxy, real-beam amplitudes or the depth-histogram forecast.
 **Stop here for Christian's review; steps 2--4 remain unexecuted.**
+Section 6b adds drawn-screen illustrations (Q, U, Vxx, Vyy, Vxy) and a
+64-screen pilot at 30/40/50 MHz; it is consistent with the analytic moments
+but is not the step-2 gate (no frequency covariance, bootstrap errors or
+domain/spectrum refinement).
 
 ### 2. Recover converged deterministic simulations at weak rotation
 
