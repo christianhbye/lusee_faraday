@@ -13,6 +13,17 @@ from scipy.special import hyp1f1
 from .config import BETA_QU
 from .conventions import lambda_squared
 
+# (k_I, k_Q, k_U) of V = int B [k_I I + k_Q Q + k_U U]. Ideal x/y dipoles
+# give <E E^dagger> = [[I+Q, U], [U, I-Q]]/2 for V_Stokes = 0; Q and U are the
+# beam-weighted Stokes parameters themselves.
+READOUTS = {
+    "xx": (0.5, 0.5, 0.0),
+    "yy": (0.5, -0.5, 0.0),
+    "xy": (0.0, 0.0, 0.5),
+    "Q": (0.0, 1.0, 0.0),
+    "U": (0.0, 0.0, 1.0),
+}
+
 
 @dataclass(frozen=True)
 class ScreenModel:
@@ -31,6 +42,8 @@ class ScreenModel:
     beta: float = BETA_QU
     jones_angle_deg: float = 45.0
     jones_phase_deg: float = 60.0
+    # (k_I, k_Q, k_U) overriding the Jones pair, e.g. READOUTS["xx"].
+    readout: "tuple | None" = None
 
     def __post_init__(self):
         positive = (
@@ -49,6 +62,11 @@ class ScreenModel:
             raise ValueError("Screen sigma must be finite and nonnegative")
         if not 0 <= self.p_ref_k <= self.i_ref_k:
             raise ValueError("Require I >= P >= 0")
+        if self.readout is not None and (
+            len(self.readout) != 3
+            or not np.all(np.isfinite(np.asarray(self.readout, complex)))
+        ):
+            raise ValueError("readout must be three finite (k_I, k_Q, k_U)")
         for name in (
             "mean_depth",
             "i_ref_k",
@@ -80,7 +98,12 @@ class ScreenModel:
 
     @property
     def stokes_coefficients(self):
-        """k_I, k_Q, k_U for p=(1,0), q=(cos psi, exp(i delta)sin psi)."""
+        """k_I, k_Q, k_U for p=(1,0), q=(cos psi, exp(i delta)sin psi).
+
+        An explicit ``readout`` replaces the Jones pair.
+        """
+        if self.readout is not None:
+            return np.asarray(self.readout, complex)
         psi = np.deg2rad(self.jones_angle_deg)
         delta = np.deg2rad(self.jones_phase_deg)
         return np.array(
