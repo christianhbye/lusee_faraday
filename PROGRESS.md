@@ -35,13 +35,13 @@ deterministic convergence, actual beam/loading, channels, noise, foreground
 treatment and production forecast remain unvalidated. **Stop for review.**
 No long real-beam audit, upstream edit or external manuscript edit was made.
 
-## Audit preparation branch — 2026-10-15
+## Audit preparation — 2026-10-15, merged to `main` 2026-10-16
 
-`audit-preparation` contains the corrected, bounded BGL v2 audit package
-and the editable croissant source/lockfile update in separate commits.
-It shares the workflow-note commit with `gaussian-screen-step1`, but
-does not contain that branch's derivation or notebook. The Gaussian
-step-1 delivery remains at `9ee8033`; its physical validation is pending.
+The corrected, bounded BGL v2 audit package and the editable croissant
+source/lockfile update were merged to `main` (PR #6) together with a CI fix
+that matches the local dependency sources by shape rather than by checkout
+path. The `audit-preparation` branch has been deleted; `gaussian-screen-step1`
+is rebased onto that `main`, and its physical validation is pending.
 The queue and handoff below preserve the audit preparation context.
 
 The installed croissant path, version and pyerfa dependency match the
@@ -52,7 +52,7 @@ fail. Formatting/lint, shell syntax and the read-only launcher plan pass.
 The historical briefing and scalar-lobe plot script are retained with
 their limitations noted in `audit/README.md`; the October survey JSON
 remains the original dated snapshot. No smoke/full service or large
-scientific computation has been launched. `main` is unchanged.
+scientific computation has been launched.
 
 ## Current handoff 2026-10-15
 
