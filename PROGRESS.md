@@ -1,5 +1,19 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Gaussian-screen discussion and inference recommendation — 2026-10-16
+
+Recorded the discussion in the [benchmark plan](docs/plans/2026-10-15-gaussian-screen-step1.md#discussion-record--2026-10-16)
+and linked it from the handoff and work queue. The record covers the physical
+ensemble, bounded continuum integral versus unresolved quadrature, smooth
+moments versus wavy realizations, covariance visualizations, the 21-cm analogy,
+real-beam generalization, fixed RM maps versus uncertain residuals, and the
+connection to the 16 measured real products. It recommends validating a small
+toy inference problem before realistic inference, including null controls,
+independent screen recovery, likelihood checks and nuisance degeneracies.
+This is a proposed sequence, not a completed inference result. Existing
+covariance/strong-rotation gates remain. No scientific job or code change.
+Checked documentation links and whitespace.
+
 ## Gaussian-screen notebook: math rendering — 2026-10-16
 
 Replaced display-math delimiters with `$$` throughout the notebook and its

@@ -17,6 +17,12 @@ checks do not yet validate spatially varying deterministic simulations.
 The proposed benchmark below is now specified; steps 2--4 remain unexecuted.
 The existing forecast and the real-beam audit retain their review gates.
 
+The [2026-10-16 discussion record](plans/2026-10-15-gaussian-screen-step1.md#discussion-record--2026-10-16)
+clarifies the fixed-map versus ensemble prediction, covariance interpretation,
+real-beam/RM limitations, and connection to measured four-port spectra. It
+recommends a validated toy inference demonstration before realistic inference;
+that addition is proposed and unexecuted.
+
 This is the consolidated handoff. [TODO](../TODO.md) holds the actionable
 queue; [the generated snapshot](paper-preparation-status.json) records input
 checksums, dependency revisions, saved forecast values and audit completion.

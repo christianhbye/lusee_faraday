@@ -1,6 +1,6 @@
 # LuSEE Faraday work queue
 
-Updated 2026-10-15. **Christian agreed to the Gaussian-screen benchmark and
+Updated 2026-10-16. **Christian agreed to the Gaussian-screen benchmark and
 validation sequence. This is the next scientific task.** The long real-beam
 audit remains pending review of its execution package. The consolidated
 status, paper outline, proposed commands and scientific gates are in
@@ -84,6 +84,24 @@ domain/spectrum refinement).
   proposed numerical cure; a failed direct simulation is not a reference.
 - [ ] Record the validated regime and computational cost. Separate numerical
   validation of this model from evidence that it describes the Galactic sky.
+
+### Proposed bridge: interpret covariance and demonstrate toy inference
+
+The [2026-10-16 discussion record](docs/plans/2026-10-15-gaussian-screen-step1.md#discussion-record--2026-10-16)
+records the fixed-map/ensemble distinction and connection to observations.
+The recommendation is to validate a small toy inference problem before the
+realistic inference pipeline; this work has not started. It retains the
+step-2 covariance and step-3 strong-rotation gates for the regimes it claims.
+
+- [ ] Visualize signed frequency-covariance slices, delay covariance/power,
+  eigenmodes and individual spectra; distinguish centered and raw power.
+- [ ] Recover an identifiable screen parameter from independent toy mock
+  observations; assess null detection errors, bias and interval coverage.
+  Use independent readouts and validate the likelihood/statistic rather
+  than assuming Gaussian measurements or observing an off counterfactual.
+- [ ] Expose nuisance degeneracies before extending to real LuSEE/WMAP
+  weights. Preserve a fixed-RM-map baseline separately from residual-screen
+  models; constrain or bracket their spatial correlations explicitly.
 
 ### 4. Extend the validated model to LuSEE and assess physical uncertainty
 
