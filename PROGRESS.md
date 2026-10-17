@@ -1,5 +1,24 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Gaussian-screen merge and inference plan — 2026-10-16
+
+Fast-forwarded local main to PR 7's squash merge `3bf50ce`. The remote
+feature branch was already deleted. Carried the three local review commits
+(physical overview, math rendering, discussion record) onto the new
+`gaussian-screen-inference` branch because they were absent from the squash
+merge; verified its committed tree matched the old feature branch before
+deleting that local branch. Preserved the uncommitted notebook kernel name.
+
+Wrote the [inference plan](docs/plans/2026-10-16-gaussian-screen-inference.md):
+full joint Q/U covariance validation first, then independent toy observations,
+likelihood checks, calibrated on/off detection, correlation-scale recovery,
+and nuisance/model sensitivity. Explicit ideal readouts replace generic Vpq
+for presentation. Synthetic noise is separated from a LuSEE sensitivity
+forecast. The plan pins convergence and calibration procedures, disjoint
+samples, implementation increments, artifacts and resource constraints.
+Updated work queue and handoff. Checked relative links, whitespace and git
+state. No scientific computation or inference code was run.
+
 ## Gaussian-screen discussion and inference recommendation — 2026-10-16
 
 Recorded the discussion in the [benchmark plan](docs/plans/2026-10-15-gaussian-screen-step1.md#discussion-record--2026-10-16)

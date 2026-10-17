@@ -1,7 +1,7 @@
 # LuSEE Faraday work queue
 
-Updated 2026-10-16. **Christian agreed to the Gaussian-screen benchmark and
-validation sequence. This is the next scientific task.** The long real-beam
+Updated 2026-10-16. **Gaussian-screen step 1 is merged (PR 7). Next: validate
+the full toy covariance, then demonstrate calibrated toy inference.** The long real-beam
 audit remains pending review of its execution package. The consolidated
 status, paper outline, proposed commands and scientific gates are in
 [docs/paper-preparation.md](docs/paper-preparation.md). Machine-readable
@@ -55,7 +55,8 @@ correlation length, a smooth Gaussian source and beam, and a realizable ideal
 complex Jones pair. Checks cover algebra, constant-screen limits and the
 reduced separation integral. They do not validate spatially varying screen
 simulations, the Galaxy, real-beam amplitudes or the depth-histogram forecast.
-**Stop here for Christian's review; steps 2--4 remain unexecuted.**
+**Step 1 was reviewed and squash-merged as PR 7; the full validation and
+inference work below remain unexecuted.**
 Section 6b adds drawn-screen illustrations (Q, U, Vxx, Vyy, Vxy) and a
 64-screen pilot at 30/40/50 MHz; it is consistent with the analytic moments
 but is not the step-2 gate (no frequency covariance, bootstrap errors or
@@ -85,13 +86,15 @@ domain/spectrum refinement).
 - [ ] Record the validated regime and computational cost. Separate numerical
   validation of this model from evidence that it describes the Galactic sky.
 
-### Proposed bridge: interpret covariance and demonstrate toy inference
+### Next implementation: interpret covariance and demonstrate toy inference
 
 The [2026-10-16 discussion record](docs/plans/2026-10-15-gaussian-screen-step1.md#discussion-record--2026-10-16)
 records the fixed-map/ensemble distinction and connection to observations.
-The recommendation is to validate a small toy inference problem before the
-realistic inference pipeline; this work has not started. It retains the
-step-2 covariance and step-3 strong-rotation gates for the regimes it claims.
+The [inference implementation plan](docs/plans/2026-10-16-gaussian-screen-inference.md)
+specifies joint Q/U covariance validation, observation/noise assumptions,
+null calibration, parameter recovery and nuisance tests before real-sky
+inference. This work has not started. It retains the step-2 covariance and
+step-3 strong-rotation gates for the regimes it claims.
 
 - [ ] Visualize signed frequency-covariance slices, delay covariance/power,
   eigenmodes and individual spectra; distinguish centered and raw power.

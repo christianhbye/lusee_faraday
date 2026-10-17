@@ -1,6 +1,8 @@
 # Gaussian-screen benchmark implementation and validation plan
 
-Scope: deliver step 1 for Christian's review, then stop. The specification is
+Historical scope: deliver step 1 for Christian's review. It was reviewed and
+merged as PR 7 on 2026-10-16. The [inference plan](2026-10-16-gaussian-screen-inference.md)
+now specifies the next work, retaining the convergence gates below. The specification is
 `docs/specs/2026-10-15-gaussian-screen-step1.md`.
 
 1. Specify the physical ensemble, tangent-plane geometry, admissible covariance,

@@ -1,6 +1,11 @@
 # LuSEE Faraday analysis and paper preparation
 
-Status: prepared for Christian's review on 2026-10-15. The long computation
+Current handoff, 2026-10-16: step 1 was reviewed and merged as PR 7
+(`3bf50ce`). The [toy inference plan](plans/2026-10-16-gaussian-screen-inference.md)
+is the next implementation sequence, beginning with full covariance
+validation. No inference or full covariance validation run has started.
+
+Preparation status as of 2026-10-15: The long computation
 has not been launched. The immediate priority is agreement on the physical
 model and observable. Bounded real-beam checks diagnose the old numerical
 failure; they do not validate the replacement covariance model. Physical
