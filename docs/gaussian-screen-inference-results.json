@@ -3452,12 +3452,14 @@
       "mixture-validation": "a262b51717d784283a4c71df3f90242b3ba9dc13a285a3cc658d27b157a957d8"
     },
     "frozen_config_sha256": "0a39e4f65bcd0caafc7d07d8dbde3a81e515b4d91f53f56039f04524bccb6d0b",
-    "builder_sha256": "c8efcb111235fa05ff50c20e642713179ec948ad334bb004a668472f92e46d9c",
+    "builder_sha256": "4ca3dd88c3643fb43eee0fac65710bef291e4df6a3370bda5611e94b23cec0ab",
     "figure_sha256": {
       "gaussian_inference_covariance.png": "83370fbb140262eaddebb0b545e35b1b908db6e090bf136fbfe91609c0f18111",
       "gaussian_inference_covariance.pdf": "2f6913162054a56d52db78cab4c028b89f88782a076f69375bad563c47d1b799",
       "gaussian_inference_information.png": "e89c46edc4cca8dd2dde9672fa02d44c6b4f7366476000445c05e9427d838128",
       "gaussian_inference_information.pdf": "246eca4ede913afb544e2bc8e837478c9d7f8cd6a20466529bcbb124134272f1",
+      "gaussian_inference_mode_comparison.png": "e3fd7930e48546b0166fdd3038df60dd2c61cd5ab9c4be7c285b4448cead1ce6",
+      "gaussian_inference_mode_comparison.pdf": "52b8ccf86ec5a6ed2c7c726e06039abe2703d9c387e687bf2c742167b2ce71b5",
       "gaussian_inference_modes.png": "30a2990bd1b96b47d4254d2395715e2734a876a3bfdb9a0bf1a1d08d513fd3a1",
       "gaussian_inference_modes.pdf": "654e82e3658862dba8f7ef1c9177b68b6cb4b4c1410309fca2d1b24171ddccaf",
       "gaussian_inference_template.png": "35ba534117d0ad5d632644d0d138c6a34507aaedb49fb1a485ee0f72ca70eb60",

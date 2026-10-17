@@ -1,5 +1,24 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Gaussian-screen inference mode comparison — 2026-10-17
+
+Added Figure 2b after the information assessment in the inference notebook,
+with definitions of centered screen signal, noise-whitened covariance modes,
+and projection into the reference total-RMS units. All ten reference modes
+compare the baseline ell=0.5 pc with the cached, source-profiled ell=0.25 and
+1 pc alternatives. Mean/RMS bars and full covariance-difference matrices
+expose changes in the first modes while retaining mode correlations. The
+source amplitude/angle/beta fits and synthetic noise are unchanged; no new
+screen ensemble or optimization was run. The original Figure 3 follows this
+supplement.
+
+Verification: the builder checks reference projected covariance against the
+identity and full projected KL against each cached fit (2 KL = 1.951 and
+0.705). Rebuilt and executed the notebook from completed caches under the
+16 GB virtual-memory cap; inspected the new PNG, and Black/flake8 pass.
+Updated the tracked figure manifest. The original calibration limitation and
+conditional toy scope still apply.
+
 ## Gaussian-screen bounded benchmark completed — 2026-10-16
 
 Delivered `notebooks/gaussian_screen_inference.ipynb`, executed from

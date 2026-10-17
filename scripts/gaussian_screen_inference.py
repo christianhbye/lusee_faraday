@@ -8,6 +8,7 @@ import common  # noqa: F401
 import hashlib
 import importlib.metadata
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import matplotlib
@@ -19,7 +20,8 @@ from nbclient import NotebookClient
 
 from calibrate_gaussian_screen import load_samples
 from gaussian_screen_experiment import check_gates, noise_covariance
-from lusee_faraday.gaussian_screen import ScreenModel
+from lusee_faraday.gaussian_screen import ScreenModel, qu_moments
+from lusee_faraday.screen_inference import gaussian_kl, transform_source
 from validate_gaussian_screen import OUT, ROOT, write_json
 
 matplotlib.use("Agg")
@@ -36,6 +38,194 @@ def save(fig, name):
     fig.savefig(FIG / f"{name}.png", dpi=160, bbox_inches="tight")
     plt.close(fig)
     return name
+
+
+def mode_comparison(assessment):
+    """Display cached profiled alternatives in one fixed reference basis."""
+    model = ScreenModel(**assessment["model"])
+    freq = np.asarray(assessment["freq_mhz"])
+    row = next(r for r in assessment["recovery"] if r["ell"] == 0.5)
+    reference = qu_moments(freq, model, method="special")
+    noise = noise_covariance(freq, model)
+    sd = np.sqrt(np.diag(noise))
+    eigenvalues, vectors = np.linalg.eigh(
+        reference["covariance"] / np.outer(sd, sd)
+    )
+    eigenvalues, vectors = eigenvalues[::-1], vectors[:, ::-1]
+    # Fix otherwise arbitrary eigenvector signs for reproducible mean offsets.
+    for column in range(len(sd)):
+        pivot = np.argmax(abs(vectors[:, column]))
+        if vectors[pivot, column] < 0:
+            vectors[:, column] *= -1
+    projection = vectors.T / sd[None, :]
+    projection /= np.sqrt(1 + eigenvalues)[:, None]
+    reference_total = reference["covariance"] + noise
+    np.testing.assert_allclose(
+        projection @ reference_total @ projection.T,
+        np.eye(len(sd)),
+        atol=1e-9,
+    )
+    alternatives = []
+    for comparison in row["comparisons"]:
+        fit = comparison["stages"][1]
+        if not fit["converged"]:
+            raise RuntimeError("unconverged source fit in mode comparison")
+        candidate = qu_moments(
+            freq,
+            replace(model, correlation_pc=comparison["alternative"]),
+            method="special",
+        )
+        mean, signal = transform_source(
+            candidate["mean"],
+            candidate["covariance"],
+            freq,
+            model,
+            *fit["parameters"],
+        )
+        projected_mean = projection @ (mean - reference["mean"])
+        projected_total = projection @ (signal + noise) @ projection.T
+        projected_kl = gaussian_kl(
+            np.zeros(len(sd)),
+            np.eye(len(sd)),
+            projected_mean,
+            projected_total,
+        )
+        # All ten modes must preserve the cached full-distribution comparison.
+        np.testing.assert_allclose(projected_kl, fit["kl"], atol=1e-8)
+        alternatives.append(
+            dict(
+                ell=comparison["alternative"],
+                mean=projected_mean,
+                covariance=projected_total,
+                kl=projected_kl,
+                parameters=fit["parameters"],
+            )
+        )
+
+    fig = plt.figure(figsize=(9, 7.5), layout="constrained")
+    grid = fig.add_gridspec(2, 2, height_ratios=[1, 1.2])
+    ax = fig.add_subplot(grid[0, :])
+    modes = np.arange(1, len(sd) + 1)
+    ax.errorbar(
+        modes - 0.2,
+        np.zeros(len(sd)),
+        yerr=np.ones(len(sd)),
+        fmt="o",
+        color="0.25",
+        capsize=3,
+        label="Reference: 0.5 pc",
+    )
+    limit = 1.0
+    for offset, color, marker, label, alternative in zip(
+        (0, 0.2),
+        ("#0072B2", "#D55E00"),
+        ("s", "^"),
+        ("Half scale", "Double scale"),
+        alternatives,
+    ):
+        rms = np.sqrt(np.diag(alternative["covariance"]))
+        ax.errorbar(
+            modes + offset,
+            alternative["mean"],
+            yerr=rms,
+            fmt=marker,
+            color=color,
+            capsize=3,
+            label=f"{label}: {alternative['ell']:g} pc",
+        )
+        limit = max(limit, np.max(abs(alternative["mean"]) + rms))
+    ax.axhline(0, color="0.5", lw=0.7)
+    ax.set(
+        xticks=modes,
+        xlabel="Reference mode (decreasing signal variance)",
+        ylabel="Mean offset ± total RMS\n/ reference total RMS",
+        ylim=(-1.1 * limit, 1.1 * limit),
+    )
+    ax.legend(
+        loc="upper center", bbox_to_anchor=(0.5, 1.23), ncol=3, fontsize=9
+    )
+    residuals = [a["covariance"] - np.eye(len(sd)) for a in alternatives]
+    limit = max(np.max(abs(r)) for r in residuals)
+    axes = []
+    for column, (alternative, residual) in enumerate(
+        zip(alternatives, residuals)
+    ):
+        ax = fig.add_subplot(grid[1, column])
+        axes.append(ax)
+        image = ax.imshow(
+            residual,
+            origin="lower",
+            extent=(0.5, 10.5, 0.5, 10.5),
+            cmap="RdBu_r",
+            vmin=-limit,
+            vmax=limit,
+        )
+        ax.set(
+            xticks=modes,
+            yticks=modes,
+            xlabel="Reference mode",
+            ylabel="Reference mode",
+            title=(
+                f"{alternative['ell']:g} pc: covariance difference"
+                f"\n$2D_{{KL}}$ = {2 * alternative['kl']:.3f}"
+            ),
+        )
+    fig.colorbar(
+        image,
+        ax=axes,
+        label="Covariance difference / reference mode RMS products",
+    )
+    caption = r"""### Figure 2b: what the fitted scale alternatives change
+
+The baseline is $\ell=0.5$ pc at 100 pc, using the same five frequencies
+over 45–50 MHz and synthetic noise as Figure 2. The half-scale and double-scale
+models use the converged amplitude/angle/spectral-index fits saved in
+`assessment.json`; no new optimization or screen draws enter this figure.
+
+Write the ten measurements as
+$\mathbf y=(Q_1,\ldots,Q_5,U_1,\ldots,U_5)^T
+=\boldsymbol\mu+\mathbf s+\mathbf n$.
+The centered screen fluctuation has covariance $S=E[\mathbf s\mathbf s^T]$
+and synthetic readout noise has covariance $N=E[\mathbf n\mathbf n^T]$.
+Thus “signal” in Figure 2's left panel means $S$, excluding the ensemble mean.
+For orthonormal eigenvectors
+$$N^{-1/2}S_0N^{-1/2}\mathbf v_a=\lambda_a\mathbf v_a,$$
+the mode $z_a=\mathbf v_a^TN^{-1/2}(\mathbf y-\boldsymbol\mu_0)$ has
+reference signal variance $\lambda_a$, noise variance one, and total variance
+$1+\lambda_a$. Subscript 0 denotes the reference model. Modes are ordered by
+decreasing $\lambda_a$; all ten are retained, including noise-dominated modes.
+
+For display, divide each mode by its reference total RMS:
+$$W_{a:}=\frac{\mathbf v_a^TN^{-1/2}}{\sqrt{1+\lambda_a}},\qquad
+\mathbf t=W(\mathbf y-\boldsymbol\mu_0).$$
+The reference has mean zero and covariance $I$. An alternative has
+$$\mathbf m=W(\boldsymbol\mu_{\rm alt}-\boldsymbol\mu_0),\qquad
+C=W(S_{\rm alt}+N)W^T.$$
+The source fit transforms both the mean and screen covariance; the readout
+noise $N$ stays fixed. The upper panel shows $m_a\pm\sqrt{C_{aa}}$ alongside
+the reference $0\pm1$. Bars are ensemble RMS including readout noise, not
+errors on fitted parameters or confidence intervals. The lower panels show
+$C-I$: diagonal entries measure variance changes, and off-diagonal entries
+show correlations between reference modes introduced by the alternative.
+Both matrices share one signed colour scale. All models use the same reference
+basis; separately diagonalizing each alternative would hide these correlations.
+
+At this baseline, the alternatives change the first two mode variances and
+shift the second mode's mean. The double-scale model also introduces
+correlations with modes 3 and 4. The models therefore predict different
+distributions, although their marginal RMS ranges overlap. These differences
+remain below the declared information criterion after the source fit.
+
+The overlapping marginal RMS bars make the comparison tangible but do not
+define a detection or recovery test. The covariance panels retain information
+that those bars omit. Because $W$ is invertible, this full ten-mode comparison
+preserves the Gaussian-model KL divergence in Figure 2 exactly; the builder
+checks it against the saved values. Gaussian distributions here are the
+information assessment's approximation, not an assumption established by
+matching first and second moments. The plotted RMS follows from those moments
+even if the screen readouts are non-Gaussian.
+"""
+    return save(fig, "gaussian_inference_mode_comparison"), caption
 
 
 def figures(validation, strong, assessment, inference):
@@ -146,6 +336,8 @@ def figures(validation, strong, assessment, inference):
             ),
         )
     )
+
+    figures.append(mode_comparison(assessment))
 
     model = ScreenModel(**assessment["model"])
     noise = noise_covariance(freq, model)
@@ -1083,15 +1275,23 @@ whitened residual diagnostics alone do not establish a Gaussian likelihood.
             " indent=2))"
         )
     )
+    notebook_path = ROOT / "notebooks/gaussian_screen_inference.ipynb"
+    kernelspec = {
+        "display_name": "Python 3 (project .venv)",
+        "language": "python",
+        "name": "python3",
+    }
+    if notebook_path.exists():
+        previous = nbformat.read(notebook_path, as_version=4)
+        kernelspec = previous.metadata.get("kernelspec", kernelspec)
+        existing_ids = {
+            (cell.cell_type, cell.source): cell.id for cell in previous.cells
+        }
+        for cell in cells:
+            cell.id = existing_ids.get((cell.cell_type, cell.source), cell.id)
     notebook = nbformat.v4.new_notebook(
         cells=cells,
-        metadata={
-            "kernelspec": {
-                "display_name": "Python 3 (project .venv)",
-                "language": "python",
-                "name": "python3",
-            }
-        },
+        metadata={"kernelspec": kernelspec},
     )
     NotebookClient(
         notebook,
@@ -1099,9 +1299,7 @@ whitened residual diagnostics alone do not establish a Gaussian likelihood.
         kernel_name="python3",
         resources={"metadata": {"path": str(ROOT)}},
     ).execute()
-    nbformat.write(
-        notebook, ROOT / "notebooks/gaussian_screen_inference.ipynb"
-    )
+    nbformat.write(notebook, notebook_path)
     print(
         f"Wrote notebook, {len(plots)} figures and tracked result record",
         flush=True,
