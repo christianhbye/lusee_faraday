@@ -1,5 +1,50 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Gaussian-screen bounded benchmark completed — 2026-10-16
+
+Delivered `notebooks/gaussian_screen_inference.ipynb`, executed from
+`scripts/gaussian_screen_inference.py`, eight inspected figures, and
+`docs/gaussian-screen-inference-results.json` with configuration, hashes,
+all calibration outcomes, numerical diagnostics and nuisance-boundary counts.
+The launcher reproduces the capped/checkpointed run; the builder reads
+completed caches and refuses stale source/configuration fingerprints.
+
+All 128-screen covariance gates pass at ell=0.05/0.15/0.5/1.5/5 pc and five
+frequencies over 45–50 MHz; maximum grid shift is 2.59e-5 of unrotated
+polarization. The separate 20/25/30/35 MHz gate passes at ell=0.5 pc. The
+five-scale validation took 662 s with peak RSS 878 MiB; the stronger-rotation
+ensemble took 42 s. Independent 1024-screen final ensembles at ell=0.5 and
+1.5 pc also pass the moment and numerical checks. The stationary depth-power
+approximation has a whitened omitted-mean error of 3.43 over 45–50 MHz and
+smaller errors in the narrow strong-rotation windows. Physical coherence
+scales supply its amplitude; no pixel-area normalization or Galactic forecast
+is inferred. Curves below 20 MHz have no direct-screen validation here.
+
+The information gate rejects factor-of-two scale recovery with source
+amplitude/angle/beta free. The frozen detection demonstration uses separate
+4096-draw calibration and validation ensembles at each of three constant
+depths, plus independent physical-screen alternatives. **17/18 null acceptance
+checks pass.** The fitted-beta/full-covariance Hc test at c=-0.04 rad/m² gives
+224/4096 false positives (5.47%); its simultaneous upper bound is 6.61%, above
+the frozen 6.5% limit. This remains unresolved; no threshold rule, tolerance
+or trial count was changed. Detection fractions for that test are diagnostics,
+not validated significance claims. Baseline Hc fits hit beta bounds in 89.6%
+of trials, so interpretation is conditional on the source restrictions.
+
+The matched-RM-covariance mixture fails Gaussian readout moments (worst 30.46
+MC standard errors) and passes its conditional moments (1.89 versus 4.16).
+Its measured RM covariance agrees within 1.15 sampling standard errors at the
+four tested lags. Thus matching RM two-point statistics does not determine
+observable phase moments. All 30 detection-statistic refinement checks pass,
+with zero changed decisions. Noise is synthetic; no scale confidence sets,
+channel-averaged observations, Galactic validity or LuSEE sensitivity claims
+are made.
+
+Verification: focused suite 29 passed; full suite 147 passed with the one
+unchanged two-port reference failure reproduced from pre-task `3bf50ce`.
+Source and new drivers pass flake8 and Black checks. Updated plan, TODO and
+handoff retain the unresolved calibration and source-model follow-ups.
+
 ## Gaussian-screen reproducibility and regression checks — 2026-10-16
 
 Pinned direct-screen seeds and the two mixture amplitudes in the frozen design;

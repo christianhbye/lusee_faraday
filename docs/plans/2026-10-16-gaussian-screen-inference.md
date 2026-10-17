@@ -1,9 +1,44 @@
 # Gaussian-screen covariance and inference: implementation plan
 
-Status: revised after paper-direction review on `gaussian-screen-inference`,
-2026-10-16. PR 7 was squash-merged as `3bf50ce`; the physical overview, math
-rendering and discussion record were carried onto this branch. This revision
-changes the work sequence; it launches no simulation or inference job.
+Status: bounded benchmark implemented on `gaussian-screen-inference`,
+2026-10-16. The five-scale covariance and separate strong-rotation gates pass.
+The information assessment does not support factor-of-two scale recovery with
+free source amplitude, angle and spectral index. Independent calibrated tests
+are complete, with one unresolved acceptance check: 17/18 pass; fitted-beta
+Hc with full covariance has a 6.61% simultaneous upper false-positive bound,
+above the frozen 6.5% limit. No tolerance or sample count was changed.
+
+Results: [executed notebook](../../notebooks/gaussian_screen_inference.ipynb)
+and [generated result/provenance record](../gaussian-screen-inference-results.json).
+The matched-RM-covariance mixture fails Gaussian readout moments but passes
+its conditional mixture moments. Frequent beta-boundary hits restrict the
+interpretation of detection fractions. These limitations close the bounded
+experiment as specified below; they remain open scientific gates before
+stronger inference claims. The original step-1 work was merged as PR 7
+(`3bf50ce`).
+
+Implementation decisions made before final observations:
+
+- Five monochromatic frequencies over 45–50 MHz replace the initial 17-point
+  candidate. At fixed total inverse-noise-variance budget, the baseline versus
+  double-scale profiled KL is 0.352 with five points and 0.343 with seventeen.
+- Validation uses 128 screens at each of ell=0.05, 0.15, 0.5, 1.5 and 5 pc.
+  The first sweep failed the coarsest angular grid at 0.5 and 1.5 pc; doubling
+  those grids passes the original tolerance. Domain checks use the exact
+  generator spectral covariance in two boxes and Gaussian weight/missing-mode
+  bounds. They do not use paired maps across different Fourier bases.
+- Direct strong-rotation validation covers 20, 25, 30 and 35 MHz at ell=0.5 pc.
+  Lower-frequency template curves have reduced-integral checks only.
+- Recovery is disabled by the information criterion. Known-source detection
+  scans the normalized Gaussian score across 41 scales. With unknown source
+  parameters, the bounded demonstration fits each null and calibrates a fixed
+  covariance-weighted residual discrepancy. It does not claim an Hs/Hc
+  profile-likelihood ratio or confidence sets for correlation length.
+- The frozen null domain contains depths -0.04, 0 and +0.04 rad/m² at the
+  specified source truth. Fitted nuisance ranges do not imply uniform
+  false-positive control over all source parameters.
+- Reproduce with `bash scripts/run_gaussian_screen_inference.sh run`; inspect
+  the existing job with `status`. Missing or changed fingerprints are rejected.
 
 ## Objective, paper deliverable and scope
 

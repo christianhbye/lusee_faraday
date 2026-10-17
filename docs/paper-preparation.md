@@ -2,11 +2,19 @@
 
 Current handoff, 2026-10-16: step 1 was reviewed and merged as PR 7
 (`3bf50ce`). The [toy inference plan](plans/2026-10-16-gaussian-screen-inference.md)
-is the next implementation sequence: full covariance validation, information
-and nuisance assessment, strong-rotation/template comparison, then a small
-calibrated inference exercise. Recovery is conditional on identifiability.
-The [Galactic-model follow-up](plans/2026-10-16-galactic-residual-screen-models.md)
-is deferred. No inference or full covariance validation run has started.
+now has passing full joint-Q/U covariance gates at five scales in 45–50 MHz
+and a separate baseline-scale gate at 20/25/30/35 MHz. The information
+assessment does not support factor-of-two scale recovery after source
+nuisance fitting. The bounded detection experiment is complete: 17/18 null
+acceptance checks pass. Fitted-beta Hc with full covariance has a simultaneous
+upper false-positive bound of 6.61%, above the frozen 6.5% limit; frequent beta
+boundary hits also restrict interpretation. The
+[executed inference notebook](../notebooks/gaussian_screen_inference.ipynb)
+and [result/provenance record](gaussian-screen-inference-results.json)
+report these limitations and the matched-covariance mixture test. The
+[Galactic-model follow-up](plans/2026-10-16-galactic-residual-screen-models.md)
+remains deferred; these conditional toy checks do not validate Galactic
+statistics or the saved sensitivity forecasts.
 
 Preparation status as of 2026-10-15: The long computation
 has not been launched. The immediate priority is agreement on the physical
@@ -22,14 +30,16 @@ and [generated check/provenance record](gaussian-screen-step1-results.json).
 It derives the paired off/on statistics for a flat-plane Gaussian source,
 beam and correlated physical screen. Its limiting-case and separation-integral
 checks do not yet validate spatially varying deterministic simulations.
-The proposed benchmark below is now specified; steps 2--4 remain unexecuted.
+The subsequent full covariance and strong-rotation checks implement that
+benchmark in the windows stated above. Real-beam and Galactic extensions
+remain open.
 The existing forecast and the real-beam audit retain their review gates.
 
 The [2026-10-16 discussion record](plans/2026-10-15-gaussian-screen-step1.md#discussion-record--2026-10-16)
 clarifies the fixed-map versus ensemble prediction, covariance interpretation,
 real-beam/RM limitations, and connection to measured four-port spectra. It
 recommends a validated toy inference demonstration before realistic inference;
-that addition is proposed and unexecuted.
+that addition is now implemented, with the calibration limitation above.
 
 This is the consolidated handoff. [TODO](../TODO.md) holds the actionable
 queue; [the generated snapshot](paper-preparation-status.json) records input
