@@ -1,5 +1,16 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Gaussian-screen notebook: math rendering — 2026-10-16
+
+Replaced display-math delimiters with `$$` throughout the notebook and its
+builder, and joined multiline inline expressions onto single lines for
+Markdown renderer compatibility, and replaced legacy `\rm` declarations
+with `\mathrm{...}`. Equations and numerical outputs are
+unchanged. Checked notebook validity, builder/input agreement, and math
+conversion through the notebook HTML exporter and Pandoc's MathML renderer.
+No scientific computation reran; output provenance still describes the prior
+execution.
+
 ## Gaussian-screen notebook: physical overview — 2026-10-16
 
 Added an opening explanation of the fixed Gaussian source/beam, the ensemble
