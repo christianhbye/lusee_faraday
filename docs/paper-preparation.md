@@ -6,6 +6,17 @@ model and observable. Bounded real-beam checks diagnose the old numerical
 failure; they do not validate the replacement covariance model. Physical
 validation must precede interpreting forecasts or producing the manuscript.
 
+Step 1 is now available for review in the executed
+[Gaussian-screen notebook](../notebooks/gaussian_screen_step1.ipynb), with its
+[model specification](specs/2026-10-15-gaussian-screen-step1.md),
+[implementation and step-2 validation plan](plans/2026-10-15-gaussian-screen-step1.md),
+and [generated check/provenance record](gaussian-screen-step1-results.json).
+It derives the paired off/on statistics for a flat-plane Gaussian source,
+beam and correlated physical screen. Its limiting-case and separation-integral
+checks do not yet validate spatially varying deterministic simulations.
+The proposed benchmark below is now specified; steps 2--4 remain unexecuted.
+The existing forecast and the real-beam audit retain their review gates.
+
 This is the consolidated handoff. [TODO](../TODO.md) holds the actionable
 queue; [the generated snapshot](paper-preparation-status.json) records input
 checksums, dependency revisions, saved forecast values and audit completion.
