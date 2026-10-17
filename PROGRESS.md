@@ -1,5 +1,24 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Gaussian-screen plan: paper priorities and inference gates — 2026-10-16
+
+Revised the plan after the paper-direction review. The sequence is full joint
+covariance validation, information/nuisance assessment, strong-rotation and
+depth-template comparison, then a small calibrated inference exercise. The
+paper deliverable now includes physical amplitude normalization and template
+approximation errors. Scale recovery is conditional on identifiable information;
+a quantified degeneracy is an acceptable result.
+
+Added a fitted constant-depth competing model, explicit source nuisance stages,
+pinned continuous-screen refinement, validation across correlation scales,
+noise-weighted numerical-error checks and calibration precision requirements.
+Profile-likelihood confidence sets are the initial interval procedure. Retained
+one matched-covariance non-Gaussian stress test and moved map diagnostics,
+intermittent screens and latent-field extensions into a linked deferred plan.
+Updated TODO and the current handoff to match. Documentation-only verification
+covers the diff, local links and unchanged pre-existing notebook edit. No
+simulation, new validation ensemble or inference job was run.
+
 ## Plan review: exploiting the RM reconstruction model — 2026-10-16
 
 Recorded a candidate amplitude-times-Gaussian-field extension in the inference

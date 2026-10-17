@@ -2,8 +2,11 @@
 
 Current handoff, 2026-10-16: step 1 was reviewed and merged as PR 7
 (`3bf50ce`). The [toy inference plan](plans/2026-10-16-gaussian-screen-inference.md)
-is the next implementation sequence, beginning with full covariance
-validation. No inference or full covariance validation run has started.
+is the next implementation sequence: full covariance validation, information
+and nuisance assessment, strong-rotation/template comparison, then a small
+calibrated inference exercise. Recovery is conditional on identifiability.
+The [Galactic-model follow-up](plans/2026-10-16-galactic-residual-screen-models.md)
+is deferred. No inference or full covariance validation run has started.
 
 Preparation status as of 2026-10-15: The long computation
 has not been launched. The immediate priority is agreement on the physical

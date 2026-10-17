@@ -1,9 +1,11 @@
 # LuSEE Faraday work queue
 
 Updated 2026-10-16. **Gaussian-screen step 1 is merged (PR 7). Next: validate
-the full toy covariance, then demonstrate calibrated toy inference.** The long real-beam
-audit remains pending review of its execution package. The consolidated
-status, paper outline, proposed commands and scientific gates are in
+the full toy covariance, assess identifiability, compare strong-rotation
+predictions with the depth-power template, then run a small calibrated
+inference exercise.** The long real-beam audit remains pending review of its
+execution package. The consolidated status, paper outline, proposed commands
+and scientific gates are in
 [docs/paper-preparation.md](docs/paper-preparation.md). Machine-readable
 provenance and existing-product values are in
 [docs/paper-preparation-status.json](docs/paper-preparation-status.json).
@@ -86,31 +88,34 @@ domain/spectrum refinement).
 - [ ] Record the validated regime and computational cost. Separate numerical
   validation of this model from evidence that it describes the Galactic sky.
 
-### Next implementation: interpret covariance and demonstrate toy inference
+### Next implementation: covariance, paper connection and scoped inference
 
-The [2026-10-16 discussion record](docs/plans/2026-10-15-gaussian-screen-step1.md#discussion-record--2026-10-16)
-records the fixed-map/ensemble distinction and connection to observations.
 The [inference implementation plan](docs/plans/2026-10-16-gaussian-screen-inference.md)
-specifies joint Q/U covariance validation, observation/noise assumptions,
-null calibration, parameter recovery and nuisance tests before real-sky
-inference. This work has not started. It retains the step-2 covariance and
-step-3 strong-rotation gates for the regimes it claims.
+now prioritizes full covariance validation, information and nuisance assessment,
+strong-rotation/template comparison, then a small calibrated inference exercise.
+This work has not started; the existing pilot does not satisfy its gates.
 
-- [ ] Visualize signed frequency-covariance slices, delay covariance/power,
-  eigenmodes and individual spectra; distinguish centered and raw power.
-- [ ] Recover an identifiable screen parameter from independent toy mock
-  observations; assess null detection errors, bias and interval coverage.
-  Use independent readouts and validate the likelihood/statistic rather
-  than assuming Gaussian measurements or observing an off counterfactual.
-- [ ] Expose nuisance degeneracies before extending to real LuSEE/WMAP
-  weights. Preserve a fixed-RM-map baseline separately from residual-screen
-  models; constrain or bracket their spatial correlations explicitly.
+- [ ] Implement pinned continuous Fourier realizations and converge joint Q/U
+  moments across small, intermediate and large correlation scales.
+- [ ] Visualize covariance and individual spectra; separate centered/raw power.
+  Assess scale information after profiling source amplitude, angle and spectral
+  terms, including the amplitude/scale and source-width degeneracies.
+- [ ] Validate strong-rotation predictions and compare the physical covariance
+  with the independent-depth template's amplitude and frequency structure.
+  Record failures and restricted scope before further recovery work.
+- [ ] Freeze a small window/noise/truth configuration and quantitative numerical
+  and calibration tolerances. Calibrate comparisons against zero rotation and
+  a fitted constant-depth screen, with the same source nuisance freedom.
+- [ ] Recover scale only if identifiable; otherwise quantify the degeneracy or
+  bound. Check numerical likelihood stability, false-positive rates and interval
+  coverage with sufficient independent samples to resolve the chosen tolerances.
+- [ ] Run one matched-covariance non-Gaussian scale-mixture stress test.
 
-- [ ] Stress-test Gaussian inference with non-Gaussian screen injections,
-  including a family with exactly matched ensemble RM covariance. Assess
-  local real-map residuals against correlated Gaussian surrogates; distinguish
-  reconstruction assumptions and posterior-mean smoothing from sky evidence.
-  The inference plan records the Hutschenreuter latent-field model and scope.
+Map diagnostics, intermittent fields and reconstruction-latent-field work are
+in the [deferred Galactic-model plan](docs/plans/2026-10-16-galactic-residual-screen-models.md).
+They remain prerequisites for Galactic interpretation, not for completing the
+conditional benchmark. Preserve a fixed-map baseline and distinguish physical
+unresolved structure from reconstruction uncertainty.
 
 ### 4. Extend the validated model to LuSEE and assess physical uncertainty
 
