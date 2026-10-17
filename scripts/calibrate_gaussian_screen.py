@@ -27,7 +27,7 @@ from lusee_faraday.screen_validation import (
 )
 from gaussian_screen_experiment import check_gates, noise_covariance
 from validate_gaussian_screen import CACHE, OUT, ROOT, provenance, write_json
-from dataclasses import replace
+from dataclasses import asdict, replace
 
 
 def load_samples(label, ell):
@@ -88,6 +88,7 @@ def main():
         null_tests=[],
         power=[],
         likelihood_diagnostics=[],
+        final_moment_checks=[],
         mixture={},
         thresholds={},
         statistic_stability=[],
@@ -308,10 +309,37 @@ def main():
         ("mixture-validation", 0.5, config["seed_alternative_noise"] + 2),
     ]:
         sample, middle, entry = load_samples(label, ell)
+        is_mixture = label.startswith("mixture")
+        expected_seed = config[
+            "seed_mixture_screen" if is_mixture else "seed_alternative_screen"
+        ]
+        if (
+            entry["seed_start"] != expected_seed
+            or entry["config"]["freq"] != config["freq_mhz"]
+            or entry["config"]["model"]
+            != asdict(replace(model, correlation_pc=ell))
+            or entry["config"]["mixture"] != is_mixture
+            or entry["config"]["mixture_amplitudes"]
+            != config["mixture_amplitudes"]
+        ):
+            raise RuntimeError(
+                "physical screen configuration differs from frozen design"
+            )
         if len(sample) != config["alternative_samples"]:
             raise RuntimeError(
                 "alternative sample count differs from frozen design"
             )
+        output["final_moment_checks"].append(
+            dict(
+                label=label,
+                ell=ell,
+                samples=entry["samples"],
+                numerical_pass=entry["numerical_pass"],
+                gaussian_moment_pass=entry["moments"]["passed"],
+                gaussian_worst_z=entry["moments"]["worst_z"],
+                gaussian_threshold=entry["moments"]["threshold"],
+            )
+        )
         rng = np.random.default_rng(noise_seed)
         data = sample + rng.normal(size=sample.shape) * sigma
         expected = qu_moments(

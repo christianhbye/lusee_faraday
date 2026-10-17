@@ -1,5 +1,23 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Gaussian-screen reproducibility and regression checks — 2026-10-16
+
+Pinned direct-screen seeds and the two mixture amplitudes in the frozen design;
+calibration now refuses a matching-shaped ensemble with different physical
+parameters, frequencies, seeds or mixture settings. Independent final moment
+checks are retained alongside likelihood diagnostics. Added explicit tests
+that frequency ablation preserves same-frequency Q/U covariance and that the
+covariance-weighted discrepancy matches the independent inverse-matrix form;
+a diagonal-only mutation is rejected. Focused suite: 29 passed (4.41 s).
+
+The full suite completed with 147 passed and one failure in the unchanged
+`test_short_dipole_monopole_matches_measured_reference`: 1.1816359006 versus
+its pinned 1.1971034514 reference. An isolated archive of pre-task commit
+`3bf50ce` reproduces that same failure in the current environment (croissant
+5.2.1, lusee 2.1.dev0). The test/reference and upstream packages are unchanged.
+Logs are under `generated_data/gaussian_screen_inference/tests-*.log`.
+The source and validation/calibration drivers pass flake8.
+
 ## Gaussian-screen numerical refinement and frozen tests — 2026-10-16
 
 The first 128-screen, five-scale sweep passed every ensemble moment check,

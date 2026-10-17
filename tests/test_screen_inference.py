@@ -281,3 +281,53 @@ def test_template_normalization_mutation_rejected():
     with patch.object(si, "local_stationary_template", wrong):
         with pytest.raises(AssertionError):
             test_stationary_template_depth_power_reference()
+
+
+def test_frequency_ablation_and_covariance_score():
+    from lusee_faraday.screen_inference import (
+        ablate_frequency_covariance,
+        covariance_discrepancy,
+    )
+
+    # Coordinate order Q1,Q2,U1,U2: Q1-U1 and Q2-U2 must survive.
+    signal = np.array(
+        [
+            [4.0, 0.2, 0.3, 0.4],
+            [0.2, 3.0, 0.5, 0.6],
+            [0.3, 0.5, 2.0, 0.7],
+            [0.4, 0.6, 0.7, 1.0],
+        ]
+    )
+    expected = np.array(
+        [
+            [4.0, 0.0, 0.3, 0.0],
+            [0.0, 3.0, 0.0, 0.6],
+            [0.3, 0.0, 2.0, 0.0],
+            [0.0, 0.6, 0.0, 1.0],
+        ]
+    )
+    np.testing.assert_array_equal(
+        ablate_frequency_covariance(signal), expected
+    )
+    noise = np.diag([0.4, 0.6, 0.8, 1.0])
+    residual = np.array([1.0, -0.2, 0.3, -0.4])
+    direct = (
+        residual
+        @ (np.linalg.inv(noise) - np.linalg.inv(noise + signal))
+        @ residual
+    )
+    np.testing.assert_allclose(
+        covariance_discrepancy(residual, signal, noise),
+        [direct],
+        atol=1e-13,
+    )
+
+
+def test_ablation_mutation_rejected():
+    from lusee_faraday import screen_inference as si
+
+    with patch.object(
+        si, "ablate_frequency_covariance", lambda s: np.diag(np.diag(s))
+    ):
+        with pytest.raises(AssertionError):
+            test_frequency_ablation_and_covariance_score()
