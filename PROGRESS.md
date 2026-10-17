@@ -1,5 +1,18 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Inference figure review and next-plan reconciliation — 2026-10-17
+
+Completed the figure walkthrough. Updated TODO, the inference plan and the
+paper-preparation handoff to link the reviewed evidence to the next decisions:
+define the observational target; assess a fixed Hutschenreuter baseline plus
+an uncertain residual; establish source/intensity constraints and realistic
+response/channel treatment; test the toy spectral minimum in realistic
+individual and ensemble spectra. The exact screen distribution still matters,
+and covariance is not a substitute for converged direct-screen quadrature.
+Calibration/source-boundary and matched-covariance non-Gaussian limitations
+remain open before stronger inference claims. The benchmark can be retained
+as a completed conditional result with those failures explicitly recorded.
+
 ## Direct-screen test of separated power predictions — 2026-10-17
 
 Added the cached baseline 128-screen covariance-validation ensemble at

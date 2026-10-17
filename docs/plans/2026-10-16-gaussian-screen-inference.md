@@ -17,6 +17,33 @@ experiment as specified below; they remain open scientific gates before
 stronger inference claims. The original step-1 work was merged as PR 7
 (`3bf50ce`).
 
+## Review outcome and next decisions — 2026-10-17
+
+The figure review is complete. The notebook now includes a comparison of
+profiled half/double-scale alternatives in all ten reference modes, an
+explicit Faraday-off power and surviving-fraction comparison, and the cached
+45–50 MHz direct-screen powers where the full/local predictions separate.
+The latter agree with the full prediction within one Monte Carlo standard
+error per frequency; they do not support the local approximation there.
+The low-frequency agreement remains conditional on the validated windows.
+
+This closes a conditional benchmark, including its failed calibration gate;
+it does not select a physical Galactic screen model. Next define the desired
+observable and assess a fixed Hutschenreuter baseline plus uncertain residual
+as one candidate in the [Galactic-model plan](2026-10-16-galactic-residual-screen-models.md).
+Keep bulk rotation detection distinct from spatial-scale inference, and assess
+which independent source or intensity constraints could break degeneracies.
+Do not turn the large paired on/off mean shift into an observational statistic
+requiring hidden off truth, or interpret small within-ensemble scatter as
+insensitivity to the assumed screen distribution.
+
+The sampled absolute-power minimum near 35 MHz is a candidate for realistic
+spectra, not a predicted Galactic feature. Test it in ensemble and individual
+spectra through realistic emission/rotation geometry, beam and channel
+responses, with leakage/noise treatment. Source flexibility and separately
+frozen null calibration precede stronger detection claims; correlation-length
+recovery remains disabled unless a new information assessment supports it.
+
 Implementation decisions made before final observations:
 
 - Five monochromatic frequencies over 45–50 MHz replace the initial 17-point

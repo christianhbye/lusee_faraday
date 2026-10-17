@@ -1,6 +1,6 @@
 # LuSEE Faraday analysis and paper preparation
 
-Current handoff, 2026-10-16: step 1 was reviewed and merged as PR 7
+Current handoff, 2026-10-17: step 1 was reviewed and merged as PR 7
 (`3bf50ce`). The [toy inference plan](plans/2026-10-16-gaussian-screen-inference.md)
 now has passing full joint-Q/U covariance gates at five scales in 45–50 MHz
 and a separate baseline-scale gate at 20/25/30/35 MHz. The information
@@ -15,6 +15,17 @@ report these limitations and the matched-covariance mixture test. The
 [Galactic-model follow-up](plans/2026-10-16-galactic-residual-screen-models.md)
 remains deferred; these conditional toy checks do not validate Galactic
 statistics or the saved sensitivity forecasts.
+
+The inference figures have now been reviewed. The next model decision is
+whether a fixed Hutschenreuter baseline plus an uncertain residual can support
+a scoped prediction of LuSEE spectra. Its residual statistics and available
+joint posterior information remain to be specified. The toy absolute-power
+minimum is recorded as a candidate test in realistic ensemble and individual
+spectra, rather than a Galactic result. The
+[review outcome](plans/2026-10-16-gaussian-screen-inference.md#review-outcome-and-next-decisions--2026-10-17)
+and [work queue](../TODO.md#4-extend-the-validated-model-to-lusee-and-assess-physical-uncertainty)
+retain source/intensity degeneracies, calibration failure, non-Gaussian
+uncertainty and the real-response/channel gates before stronger claims.
 
 Preparation status as of 2026-10-15: The long computation
 has not been launched. The immediate priority is agreement on the physical

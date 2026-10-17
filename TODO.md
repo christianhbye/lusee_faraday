@@ -1,6 +1,6 @@
 # LuSEE Faraday work queue
 
-Updated 2026-10-16. **The conditional Gaussian-screen benchmark is
+Updated 2026-10-17. **The conditional Gaussian-screen benchmark is
 implemented: covariance gates pass, scale recovery is unsupported, and
 17/18 null-calibration acceptance checks pass.** The unresolved fitted-beta
 constant-depth check and strong source-prior dependence remain visible in the
@@ -138,6 +138,16 @@ unresolved structure from reconstruction uncertainty.
 
 ### 4. Extend the validated model to LuSEE and assess physical uncertainty
 
+- [ ] Define the next observational target before further inference scans:
+  distinguish bulk rotation, departures from uniform rotation and scale
+  recovery. The benchmark supports no scale-recovery claim; assess angular
+  scale/source-width/amplitude ambiguity and whether independent intensity
+  or source constraints can help. I was not included in this inference.
+- [ ] Assess a fixed Hutschenreuter baseline plus statistical residual
+  delta-phi as a candidate, beginning with an inventory of joint posterior
+  information and resolved scales. Specify the uncertain residual and avoid
+  double-counting power already represented by the baseline. The local map's
+  mean and per-pixel errors alone do not define spatially coherent draws.
 - [ ] Introduce WMAP spatial variation and the actual frozen four-port response,
   including both polarization branches and their joint statistics.
 - [ ] Propagate actual channel responses through signal and noise. Define and
@@ -153,7 +163,21 @@ unresolved structure from reconstruction uncertainty.
   revise or replace that approximation before interpreting saved forecasts.
 - [ ] Derive beam-integrated amplitude consistently with the covariance;
   correct slab-envelope/floor and mean-polarization/power interpretations.
+- [ ] Test whether the competition between intrinsic brightening and
+  fractional depolarization produces a minimum in realistic absolute
+  polarized-power spectra. The sampled toy minimum near 35 MHz is a
+  candidate prediction, not a Galactic result. Test ensemble and individual
+  spectra with the same beam/channel estimator, leakage treatment and noise
+  bias correction; compare source/instrument alternatives. See the
+  [scoped follow-up](docs/plans/2026-10-16-galactic-residual-screen-models.md#candidate-spectral-minimum).
 - [ ] Update detectability and permitted paper claims only after these gates.
+
+Choose the physical residual model and source freedom before a new recovery
+or forecast campaign. Any revised detection procedure needs a separately
+frozen calibration; preserve this benchmark's failed acceptance check.
+Analytic covariance does not remove the need to converge each validation
+screen's direct integral. Small scatter within an ensemble does not establish
+robustness to choosing a different ensemble.
 
 ## Separate track: review and complete the real-beam numerical audit
 
