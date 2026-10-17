@@ -50,6 +50,18 @@ which observable statistics are sensitive to non-Gaussian depths. Then:
 
 ## Candidate extension using the reconstruction's latent fields
 
+Discussion, 2026-10-17: retain the Hutschenreuter reconstruction as a fixed
+large-scale baseline and model only the uncertain residual,
+phi(n)=phi_baseline(n)+delta_phi(n), as a candidate compromise between a
+single prescribed map and a full random-sky model. The ensemble would predict
+measurement statistics conditional on the baseline, rather than assume the
+Galaxy redraws during a LuSEE night. Define which angular scales the baseline
+represents before adding residual power; distinguish reconstruction uncertainty
+from physical sub-resolution fluctuations. Neither the residual distribution
+nor its independence from the baseline is established. This is a possibility
+to assess, not a selected Galactic model or a remedy for unresolved numerical
+quadrature: direct-screen validation still requires converged sums.
+
 Discussion, 2026-10-16: exploit phi(n)=A(n)*chi(n), A=exp(rho), as a
 structured alternative to assuming the entire RM sky is a homogeneous
 Gaussian field. This is a candidate derivation, not a validated replacement
@@ -83,6 +95,28 @@ keep assumptions about unresolved fluctuations explicit. Validate fixed-A and
 random-A limits with independent converged direct-screen sums before inference.
 This extension may provide a physically motivated non-Gaussian stress test
 between the Gaussian benchmark and the full LuSEE/WMAP model.
+
+## PolSynch comparison (read-only inspection, 2026-10-17)
+
+Local checkout: `../PolSynch`, commit `749f27f`. Its generators draw Q/U
+angular harmonic coefficients jointly across Faraday-depth bins, with
+power-law angular spectra, optional cross-bin covariance and per-realization
+RMS rescaling (`genRMmap.py`). The frequency synthesis is intended to sum
+complex polarized-emission amplitudes with exp(2i*phi*lambda^2)
+(`invRM.py`). This models a Faraday dispersion function F(n,phi), rather
+than an intrinsic sky multiplied by a single foreground-screen phase. It
+does not condition on the Hutschenreuter map or supply its missing residual
+statistics. The reference model targets 50–200 MHz from low-frequency
+polarization observations; extension to the LuSEE band requires assessment.
+Reference: [Spinelli et al. 2018](https://doi.org/10.1093/mnras/sty1457).
+
+Local implementation issue: `invRM.py:P_l2` line 42 uses the loop index in
+the phase rather than `phi_array[index]`. Supplied full-data depths span
+-16.57 to +20.57 rad/m² over 14 bins; the code instead uses 0 through 13.
+A one-bin input at phi=0.37 rad/m² and 100 MHz returned 1+0i instead of
+exp(2i*phi*lambda²), with absolute error 0.366. Existing synthesis tests use
+zero or index-valued depths and miss this error. No PolSynch files were
+modified, and no full-sky simulation was run.
 
 ## Entry decision and deliverable
 

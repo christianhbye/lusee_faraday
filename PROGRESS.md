@@ -1,5 +1,19 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Candidate residual screen and PolSynch comparison — 2026-10-17
+
+Recorded the fixed Hutschenreuter baseline plus uncertain delta-phi ensemble
+as a possibility in `docs/plans/2026-10-16-galactic-residual-screen-models.md`.
+It remains conditional on specifying resolved scales, residual statistics and
+separate reconstruction/sub-resolution uncertainty. Read-only inspection of
+`../PolSynch` at `749f27f` finds a different generative model: random complex
+polarized emission in Faraday-depth bins, followed by frequency synthesis.
+It supplies neither the proposed residual-screen statistics nor a LuSEE-band
+validation. A one-bin calculation confirms that local `invRM.py:P_l2` uses
+bin indices instead of physical depths in its phase; recorded the evidence
+and the existing tests' blind spot in the plan. No checkout edits or sky
+generation were performed.
+
 ## Gaussian-screen inference mode comparison — 2026-10-17
 
 Added Figure 2b after the information assessment in the inference notebook,
