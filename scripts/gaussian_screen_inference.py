@@ -429,27 +429,35 @@ def figures(validation, strong, assessment, inference):
     expected_power = np.diag(full)[:ns] + np.diag(full)[ns:]
     diag = assessment["strong_diagonal"]
     f = np.array([r["freq_mhz"] for r in diag])
-    fig, axes = plt.subplots(
-        2,
-        1,
-        figsize=(6.5, 5.5),
-        sharex=True,
-        gridspec_kw={"height_ratios": [3, 1]},
-        layout="constrained",
+    on_power = np.array([r["centered_power"] + r["mean_power"] for r in diag])
+    approximate_power = np.array([r["approximate_power"] for r in diag])
+    off = qu_moments(
+        f, replace(model, mean_depth=0.0, sigma_depth=0.0), method="special"
+    )["off"]
+    off_power = np.sum(off.reshape(2, -1) ** 2, axis=0)
+    sample_indices = np.searchsorted(f, sf)
+    np.testing.assert_allclose(f[sample_indices], sf)
+    sample_off_power = off_power[sample_indices]
+    fraction = on_power / off_power
+    if np.any((fraction < 0) | (fraction > 1 + 1e-12)):
+        raise RuntimeError("unphysical surviving power fraction")
+    fig = plt.figure(figsize=(9, 6.5), layout="constrained")
+    grid = fig.add_gridspec(2, 2, height_ratios=[3, 1])
+    power_ax = fig.add_subplot(grid[0, 0])
+    fraction_ax = fig.add_subplot(grid[0, 1], sharex=power_ax)
+    residual_ax = fig.add_subplot(grid[1, :], sharex=power_ax)
+    for ax, normalization in ((power_ax, 1), (fraction_ax, off_power)):
+        ax.semilogy(f, on_power / normalization, "o-", label="Full on power")
+        ax.semilogy(
+            f,
+            approximate_power / normalization,
+            "s--",
+            label="Local approximation",
+        )
+    power_ax.semilogy(
+        f, off_power, ":", color="0.35", label="Faraday-off power"
     )
-    axes[0].semilogy(
-        f,
-        [r["centered_power"] + r["mean_power"] for r in diag],
-        "o-",
-        label="Full raw power",
-    )
-    axes[0].semilogy(
-        f,
-        [r["approximate_power"] for r in diag],
-        "s--",
-        label="Local stationary approximation",
-    )
-    axes[0].errorbar(
+    power_ax.errorbar(
         sf,
         sample_power,
         yerr=error,
@@ -457,19 +465,37 @@ def figures(validation, strong, assessment, inference):
         color="black",
         label="Direct screens",
     )
-    axes[0].set(ylabel=r"$\langle |P|^2\rangle$ ($\mathrm{K}^2$)")
-    axes[0].legend(fontsize=9)
-    axes[1].errorbar(
+    fraction_ax.errorbar(
+        sf,
+        sample_power / sample_off_power,
+        yerr=error / sample_off_power,
+        fmt="o",
+        color="black",
+        label="Direct screens",
+    )
+    fraction_ax.axhline(1, color="0.35", ls=":", label="No depolarization")
+    power_ax.set(
+        ylabel=r"$\langle |P|^2\rangle$ ($\mathrm{K}^2$)",
+        title="Absolute polarized power",
+    )
+    fraction_ax.set(
+        ylabel=r"$D=\langle |P_{\rm on}|^2\rangle/|P_{\rm off}|^2$",
+        title="Surviving power fraction",
+    )
+    for ax in (power_ax, fraction_ax):
+        ax.legend(fontsize=8)
+        ax.set(xlabel="Frequency (MHz)")
+    residual_ax.errorbar(
         sf,
         (sample_power - expected_power) / error,
         yerr=1,
         fmt="o",
         color="black",
     )
-    axes[1].axhline(0, color="gray")
-    axes[1].axhline(sr["moments"]["threshold"], color="gray", ls=":")
-    axes[1].axhline(-sr["moments"]["threshold"], color="gray", ls=":")
-    axes[1].set(xlabel="Frequency (MHz)", ylabel="Residual / MC SE")
+    residual_ax.axhline(0, color="gray")
+    residual_ax.axhline(sr["moments"]["threshold"], color="gray", ls=":")
+    residual_ax.axhline(-sr["moments"]["threshold"], color="gray", ls=":")
+    residual_ax.set(xlabel="Frequency (MHz)", ylabel="Residual / MC SE")
     figures.append(
         (
             save(fig, "gaussian_inference_template"),
@@ -477,7 +503,12 @@ def figures(validation, strong, assessment, inference):
                 "Physical polarization power for the baseline"
                 " source/beam/screen. Direct-screen points use 128"
                 " independent, individually converged realizations at 20–35"
-                " MHz; their errors are screen Monte Carlo errors. The local"
+                " MHz; their errors are screen Monte Carlo errors. Left:"
+                " absolute Faraday-on power and the deterministic Faraday-off"
+                " power through the same source and beam. Right: both on"
+                " predictions and the direct-screen estimates divided by"
+                " that off power. This is a power fraction, not a polarized"
+                " amplitude fraction. The local"
                 " small-separation approximation supplies its own physical"
                 " amplitude and approaches the full expression toward strong"
                 " rotation. The residual panel compares direct sums with the"
@@ -485,6 +516,23 @@ def figures(validation, strong, assessment, inference):
                 " checks but no direct-screen validation in this run."
                 " Narrow-band covariance-shape errors are tabulated"
                 " separately."
+                "\n\nFor this fixed-angle Gaussian source, the off power is"
+                r" $|P_{\rm off}|^2=(\eta P_{\rm ref})^2"
+                r"(\nu/\nu_{\rm ref})^{2\beta}$, where $\eta$ is the beam"
+                " dilution factor. Defining the surviving fraction as"
+                r" $D(\nu)=\langle|P_{\rm on}|^2\rangle/|P_{\rm off}|^2$"
+                " separates intrinsic brightening toward low frequency from"
+                " stronger fractional depolarization. Their product produces"
+                " a minimum in the sampled absolute-power curve near"
+                f" {f[np.argmin(on_power)]:g} MHz. This is an ensemble"
+                " mean-square minimum for the declared toy parameters, not a"
+                " predicted minimum in every individual spectrum.\n\n"
+                "Whether this competition produces a measurable minimum in"
+                " realistic LuSEE spectra is a candidate follow-up. Its"
+                " existence and frequency must be assessed with realistic"
+                " emission, screen structure, beam chromaticity and channel"
+                " averaging before interpreting a feature in data; no such"
+                " validation is supplied here."
             ),
         )
     )

@@ -120,6 +120,29 @@ modified, and no full-sky simulation was run.
 
 ## Entry decision and deliverable
 
+### Candidate spectral minimum
+
+Discussion, 2026-10-17: test whether the Gaussian benchmark's minimum in
+ensemble absolute polarized power survives in realistic spectra. Intrinsic
+synchrotron brightening toward low frequency competes with stronger fractional
+depolarization: <|P_on(nu)|²> = |P_off(nu)|² D(nu). The sampled toy curve has
+a minimum near 35 MHz; its location is conditional on the adopted parameters.
+Figure 4 now displays both the off reference and D to separate these effects.
+
+Assess the existence, location and depth of any minimum across individual
+realizations and declared time/sky selections, in addition to ensemble power.
+Use the proposed fixed baseline plus residual screen where justified, vary
+unconstrained small-scale structure and emission/rotation geometry, and pass
+on/off predictions through the same realistic beam, channel estimator and
+calibration reference. Distinguish physical polarization from instrumental
+I-to-Q/U leakage; account for measurement-noise bias in squared amplitudes.
+Any data comparison must include smooth intrinsic-spectrum and instrumental
+alternatives capable of producing a similar feature. A minimum is a candidate
+observable to test, not yet a robust Galactic prediction or a unique Faraday
+identification. No new realistic-spectrum calculation has been run.
+
+### Entry decision
+
 Begin with an inventory of map components, posterior information, masks and
 resolved scales. Select a local residual definition and observational question
 before choosing a screen family. Keep the fixed RM map as a separate baseline;

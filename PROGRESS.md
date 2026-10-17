@@ -1,5 +1,23 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Absolute polarization power and surviving fraction — 2026-10-17
+
+Expanded the inference notebook's original Figure 4 with a deterministic
+Faraday-off power reference and a separate surviving-power-fraction panel,
+D=<|P_on|²>/|P_off|². Both use the same toy source, beam and frequency grid;
+the off reference comes from `qu_moments` with zero screen mean/dispersion.
+Direct-screen powers and their Monte Carlo errors are normalized by that
+same reference. The original full-model residual check is retained. The
+notebook explains the sampled minimum near 35 MHz as competition between
+intrinsic synchrotron brightening and fractional Faraday depolarization.
+
+Recorded testing the minimum in realistic spectra as a candidate follow-up
+in the Galactic residual-screen plan, including individual realizations,
+beam/channel response, leakage and noise bias. No realistic-spectrum result
+is claimed. Rebuilt and executed the notebook from existing caches under
+the 16 GB cap, checked the fraction lies in [0,1], and inspected the expanded
+figure. Black/flake8 and figure-manifest checks pass.
+
 ## Candidate residual screen and PolSynch comparison — 2026-10-17
 
 Recorded the fixed Hutschenreuter baseline plus uncertain delta-phi ensemble
