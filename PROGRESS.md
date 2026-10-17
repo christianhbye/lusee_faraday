@@ -1,5 +1,17 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Gaussian-screen notebook: physical overview — 2026-10-16
+
+Added an opening explanation of the fixed Gaussian source/beam, the ensemble
+of physical RM screens, and the rotate-then-sum measurement equation. It
+connects individual pixel-summed spectra to the analytic ensemble mean and
+frequency covariance, and explains why spatial RM correlations affect the
+surviving power. Updated the notebook builder with the same text. This is a
+prose-only change; existing outputs are retained from the previous execution
+and their provenance describes that run. No simulation or forecast reran.
+Verified notebook structure and agreement with the builder's Markdown/code
+cells without executing the analysis.
+
 ## Gaussian-screen step 1: drawn screens and Stokes readouts — 2026-10-16
 
 After review feedback the notebook gained Section 6b. `ScreenModel.readout`

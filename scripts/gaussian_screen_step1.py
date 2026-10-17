@@ -35,6 +35,44 @@ Faraday-off/on visibility. It executes algebraic limits and one-dimensional
 integration checks. It does **not** validate spatial screen simulations,
 model the Galaxy, or update the detection forecast.
 
+### Physical picture and connection to the pixel sum
+
+The beam and intrinsic source are fixed Gaussian-shaped profiles. The
+Faraday depth $\phi(\mathbf r)$ is a Gaussian random field: its mean and
+spatial covariance define an ensemble of possible rotation-measure (RM)
+maps. For this foreground-screen geometry, RM equals Faraday depth. Each
+drawn map stays fixed across frequency; the source and receiver stay fixed
+across the ensemble.
+
+For one map, rotate the polarization in each direction and sum through the
+beam. With $P_0=Q_0+iU_0$ the intrinsic polarized brightness,
+$\boldsymbol\theta$ the angular position, $d$ the screen distance, and
+$\lambda$ the wavelength, the beam-averaged polarization is
+\[
+\overline P_{\rm on}(\nu)=\int d^2\theta\,
+B(\boldsymbol\theta)P_0(\boldsymbol\theta,\nu)
+e^{2i\phi(d\boldsymbol\theta)\lambda^2}.
+\]
+The Faraday-off calculation replaces the exponential by one. The receiver
+combines the resulting beam-weighted intensity, $Q=\mathrm{Re}\,\overline P$
+and $U=\mathrm{Im}\,\overline P$ into a visibility (Section 2).
+
+This is the original pixel sum in continuum form. We compare two routes:
+
+- **Draw maps, then sum:** Section 6b draws RM maps and evaluates the angular
+  sum for each map, producing individual noiseless measurement spectra.
+- **Predict the statistics:** Sections 3--4 average the phase factors over
+  the map ensemble analytically, then integrate to predict the measurement
+  mean and covariance across frequency. Gaussian spatial weights reduce
+  the angular-pair integral to one integral over separation.
+
+Spatial covariance determines how much polarization cancels inside the
+beam. Maps with the same one-point RM distribution can have different
+correlation lengths and different surviving power. The analytic result
+predicts the statistics across maps; the individual curves come from maps
+passed through the pixel sum. No Gaussian distribution of measurements is
+assumed. The drawn-screen comparison is currently a pilot (Section 6b).
+
 Rebuild and execute from the repository root with
 `.venv/bin/python scripts/gaussian_screen_step1.py`. The executor uses that
 same Python for the kernel. No external maps or real beam are needed.
