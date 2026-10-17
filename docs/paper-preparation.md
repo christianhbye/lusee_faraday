@@ -1,6 +1,33 @@
 # LuSEE Faraday analysis and paper preparation
 
-Status: prepared for Christian's review on 2026-10-15. The long computation
+Current handoff, 2026-10-17: step 1 was reviewed and merged as PR 7
+(`3bf50ce`). The [toy inference plan](plans/2026-10-16-gaussian-screen-inference.md)
+now has passing full joint-Q/U covariance gates at five scales in 45–50 MHz
+and a separate baseline-scale gate at 20/25/30/35 MHz. The information
+assessment does not support factor-of-two scale recovery after source
+nuisance fitting. The bounded detection experiment is complete: 17/18 null
+acceptance checks pass. Fitted-beta Hc with full covariance has a simultaneous
+upper false-positive bound of 6.61%, above the frozen 6.5% limit; frequent beta
+boundary hits also restrict interpretation. The
+[executed inference notebook](../notebooks/gaussian_screen_inference.ipynb)
+and [result/provenance record](gaussian-screen-inference-results.json)
+report these limitations and the matched-covariance mixture test. The
+[Galactic-model follow-up](plans/2026-10-16-galactic-residual-screen-models.md)
+remains deferred; these conditional toy checks do not validate Galactic
+statistics or the saved sensitivity forecasts.
+
+The inference figures have now been reviewed. The next model decision is
+whether a fixed Hutschenreuter baseline plus an uncertain residual can support
+a scoped prediction of LuSEE spectra. Its residual statistics and available
+joint posterior information remain to be specified. The toy absolute-power
+minimum is recorded as a candidate test in realistic ensemble and individual
+spectra, rather than a Galactic result. The
+[review outcome](plans/2026-10-16-gaussian-screen-inference.md#review-outcome-and-next-decisions--2026-10-17)
+and [work queue](../TODO.md#4-extend-the-validated-model-to-lusee-and-assess-physical-uncertainty)
+retain source/intensity degeneracies, calibration failure, non-Gaussian
+uncertainty and the real-response/channel gates before stronger claims.
+
+Preparation status as of 2026-10-15: The long computation
 has not been launched. The immediate priority is agreement on the physical
 model and observable. Bounded real-beam checks diagnose the old numerical
 failure; they do not validate the replacement covariance model. Physical
@@ -14,8 +41,16 @@ and [generated check/provenance record](gaussian-screen-step1-results.json).
 It derives the paired off/on statistics for a flat-plane Gaussian source,
 beam and correlated physical screen. Its limiting-case and separation-integral
 checks do not yet validate spatially varying deterministic simulations.
-The proposed benchmark below is now specified; steps 2--4 remain unexecuted.
+The subsequent full covariance and strong-rotation checks implement that
+benchmark in the windows stated above. Real-beam and Galactic extensions
+remain open.
 The existing forecast and the real-beam audit retain their review gates.
+
+The [2026-10-16 discussion record](plans/2026-10-15-gaussian-screen-step1.md#discussion-record--2026-10-16)
+clarifies the fixed-map versus ensemble prediction, covariance interpretation,
+real-beam/RM limitations, and connection to measured four-port spectra. It
+recommends a validated toy inference demonstration before realistic inference;
+that addition is now implemented, with the calibration limitation above.
 
 This is the consolidated handoff. [TODO](../TODO.md) holds the actionable
 queue; [the generated snapshot](paper-preparation-status.json) records input

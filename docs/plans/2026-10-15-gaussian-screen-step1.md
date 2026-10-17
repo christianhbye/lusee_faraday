@@ -1,6 +1,8 @@
 # Gaussian-screen benchmark implementation and validation plan
 
-Scope: deliver step 1 for Christian's review, then stop. The specification is
+Historical scope: deliver step 1 for Christian's review. It was reviewed and
+merged as PR 7 on 2026-10-16. The [inference plan](2026-10-16-gaussian-screen-inference.md)
+now specifies the next work, retaining the convergence gates below. The specification is
 `docs/specs/2026-10-15-gaussian-screen-step1.md`.
 
 1. Specify the physical ensemble, tangent-plane geometry, admissible covariance,
@@ -104,3 +106,139 @@ strong-rotation predictions do not satisfy that gate. Step 4 introduces the
 actual two-branch LuSEE response, real sky variation, channels, foreground
 treatment and noise only after review of steps 2--3. None of those jobs is
 part of this delivery.
+
+
+## Discussion record — 2026-10-16
+
+Christian asked how the Gaussian notebook relates to the original pixel
+sum, the existing RM map, and eventual LuSEE-Night measurements. This section
+records the explanation and the recommended next sequence. The inference
+work below is proposed, not executed or an agreed replacement for the
+existing validation gates.
+
+### Physical model and numerical distinction
+
+The source and beam are fixed Gaussian-shaped profiles. The Faraday screen
+is the Gaussian random field; one drawn screen stays fixed across frequency.
+Only the screen varies across the ensemble. Sections 1--6 predict ensemble
+moments; Section 6b directly pixel-sums drawn maps and supplies a small pilot.
+Measurements are calculated from screens, not drawn from an assumed Gaussian
+visibility distribution. There is currently no receiver noise.
+
+The continuum phase integral is bounded, not divergent. An unresolved pixel
+quadrature can leave an incorrect, resolution-dependent cancellation residual.
+Averaging Gaussian phase differences analytically replaces oscillatory factors
+with a smooth coherence kernel determined by the screen structure function.
+Stationarity and circular source/beam symmetry then reduce the angular-pair
+integral to one separation integral. Averaging and symmetry do different
+jobs. This predicts ensemble moments, not the exact spectrum of a specified
+map, and the narrow coherence region still needs convergence checks.
+
+An individual screen produces spectral wiggles. Averaging over different
+screens can suppress those wiggles, leaving a smooth mean and pointwise
+standard deviation. Their frequency coherence resides in off-diagonal
+covariance, which the pointwise band cannot display. The pilot does not yet
+validate that full covariance.
+
+### Interpretation and visualization of covariance
+
+Proposed views are signed covariance/correlation slices at reference
+frequencies, delay-space covariance, dominant spectral eigenmodes, and
+individual measurement spectra alongside the ensemble prediction. Delay
+power is the diagonal of the frequency covariance transformed on both axes;
+retain cross-mode correlations where they matter. Account separately for a
+nonzero mean when predicting raw power, and apply the same window/channel
+response to simulations and observations.
+
+The analogy with 21-cm tomography versus a power spectrum is useful: a map
+or spectrum is a realization, while covariance describes statistical
+structure. Fourier modes diagonalize covariance under appropriate stationarity
+assumptions. This Faraday model generally depends separately on both
+wavelength-squared coordinates, so a delay-power curve need not contain all
+of its second-moment information.
+
+### Existing RM map and the real-beam extension
+
+No screen covariance is required to calculate the visibility conditional on
+a fully specified RM map. That calculation still needs converged angular
+integration. Covariance is needed to describe an ensemble or to model
+uncertain/unresolved structure. A statistical replacement does not recover
+the fixed-map spectrum simply by averaging its phases.
+
+Keep the existing RM map as a deterministic baseline. A possible extension
+is phi(n) = phi_map(n) + delta_phi(n), with the residual's meaning stated:
+posterior uncertainty in the fixed sky and physical small-scale fluctuations
+are distinct modeling questions. Do not add physical power already represented
+by the baseline or equate map-pixel size with a coherence area.
+
+Resolved angular correlations can be estimated from RM observations using
+structure functions or angular spectra, with explicit treatment of noise,
+large-scale Galactic variation, sampling and spatial-averaging assumptions.
+Unconstrained smaller scales require stated models and sensitivity tests.
+The Faraday 2020 release provides posterior means and per-pixel standard
+deviations; those products alone do not specify joint spatial uncertainty or
+physical sub-resolution turbulence. See the
+[data description](https://wwwmpa.mpa-garching.mpg.de/~ensslin/research/data/faraday2020.html).
+No observationally justified residual covariance has yet been selected here.
+
+Analytic Gaussian phase averaging survives arbitrary fixed source/response
+weights and a general valid Gaussian-screen covariance. Gaussian spatial
+profiles make the present separation weighting analytic. Isotropic screen
+statistics may permit a separation reduction with numerically calculated
+weights for other beams/skies; spatially varying Galactic statistics,
+curved-sky polarization transport and both response branches require a new
+implementation and validation. Efficient real-response evaluation has not
+been demonstrated. WMAP supplies a fixed polarized-sky template, not the
+screen statistics; extending its emission behind a foreground screen remains
+a physical assumption.
+
+### Connection to measured data and proposed inference sequence
+
+The data are the 16 real four-port products versus time and frequency. The
+new ensemble covariance describes correlations among those readouts; it is
+distinct from the electric-field coherency that defines each port product.
+The real instrument observes one sky and has no Faraday-off switch. Paired
+off/on simulations remain useful controls, but their difference is not
+itself an observed data vector. Detection must compare model predictions
+through the same instrument, channel averaging and foreground processing,
+allowing competing foreground/instrument explanations comparable freedom.
+
+Recommendation: complete the toy covariance validation, then demonstrate a
+small inference problem in the toy model before building a full realistic
+inference pipeline. Strong-rotation claims retain the existing step-3 gate;
+a weak-rotation inference demonstration can establish only its stated regime.
+
+1. Plot and validate frequency covariance against converged, independently
+   generated screen realizations, including numerical and ensemble errors.
+2. Use independent mock observations for inference validation. Initially
+   hold the source/beam fixed and test one screen parameter at a time; then
+   expose degeneracies when intrinsic polarized amplitude or smooth source
+   terms are allowed to vary. Identify a band where the parameter changes
+   an observable before choosing it as a recovery target.
+3. Use the toy model's independent readouts. Q and U suffice for ideal x/y
+   dipoles: Vxx, Vyy and Vxy are redundant combinations with fixed intensity.
+   Do not treat them as independent measurements or manufacture 16 independent
+   toy channels. Add an explicit illustrative noise model if needed; state
+   its covariance, channel widths and integration time, and distinguish it
+   from a LuSEE noise prediction.
+4. Test Faraday-on versus off using the observed mock readouts, without
+   supplying the hidden off realization to the inference. Calibrate detection
+   errors on null simulations and assess parameter bias/interval coverage
+   across independent screens. A Gaussian screen does not imply a Gaussian
+   likelihood for its nonlinear readouts: validate a moment-based likelihood
+   or calibrate a simulation-based statistic. Detection must also survive
+   declared nuisance alternatives, not merely reject an exactly known smooth
+   off spectrum.
+5. Extend to the actual frozen LuSEE response and WMAP-based sky in stages,
+   then propagate channel response, calibration, foreground treatment and
+   radiometer noise. Preserve the paired on/off simulations and evaluate
+   recovery with the same processing used for data. Include correlations
+   across ports and times; one physical screen persists throughout.
+
+Beam integration generally prevents unique RM-map reconstruction. The first
+inference targets should be identifiable statistical combinations, not a
+promised screen image. Angular correlation scale is distinguishable from
+physical length only with distance information; polarized amplitude and
+screen fluctuation parameters may be degenerate. Report what a single
+realization constrains and what remains prior/model dependent. Passing toy
+recovery establishes the inference procedure only within that toy model.

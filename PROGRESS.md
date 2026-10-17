@@ -1,5 +1,314 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Inference figure review and next-plan reconciliation — 2026-10-17
+
+Completed the figure walkthrough. Updated TODO, the inference plan and the
+paper-preparation handoff to link the reviewed evidence to the next decisions:
+define the observational target; assess a fixed Hutschenreuter baseline plus
+an uncertain residual; establish source/intensity constraints and realistic
+response/channel treatment; test the toy spectral minimum in realistic
+individual and ensemble spectra. The exact screen distribution still matters,
+and covariance is not a substitute for converged direct-screen quadrature.
+Calibration/source-boundary and matched-covariance non-Gaussian limitations
+remain open before stronger inference claims. The benchmark can be retained
+as a completed conditional result with those failures explicitly recorded.
+
+## Direct-screen test of separated power predictions — 2026-10-17
+
+Added the cached baseline 128-screen covariance-validation ensemble at
+45–50 MHz to Figure 4, alongside the existing 20–35 MHz strong-rotation
+ensemble. The builder checks that physical source/beam/screen parameters
+match, uses each ensemble's exact frequency coordinates and analytic raw
+second moments, and retains its own declared simultaneous moment bounds.
+The high-frequency power residuals against the full prediction range from
+-0.92 to -0.73 Monte Carlo standard errors; residuals against the local
+approximation range from +12.48 to +22.15. The caption includes every
+high-frequency residual against both predictions and notes their correlation.
+This supports the full toy prediction in the regime where the curves separate;
+it is not a new model-selection significance or a Galactic validation.
+
+No new simulation or fitting was run. Rebuilt and executed the notebook from
+completed caches under the 16 GB cap, inspected both power/fraction panels
+and the residual panel, and passed Black/flake8 and manifest checks. Curves
+below 20 MHz still lack direct-screen validation.
+
+## Absolute polarization power and surviving fraction — 2026-10-17
+
+Expanded the inference notebook's original Figure 4 with a deterministic
+Faraday-off power reference and a separate surviving-power-fraction panel,
+D=<|P_on|²>/|P_off|². Both use the same toy source, beam and frequency grid;
+the off reference comes from `qu_moments` with zero screen mean/dispersion.
+Direct-screen powers and their Monte Carlo errors are normalized by that
+same reference. The original full-model residual check is retained. The
+notebook explains the sampled minimum near 35 MHz as competition between
+intrinsic synchrotron brightening and fractional Faraday depolarization.
+
+Recorded testing the minimum in realistic spectra as a candidate follow-up
+in the Galactic residual-screen plan, including individual realizations,
+beam/channel response, leakage and noise bias. No realistic-spectrum result
+is claimed. Rebuilt and executed the notebook from existing caches under
+the 16 GB cap, checked the fraction lies in [0,1], and inspected the expanded
+figure. Black/flake8 and figure-manifest checks pass.
+
+## Candidate residual screen and PolSynch comparison — 2026-10-17
+
+Recorded the fixed Hutschenreuter baseline plus uncertain delta-phi ensemble
+as a possibility in `docs/plans/2026-10-16-galactic-residual-screen-models.md`.
+It remains conditional on specifying resolved scales, residual statistics and
+separate reconstruction/sub-resolution uncertainty. Read-only inspection of
+`../PolSynch` at `749f27f` finds a different generative model: random complex
+polarized emission in Faraday-depth bins, followed by frequency synthesis.
+It supplies neither the proposed residual-screen statistics nor a LuSEE-band
+validation. A one-bin calculation confirms that local `invRM.py:P_l2` uses
+bin indices instead of physical depths in its phase; recorded the evidence
+and the existing tests' blind spot in the plan. No checkout edits or sky
+generation were performed.
+
+## Gaussian-screen inference mode comparison — 2026-10-17
+
+Added Figure 2b after the information assessment in the inference notebook,
+with definitions of centered screen signal, noise-whitened covariance modes,
+and projection into the reference total-RMS units. All ten reference modes
+compare the baseline ell=0.5 pc with the cached, source-profiled ell=0.25 and
+1 pc alternatives. Mean/RMS bars and full covariance-difference matrices
+expose changes in the first modes while retaining mode correlations. The
+source amplitude/angle/beta fits and synthetic noise are unchanged; no new
+screen ensemble or optimization was run. The original Figure 3 follows this
+supplement.
+
+Verification: the builder checks reference projected covariance against the
+identity and full projected KL against each cached fit (2 KL = 1.951 and
+0.705). Rebuilt and executed the notebook from completed caches under the
+16 GB virtual-memory cap; inspected the new PNG, and Black/flake8 pass.
+Updated the tracked figure manifest. The original calibration limitation and
+conditional toy scope still apply.
+
+## Gaussian-screen bounded benchmark completed — 2026-10-16
+
+Delivered `notebooks/gaussian_screen_inference.ipynb`, executed from
+`scripts/gaussian_screen_inference.py`, eight inspected figures, and
+`docs/gaussian-screen-inference-results.json` with configuration, hashes,
+all calibration outcomes, numerical diagnostics and nuisance-boundary counts.
+The launcher reproduces the capped/checkpointed run; the builder reads
+completed caches and refuses stale source/configuration fingerprints.
+
+All 128-screen covariance gates pass at ell=0.05/0.15/0.5/1.5/5 pc and five
+frequencies over 45–50 MHz; maximum grid shift is 2.59e-5 of unrotated
+polarization. The separate 20/25/30/35 MHz gate passes at ell=0.5 pc. The
+five-scale validation took 662 s with peak RSS 878 MiB; the stronger-rotation
+ensemble took 42 s. Independent 1024-screen final ensembles at ell=0.5 and
+1.5 pc also pass the moment and numerical checks. The stationary depth-power
+approximation has a whitened omitted-mean error of 3.43 over 45–50 MHz and
+smaller errors in the narrow strong-rotation windows. Physical coherence
+scales supply its amplitude; no pixel-area normalization or Galactic forecast
+is inferred. Curves below 20 MHz have no direct-screen validation here.
+
+The information gate rejects factor-of-two scale recovery with source
+amplitude/angle/beta free. The frozen detection demonstration uses separate
+4096-draw calibration and validation ensembles at each of three constant
+depths, plus independent physical-screen alternatives. **17/18 null acceptance
+checks pass.** The fitted-beta/full-covariance Hc test at c=-0.04 rad/m² gives
+224/4096 false positives (5.47%); its simultaneous upper bound is 6.61%, above
+the frozen 6.5% limit. This remains unresolved; no threshold rule, tolerance
+or trial count was changed. Detection fractions for that test are diagnostics,
+not validated significance claims. Baseline Hc fits hit beta bounds in 89.6%
+of trials, so interpretation is conditional on the source restrictions.
+
+The matched-RM-covariance mixture fails Gaussian readout moments (worst 30.46
+MC standard errors) and passes its conditional moments (1.89 versus 4.16).
+Its measured RM covariance agrees within 1.15 sampling standard errors at the
+four tested lags. Thus matching RM two-point statistics does not determine
+observable phase moments. All 30 detection-statistic refinement checks pass,
+with zero changed decisions. Noise is synthetic; no scale confidence sets,
+channel-averaged observations, Galactic validity or LuSEE sensitivity claims
+are made.
+
+Verification: focused suite 29 passed; full suite 147 passed with the one
+unchanged two-port reference failure reproduced from pre-task `3bf50ce`.
+Source and new drivers pass flake8 and Black checks. Updated plan, TODO and
+handoff retain the unresolved calibration and source-model follow-ups.
+
+## Gaussian-screen reproducibility and regression checks — 2026-10-16
+
+Pinned direct-screen seeds and the two mixture amplitudes in the frozen design;
+calibration now refuses a matching-shaped ensemble with different physical
+parameters, frequencies, seeds or mixture settings. Independent final moment
+checks are retained alongside likelihood diagnostics. Added explicit tests
+that frequency ablation preserves same-frequency Q/U covariance and that the
+covariance-weighted discrepancy matches the independent inverse-matrix form;
+a diagonal-only mutation is rejected. Focused suite: 29 passed (4.41 s).
+
+The full suite completed with 147 passed and one failure in the unchanged
+`test_short_dipole_monopole_matches_measured_reference`: 1.1816359006 versus
+its pinned 1.1971034514 reference. An isolated archive of pre-task commit
+`3bf50ce` reproduces that same failure in the current environment (croissant
+5.2.1, lusee 2.1.dev0). The test/reference and upstream packages are unchanged.
+Logs are under `generated_data/gaussian_screen_inference/tests-*.log`.
+The source and validation/calibration drivers pass flake8.
+
+## Gaussian-screen numerical refinement and frozen tests — 2026-10-16
+
+The first 128-screen, five-scale sweep passed every ensemble moment check,
+but its coarsest angular grids at ell=0.5 and 1.5 pc shifted by 1.09e-4 and
+1.83e-4 of unrotated polarization, exceeding the unchanged 1e-4 criterion.
+Added explicit per-scale angular-grid multipliers and doubled those grids.
+The original ledger is retained as `covariance-validation-initial.json`; the
+full source-fingerprinted validation is rerunning before inference can start.
+The scale-mixture spatial diagnostic now includes its per-screen A² factor.
+
+Bound the null fitter to the frozen beta/depth ranges, recorded physical
+amplitude and other nuisance boundary hits, and added final-statistic checks
+on two angular grids with identical noise. Freezing rejects stale validation
+and information-assessment products or missing scale/frequency coverage.
+`scripts/run_gaussian_screen_inference.sh` provides a capped, checkpointed
+end-to-end run and a read-only status command.
+
+The focused suite passes 27 tests (6.39 s), including independent depth and
+spatial-integral checks of the stationary template and explicit rejected
+mutations of template normalization and nuisance bounds. Source and driver
+lint passes. An isolated 16-sample orchestration smoke test exercises all 18
+null comparisons and 30 alternative comparisons; its statistical outputs are
+not scientific validation. The full project suite and production run remain
+in progress.
+
+## Gaussian-screen implementation: validation and inference drivers — 2026-10-16
+
+Added resumable three-grid direct-screen validation with nested Fourier-cutoff
+checks, generator covariance diagnostics, all-cell moment bootstrap errors and
+source/configuration fingerprints. Each realization is checkpointed. The
+resource pilot exposed inadequate source-profile sampling at large ell; the
+production prescription now resolves the source width as well as screen modes
+and phase variation. The five-scale 45–50 MHz covariance ensemble is running.
+
+The independent 128-screen baseline ensemble at 20/25/30/35 MHz passed numerical
+and moment gates: maximum angular shift 7.43e-6 of unrotated polarization,
+worst moment discrepancy 3.03 MC standard errors versus the simultaneous 4.06
+threshold. This is a conditional toy-model result, not Galactic validation.
+
+Added normalized Gaussian scoring, source nuisance transformations/profiling,
+constant-depth null fits, calibrated-discrepancy tools, finite-model information
+assessment, mixture moments and the physical stationary-template limit.
+Independent controls and explicit normalization/depth-fit mutations bring the
+focused suite to 24 passing tests (4.74 s); source lint passes. The analytic
+assessment fails the declared factor-of-two recovery criterion at every tested
+scale after nuisance profiling. Five versus seventeen frequencies gives
+profiled KL 0.352 versus 0.343 for the baseline-to-double-scale comparison at
+fixed total inverse-variance budget. Calibration and final observations remain
+pending the full spatial moment gate; no recovery intervals are claimed.
+
+## Gaussian-screen implementation: moments and pinned fields — 2026-10-16
+
+Added joint Q/U moments, retaining conjugated and nonconjugated complex
+covariance, with stable centered quadrature and a separately checked fast
+special-function path. Added immutable pinned Fourier fields, independent
+grid evaluation, nested cutoff truncation, persisted coefficients and exact
+discrete spectral covariance. The original illustrative generator remains
+available for its existing notebook.
+
+Independent controls compare Q/U moments to direct Gaussian integration of
+a spatially constant screen and grid evaluations to an explicit sinusoid.
+Mutation checks reject omitted relation moments, erased centered covariance
+and incorrect FFT normalization. The focused suite passed 20 tests in 4.21 s
+under the 16 GB virtual-memory limit. This establishes algebra and generator
+controls; the full spatial covariance gate remains pending. A capped resource
+pilot is measuring the new three-grid direct-sum cost before ensemble sizing.
+
+## Gaussian-screen plan: paper priorities and inference gates — 2026-10-16
+
+Revised the plan after the paper-direction review. The sequence is full joint
+covariance validation, information/nuisance assessment, strong-rotation and
+depth-template comparison, then a small calibrated inference exercise. The
+paper deliverable now includes physical amplitude normalization and template
+approximation errors. Scale recovery is conditional on identifiable information;
+a quantified degeneracy is an acceptable result.
+
+Added a fitted constant-depth competing model, explicit source nuisance stages,
+pinned continuous-screen refinement, validation across correlation scales,
+noise-weighted numerical-error checks and calibration precision requirements.
+Profile-likelihood confidence sets are the initial interval procedure. Retained
+one matched-covariance non-Gaussian stress test and moved map diagnostics,
+intermittent screens and latent-field extensions into a linked deferred plan.
+Updated TODO and the current handoff to match. Documentation-only verification
+covers the diff, local links and unchanged pre-existing notebook edit. No
+simulation, new validation ensemble or inference job was run.
+
+## Plan review: exploiting the RM reconstruction model — 2026-10-16
+
+Recorded a candidate amplitude-times-Gaussian-field extension in the inference
+plan. Fixed amplitude preserves analytic conditional Gaussian phase averaging;
+uncertain lognormal amplitude adds low-dimensional latent averaging for phase
+moments under specified latent statistics. Angular integration, posterior
+conditioning, unknown correlations and hyperparameter uncertainty remain
+separate requirements. No new calculation or inference result is claimed.
+
+## Inference plan review: non-Gaussian screens — 2026-10-16
+
+Checked tests and plan: no non-Gaussian screen robustness test or Gaussianity
+assessment of the real RM map has been run. The primary Hutschenreuter et al.
+(2022) model uses exp(rho)*chi with Gaussian latent fields, which generally
+gives non-Gaussian depths. Added explicit matched-covariance non-Gaussian
+injections, intermittent-screen stress tests, local map/surrogate diagnostics,
+posterior/held-out-data caveats and observable phase-statistic comparisons to
+the inference plan. Updated TODO. This is a documented review finding and
+planned validation, not a claim that a map diagnostic or inference test passed.
+No scientific computation was run.
+
+## Gaussian-screen merge and inference plan — 2026-10-16
+
+Fast-forwarded local main to PR 7's squash merge `3bf50ce`. The remote
+feature branch was already deleted. Carried the three local review commits
+(physical overview, math rendering, discussion record) onto the new
+`gaussian-screen-inference` branch because they were absent from the squash
+merge; verified its committed tree matched the old feature branch before
+deleting that local branch. Preserved the uncommitted notebook kernel name.
+
+Wrote the [inference plan](docs/plans/2026-10-16-gaussian-screen-inference.md):
+full joint Q/U covariance validation first, then independent toy observations,
+likelihood checks, calibrated on/off detection, correlation-scale recovery,
+and nuisance/model sensitivity. Explicit ideal readouts replace generic Vpq
+for presentation. Synthetic noise is separated from a LuSEE sensitivity
+forecast. The plan pins convergence and calibration procedures, disjoint
+samples, implementation increments, artifacts and resource constraints.
+Updated work queue and handoff. Checked relative links, whitespace and git
+state. No scientific computation or inference code was run.
+
+## Gaussian-screen discussion and inference recommendation — 2026-10-16
+
+Recorded the discussion in the [benchmark plan](docs/plans/2026-10-15-gaussian-screen-step1.md#discussion-record--2026-10-16)
+and linked it from the handoff and work queue. The record covers the physical
+ensemble, bounded continuum integral versus unresolved quadrature, smooth
+moments versus wavy realizations, covariance visualizations, the 21-cm analogy,
+real-beam generalization, fixed RM maps versus uncertain residuals, and the
+connection to the 16 measured real products. It recommends validating a small
+toy inference problem before realistic inference, including null controls,
+independent screen recovery, likelihood checks and nuisance degeneracies.
+This is a proposed sequence, not a completed inference result. Existing
+covariance/strong-rotation gates remain. No scientific job or code change.
+Checked documentation links and whitespace.
+
+## Gaussian-screen notebook: math rendering — 2026-10-16
+
+Replaced display-math delimiters with `$$` throughout the notebook and its
+builder, and joined multiline inline expressions onto single lines for
+Markdown renderer compatibility, and replaced legacy `\rm` declarations
+with `\mathrm{...}`. Equations and numerical outputs are
+unchanged. Checked notebook validity, builder/input agreement, and math
+conversion through the notebook HTML exporter and Pandoc's MathML renderer.
+No scientific computation reran; output provenance still describes the prior
+execution.
+
+## Gaussian-screen notebook: physical overview — 2026-10-16
+
+Added an opening explanation of the fixed Gaussian source/beam, the ensemble
+of physical RM screens, and the rotate-then-sum measurement equation. It
+connects individual pixel-summed spectra to the analytic ensemble mean and
+frequency covariance, and explains why spatial RM correlations affect the
+surviving power. Updated the notebook builder with the same text. This is a
+prose-only change; existing outputs are retained from the previous execution
+and their provenance describes that run. No simulation or forecast reran.
+Verified notebook structure and agreement with the builder's Markdown/code
+cells without executing the analysis.
+
 ## Gaussian-screen step 1: drawn screens and Stokes readouts — 2026-10-16
 
 After review feedback the notebook gained Section 6b. `ScreenModel.readout`

@@ -1,9 +1,14 @@
 # LuSEE Faraday work queue
 
-Updated 2026-10-15. **Christian agreed to the Gaussian-screen benchmark and
-validation sequence. This is the next scientific task.** The long real-beam
-audit remains pending review of its execution package. The consolidated
-status, paper outline, proposed commands and scientific gates are in
+Updated 2026-10-17. **The conditional Gaussian-screen benchmark is
+implemented: covariance gates pass, scale recovery is unsupported, and
+17/18 null-calibration acceptance checks pass.** The unresolved fitted-beta
+constant-depth check and strong source-prior dependence remain visible in the
+[executed notebook](notebooks/gaussian_screen_inference.ipynb) and
+[result record](docs/gaussian-screen-inference-results.json). The long
+real-beam audit remains pending review of its
+execution package. The consolidated status, paper outline, proposed commands
+and scientific gates are in
 [docs/paper-preparation.md](docs/paper-preparation.md). Machine-readable
 provenance and existing-product values are in
 [docs/paper-preparation-status.json](docs/paper-preparation-status.json).
@@ -20,7 +25,7 @@ provenance and existing-product values are in
 - [x] Prepare corrected BGL audit, cheap preflight and bounded staged launcher.
 - [x] Add small numerical, storage, provenance and restart checks.
 
-## Next: derive and validate the Gaussian-screen benchmark
+## Gaussian-screen benchmark and remaining scientific gates
 
 Keep the original Faraday-off/on visibility comparison as the organizing
 question. Predict its ensemble mean and covariance by averaging unresolved
@@ -55,38 +60,94 @@ correlation length, a smooth Gaussian source and beam, and a realizable ideal
 complex Jones pair. Checks cover algebra, constant-screen limits and the
 reduced separation integral. They do not validate spatially varying screen
 simulations, the Galaxy, real-beam amplitudes or the depth-histogram forecast.
-**Stop here for Christian's review; steps 2--4 remain unexecuted.**
+**Step 1 was reviewed and squash-merged as PR 7. The full covariance and
+strong-rotation gates below now pass; calibrated detection is complete with
+one unresolved acceptance check.**
 Section 6b adds drawn-screen illustrations (Q, U, Vxx, Vyy, Vxy) and a
 64-screen pilot at 30/40/50 MHz; it is consistent with the analytic moments
 but is not the step-2 gate (no frequency covariance, bootstrap errors or
 domain/spectrum refinement).
 
-### 2. Recover converged deterministic simulations at weak rotation
+### 2. Recover converged deterministic simulations in the initial window
 
-- [ ] Generate realizations of the specified screen and compute the original
+- [x] Generate realizations of the specified screen and compute the original
   off/on visibilities in a regime where direct quadrature can converge.
-- [ ] Refine each realization's angular quadrature while holding its physical
+- [x] Refine each realization's angular quadrature while holding its physical
   screen fixed. Separately increase ensemble size to measure sampling error.
-- [ ] Compare simulated means and frequency covariance with the analytic
+- [x] Compare simulated means and frequency covariance with the analytic
   prediction against both numerical and ensemble uncertainties.
-- [ ] Recover zero-rotation and spatially constant-screen limits; a uniform
+- [x] Recover zero-rotation and spatially constant-screen limits; a uniform
   screen must not introduce spurious angular depolarization.
 
 ### 3. Demonstrate convergence at strong rotation
 
-- [ ] Increase rotation strength through wavelength while holding the source,
+- [x] Increase rotation strength through wavelength while holding the source,
   beam and physical screen statistics fixed.
-- [ ] Demonstrate convergence of the covariance separation integral as its
+- [x] Demonstrate convergence of the covariance separation integral as its
   coherence region narrows. Compare any small-angle approximation with the
   full toy-model integral and available analytic limits.
-- [ ] Show that surviving power is independent of arbitrary pixel area.
+- [x] Show that surviving power is independent of arbitrary pixel area.
   Grid-dependent amplitude or failed quadrature convergence rejects the
   proposed numerical cure; a failed direct simulation is not a reference.
-- [ ] Record the validated regime and computational cost. Separate numerical
+- [x] Record the validated regime and computational cost. Separate numerical
   validation of this model from evidence that it describes the Galactic sky.
+
+Validation covers five monochromatic frequencies in 45–50 MHz at five
+correlation scales, plus 20/25/30/35 MHz at the baseline scale. The first
+angular-grid failures remain recorded; refined grids pass the unchanged
+criterion. Lower-frequency direct simulations and Galactic interpretation
+remain outside this result.
+
+### Implemented: covariance, paper connection and scoped inference
+
+The [inference implementation plan](docs/plans/2026-10-16-gaussian-screen-inference.md)
+now prioritizes full covariance validation, information and nuisance assessment,
+strong-rotation/template comparison, then a small calibrated inference exercise.
+The new 128-screen ensembles satisfy the covariance gates. The frozen
+experiment has 4096 calibration and 4096 independent validation noise draws
+per null configuration, and 1024 final physical screens per alternative.
+
+- [x] Implement pinned continuous Fourier realizations and converge joint Q/U
+  moments across small, intermediate and large correlation scales.
+- [x] Visualize covariance and individual spectra; separate centered/raw power.
+  Assess scale information after profiling source amplitude, angle and spectral
+  terms, including the amplitude/scale and source-width degeneracies.
+- [x] Validate strong-rotation predictions and compare the physical covariance
+  with the independent-depth template's amplitude and frequency structure.
+  Record failures and restricted scope before further recovery work.
+- [x] Freeze a small window/noise/truth configuration and quantitative numerical
+  and calibration tolerances. Run comparisons against zero rotation and a
+  fitted constant-depth screen, with the same source nuisance freedom.
+- [x] Quantify the lack of scale information and source-width ambiguity.
+  Recovery is disabled by the declared criterion; no scale intervals or
+  coverage claims are made. Numerical refinement changes no detection decisions.
+- [x] Run one matched-covariance non-Gaussian scale-mixture stress test.
+- [ ] Resolve the fitted-beta/full-covariance Hc calibration acceptance check
+  in a separately frozen follow-up: observed false-positive fraction 5.47%,
+  simultaneous upper bound 6.61% versus the 6.5% acceptance limit.
+- [ ] Assess sensitivity to broader source spectral models before interpreting
+  null rejection as spatial Faraday structure. The baseline alternative hits
+  beta bounds in 89.6% of fitted Hc trials; current rates are conditional on
+  beta in [-4, -1] and the specified source truth.
+
+Map diagnostics, intermittent fields and reconstruction-latent-field work are
+in the [deferred Galactic-model plan](docs/plans/2026-10-16-galactic-residual-screen-models.md).
+They remain prerequisites for Galactic interpretation, not for completing the
+conditional benchmark. Preserve a fixed-map baseline and distinguish physical
+unresolved structure from reconstruction uncertainty.
 
 ### 4. Extend the validated model to LuSEE and assess physical uncertainty
 
+- [ ] Define the next observational target before further inference scans:
+  distinguish bulk rotation, departures from uniform rotation and scale
+  recovery. The benchmark supports no scale-recovery claim; assess angular
+  scale/source-width/amplitude ambiguity and whether independent intensity
+  or source constraints can help. I was not included in this inference.
+- [ ] Assess a fixed Hutschenreuter baseline plus statistical residual
+  delta-phi as a candidate, beginning with an inventory of joint posterior
+  information and resolved scales. Specify the uncertain residual and avoid
+  double-counting power already represented by the baseline. The local map's
+  mean and per-pixel errors alone do not define spatially coherent draws.
 - [ ] Introduce WMAP spatial variation and the actual frozen four-port response,
   including both polarization branches and their joint statistics.
 - [ ] Propagate actual channel responses through signal and noise. Define and
@@ -102,7 +163,21 @@ domain/spectrum refinement).
   revise or replace that approximation before interpreting saved forecasts.
 - [ ] Derive beam-integrated amplitude consistently with the covariance;
   correct slab-envelope/floor and mean-polarization/power interpretations.
+- [ ] Test whether the competition between intrinsic brightening and
+  fractional depolarization produces a minimum in realistic absolute
+  polarized-power spectra. The sampled toy minimum near 35 MHz is a
+  candidate prediction, not a Galactic result. Test ensemble and individual
+  spectra with the same beam/channel estimator, leakage treatment and noise
+  bias correction; compare source/instrument alternatives. See the
+  [scoped follow-up](docs/plans/2026-10-16-galactic-residual-screen-models.md#candidate-spectral-minimum).
 - [ ] Update detectability and permitted paper claims only after these gates.
+
+Choose the physical residual model and source freedom before a new recovery
+or forecast campaign. Any revised detection procedure needs a separately
+frozen calibration; preserve this benchmark's failed acceptance check.
+Analytic covariance does not remove the need to converge each validation
+screen's direct integral. Small scatter within an ensemble does not establish
+robustness to choosing a different ensemble.
 
 ## Separate track: review and complete the real-beam numerical audit
 

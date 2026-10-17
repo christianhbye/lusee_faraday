@@ -35,6 +35,44 @@ Faraday-off/on visibility. It executes algebraic limits and one-dimensional
 integration checks. It does **not** validate spatial screen simulations,
 model the Galaxy, or update the detection forecast.
 
+### Physical picture and connection to the pixel sum
+
+The beam and intrinsic source are fixed Gaussian-shaped profiles. The
+Faraday depth $\phi(\mathbf r)$ is a Gaussian random field: its mean and
+spatial covariance define an ensemble of possible rotation-measure (RM)
+maps. For this foreground-screen geometry, RM equals Faraday depth. Each
+drawn map stays fixed across frequency; the source and receiver stay fixed
+across the ensemble.
+
+For one map, rotate the polarization in each direction and sum through the
+beam. With $P_0=Q_0+iU_0$ the intrinsic polarized brightness,
+$\boldsymbol\theta$ the angular position, $d$ the screen distance, and
+$\lambda$ the wavelength, the beam-averaged polarization is
+$$
+\overline P_{\mathrm{on}}(\nu)=\int d^2\theta\,
+B(\boldsymbol\theta)P_0(\boldsymbol\theta,\nu)
+e^{2i\phi(d\boldsymbol\theta)\lambda^2}.
+$$
+The Faraday-off calculation replaces the exponential by one. The receiver
+combines the resulting beam-weighted intensity, $Q=\mathrm{Re}\,\overline P$
+and $U=\mathrm{Im}\,\overline P$ into a visibility (Section 2).
+
+This is the original pixel sum in continuum form. We compare two routes:
+
+- **Draw maps, then sum:** Section 6b draws RM maps and evaluates the angular
+  sum for each map, producing individual noiseless measurement spectra.
+- **Predict the statistics:** Sections 3--4 average the phase factors over
+  the map ensemble analytically, then integrate to predict the measurement
+  mean and covariance across frequency. Gaussian spatial weights reduce
+  the angular-pair integral to one integral over separation.
+
+Spatial covariance determines how much polarization cancels inside the
+beam. Maps with the same one-point RM distribution can have different
+correlation lengths and different surviving power. The analytic result
+predicts the statistics across maps; the individual curves come from maps
+passed through the pixel sum. No Gaussian distribution of measurements is
+assumed. The drawn-screen comparison is currently a pilot (Section 6b).
+
 Rebuild and execute from the repository root with
 `.venv/bin/python scripts/gaussian_screen_step1.py`. The executor uses that
 same Python for the kernel. No external maps or real beam are needed.
@@ -67,33 +105,33 @@ polarization basis. Curvature, parallel transport, horizon and lunar motion
 are excluded. At a thin screen distance $d=100\,\mathrm{pc}$,
 $\mathbf r=d\boldsymbol\theta$. Adopt a stationary real Gaussian depth field
 $\phi(\mathbf r)$ with
-\[
+$$
 \langle\phi\rangle=m,\quad
 K_\phi(h)=\langle\delta\phi(\mathbf r)\delta\phi(\mathbf r')\rangle
 =\sigma_\phi^2 e^{-h^2/(2\ell^2)},\quad h=|\mathbf r-\mathbf r'|.
-\]
+$$
 Baseline $m=0.01\,\mathrm{rad\,m^{-2}}$,
 $\sigma_\phi=0.02\,\mathrm{rad\,m^{-2}}$, and **physical**
 $\ell=0.5\,\mathrm{pc}$.
 The angular correlation scale is $\ell/d$, defined by correlation $e^{-1/2}$.
 For $K(h)=\int d^2k\,S(k)e^{i\mathbf k\cdot\mathbf h}/(2\pi)^2$,
-\[
+$$
 S(k)=2\pi\sigma_\phi^2\ell^2 e^{-\ell^2 k^2/2}\geq0,
 \quad \int\frac{d^2k}{(2\pi)^2}S(k)=\sigma_\phi^2.
-\]
+$$
 This proves admissibility on the plane. The structure function is
 $D_\phi(h)=2\sigma_\phi^2[1-\rho(h)]$, $\rho=e^{-h^2/(2\ell^2)}$.
 The model is smooth, and is not a claimed Galactic turbulence spectrum.
 $\ell\to\infty$ is one random constant depth over the entire source.
 
 Use the deterministic Rayleigh-Jeans source and normalized power beam
-\[
-I_0=I_{\rm ref} f_i e^{-\theta^2/(2s_{\rm src}^2)},\quad
-P_0=Q+iU=P_{\rm ref}f_i e^{2i\chi}e^{-\theta^2/(2s_{\rm src}^2)},\quad
-B=\frac{e^{-\theta^2/(2s_{\rm beam}^2)}}{2\pi s_{\rm beam}^2}.
-\]
-$I_{\rm ref}=2$ K, $P_{\rm ref}=1$ K, $\chi=20^\circ$,
-$s_{\rm src}=1.5^\circ$, $s_{\rm beam}=1^\circ$ (standard deviations),
+$$
+I_0=I_{\mathrm{ref}} f_i e^{-\theta^2/(2s_{\mathrm{src}}^2)},\quad
+P_0=Q+iU=P_{\mathrm{ref}}f_i e^{2i\chi}e^{-\theta^2/(2s_{\mathrm{src}}^2)},\quad
+B=\frac{e^{-\theta^2/(2s_{\mathrm{beam}}^2)}}{2\pi s_{\mathrm{beam}}^2}.
+$$
+$I_{\mathrm{ref}}=2$ K, $P_{\mathrm{ref}}=1$ K, $\chi=20^\circ$,
+$s_{\mathrm{src}}=1.5^\circ$, $s_{\mathrm{beam}}=1^\circ$ (standard deviations),
 $f_i=(\nu_i/30\,\mathrm{MHz})^{\beta}$, with $\beta$ imported from
 `config.BETA_QU`. Stokes $V=0$, and $I\geq |P|$ everywhere.
 $B$ has inverse-solid-angle units under $d\Omega\simeq d^2\theta$.
@@ -164,99 +202,93 @@ print("No pixel size or pixel count appears in this configuration.")
     md(r"""
 ## 2. A complex visibility with both polarization branches
 
-The COSMO convention is $P_{\rm on}=P_0e^{+2i\phi\lambda^2}$, using
+The COSMO convention is $P_{\mathrm{on}}=P_0e^{+2i\phi\lambda^2}$, using
 `conventions.lambda_squared` and `faraday_phase_cosmo`; no IAU conversion
 is applied in the plane. Ideal Jones rows
 $j_p=(1,0)$ and $j_q=(\cos\psi,e^{i\delta}\sin\psi)$,
 $\psi=45^\circ$, $\delta=60^\circ$, define a complex cross visibility.
-For $\langle EE^\dagger\rangle=\frac12\left(\begin{smallmatrix}
-I+Q&U\\U&I-Q\end{smallmatrix}\right)$,
-\[
+For $\langle EE^\dagger\rangle=\frac12\left(\begin{smallmatrix} I+Q&U\\U&I-Q\end{smallmatrix}\right)$,
+$$
 V=\int d^2\theta\,B(k_I I+k_Q Q+k_U U),\quad
 k_I=k_Q=\tfrac12\cos\psi,\quad k_U=\tfrac12 e^{-i\delta}\sin\psi.
-\]
+$$
 Both ports share the spatial beam. The brightness coherency is positive
 semidefinite. Loading is unity and frozen, thermal terms vanish. This
 realizable ideal pair is not the actual four-port response.
 
 Combining source and beam gives
-\[
-\eta=\frac{s_{\rm src}^2}{s_{\rm src}^2+s_{\rm beam}^2},\quad
-w=d(s_{\rm src}^{-2}+s_{\rm beam}^{-2})^{-1/2},\quad
+$$
+\eta=\frac{s_{\mathrm{src}}^2}{s_{\mathrm{src}}^2+s_{\mathrm{beam}}^2},\quad
+w=d(s_{\mathrm{src}}^{-2}+s_{\mathrm{beam}}^{-2})^{-1/2},\quad
 W(\mathbf r)=\frac{e^{-r^2/(2w^2)}}{2\pi w^2},\quad \int W\,d^2r=1.
-\]
+$$
 With $x_i=\lambda_i^2$ in m$^2$, and $s\in\{+1,-1\}$, set
-\[
+$$
 Z_s(i)=\int d^2r\,W(\mathbf r)e^{2isx_i\phi(\mathbf r)},\quad
-b_s(i)=\eta P_{\rm ref}f_i e^{2is\chi}\frac{k_Q-is k_U}{2},\quad
-v_I(i)=\eta I_{\rm ref}f_i k_I.
-\]
+b_s(i)=\eta P_{\mathrm{ref}}f_i e^{2is\chi}\frac{k_Q-is k_U}{2},\quad
+v_I(i)=\eta I_{\mathrm{ref}}f_i k_I.
+$$
 The paired quantities are
-\[
-V_{\rm on}(i)=v_I(i)+\sum_s b_s(i)Z_s(i),\qquad
-V_{\rm off}(i)=v_I(i)+\sum_s b_s(i).
-\]
+$$
+V_{\mathrm{on}}(i)=v_I(i)+\sum_s b_s(i)Z_s(i),\qquad
+V_{\mathrm{off}}(i)=v_I(i)+\sum_s b_s(i).
+$$
 $Z_-=Z_+^*$, but generally $b_-\ne b_+^*$. Thus replacing the visibility
 by the real part of one branch would lose information. The deterministic
-intensity contribution is retained and cancels in $\Delta=V_{\rm on}-V_{\rm
-off}$.
+intensity contribution is retained and cancels in $\Delta=V_{\mathrm{on}}-V_{\mathrm{off}}$.
 """)
     md(r"""
 ## 3. Gaussian phase average and all second moments
 
 For any real Gaussian vector, its characteristic function is
-$\langle e^{i\mathbf a^T\boldsymbol\phi}\rangle
-=\exp(i\mathbf a^T\mathbf m-\mathbf a^T K\mathbf a/2)$.
+$\langle e^{i\mathbf a^T\boldsymbol\phi}\rangle =\exp(i\mathbf a^T\mathbf m-\mathbf a^T K\mathbf a/2)$.
 Apply it once to the **same physical screen** at the two directions:
-\[
+$$
 a_s(i)=\langle Z_s(i)\rangle=e^{2ismx_i-2\sigma_\phi^2x_i^2},
-\]
-\[
+$$
+$$
 G_{st}(i,j;h)=\left\langle e^{2i[sx_i\phi(\mathbf r)-tx_j\phi(\mathbf
 r')]}\right\rangle
 =e^{2im(sx_i-tx_j)}
 e^{-2\sigma_\phi^2[x_i^2+x_j^2-2stx_ix_j\rho(h)]}.
-\]
-For $s=t$, this is $e^{2ism(x_i-x_j)}
-e^{-2\sigma_\phi^2(x_i-x_j)^2}e^{-2x_ix_jD_\phi(h)}$.
+$$
+For $s=t$, this is $e^{2ism(x_i-x_j)} e^{-2\sigma_\phi^2(x_i-x_j)^2}e^{-2x_ix_jD_\phi(h)}$.
 At equal frequency the last kernel is $e^{-2\lambda^4D_\phi(h)}$.
 Opposite-branch terms use $st=-1$ and must also be kept.
 
 Define $M_{st}=\int d^2r\,d^2r'\,WW'G_{st}$ and
 $K_{st}=M_{st}-a_s(i)a_t(j)^*$. Then
-\[
-\mu_{\rm on}(i)=v_I(i)+\sum_s b_s(i)a_s(i),\quad
+$$
+\mu_{\mathrm{on}}(i)=v_I(i)+\sum_s b_s(i)a_s(i),\quad
 C_{ij}=\sum_{st}b_s(i)b_t(j)^*K_{st}(i,j),
-\]
-\[
-\langle V_{{\rm on},i}V_{{\rm on},j}^*\rangle
-=C_{ij}+\mu_{{\rm on},i}\mu_{{\rm on},j}^*,\quad
-\langle V_{{\rm off},i}V_{{\rm off},j}^*\rangle=V_{{\rm off},i}V_{{\rm
-off},j}^*,
-\]
-\[
-\langle V_{{\rm on},i}V_{{\rm off},j}^*\rangle
-=\mu_{{\rm on},i}V_{{\rm off},j}^*.
-\]
-The off mean is $V_{\rm off}$, and its centered covariance and centered
+$$
+$$
+\langle V_{{\mathrm{on}},i}V_{{\mathrm{on}},j}^*\rangle
+=C_{ij}+\mu_{{\mathrm{on}},i}\mu_{{\mathrm{on}},j}^*,\quad
+\langle V_{{\mathrm{off}},i}V_{{\mathrm{off}},j}^*\rangle=V_{{\mathrm{off}},i}V_{{\mathrm{off}},j}^*,
+$$
+$$
+\langle V_{{\mathrm{on}},i}V_{{\mathrm{off}},j}^*\rangle
+=\mu_{{\mathrm{on}},i}V_{{\mathrm{off}},j}^*.
+$$
+The off mean is $V_{\mathrm{off}}$, and its centered covariance and centered
 on/off cross-covariance are zero because off is deterministic.
 For the paired difference,
-\[
-\mu_\Delta=\mu_{\rm on}-V_{\rm off},\quad C_\Delta=C,\quad
+$$
+\mu_\Delta=\mu_{\mathrm{on}}-V_{\mathrm{off}},\quad C_\Delta=C,\quad
 \langle\Delta_i\Delta_j^*\rangle=C_{ij}+\mu_{\Delta,i}\mu_{\Delta,j}^*,
-\]
-\[
-\boxed{\langle|V_{{\rm on},i}-V_{{\rm off},i}|^2\rangle
-=C_{ii}+|\mu_{{\rm on},i}-V_{{\rm off},i}|^2.}
-\]
+$$
+$$
+\boxed{\langle|V_{{\mathrm{on}},i}-V_{{\mathrm{off}},i}|^2\rangle
+=C_{ii}+|\mu_{{\mathrm{on}},i}-V_{{\mathrm{off}},i}|^2.}
+$$
 A depolarized on mean still leaves the second term. Mean polarization power
 $|\langle P\rangle|^2$ cannot replace $\langle|P|^2\rangle$.
 If off were uncertain, its covariance and joint covariance with on would
 enter; this notebook does not assume that more general model.
 
 For completeness the nonconjugated centered moment is
-$J_{ij}=\langle\delta V_i\delta V_j\rangle
-=\sum_{st}b_s(i)b_t(j)K_{s,-t}(i,j)$, with raw moment
+$J_{ij}=\langle\delta V_i\delta V_j\rangle =\sum_{st}b_s(i)b_t(j)K_{s,-t}(i,j)$, with raw moment
 $J_{ij}+\mu_i\mu_j$. The visibility distribution need not be Gaussian or
 circular. $C$ and $J$ specify the second moments of its real/imaginary parts.
 """)
@@ -264,23 +296,22 @@ circular. $C$ and $J$ specify the second moments of its real/imaginary parts.
 ## 4. Reduce the angular integral before evaluating it
 
 The autocorrelation of the normalized Gaussian weight is
-$A_W(h)=\int W(\mathbf r)W(\mathbf r+\mathbf h)d^2r
-=e^{-h^2/(4w^2)}/(4\pi w^2)$. Translation invariance followed by azimuthal
+$A_W(h)=\int W(\mathbf r)W(\mathbf r+\mathbf h)d^2r =e^{-h^2/(4w^2)}/(4\pi w^2)$. Translation invariance followed by azimuthal
 symmetry reduces the original four angular coordinates to one separation:
-\[
+$$
 M_{st}=\int_0^\infty \frac{h\,dh}{2w^2}e^{-h^2/(4w^2)}G_{st}(h).
-\]
+$$
 Put $u=h^2/(4w^2)$, $\kappa=2w^2/\ell^2$,
 $A=4\sigma_\phi^2stx_ix_j$, $B_{ij}=2\sigma_\phi^2(x_i^2+x_j^2)$:
-\[
+$$
 M_{st}=e^{2im(sx_i-tx_j)}\int_0^\infty
  e^{-u-B_{ij}+A e^{-\kappa u}}du.
-\]
+$$
 The centered integral replaces $e^{-B+A\rho}$ by
 $e^{-B}(e^{A\rho}-1)$. For $A\geq0$ it is evaluated stably as
-\[
+$$
 e^{-2\sigma_\phi^2(x_i-x_j)^2-A(1-\rho)}[-\operatorname{expm1}(-A\rho)],
-\]
+$$
 and for $A<0$ as $e^{-B}\operatorname{expm1}(A\rho)$. No large positive
 exponents or subtraction of nearly equal second moments are needed.
 
@@ -289,23 +320,23 @@ A constant mean depth leaves a known frequency phase outside this
 nonoscillatory integral. It does not remove the need to resolve the physical
 coherence region. At equal frequency and small separation,
 $D_\phi\simeq\sigma_\phi^2h^2/\ell^2$, so its e-fold radius is
-\[
-h_{\rm coh}=\frac{\ell}{\sqrt{2}\sigma_\phi x}.
-\]
-This approximation requires $h_{\rm coh}\ll\ell$; it is not used to replace
+$$
+h_{\mathrm{coh}}=\frac{\ell}{\sqrt{2}\sigma_\phi x}.
+$$
+This approximation requires $h_{\mathrm{coh}}\ll\ell$; it is not used to replace
 the full kernel. The code splits near $u_c=1/(1+|A|\kappa)$, rescales each
 interval to unit length and integrates adaptively. The absolute centered
 tail beyond $u_{\max}$ is at most $2e^{-u_{\max}}$. This is a tolerance on
 an integral, not a numerical pixel area or a physical coherence length.
 
 A second evaluation uses $\rho=e^{-\kappa u}$ and $a=1/\kappa$:
-\[
+$$
 \int_0^\infty e^{-u-B+A e^{-\kappa u}}du
 =\begin{cases}
 e^{-B+A}\,{}_1F_1(1;1+a;-A),& A\geq0,\\
 e^{-B}\,{}_1F_1(a;1+a;A),& A<0.
 \end{cases}
-\]
+$$
 Kummer's transform avoids $e^A$ overflow. Constant screens are handled
 explicitly. Comparing these two evaluations checks the reduced integral;
 both share its derivation, so this is not independent sky validation.
@@ -580,7 +611,7 @@ unrotated branch. It lies between $|\langle Z_+\rangle|^2$ and 1.
 This diagnostic removes the known smooth source spectrum; the second panel
 returns to the original visibility difference in K$^2$.
 
-For $\sigma_\phi x\gg1$ and $h_{\rm coh}\ll w$, the small-separation estimate
+For $\sigma_\phi x\gg1$ and $h_{\mathrm{coh}}\ll w$, the small-separation estimate
 is $\langle|Z_+|^2\rangle\simeq\ell^2/(8w^2\sigma_\phi^2 x^2)$.
 This explains why physical coherence area matters. The plotted curves use
 the full model, not this asymptotic estimate. At fixed variance,
@@ -725,23 +756,22 @@ Sections 5 and 6 are averages over all screens. Here individual screens are
 **drawn** and the Faraday-off and Faraday-on readouts are summed pixel by
 pixel. The readout above, one generic Jones-pair cross product, is a mixture
 of the quantities an ideal pair of $x$ and $y$ dipoles measures. For
-$V_{\rm Stokes}=0$, $\langle EE^\dagger\rangle=\tfrac12\left(\begin{smallmatrix}
-I+Q&U\\U&I-Q\end{smallmatrix}\right)$, so
-\[
+$V_{\mathrm{Stokes}}=0$, $\langle EE^\dagger\rangle=\tfrac12\left(\begin{smallmatrix} I+Q&U\\U&I-Q\end{smallmatrix}\right)$, so
+$$
 V_{xx}=\tfrac12(I+Q),\quad V_{yy}=\tfrac12(I-Q),\quad V_{xy}=\tfrac12U,
-\]
+$$
 each beam-weighted, and $Q=V_{xx}-V_{yy}$, $U=2V_{xy}$. Faraday rotation
 changes only $Q$ and $U$; $I$ is untouched.
 
 Screens come from a spectral construction on a periodic $4096^2$ grid
 covering $8^\circ$ (pixel $0.002^\circ$), with the specified $S(k)$, and one
 screen is used at every frequency. The sum is
-$\sum_{\rm pix}B\,[k_I I+k_Q\,\mathrm{Re}\,P_{\rm on}+k_U\,\mathrm{Im}\,P_{\rm on}]$
-with $P_{\rm on}=P_0e^{2i\lambda^2\phi}$ at each pixel. It shares no code
+$\sum_{\mathrm{pix}}B\,[k_I I+k_Q\,\mathrm{Re}\,P_{\mathrm{on}}+k_U\,\mathrm{Im}\,P_{\mathrm{on}}]$
+with $P_{\mathrm{on}}=P_0e^{2i\lambda^2\phi}$ at each pixel. It shares no code
 with the separation integral and does not use the Jones-branch algebra, so
 it is an independent route to the same expectation values. The steep source
 spectrum would hide everything, so each readout is divided by the known
-smooth unrotated polarized amplitude $A(\nu)=\eta P_{\rm ref}f(\nu)$,
+smooth unrotated polarized amplitude $A(\nu)=\eta P_{\mathrm{ref}}f(\nu)$,
 the same function for the drawn and predicted curves.
 """)
     code(r"""
@@ -807,7 +837,7 @@ plt.show()
 """)
     md(r"""
 **Figure 4.** Beam-weighted Stokes $Q$ and $U$, each divided by
-$A(\nu)=\eta P_{\rm ref}f(\nu)$, versus frequency (10--50 MHz, 161 samples).
+$A(\nu)=\eta P_{\mathrm{ref}}f(\nu)$, versus frequency (10--50 MHz, 161 samples).
 Dashed: Faraday off. Thin blue: the Faraday-on readout of five drawn screens
 (seeds 11--15), each screen held fixed across frequency. Orange: the
 analytic mean and $\pm1\sigma$ of Section 3 for the same readout. The
@@ -902,13 +932,13 @@ For one branch, define
 $g(\varphi)=\int W(\mathbf r)\delta(\varphi-\phi(\mathbf r))d^2r$,
 including the deterministic source factor separately. Its centered depth
 covariance involves
-\[
+$$
 C_g(\varphi,\varphi')=\iint WW'
 [p_2(\varphi,\varphi';\rho(h))-p_1(\varphi)p_1(\varphi')]d^2r\,d^2r'.
-\]
+$$
 A one-point RM histogram supplies $p_1$ but not the correlated $p_2$.
 At finite physical $\ell$, this is generally not
-$A_{\rm power}^2H(\varphi)\delta(\varphi-\varphi')$.
+$A_{\mathrm{power}}^2H(\varphi)\delta(\varphi-\varphi')$.
 Recovering that existing template requires a separate physical assumption
 of uncorrelated **centered depth amplitudes**, their power density and
 normalization. It also requires retaining any mean signal and, for a complex

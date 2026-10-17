@@ -300,3 +300,74 @@ def visibility_moments(
         second_delta=delta_second,
         expected_abs_delta2=diag_delta.real,
     )
+
+
+def real_covariance(covariance, relation):
+    """Covariance of (Re P, Im P), including the nonconjugated moment."""
+    c, j = np.asarray(covariance), np.asarray(relation)
+    return 0.5 * np.block(
+        [[(c + j).real, (j - c).imag], [(j + c).imag, (c - j).real]]
+    )
+
+
+def qu_moments(
+    freq_mhz, model, numerical=SeparationQuadrature(), method="quadrature"
+):
+    """Joint beam-averaged (Q frequencies, U frequencies) moments in K/K^2.
+
+    The special-function path is fast but subtracts raw moments; compare it
+    with the stable centered quadrature before inference in a new regime.
+    """
+    x, _, _, _ = source_terms(freq_mhz, model)
+    freq = np.asarray(freq_mhz)
+    amplitude = (
+        model.eta * model.p_ref_k * (freq / model.ref_mhz) ** model.beta
+    )
+    intrinsic = amplitude * np.exp(2j * np.deg2rad(model.angle_deg))
+    a = np.exp(2j * model.mean_depth * x - 2 * model.sigma_depth**2 * x**2)
+    kernels = []
+    for t in (1, -1):
+        if method == "quadrature":
+            kernel = np.array(
+                [
+                    [centered_branch(u, v, 1, t, model, numerical) for v in x]
+                    for u in x
+                ]
+            )
+        elif method == "special":
+            u, v = x[:, None], x[None, :]
+            sig2 = model.sigma_depth**2
+            aa = 4 * sig2 * t * u * v
+            bb = 2 * sig2 * (u * u + v * v)
+            if model.kappa == 0:
+                raw = np.exp(-2 * sig2 * (u - t * v) ** 2)
+            elif t == 1:
+                raw = np.exp(-2 * sig2 * (u - v) ** 2) * hyp1f1(
+                    1, 1 + 1 / model.kappa, -aa
+                )
+            else:
+                raw = np.exp(-bb) * hyp1f1(
+                    1 / model.kappa, 1 + 1 / model.kappa, aa
+                )
+            kernel = np.exp(2j * model.mean_depth * (u - t * v)) * (
+                raw - np.exp(-bb)
+            )
+        else:
+            raise ValueError("method must be quadrature or special")
+        kernels.append(kernel)
+    c = np.outer(intrinsic, intrinsic.conj()) * kernels[0]
+    j = np.outer(intrinsic, intrinsic) * kernels[1]
+    mean_p = intrinsic * a
+    mean = np.r_[mean_p.real, mean_p.imag]
+    off = np.r_[intrinsic.real, intrinsic.imag]
+    covariance = real_covariance(c, j)
+    shift = mean - off
+    return dict(
+        mean=mean,
+        off=off,
+        covariance=covariance,
+        second=covariance + np.outer(mean, mean),
+        delta_second=covariance + np.outer(shift, shift),
+        complex_covariance=c,
+        complex_relation=j,
+    )
