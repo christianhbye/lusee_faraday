@@ -106,6 +106,12 @@ step-3 strong-rotation gates for the regimes it claims.
   weights. Preserve a fixed-RM-map baseline separately from residual-screen
   models; constrain or bracket their spatial correlations explicitly.
 
+- [ ] Stress-test Gaussian inference with non-Gaussian screen injections,
+  including a family with exactly matched ensemble RM covariance. Assess
+  local real-map residuals against correlated Gaussian surrogates; distinguish
+  reconstruction assumptions and posterior-mean smoothing from sky evidence.
+  The inference plan records the Hutschenreuter latent-field model and scope.
+
 ### 4. Extend the validated model to LuSEE and assess physical uncertainty
 
 - [ ] Introduce WMAP spatial variation and the actual frozen four-port response,

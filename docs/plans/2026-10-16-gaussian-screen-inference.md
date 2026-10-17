@@ -186,6 +186,65 @@ The initial Gaussian-shaped K is a benchmark choice; future observational
 constraints may require other shapes or non-Gaussian residuals. A successful
 fit within the generating family is not evidence that it describes the Galaxy.
 
+### Required non-Gaussian robustness and real-map checks
+
+Review finding, 2026-10-16: no non-Gaussian screen-injection test or Gaussian
+random-field assessment of the Hutschenreuter map has been run. Existing
+tests check Gaussian draws and their direct sums. Add the following before
+extending a Gaussian-screen inference claim to a Galactic model.
+
+Hutschenreuter et al. (2022), Section 2.3, Eq. (7), model the Galactic depth
+as exp(rho) times chi, where rho and chi are Gaussian fields. This nonlinear
+combination is generally non-Gaussian; Gaussian latent variables do not make
+the RM field Gaussian. The map is also a posterior reconstruction, so its
+statistics reflect the reconstruction model and spatially varying constraints.
+See the [primary paper](https://doi.org/10.1051/0004-6361/202140486).
+This observation does not establish whether a specified local residual can
+be approximated as Gaussian at the scales relevant to our observable.
+
+1. Add a controlled non-Gaussian family with exactly the same ensemble mean
+   and covariance as the Gaussian benchmark: phi=m+A*g, with g a zero-mean
+   Gaussian field of covariance K, and A an independent positive random
+   amplitude per screen satisfying E[A^2]=1. Choose a declared nonconstant
+   distribution for A; A=1 is the Gaussian control. Do not renormalize each
+   screen to its sample variance. This scale mixture changes higher moments
+   while preserving K exactly in expectation, isolating a failure that cannot
+   be fixed merely by selecting another covariance shape.
+2. Independently converge direct readouts for these screens. Compare means,
+   full frequency covariance and detection/recovery calibration with the
+   Gaussian-screen prediction. Equal RM covariance does not guarantee equal
+   phase statistics. Quantify the non-Gaussianity/noise regime where the
+   approximation works or fails. Separate validation of a Gaussian readout
+   likelihood from misspecification of the physical screen distribution.
+3. Add a spatially intermittent/lognormal-modulated family, motivated by the
+   reconstruction's latent-field form, with its normalization and correlation
+   changes measured explicitly. This is a stress test, not a validated model
+   of the map or a matched-covariance control unless matching is demonstrated.
+4. Assess the existing map conditionally on declared sky regions, scale range,
+   large-scale mean and variance model. Compare marginal residuals, separated
+   pixel-pair distributions, increment distributions and selected higher-order
+   statistics against Gaussian surrogates with the same covariance, mask and
+   effective resolution. Use independent regions for assessment. Calibrate
+   discrepancies with correlated simulations rather than treating map pixels
+   as independent samples. A pooled all-sky histogram can mix different means
+   and variances; it neither establishes nor isolates non-Gaussianity of a
+   residual random field.
+5. Where possible, assess posterior realizations and held-out RM observations,
+   not only the posterior-mean map. A mean map is not a screen realization,
+   and agreement with a reconstruction's imposed prior is not independent
+   evidence for the sky. State the available posterior information and the
+   unresolved scales left unconstrained.
+6. Compare the empirical single/pair phase averages relevant to the intended
+   frequency window with their Gaussian predictions, alongside map diagnostics.
+   For non-Gaussian depths the necessary characteristic functions depend on
+   more than mean and covariance. Prioritize the error in the final readout
+   statistics, rather than treating an omnibus Gaussianity test as a direct
+   prediction of measurement bias. Finite resolved-map comparisons do not
+   constrain missing sub-resolution structure.
+
+These are planned checks. No map analysis, new ensemble or physical covariance
+selection was performed while adding this review note.
+
 ## Implementation increments and artifacts
 
 1. Add joint-readout moment support and meaningful synthetic controls to

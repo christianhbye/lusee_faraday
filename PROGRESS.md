@@ -1,5 +1,17 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Inference plan review: non-Gaussian screens — 2026-10-16
+
+Checked tests and plan: no non-Gaussian screen robustness test or Gaussianity
+assessment of the real RM map has been run. The primary Hutschenreuter et al.
+(2022) model uses exp(rho)*chi with Gaussian latent fields, which generally
+gives non-Gaussian depths. Added explicit matched-covariance non-Gaussian
+injections, intermittent-screen stress tests, local map/surrogate diagnostics,
+posterior/held-out-data caveats and observable phase-statistic comparisons to
+the inference plan. Updated TODO. This is a documented review finding and
+planned validation, not a claim that a map diagnostic or inference test passed.
+No scientific computation was run.
+
 ## Gaussian-screen merge and inference plan — 2026-10-16
 
 Fast-forwarded local main to PR 7's squash merge `3bf50ce`. The remote
