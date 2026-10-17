@@ -1,5 +1,14 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Plan review: exploiting the RM reconstruction model — 2026-10-16
+
+Recorded a candidate amplitude-times-Gaussian-field extension in the inference
+plan. Fixed amplitude preserves analytic conditional Gaussian phase averaging;
+uncertain lognormal amplitude adds low-dimensional latent averaging for phase
+moments under specified latent statistics. Angular integration, posterior
+conditioning, unknown correlations and hyperparameter uncertainty remain
+separate requirements. No new calculation or inference result is claimed.
+
 ## Inference plan review: non-Gaussian screens — 2026-10-16
 
 Checked tests and plan: no non-Gaussian screen robustness test or Gaussianity

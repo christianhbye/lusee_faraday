@@ -245,6 +245,42 @@ be approximated as Gaussian at the scales relevant to our observable.
 These are planned checks. No map analysis, new ensemble or physical covariance
 selection was performed while adding this review note.
 
+### Candidate extension using the reconstruction's latent fields
+
+Discussion, 2026-10-16: exploit phi(n)=A(n)*chi(n), A=exp(rho), as a
+structured alternative to assuming the entire RM sky is a homogeneous
+Gaussian field. This is a candidate derivation, not a validated replacement
+for the toy inference plan or a claim to reproduce the reconstruction posterior.
+
+First consider a prescribed positive amplitude map A and a conditional Gaussian
+model for chi. Then phi conditional on A is Gaussian with mean A*mu_chi and
+covariance A(n)*A(n')*K_chi(n,n'). The same characteristic-function phase
+average remains exact for that specified model. Spatially varying amplitude
+permits spatially varying RM variance; isotropic separation reduction is no
+longer automatic. Constant A is the Gaussian benchmark limit.
+
+Next consider uncertain A=exp(rho). Under a specified jointly Gaussian latent
+model with fixed hyperparameters, condition on rho and analytically integrate
+chi using its conditional mean/covariance. A one-direction phase moment then
+requires averaging over one rho value; a two-direction phase moment requires
+over their joint pair distribution. The remaining latent integral has one or
+two dimensions per angular point/pair, rather than requiring a complete screen
+draw for each phase moment. This does not eliminate the angular-pair integral,
+prove affordable real-beam evaluation, or supply unknown latent covariances.
+When latent fields are correlated, use conditional statistics, not an
+unjustified independence assumption. Hyperparameter uncertainty adds further
+averaging. Data conditioning can produce a non-Gaussian posterior, so Gaussian
+prior fields do not guarantee this closure for posterior predictions.
+
+The released component means/standard deviations are useful exploratory
+inputs, but do not determine joint latent statistics or their posterior.
+Products of component means need not reproduce the mean RM map. Inventory
+available component/posterior information before adopting this model, and
+keep assumptions about unresolved fluctuations explicit. Validate fixed-A and
+random-A limits with independent converged direct-screen sums before inference.
+This extension may provide a physically motivated non-Gaussian stress test
+between the Gaussian benchmark and the full LuSEE/WMAP model.
+
 ## Implementation increments and artifacts
 
 1. Add joint-readout moment support and meaningful synthetic controls to
