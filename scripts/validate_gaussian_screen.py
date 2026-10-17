@@ -11,7 +11,7 @@ import importlib.metadata
 import json
 import resource
 import time
-from dataclasses import asdict, replace
+from dataclasses import asdict
 from pathlib import Path
 
 import numpy as np
@@ -120,9 +120,9 @@ def one_screen(model, freq, seed, width, cutoff, n, mixture=1.0):
     m = screen.coefficients.shape[0] // 2
     k = 2 * np.pi / width * np.arange(-m, m + 1)
     lags = model.correlation_pc * np.array([0.0, 0.5, 1.0, 2.0])
-    spatial_cov = np.cos(lags[:, None] * k) @ (
-        abs(screen.coefficients) ** 2
-    ).sum(axis=1)
+    spatial_cov = mixture**2 * (
+        np.cos(lags[:, None] * k) @ (abs(screen.coefficients) ** 2).sum(axis=1)
+    )
     return dict(
         levels=levels,
         changes=changes,
@@ -141,6 +141,13 @@ def main():
     parser.add_argument(
         "--freq", type=float, nargs="+", default=[45.0, 47.5, 50.0]
     )
+    parser.add_argument(
+        "--grid-refinement",
+        type=int,
+        nargs="+",
+        default=[1],
+        help="Angular-grid multiplier, one value or one per --ell",
+    )
     parser.add_argument("--samples", type=int, default=8)
     parser.add_argument("--seed-start", type=int, default=10000)
     parser.add_argument("--label", default="pilot")
@@ -149,14 +156,20 @@ def main():
     args = parser.parse_args()
     if args.samples < 1 or min(args.ell) <= 0:
         parser.error("positive sample count and scales required")
+    refinements = args.grid_refinement
+    if len(refinements) == 1:
+        refinements = refinements * len(args.ell)
+    if len(refinements) != len(args.ell) or min(refinements) < 1:
+        parser.error("positive grid multiplier required for each scale")
     OUT.mkdir(parents=True, exist_ok=True)
     CACHE.mkdir(parents=True, exist_ok=True)
     all_results = []
     started = time.monotonic()
-    for ell in args.ell:
+    for ell, refinement in zip(args.ell, refinements):
         model = ScreenModel(correlation_pc=ell)
         freq = np.array(args.freq)
         width, cutoff, n = geometry(model, freq, args.domain_factor)
+        n *= refinement
         config = dict(
             model=asdict(model),
             freq=freq.tolist(),
@@ -212,6 +225,7 @@ def main():
             * model.sigma_depth
             * lambda_squared(freq).max()
             * np.exp(-0.25 * ell**2 * cutoff**2)
+            * (np.sqrt(1.5) if args.mixture else 1.0)
         )
         numerical_pass = bool(
             max_change < 1e-4

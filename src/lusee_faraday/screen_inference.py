@@ -225,7 +225,14 @@ def local_stationary_template(freq, model, center_mhz):
 
 
 def profile_null_batch(
-    data, freq, model, noise, constant_depth=False, free_beta=False
+    data,
+    freq,
+    model,
+    noise,
+    constant_depth=False,
+    free_beta=False,
+    beta_bounds=(-4.0, -1.0),
+    depth_bounds=(-0.1, 0.1),
 ):
     """Fit deterministic Q+iU source nulls; profile complex source amplitude.
 
@@ -243,9 +250,11 @@ def profile_null_batch(
         raise ValueError("requires diagonal noise equal for Q and U")
     pol = data[:, :n] + 1j * data[:, n:]
     x = lambda_squared(freq)
-    depths = np.linspace(-0.1, 0.1, 65) if constant_depth else np.array([0.0])
+    depths = (
+        np.linspace(*depth_bounds, 65) if constant_depth else np.array([0.0])
+    )
     betas = (
-        np.linspace(-4.0, -1.0, 31) if free_beta else np.array([model.beta])
+        np.linspace(*beta_bounds, 31) if free_beta else np.array([model.beta])
     )
     grid = np.array([(c, b) for c in depths for b in betas])
 
@@ -285,10 +294,10 @@ def profile_null_batch(
         bounds = []
         initial = []
         if constant_depth:
-            bounds.append((-0.1, 0.1))
+            bounds.append(depth_bounds)
             initial.append(start[0])
         if free_beta:
-            bounds.append((-4.0, -1.0))
+            bounds.append(beta_bounds)
             initial.append(start[1])
 
         def evaluate(values, details=False):

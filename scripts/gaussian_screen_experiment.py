@@ -17,7 +17,7 @@ from lusee_faraday.screen_inference import (
     local_stationary_template,
 )
 from lusee_faraday.screen_validation import noise_weighted_error
-from validate_gaussian_screen import OUT, ROOT, write_json
+from validate_gaussian_screen import CACHE, OUT, ROOT, provenance, write_json
 
 FREQ = np.linspace(45, 50, 5)
 SCALES = np.geomspace(0.05, 5, 41)
@@ -191,6 +191,20 @@ def assess():
     assessment["recovery_enabled"] = any(
         r["supports_recovery"] for r in assessment["recovery"]
     )
+    assessment["provenance"] = provenance(
+        dict(
+            model=asdict(model),
+            freq_mhz=FREQ.tolist(),
+            noise_fraction=NOISE_FRACTION,
+        )
+    )
+    assessment["assessment_sources"] = {
+        name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
+        for name in (
+            "scripts/gaussian_screen_experiment.py",
+            "src/lusee_faraday/screen_inference.py",
+        )
+    }
     write_json(OUT / "assessment.json", assessment)
     print(
         "Recovery criterion:",
@@ -208,7 +222,28 @@ def check_gates():
             for r in record["results"]
         ):
             raise RuntimeError(f"{name} gate not passed; inference is blocked")
+        required_scales = (
+            [0.05, 0.15, 0.5, 1.5, 5.0]
+            if name == "covariance-validation"
+            else [0.5]
+        )
+        required_freq = (
+            FREQ if name == "covariance-validation" else [20, 25, 30, 35]
+        )
+        if sorted(r["ell"] for r in record["results"]) != required_scales:
+            raise RuntimeError(f"{name}: required scale coverage is missing")
         for row in record["results"]:
+            stored = json.loads(
+                (CACHE / row["cache"] / "config.json").read_text()
+            )
+            if stored != provenance(row["config"]):
+                raise RuntimeError(f"{name}: stale validation provenance")
+            if row["samples"] < 128 or not np.array_equal(
+                row["config"]["freq"], required_freq
+            ):
+                raise RuntimeError(
+                    f"{name}: incomplete sample/frequency coverage"
+                )
             z = (
                 np.array(row["spatial_empirical"])
                 - np.array(row["spatial_expected"])
@@ -220,6 +255,17 @@ def check_gates():
 def freeze():
     check_gates()
     assessment = json.loads((OUT / "assessment.json").read_text())
+    if assessment["provenance"] != provenance(
+        dict(
+            model=asdict(ScreenModel()),
+            freq_mhz=FREQ.tolist(),
+            noise_fraction=NOISE_FRACTION,
+        )
+    ):
+        raise RuntimeError("stale information assessment")
+    for name, digest in assessment["assessment_sources"].items():
+        if hashlib.sha256((ROOT / name).read_bytes()).hexdigest() != digest:
+            raise RuntimeError(f"stale assessment source: {name}")
     if assessment["recovery_enabled"]:
         raise RuntimeError(
             "Information supports recovery: configure interval calibration "
@@ -251,6 +297,8 @@ def freeze():
         null_depths=[-0.04, 0.0, 0.04],
         numerical_mean_whitened_tolerance=0.01,
         numerical_covariance_whitened_tolerance=0.01,
+        numerical_statistic_relative_tolerance=0.001,
+        numerical_detection_flip_tolerance=1,
         recovery="disabled by finite-model information assessment",
         null_truth_scope="amplitude=1 K, angle=20 deg, beta=config.BETA_QU; "
         "constant depths -0.04, 0, +0.04 rad/m^2 only",

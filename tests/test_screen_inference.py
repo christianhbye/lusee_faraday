@@ -193,6 +193,19 @@ def test_profiled_constant_null_recovers_direct_spectrum():
     )
     assert fitted["converged"].all()
     assert np.max(abs(fitted["residual"])) < 1e-6
+    restricted = profile_null_batch(
+        y,
+        freq,
+        model,
+        np.eye(10) * 0.001**2,
+        True,
+        True,
+        depth_bounds=(-0.01, 0.01),
+        beta_bounds=(-3.0, -2.0),
+    )
+    assert restricted["converged"].all()
+    assert abs(restricted["parameters"][0, 2]) <= 0.01
+    assert np.max(abs(restricted["residual"])) > 1e-4
     np.testing.assert_allclose(
         fitted["parameters"][0], [amp, angle, depth, beta], atol=1e-4, rtol=0
     )
@@ -211,3 +224,60 @@ def test_null_depth_mutation_rejected():
     with patch.object(si, "profile_null_batch", ignore_depth):
         with pytest.raises(AssertionError):
             test_profiled_constant_null_recovers_direct_spectrum()
+
+
+def test_null_bounds_mutation_rejected():
+    from lusee_faraday import screen_inference as si
+
+    original = si.profile_null_batch
+    with patch.object(si, "profile_null_batch", lambda *a, **kw: original(*a)):
+        with pytest.raises(AssertionError):
+            test_profiled_constant_null_recovers_direct_spectrum()
+
+
+def test_stationary_template_depth_power_reference():
+    from scipy.integrate import quad
+    from lusee_faraday.conventions import lambda_squared
+    from lusee_faraday.screen_inference import local_stationary_template
+
+    model = gs.ScreenModel()
+    freq = np.linspace(29.9, 30.1, 5)
+    x = lambda_squared(freq)
+    x0 = float(lambda_squared([30.0])[0])
+    z, weights = hermgauss(32)
+    depth = model.mean_depth + np.sqrt(2) * model.sigma_depth * z
+    branches = np.exp(2j * x[:, None] * depth)
+    unit = (branches * (weights / np.sqrt(np.pi))) @ branches.conj().T
+    # Independently integrate the small-separation physical coherence power.
+    w = model.weight_sigma_pc
+    power, _ = quad(
+        lambda r: r
+        / (2 * w**2)
+        * np.exp(
+            -(r**2) / (4 * w**2)
+            - 2 * model.sigma_depth**2 * x0**2 * r**2 / model.correlation_pc**2
+        ),
+        0,
+        np.inf,
+        epsabs=1e-13,
+    )
+    amp = model.eta * model.p_ref_k * (freq / model.ref_mhz) ** model.beta
+    c = power * np.outer(amp, amp) * unit
+    expected = 0.5 * np.block([[c.real, -c.imag], [c.imag, c.real]])
+    result = local_stationary_template(freq, model, 30.0)
+    np.testing.assert_allclose(result["covariance"], expected, atol=1e-13)
+
+
+def test_template_normalization_mutation_rejected():
+    from lusee_faraday import screen_inference as si
+
+    original = si.local_stationary_template
+
+    def wrong(*args):
+        result = original(*args)
+        result["covariance"] *= 2
+        return result
+
+    with patch.object(si, "local_stationary_template", wrong):
+        with pytest.raises(AssertionError):
+            test_stationary_template_depth_power_reference()

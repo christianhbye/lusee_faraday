@@ -90,7 +90,54 @@ def main():
         likelihood_diagnostics=[],
         mixture={},
         thresholds={},
+        statistic_stability=[],
+        nuisance_fits=[],
+        conditioning=[
+            dict(
+                ell=ell,
+                total_condition_number=float(
+                    np.linalg.cond(m["covariance"] + noise)
+                ),
+                minimum_signal_eigenvalue=float(
+                    np.linalg.eigvalsh(m["covariance"])[0]
+                ),
+            )
+            for ell, m in zip(config["scale_grid_pc"], moments)
+        ],
     )
+
+    def boundary_fractions(parameters, constant_depth, free_beta):
+        amplitudes, _, depths, betas = parameters.T
+        limit = np.minimum(
+            model.i_ref_k,
+            np.min(
+                model.i_ref_k
+                * (freq[None, :] / model.ref_mhz)
+                ** (model.beta - betas[:, None]),
+                axis=1,
+            ),
+        )
+        hits = dict(
+            amplitude_lower=np.isclose(amplitudes, 0, atol=1e-5),
+            amplitude_upper=np.isclose(amplitudes, limit, atol=1e-5),
+        )
+        if constant_depth:
+            hits["depth"] = np.any(
+                np.isclose(
+                    depths[:, None], config["constant_depth_bounds"], atol=1e-5
+                ),
+                axis=1,
+            )
+        if free_beta:
+            hits["beta"] = np.any(
+                np.isclose(betas[:, None], config["beta_bounds"], atol=1e-5),
+                axis=1,
+            )
+        return dict(
+            any=float(np.any(list(hits.values()), axis=0).mean()),
+            **{name: float(value.mean()) for name, value in hits.items()},
+        )
+
     ncal = config["calibration_samples"]
     nval = config["null_validation_samples"]
     nulls = {}
@@ -127,6 +174,10 @@ def main():
                                 noise,
                                 is_constant,
                                 free_beta,
+                                beta_bounds=tuple(config["beta_bounds"]),
+                                depth_bounds=tuple(
+                                    config["constant_depth_bounds"]
+                                ),
                             )
                             if not fit["converged"].all():
                                 raise RuntimeError("unconverged null fit")
@@ -166,7 +217,10 @@ def main():
                 f"({time.monotonic()-started:.1f}s)",
                 flush=True,
             )
-    alpha = (1 - config["simultaneous_confidence"]) / 18
+    alpha = (1 - config["simultaneous_confidence"]) / config[
+        "simultaneous_null_comparisons"
+    ]
+    quantile = 1 - config["false_positive_target"]
     for stage in range(2):
         for null in ("H0", "Hc"):
             depths = [0.0] if null == "H0" else config["null_depths"]
@@ -176,7 +230,7 @@ def main():
                     float(
                         np.quantile(
                             nulls["calibration", d][name],
-                            0.95,
+                            quantile,
                             method="higher",
                         )
                     )
@@ -191,21 +245,8 @@ def main():
                     parameters = nulls["validation", depth][
                         f"{stage}-{null}-parameters"
                     ]
-                    boundaries = (
-                        np.isclose(parameters[:, 0], model.i_ref_k, atol=1e-5)
-                        | (
-                            np.isclose(abs(parameters[:, 2]), 0.1, atol=1e-5)
-                            if null == "Hc"
-                            else False
-                        )
-                        | (
-                            (
-                                np.isclose(parameters[:, 3], -4, atol=1e-5)
-                                | np.isclose(parameters[:, 3], -1, atol=1e-5)
-                            )
-                            if stage
-                            else False
-                        )
+                    boundaries = boundary_fractions(
+                        parameters, null == "Hc", bool(stage)
                     )
                     output["null_tests"].append(
                         dict(
@@ -216,9 +257,8 @@ def main():
                             rate=detections / len(score),
                             interval=interval,
                             threshold=threshold,
-                            nuisance_boundary_fraction=float(
-                                boundaries.mean()
-                            ),
+                            nuisance_boundary_fraction=boundaries["any"],
+                            nuisance_boundaries=boundaries,
                             passed=bool(
                                 interval[1]
                                 <= config["false_positive_target"]
@@ -229,7 +269,9 @@ def main():
     for weight in range(2):
         name = f"known-{weight}"
         threshold = float(
-            np.quantile(nulls["calibration", 0.0][name], 0.95, method="higher")
+            np.quantile(
+                nulls["calibration", 0.0][name], quantile, method="higher"
+            )
         )
         output["thresholds"][name] = threshold
         score = nulls["validation", 0.0][name]
@@ -244,12 +286,16 @@ def main():
                 rate=detections / len(score),
                 interval=interval,
                 threshold=threshold,
-                passed=bool(interval[1] <= 0.065),
+                passed=bool(
+                    interval[1]
+                    <= config["false_positive_target"]
+                    + config["false_positive_upper_tolerance"]
+                ),
             )
         )
     # Exact order-statistic uncertainty for each calibration quantile, before
     # taking the conservative max across the declared Hc depths.
-    rank = int(np.ceil(0.95 * (ncal - 1))) + 1
+    rank = int(np.ceil(quantile * (ncal - 1))) + 1
     output["calibration_tail_probability_interval"] = beta_distribution.ppf(
         [alpha / 2, 1 - alpha / 2], ncal + 1 - rank, rank
     ).tolist()
@@ -277,7 +323,10 @@ def main():
             np.cov(sample, rowvar=False) - np.cov(middle, rowvar=False),
             total,
         )
-        if max(numeric) > 0.01:
+        if (
+            numeric[0] > config["numerical_mean_whitened_tolerance"]
+            or numeric[1] > config["numerical_covariance_whitened_tolerance"]
+        ):
             raise RuntimeError(
                 "noise-weighted numerical error exceeds tolerance"
             )
@@ -301,17 +350,87 @@ def main():
             )
         )
         record = dict(data=data, physical_sample=sample, mean=expected["mean"])
+        refined_data = data + middle - sample
+
+        def record_stability(name, fine_score, coarse_score):
+            threshold = output["thresholds"][name]
+            change = float(np.max(abs(fine_score - coarse_score)))
+            flips = int(
+                np.count_nonzero(
+                    (fine_score > threshold) != (coarse_score > threshold)
+                )
+            )
+            passed = bool(
+                change / max(1.0, abs(threshold))
+                < config["numerical_statistic_relative_tolerance"]
+                and flips <= config["numerical_detection_flip_tolerance"]
+            )
+            output["statistic_stability"].append(
+                dict(
+                    label=label,
+                    ell=ell,
+                    name=name,
+                    max_score_change=change,
+                    detection_flips=flips,
+                    passed=passed,
+                )
+            )
+            if not passed:
+                raise RuntimeError(
+                    "statistic is unstable under quadrature refinement"
+                )
+
         for stage, free_beta in enumerate((False, True)):
             for null, is_constant in [("H0", False), ("Hc", True)]:
                 fit = profile_null_batch(
-                    data, freq, model, noise, is_constant, free_beta
+                    data,
+                    freq,
+                    model,
+                    noise,
+                    is_constant,
+                    free_beta,
+                    beta_bounds=tuple(config["beta_bounds"]),
+                    depth_bounds=tuple(config["constant_depth_bounds"]),
                 )
                 if not fit["converged"].all():
                     raise RuntimeError("unconverged alternative null fit")
+                refined_fit = profile_null_batch(
+                    refined_data,
+                    freq,
+                    model,
+                    noise,
+                    is_constant,
+                    free_beta,
+                    beta_bounds=tuple(config["beta_bounds"]),
+                    depth_bounds=tuple(config["constant_depth_bounds"]),
+                )
+                if not refined_fit["converged"].all():
+                    raise RuntimeError("unconverged quadrature-check null fit")
+                record[f"{stage}-{null}-parameters"] = fit["parameters"]
+                output["nuisance_fits"].append(
+                    dict(
+                        label=label,
+                        ell=ell,
+                        stage=stage,
+                        null=null,
+                        converged=int(fit["converged"].sum()),
+                        n=len(data),
+                        boundaries=boundary_fractions(
+                            fit["parameters"], is_constant, free_beta
+                        ),
+                    )
+                )
                 for weight, signal in enumerate(signals):
                     name = f"{stage}-{null}-{weight}"
                     score = covariance_discrepancy(
                         fit["residual"], signal, noise
+                    )
+                    record_stability(
+                        name,
+                        score,
+                        covariance_discrepancy(
+                            refined_fit["residual"], signal, noise
+                        ),
                     )
                     record[name] = score
                     count = int(
@@ -337,6 +456,13 @@ def main():
                 fixed_source_scores(data, alternatives, noise).max(axis=1)
                 - nullscore
             )
+            coarse_score = 2 * (
+                fixed_source_scores(refined_data, alternatives, noise).max(
+                    axis=1
+                )
+                - fixed_source_scores(refined_data, [zero], noise)[:, 0]
+            )
+            record_stability(name, score, coarse_score)
             record[name] = score
             count = int(np.count_nonzero(score > output["thresholds"][name]))
             output["power"].append(
@@ -355,6 +481,11 @@ def main():
             output["mixture"] = dict(
                 gaussian_moments=moment_comparison(sample, expected),
                 conditional_mixture_moments=moment_comparison(sample, exact),
+                gaussian_model_whitened_error=noise_weighted_error(
+                    exact["mean"] - expected["mean"],
+                    exact["covariance"] - expected["covariance"],
+                    total,
+                ),
             )
         np.savez(OUT / f"observation-{label}-{ell}.npz", **record)
         print(f"{label} ell={ell} scored", flush=True)

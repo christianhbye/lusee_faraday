@@ -1,5 +1,30 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Gaussian-screen numerical refinement and frozen tests — 2026-10-16
+
+The first 128-screen, five-scale sweep passed every ensemble moment check,
+but its coarsest angular grids at ell=0.5 and 1.5 pc shifted by 1.09e-4 and
+1.83e-4 of unrotated polarization, exceeding the unchanged 1e-4 criterion.
+Added explicit per-scale angular-grid multipliers and doubled those grids.
+The original ledger is retained as `covariance-validation-initial.json`; the
+full source-fingerprinted validation is rerunning before inference can start.
+The scale-mixture spatial diagnostic now includes its per-screen A² factor.
+
+Bound the null fitter to the frozen beta/depth ranges, recorded physical
+amplitude and other nuisance boundary hits, and added final-statistic checks
+on two angular grids with identical noise. Freezing rejects stale validation
+and information-assessment products or missing scale/frequency coverage.
+`scripts/run_gaussian_screen_inference.sh` provides a capped, checkpointed
+end-to-end run and a read-only status command.
+
+The focused suite passes 27 tests (6.39 s), including independent depth and
+spatial-integral checks of the stationary template and explicit rejected
+mutations of template normalization and nuisance bounds. Source and driver
+lint passes. An isolated 16-sample orchestration smoke test exercises all 18
+null comparisons and 30 alternative comparisons; its statistical outputs are
+not scientific validation. The full project suite and production run remain
+in progress.
+
 ## Gaussian-screen implementation: validation and inference drivers — 2026-10-16
 
 Added resumable three-grid direct-screen validation with nested Fourier-cutoff
