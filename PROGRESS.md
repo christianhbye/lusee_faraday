@@ -1,5 +1,24 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Direct-screen test of separated power predictions — 2026-10-17
+
+Added the cached baseline 128-screen covariance-validation ensemble at
+45–50 MHz to Figure 4, alongside the existing 20–35 MHz strong-rotation
+ensemble. The builder checks that physical source/beam/screen parameters
+match, uses each ensemble's exact frequency coordinates and analytic raw
+second moments, and retains its own declared simultaneous moment bounds.
+The high-frequency power residuals against the full prediction range from
+-0.92 to -0.73 Monte Carlo standard errors; residuals against the local
+approximation range from +12.48 to +22.15. The caption includes every
+high-frequency residual against both predictions and notes their correlation.
+This supports the full toy prediction in the regime where the curves separate;
+it is not a new model-selection significance or a Galactic validation.
+
+No new simulation or fitting was run. Rebuilt and executed the notebook from
+completed caches under the 16 GB cap, inspected both power/fraction panels
+and the residual panel, and passed Black/flake8 and manifest checks. Curves
+below 20 MHz still lack direct-screen validation.
+
 ## Absolute polarization power and surviving fraction — 2026-10-17
 
 Expanded the inference notebook's original Figure 4 with a deterministic

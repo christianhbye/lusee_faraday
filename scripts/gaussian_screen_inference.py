@@ -21,7 +21,11 @@ from nbclient import NotebookClient
 from calibrate_gaussian_screen import load_samples
 from gaussian_screen_experiment import check_gates, noise_covariance
 from lusee_faraday.gaussian_screen import ScreenModel, qu_moments
-from lusee_faraday.screen_inference import gaussian_kl, transform_source
+from lusee_faraday.screen_inference import (
+    gaussian_kl,
+    local_stationary_template,
+    transform_source,
+)
 from validate_gaussian_screen import OUT, ROOT, write_json
 
 matplotlib.use("Agg")
@@ -418,15 +422,6 @@ def figures(validation, strong, assessment, inference):
         )
     )
 
-    samples, _, _ = load_samples("strong-validation", 0.5)
-    sr = strong["results"][0]
-    sf = np.array(sr["config"]["freq"])
-    ns = len(sf)
-    raw = samples[:, :ns] ** 2 + samples[:, ns:] ** 2
-    sample_power = raw.mean(0)
-    error = raw.std(0, ddof=1) / np.sqrt(len(raw))
-    full = np.array(sr["moments"]["second"]["expected"])
-    expected_power = np.diag(full)[:ns] + np.diag(full)[ns:]
     diag = assessment["strong_diagonal"]
     f = np.array([r["freq_mhz"] for r in diag])
     on_power = np.array([r["centered_power"] + r["mean_power"] for r in diag])
@@ -435,9 +430,6 @@ def figures(validation, strong, assessment, inference):
         f, replace(model, mean_depth=0.0, sigma_depth=0.0), method="special"
     )["off"]
     off_power = np.sum(off.reshape(2, -1) ** 2, axis=0)
-    sample_indices = np.searchsorted(f, sf)
-    np.testing.assert_allclose(f[sample_indices], sf)
-    sample_off_power = off_power[sample_indices]
     fraction = on_power / off_power
     if np.any((fraction < 0) | (fraction > 1 + 1e-12)):
         raise RuntimeError("unphysical surviving power fraction")
@@ -457,22 +449,75 @@ def figures(validation, strong, assessment, inference):
     power_ax.semilogy(
         f, off_power, ":", color="0.35", label="Faraday-off power"
     )
-    power_ax.errorbar(
-        sf,
-        sample_power,
-        yerr=error,
-        fmt="o",
-        color="black",
-        label="Direct screens",
+    comparison_table = (
+        "\n\n| Frequency (MHz) | (Direct − full) / MC SE |"
+        " (Direct − local approximation) / MC SE |\n"
+        "|---:|---:|---:|\n"
     )
-    fraction_ax.errorbar(
-        sf,
-        sample_power / sample_off_power,
-        yerr=error / sample_off_power,
-        fmt="o",
-        color="black",
-        label="Direct screens",
-    )
+    for label, marker, color, legend in (
+        ("strong-validation", "o", "black", "Direct: 20–35 MHz"),
+        ("covariance-validation", "D", "#CC79A7", "Direct: 45–50 MHz"),
+    ):
+        samples, _, entry = load_samples(label, 0.5)
+        if ScreenModel(**entry["config"]["model"]) != model:
+            raise RuntimeError("power comparison ensembles differ physically")
+        sf = np.asarray(entry["config"]["freq"])
+        ns = len(sf)
+        raw = samples[:, :ns] ** 2 + samples[:, ns:] ** 2
+        sample_power = raw.mean(0)
+        error = raw.std(0, ddof=1) / np.sqrt(len(raw))
+        full = np.asarray(entry["moments"]["second"]["expected"])
+        expected_power = np.diag(full)[:ns] + np.diag(full)[ns:]
+        sample_off = qu_moments(
+            sf,
+            replace(model, mean_depth=0.0, sigma_depth=0.0),
+            method="special",
+        )["off"]
+        sample_off_power = np.sum(sample_off.reshape(2, -1) ** 2, axis=0)
+        power_ax.errorbar(
+            sf,
+            sample_power,
+            yerr=error,
+            fmt=marker,
+            color=color,
+            label=legend,
+        )
+        fraction_ax.errorbar(
+            sf,
+            sample_power / sample_off_power,
+            yerr=error / sample_off_power,
+            fmt=marker,
+            color=color,
+            label=legend,
+        )
+        residual_ax.errorbar(
+            sf,
+            (sample_power - expected_power) / error,
+            yerr=1,
+            fmt=marker,
+            color=color,
+        )
+        # Each ensemble retains its own declared simultaneous moment bound.
+        threshold = entry["moments"]["threshold"]
+        for sign in (-1, 1):
+            residual_ax.hlines(
+                sign * threshold,
+                sf.min(),
+                sf.max(),
+                color=color,
+                linestyles=":",
+            )
+        if label == "covariance-validation":
+            for i, frequency in enumerate(sf):
+                local = local_stationary_template(
+                    np.array([frequency]), model, frequency
+                )
+                local_power = np.trace(local["covariance"])
+                comparison_table += (
+                    f"| {frequency:g} |"
+                    f" {(sample_power[i] - expected_power[i])/error[i]:.2f} |"
+                    f" {(sample_power[i] - local_power)/error[i]:.2f} |\n"
+                )
     fraction_ax.axhline(1, color="0.35", ls=":", label="No depolarization")
     power_ax.set(
         ylabel=r"$\langle |P|^2\rangle$ ($\mathrm{K}^2$)",
@@ -485,16 +530,7 @@ def figures(validation, strong, assessment, inference):
     for ax in (power_ax, fraction_ax):
         ax.legend(fontsize=8)
         ax.set(xlabel="Frequency (MHz)")
-    residual_ax.errorbar(
-        sf,
-        (sample_power - expected_power) / error,
-        yerr=1,
-        fmt="o",
-        color="black",
-    )
     residual_ax.axhline(0, color="gray")
-    residual_ax.axhline(sr["moments"]["threshold"], color="gray", ls=":")
-    residual_ax.axhline(-sr["moments"]["threshold"], color="gray", ls=":")
     residual_ax.set(xlabel="Frequency (MHz)", ylabel="Residual / MC SE")
     figures.append(
         (
@@ -502,8 +538,12 @@ def figures(validation, strong, assessment, inference):
             (
                 "Physical polarization power for the baseline"
                 " source/beam/screen. Direct-screen points use 128"
-                " independent, individually converged realizations at 20–35"
-                " MHz; their errors are screen Monte Carlo errors. Left:"
+                " individually converged realizations per ensemble: black"
+                " circles at 20–35 MHz (`strong-validation`) and magenta"
+                " diamonds at 45–50 MHz (`covariance-validation`, baseline"
+                " scale). Each ensemble contains independent screen draws;"
+                " frequencies within an ensemble share the same screens."
+                " Errors are screen Monte Carlo errors. Left:"
                 " absolute Faraday-on power and the deterministic Faraday-off"
                 " power through the same source and beam. Right: both on"
                 " predictions and the direct-screen estimates divided by"
@@ -512,7 +552,14 @@ def figures(validation, strong, assessment, inference):
                 " small-separation approximation supplies its own physical"
                 " amplitude and approaches the full expression toward strong"
                 " rotation. The residual panel compares direct sums with the"
-                " full prediction. Curves below 20 MHz have reduced-integral"
+                " full prediction, with each ensemble's own simultaneous"
+                " moment bounds drawn over its frequency window. The"
+                " high-frequency simulations test the separated curves"
+                " directly; the table below reports residuals against both"
+                " predictions using the same sample standard errors. These"
+                " correlated residuals are diagnostics, not a newly calibrated"
+                " model-selection significance. Curves below 20 MHz have"
+                " reduced-integral"
                 " checks but no direct-screen validation in this run."
                 " Narrow-band covariance-shape errors are tabulated"
                 " separately."
@@ -532,7 +579,7 @@ def figures(validation, strong, assessment, inference):
                 " existence and frequency must be assessed with realistic"
                 " emission, screen structure, beam chromaticity and channel"
                 " averaging before interpreting a feature in data; no such"
-                " validation is supplied here."
+                " validation is supplied here." + comparison_table
             ),
         )
     )
