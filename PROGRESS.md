@@ -1,5 +1,22 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Gaussian-screen implementation: moments and pinned fields — 2026-10-16
+
+Added joint Q/U moments, retaining conjugated and nonconjugated complex
+covariance, with stable centered quadrature and a separately checked fast
+special-function path. Added immutable pinned Fourier fields, independent
+grid evaluation, nested cutoff truncation, persisted coefficients and exact
+discrete spectral covariance. The original illustrative generator remains
+available for its existing notebook.
+
+Independent controls compare Q/U moments to direct Gaussian integration of
+a spatially constant screen and grid evaluations to an explicit sinusoid.
+Mutation checks reject omitted relation moments, erased centered covariance
+and incorrect FFT normalization. The focused suite passed 20 tests in 4.21 s
+under the 16 GB virtual-memory limit. This establishes algebra and generator
+controls; the full spatial covariance gate remains pending. A capped resource
+pilot is measuring the new three-grid direct-sum cost before ensemble sizing.
+
 ## Gaussian-screen plan: paper priorities and inference gates — 2026-10-16
 
 Revised the plan after the paper-direction review. The sequence is full joint
