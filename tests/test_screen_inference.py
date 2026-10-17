@@ -120,3 +120,94 @@ def test_mutations_are_rejected(tmp_path):
     ):
         with pytest.raises(AssertionError):
             test_fourier_known_modes_and_refinement(tmp_path)
+
+
+def test_likelihood_normalization_and_source_transform():
+    from lusee_faraday.screen_inference import gaussian_nll, transform_source
+    from scipy.stats import multivariate_normal
+
+    mean = np.array([0.2, -0.4])
+    cov = np.array([[2.0, 0.3], [0.3, 0.8]])
+    data = np.array([1.0, 2.0])
+    np.testing.assert_allclose(
+        gaussian_nll(data, mean, cov),
+        -multivariate_normal.logpdf(data, mean, cov),
+    )
+    # At zero residual, a covariance change affects only the normalization.
+    np.testing.assert_allclose(
+        gaussian_nll(mean, mean, 4 * cov) - gaussian_nll(mean, mean, cov),
+        np.log(4),
+    )
+    freq = np.array([45.0, 47.5, 50.0])
+    model = gs.ScreenModel()
+    base = gs.qu_moments(freq, model)
+    moved = gs.qu_moments(
+        freq, replace(model, p_ref_k=0.7, angle_deg=31.0, beta=-2.2)
+    )
+    m, c = transform_source(
+        base["mean"],
+        base["covariance"],
+        freq,
+        model,
+        0.7,
+        np.deg2rad(11.0),
+        -2.2 - model.beta,
+    )
+    np.testing.assert_allclose(m, moved["mean"], atol=1e-13)
+    np.testing.assert_allclose(c, moved["covariance"], atol=1e-13)
+
+
+def test_likelihood_normalization_mutation():
+    from lusee_faraday import screen_inference as si
+
+    original = si.gaussian_nll
+
+    def wrong(data, mean, cov):
+        return original(data, mean, cov) - 0.5 * np.linalg.slogdet(cov)[1]
+
+    with patch.object(si, "gaussian_nll", wrong):
+        with pytest.raises(AssertionError):
+            test_likelihood_normalization_and_source_transform()
+
+
+def test_profiled_constant_null_recovers_direct_spectrum():
+    from lusee_faraday.screen_inference import profile_null_batch
+    from lusee_faraday.conventions import faraday_phase_cosmo
+
+    freq = np.linspace(45, 50, 5)
+    model = gs.ScreenModel()
+    depth = 0.027
+    beta = -2.3
+    amp = 0.8
+    angle = 0.21
+    pol = (
+        model.eta
+        * amp
+        * (freq / model.ref_mhz) ** beta
+        * np.exp(2j * angle)
+        * faraday_phase_cosmo(np.array([depth]), freq)[0]
+    )
+    y = np.r_[pol.real, pol.imag]
+    fitted = profile_null_batch(
+        y, freq, model, np.eye(10) * 0.001**2, True, True
+    )
+    assert fitted["converged"].all()
+    assert np.max(abs(fitted["residual"])) < 1e-6
+    np.testing.assert_allclose(
+        fitted["parameters"][0], [amp, angle, depth, beta], atol=1e-4, rtol=0
+    )
+
+
+def test_null_depth_mutation_rejected():
+    from lusee_faraday import screen_inference as si
+
+    original = si.profile_null_batch
+
+    def ignore_depth(
+        data, freq, model, noise, constant_depth=False, free_beta=False
+    ):
+        return original(data, freq, model, noise, False, free_beta)
+
+    with patch.object(si, "profile_null_batch", ignore_depth):
+        with pytest.raises(AssertionError):
+            test_profiled_constant_null_recovers_direct_spectrum()

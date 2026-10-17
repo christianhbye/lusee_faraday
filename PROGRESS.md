@@ -1,5 +1,30 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Gaussian-screen implementation: validation and inference drivers — 2026-10-16
+
+Added resumable three-grid direct-screen validation with nested Fourier-cutoff
+checks, generator covariance diagnostics, all-cell moment bootstrap errors and
+source/configuration fingerprints. Each realization is checkpointed. The
+resource pilot exposed inadequate source-profile sampling at large ell; the
+production prescription now resolves the source width as well as screen modes
+and phase variation. The five-scale 45–50 MHz covariance ensemble is running.
+
+The independent 128-screen baseline ensemble at 20/25/30/35 MHz passed numerical
+and moment gates: maximum angular shift 7.43e-6 of unrotated polarization,
+worst moment discrepancy 3.03 MC standard errors versus the simultaneous 4.06
+threshold. This is a conditional toy-model result, not Galactic validation.
+
+Added normalized Gaussian scoring, source nuisance transformations/profiling,
+constant-depth null fits, calibrated-discrepancy tools, finite-model information
+assessment, mixture moments and the physical stationary-template limit.
+Independent controls and explicit normalization/depth-fit mutations bring the
+focused suite to 24 passing tests (4.74 s); source lint passes. The analytic
+assessment fails the declared factor-of-two recovery criterion at every tested
+scale after nuisance profiling. Five versus seventeen frequencies gives
+profiled KL 0.352 versus 0.343 for the baseline-to-double-scale comparison at
+fixed total inverse-variance budget. Calibration and final observations remain
+pending the full spatial moment gate; no recovery intervals are claimed.
+
 ## Gaussian-screen implementation: moments and pinned fields — 2026-10-16
 
 Added joint Q/U moments, retaining conjugated and nonconjugated complex
