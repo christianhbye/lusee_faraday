@@ -1,5 +1,22 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Detailed paper implementation plan — 2026-10-17
+
+Read Fable's two latest commits (`6f9bdf2`, `3ec0f12`) and mapped their
+five phases to existing production interfaces and proposed code in
+`docs/plans/2026-10-17-paper-implementation.md`. The plan specifies depth
+moments, spin-2 all-pair covariance, exact channel-weight propagation,
+leakage residuals, loaded receiver/radiometer noise, result provenance and
+phase gates. It flags the contradictory `f=0` pilot check: with the stated
+`f Phi` convention, `f=0` is unrotated and `f=1` recovers the screen pilot.
+It also scopes the exponential cross-term check to its exact screen limit,
+retains broad frequency covariance for near-edge slab emission, and requires
+the same smooth-fit operator on signal, leakage and noise.
+
+Prepared on `paper-implementation-plan` for Christian's requested review
+before coding. No implementation code or scientific runs were added; the
+pre-existing edits to both Gaussian-screen notebooks were left untouched.
+
 ## Paper framing adopted and plan to the paper — 2026-10-17
 
 Reviewed and fast-forward merged `paper-framing-redistribution` into main:
