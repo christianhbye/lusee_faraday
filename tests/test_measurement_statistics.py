@@ -48,3 +48,7 @@ def test_repeat_difference_cancels_fixed_sky_and_adds_independent_noise():
 def test_invalid_statistics_covariance_is_rejected():
     with pytest.raises(ValueError):
         gaussian_mean_square(np.diag([1.0, -1.0]))
+    with pytest.raises(ValueError):
+        gaussian_mean_square(np.array([[1, 0.2j], [-0.2j, 1]]))
+    with pytest.raises(ValueError):
+        gaussian_mean_square(np.eye(2), np.array([1j, 0]))

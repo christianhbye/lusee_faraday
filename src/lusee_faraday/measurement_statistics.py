@@ -5,6 +5,10 @@ import numpy as np
 
 def gaussian_mean_square(covariance, mean=None):
     """Mean and sampling RMS of x^T x/n for one correlated Gaussian draw."""
+    if not np.isrealobj(covariance) or (
+        mean is not None and not np.isrealobj(mean)
+    ):
+        raise ValueError("real observables are required; retain complex C/J")
     c = np.asarray(covariance, float)
     if (
         c.ndim != 2

@@ -24,6 +24,12 @@ FAULTS = [
         "if False and np.linalg.eigvalsh(c)[0] <",
         "test_invalid_statistics_covariance_is_rejected",
     ),
+    (
+        "silently discard complex covariance",
+        "not np.isrealobj(covariance)",
+        "False",
+        "test_invalid_statistics_covariance_is_rejected",
+    ),
 ]
 
 if __name__ == "__main__":

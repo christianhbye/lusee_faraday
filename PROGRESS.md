@@ -1,5 +1,14 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Real-observable statistics guard — 2026-10-17
+
+The correlated-power statistic now rejects complex covariance or mean
+inputs explicitly, preventing accidental loss of the complex relation.
+The existing invalid-input check covers both cases; all three statistics
+tests pass and all four deliberate faults are caught. The regenerated
+`docs/measurement-statistics-validation.json` records the updated sources.
+
+
 ## Native chromatic I-only beam controls — 2026-10-17
 
 Computed all 30 native-frequency response slices for as-built, C4-symmetrized
