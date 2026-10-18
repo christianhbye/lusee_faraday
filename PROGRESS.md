@@ -1,5 +1,20 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Independent full-channel scale-mixture control — 2026-10-17
+
+Propagated a global 0.5/1.5 variance mixture through actual parent and folded
+zoom responses in a matched two-source geometry, retaining full cross-
+frequency Q/U covariance and relation. Independent bivariate Gaussian
+integration uses exact screen/slab phase laws, with 64/128 order refinement.
+All eight 30/50 MHz geometry/profile controls pass: covariance agreement is
+better than 7.1e-13 on the covariance RMS scale. A Gaussian column with the
+same RM covariance differs by up to 0.0890. Deliberately omitting global
+conditional-mean variation makes every control fail. The records are
+`docs/channel-mixture-validation.json` and its explicit fault companion.
+The declared 33-node frequency interpolation and deterministic intrinsic
+source geometry delimit this independent channel check.
+
+
 ## Matched spherical/flat deterministic geometry — 2026-10-17
 
 Added a spherical Gaussian source/analyzer control with both intrinsic spin

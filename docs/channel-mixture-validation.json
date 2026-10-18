@@ -1,0 +1,156 @@
+{
+  "fingerprint": "b472e94653bd610b8ee114b2bf9e1363b7c0ac4d3707234cc60eebd3323c5fa1",
+  "provenance": {
+    "configuration": {
+      "spatial_weights": [
+        [
+          0.7,
+          0.2
+        ],
+        [
+          -0.4,
+          0.5
+        ]
+      ],
+      "sites": 2,
+      "correlations": [
+        0.3,
+        0.95
+      ],
+      "variance_scales": [
+        0.5,
+        1.5
+      ],
+      "probabilities": [
+        0.5,
+        0.5
+      ],
+      "selected_rows": [
+        0,
+        1,
+        2,
+        99,
+        72
+      ],
+      "frequency_nodes": 33,
+      "gaussian_orders": [
+        64,
+        128
+      ],
+      "covariance_tolerance": 2e-06,
+      "omit_global_mean_variance": false
+    },
+    "sources": {
+      "scripts/paper_common.py": "2257dfa4993fc7f5c31675c8530a61547d323c4dec7429b1ab9dacf8bf5f0b92",
+      "scripts/validate_channel_mixture.py": "6623291a5fec2652f76044ed81bf5af065ee5f115f10a319f5de4f8bf1b2b66d",
+      "src/lusee_faraday/channelization.py": "df5655f80a4aed9a712a620724df94fae7d1bee3b887ebc2193fde301e3bb910",
+      "src/lusee_faraday/depth_channel_covariance.py": "80f3095aa97ff9a4477a41f62124448900dcb7733b10e84a238556b0fe38b7a7",
+      "src/lusee_faraday/frequency_covariance.py": "a1332347e0110a389ec2e1f035ba054f3dd6687094b384a6b9702ccb87cef42e",
+      "src/lusee_faraday/gaussian_screen.py": "9b9afe77efb0f80da38619f1cb221caead4527db7348b8daffcbf81faec5958a"
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "2.4.2",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+      },
+      "scipy": {
+        "version": "1.17.1",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+      },
+      "lusee": {
+        "version": "2.1.dev0",
+        "path": "/home/christian/Documents/research/lusee/luseepy/lusee/__init__.py",
+        "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef"
+      },
+      "croissant-sim": {
+        "version": "5.2.1",
+        "path": "/home/christian/Documents/projects/croissant/src/croissant/__init__.py",
+        "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c"
+      }
+    }
+  },
+  "results": [
+    {
+      "center_mhz": 30.0,
+      "rho": 0.3,
+      "profile": "screen",
+      "maximum_covariance_error_over_rms": 4.351922585821416e-13,
+      "gaussian_mismatch_over_rms": 0.0008206251795045005,
+      "quadrature_refinement_over_rms": 3.040063436909355e-11,
+      "maximum_mean_error": 1.76919014540366e-16,
+      "passed": true
+    },
+    {
+      "center_mhz": 30.0,
+      "rho": 0.3,
+      "profile": "slab",
+      "maximum_covariance_error_over_rms": 3.6639835342590855e-15,
+      "gaussian_mismatch_over_rms": 0.01780907568768478,
+      "quadrature_refinement_over_rms": 4.828665018829178e-14,
+      "maximum_mean_error": 8.065419530976872e-16,
+      "passed": true
+    },
+    {
+      "center_mhz": 30.0,
+      "rho": 0.95,
+      "profile": "screen",
+      "maximum_covariance_error_over_rms": 5.302315225375874e-13,
+      "gaussian_mismatch_over_rms": 0.017278962816103943,
+      "quadrature_refinement_over_rms": 3.66950483701238e-11,
+      "maximum_mean_error": 1.102490212490461e-16,
+      "passed": true
+    },
+    {
+      "center_mhz": 30.0,
+      "rho": 0.95,
+      "profile": "slab",
+      "maximum_covariance_error_over_rms": 3.4165415672468693e-15,
+      "gaussian_mismatch_over_rms": 0.012121853022737838,
+      "quadrature_refinement_over_rms": 6.543885192444052e-14,
+      "maximum_mean_error": 7.685764746161622e-16,
+      "passed": true
+    },
+    {
+      "center_mhz": 50.0,
+      "rho": 0.3,
+      "profile": "screen",
+      "maximum_covariance_error_over_rms": 6.660265471342441e-13,
+      "gaussian_mismatch_over_rms": 0.08769802790773523,
+      "quadrature_refinement_over_rms": 5.428579751605276e-15,
+      "maximum_mean_error": 1.4582246917392212e-15,
+      "passed": true
+    },
+    {
+      "center_mhz": 50.0,
+      "rho": 0.3,
+      "profile": "slab",
+      "maximum_covariance_error_over_rms": 7.962757849009125e-15,
+      "gaussian_mismatch_over_rms": 0.08210901502796229,
+      "quadrature_refinement_over_rms": 4.204493830867347e-15,
+      "maximum_mean_error": 2.1105647036689586e-15,
+      "passed": true
+    },
+    {
+      "center_mhz": 50.0,
+      "rho": 0.95,
+      "profile": "screen",
+      "maximum_covariance_error_over_rms": 7.05069057182464e-13,
+      "gaussian_mismatch_over_rms": 0.05027314280022472,
+      "quadrature_refinement_over_rms": 3.147643518682167e-15,
+      "maximum_mean_error": 7.832041159795667e-16,
+      "passed": true
+    },
+    {
+      "center_mhz": 50.0,
+      "rho": 0.95,
+      "profile": "slab",
+      "maximum_covariance_error_over_rms": 1.0830624360526802e-14,
+      "gaussian_mismatch_over_rms": 0.08897048516839036,
+      "quadrature_refinement_over_rms": 4.068186397013896e-15,
+      "maximum_mean_error": 1.2213241756093729e-15,
+      "passed": true
+    }
+  ],
+  "all_passed": true,
+  "scope": "Independent bivariate Gaussian quadrature at two deterministic complex-polarization source positions. Shared global scale draw per realization; exact screen/slab phase laws followed by actual parent and folded zoom channel responses on a declared 33-node interpolation. Full cross-frequency covariance and complex relation enter Q/U. The Gaussian reference with identical RM covariance is retained as a mismatched control. This validates channel phase-mixture moments, not Gaussianity of the full production visibility sky."
+}
