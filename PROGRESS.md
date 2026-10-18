@@ -1,5 +1,16 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Correlated-spectrum statistics — 2026-10-17
+
+Added the full Gaussian sampling variance of a mean-square spectrum,
+including off-diagonal channel covariance and a nonzero deterministic mean.
+Independent repeated measurements cancel the fixed sky and add estimator
+noise variances. Exact fourth-moment cubature and fixed-sky controls pass;
+all three deliberately injected faults are caught. Evidence is in
+`docs/measurement-statistics-validation.json`. These statistics describe
+conditional predictive scatter, not independent sky samples per channel.
+
+
 ## Local input and lunar plasma audit — 2026-10-17
 
 Added primary-source checks of a nearby pulsar's historical DM/RM, its timing

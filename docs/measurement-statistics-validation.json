@@ -1,0 +1,42 @@
+{
+  "tests_passed": 3,
+  "fault_checks": {
+    "faults": [
+      {
+        "fault": "count correlated channels as independent",
+        "source": "src/lusee_faraday/measurement_statistics.py",
+        "test": "tests/test_measurement_statistics.py::test_power_uncertainty_matches_exact_gaussian_fourth_moments",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "c6dc2fa82626238224d585689385ac2b5e23c303e0439cd0866d638bdebfe85f"
+      },
+      {
+        "fault": "add repeat noise amplitudes instead of variances",
+        "source": "src/lusee_faraday/measurement_statistics.py",
+        "test": "tests/test_measurement_statistics.py::test_repeat_difference_cancels_fixed_sky_and_adds_independent_noise",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "5f8f1525726cd744e88a978618276941529d62c6c936ed6fd35f29e4a074bb9f"
+      },
+      {
+        "fault": "accept negative variance",
+        "source": "src/lusee_faraday/measurement_statistics.py",
+        "test": "tests/test_measurement_statistics.py::test_invalid_statistics_covariance_is_rejected",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "a9c7839c0e5e6a5c18b0664dd2597eb0d54b327e337733438edfc7c7828c4d93"
+      }
+    ],
+    "all_caught": true,
+    "source_sha256": {
+      "src/lusee_faraday/measurement_statistics.py": "79b736de54938d922a6838f994c01190d004164a131c0fbd4ef87d829ac6dbe6"
+    },
+    "test_sha256": {
+      "tests/test_measurement_statistics.py": "35d52a486b2b48c40efc986d01d57cb7ff9817c113dc7fa38fa75e2935e1bf00"
+    },
+    "runner_sha256": "5a32ff4ca688b658df27108f70009a62b2d2736a0a57e5db1464584de43f4a80",
+    "helper_sha256": "8fe9fcca6654b373b8d72ca0914c1079fcba935bb1f4a198957b7ff8456704a5"
+  },
+  "test_log_sha256": "13cc0e2242b34abc964aba9555f159a79b4eacb07e52d4e0fd83f844158bb310",
+  "scope": "Full Gaussian quadratic-power sampling variance, including correlated bins and nonzero means. Independent repeats retain one sky and add noise variances."
+}
