@@ -1,0 +1,30 @@
+{
+  "scope": "Conditional flat-plane depth-profile benchmark; not a Galactic or LuSEE sensitivity prediction.",
+  "frequencies_mhz": [10.0, 30.0, 50.0],
+  "screen_model": {
+    "distance_pc": 100.0,
+    "correlation_pc": 0.5,
+    "mean_depth": 0.01,
+    "sigma_depth": 0.02
+  },
+  "sigma_depth_values": [0.002, 0.02],
+  "input_status": "Illustrative screen parameters, not inferred from the horizon table. Remaining source/beam parameters use the recorded PR 7 ScreenModel defaults.",
+  "profiles": [
+    {"kind": "screen", "fraction": 0.0},
+    {"kind": "screen", "fraction": 0.6},
+    {"kind": "screen", "fraction": 1.0},
+    {"kind": "slab"},
+    {"kind": "gaussian", "center": 0.5, "width": 0.15}
+  ],
+  "depth_numerical": {
+    "order": 16,
+    "max_order": 256,
+    "epsabs": 2e-10,
+    "epsrel": 2e-6
+  },
+  "separation_numerical": {
+    "epsabs": 2e-11,
+    "epsrel": 2e-10,
+    "upper_u": 40.0
+  }
+}

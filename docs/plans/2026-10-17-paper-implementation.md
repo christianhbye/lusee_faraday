@@ -1,7 +1,10 @@
 # Implementation plan for the Faraday paper
 
-Status: proposed implementation, prepared for Christian's review before code.
-Branch: `paper-implementation-plan`, based on `3ec0f12`. The governing
+Status: implementation started on `implementation/depth-depolarization`.
+The first increment supplies conditional horizon arithmetic and flat-plane
+depth-profile moments; its [scope and validation](../specs/2026-10-17-depth-depolarization.md)
+distinguish them from the remaining local-input and real-instrument work.
+Planning branch: `paper-implementation-plan`, based on `3ec0f12`. The governing
 prescriptions are Fable's [adopted framing](2026-10-17-paper-framing.md)
 and [feasibility assessment](2026-10-17-paper-plan-feasibility.md), introduced
 in `6f9bdf2` and `3ec0f12`. This document specifies how to implement their

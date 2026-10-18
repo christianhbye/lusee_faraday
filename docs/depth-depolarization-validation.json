@@ -1,0 +1,162 @@
+{
+  "baseline": {
+    "passed": 151,
+    "failed": 1,
+    "failures": [
+      "tests/test_response_two_port.py::test_short_dipole_monopole_matches_measured_reference"
+    ],
+    "log_sha256": "7b65116a026da5ea7629eefaa6a8c9edbe5969e5afc3e8e8d7aecfb54388a590"
+  },
+  "full_suite": {
+    "passed": 169,
+    "failed": 1,
+    "failures": [
+      "tests/test_response_two_port.py::test_short_dipole_monopole_matches_measured_reference"
+    ],
+    "log_sha256": "2acd27aebe98d01f77f84d89e013abd1053336459f95578ce65d013cc5727e1c"
+  },
+  "focused_new_tests": 18,
+  "fault_audit": {
+    "runner_sha256": "80f75f629afc6c06d39ef83ca6b9f3b16e3c44c8de94eeed592442ed0dee9eda",
+    "faults": [
+      {
+        "fault": "unnormalized slab",
+        "test": "tests/test_depth_depolarization.py::test_profile_normalization_and_zero_rotation",
+        "source": "src/lusee_faraday/depth_depolarization.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "6fcff745f2c78293040144ce9ee2a307ceb94e6bbb7dcf188219e55a1f378cbc"
+      },
+      {
+        "fault": "ignored screen fraction",
+        "test": "tests/test_depth_depolarization.py::test_fraction_zero_and_scaled_foreground_screen",
+        "source": "src/lusee_faraday/depth_depolarization.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "6fcff745f2c78293040144ce9ee2a307ceb94e6bbb7dcf188219e55a1f378cbc"
+      },
+      {
+        "fault": "wrong relation phase",
+        "test": "tests/test_depth_depolarization.py::test_phase_moments_against_direct_bivariate_depths",
+        "source": "src/lusee_faraday/depth_depolarization.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "6fcff745f2c78293040144ce9ee2a307ceb94e6bbb7dcf188219e55a1f378cbc"
+      },
+      {
+        "fault": "halved rotation",
+        "test": "tests/test_depth_depolarization.py::test_deterministic_slab_and_truncated_gaussian_response",
+        "source": "src/lusee_faraday/depth_depolarization.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "6fcff745f2c78293040144ce9ee2a307ceb94e6bbb7dcf188219e55a1f378cbc"
+      },
+      {
+        "fault": "halved uniform-screen variance",
+        "test": "tests/test_depth_depolarization.py::test_uniform_random_screen_slab_beam_moments",
+        "source": "src/lusee_faraday/depth_depolarization.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "6fcff745f2c78293040144ce9ee2a307ceb94e6bbb7dcf188219e55a1f378cbc"
+      },
+      {
+        "fault": "doubled speckle power",
+        "test": "tests/test_depth_depolarization.py::test_joint_covariance_power_split_and_refinement",
+        "source": "src/lusee_faraday/depth_depolarization.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "6fcff745f2c78293040144ce9ee2a307ceb94e6bbb7dcf188219e55a1f378cbc"
+      },
+      {
+        "fault": "missing raw relation cross term",
+        "test": "tests/test_depth_depolarization.py::test_raw_screen_relation_is_not_the_centered_relation",
+        "source": "src/lusee_faraday/depth_depolarization.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "6fcff745f2c78293040144ce9ee2a307ceb94e6bbb7dcf188219e55a1f378cbc"
+      },
+      {
+        "fault": "skipped depth convergence",
+        "test": "tests/test_depth_depolarization.py::test_unresolved_depth_ridge_raises",
+        "source": "src/lusee_faraday/depth_depolarization.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "6fcff745f2c78293040144ce9ee2a307ceb94e6bbb7dcf188219e55a1f378cbc"
+      },
+      {
+        "fault": "unvalidated profile",
+        "test": "tests/test_depth_depolarization.py::test_invalid_depth_parameters",
+        "source": "src/lusee_faraday/depth_depolarization.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "6fcff745f2c78293040144ce9ee2a307ceb94e6bbb7dcf188219e55a1f378cbc"
+      },
+      {
+        "fault": "wrong density units",
+        "test": "tests/test_faraday_horizon.py::test_rate_units_and_sign",
+        "source": "src/lusee_faraday/faraday_horizon.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "2cfa010e3ba3df54a4a3310b7bd29d1e2efa9d6d7620b8e58110622abc0f8c95"
+      },
+      {
+        "fault": "missing polarization phase factor",
+        "test": "tests/test_faraday_horizon.py::test_horizon_reaches_requested_phase_and_scales_with_frequency",
+        "source": "src/lusee_faraday/faraday_horizon.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "2cfa010e3ba3df54a4a3310b7bd29d1e2efa9d6d7620b8e58110622abc0f8c95"
+      },
+      {
+        "fault": "finite zero-field horizon",
+        "test": "tests/test_faraday_horizon.py::test_zero_field_has_no_finite_horizon_but_volume_is_finite",
+        "source": "src/lusee_faraday/faraday_horizon.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "2cfa010e3ba3df54a4a3310b7bd29d1e2efa9d6d7620b8e58110622abc0f8c95"
+      },
+      {
+        "fault": "negative density allowed",
+        "test": "tests/test_faraday_horizon.py::test_invalid_horizon_inputs",
+        "source": "src/lusee_faraday/faraday_horizon.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "2cfa010e3ba3df54a4a3310b7bd29d1e2efa9d6d7620b8e58110622abc0f8c95"
+      },
+      {
+        "fault": "stale manifest allowed",
+        "test": "tests/test_paper_drivers.py::test_manifest_refuses_changed_config_and_source",
+        "source": "scripts/paper_common.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "2257dfa4993fc7f5c31675c8530a61547d323c4dec7429b1ab9dacf8bf5f0b92"
+      },
+      {
+        "fault": "corrupt covariance allowed",
+        "test": "tests/test_paper_drivers.py::test_depth_driver_cache_rejects_corruption",
+        "source": "scripts/depth_depolarization.py",
+        "caught": true,
+        "returncode": 1,
+        "source_sha256": "97e8b1a0bdefeae7758cbe1b1c8601a0f4351ab55545cebfa5beb660f8037eba"
+      }
+    ],
+    "all_caught": true,
+    "scope": "Disposable mutated copies; working source was not changed."
+  },
+  "depth_cases": 10,
+  "max_numerical_refinement_shift": 5.773159728050814e-15,
+  "min_covariance_eigenvalue_k2": 0.0,
+  "result_sha256": "48e35752595f2a9f291e4ac758e4122cfd018feff46f2334d5110e1e6eaae6e9",
+  "source_sha256": {
+    "tests/test_depth_depolarization.py": "a75db0c4f8fda4a6833d76d8cd14a356d4852fd9a42c4bd29fca5026112b4130",
+    "tests/test_faraday_horizon.py": "401cf27a54fb456a464bb1b07d56e95340fc60b6611cad3e63755ef8612149b4",
+    "tests/test_paper_drivers.py": "9f2276e2aa4ee9c176aecdc1de1178b1a68c28e8b843268713184c7ac6a358b9",
+    "scripts/validate_depth_faults.py": "80f75f629afc6c06d39ef83ca6b9f3b16e3c44c8de94eeed592442ed0dee9eda"
+  },
+  "figure": {
+    "path": "report/figures/depth_depolarization.pdf",
+    "sha256": "35f528c4492f3f0dff173e4b82e88b80a9c377c13409f97f010306fe50e799be",
+    "visual_inspection": "Labels, legend, scales, clipping markers and caption checked."
+  },
+  "scope": "Conditional flat-plane depth benchmark and uniform-rate horizons; later real-instrument phases remain open."
+}

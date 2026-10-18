@@ -1,5 +1,32 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Depth-profile moments and first implementation figure — 2026-10-17
+
+Implemented screen fractions 0/0.6/1, a uniform slab and a truncated Gaussian
+profile in `lusee_faraday.depth_depolarization`. The calculation retains both
+complex moment types, the full joint Q/U covariance and the smooth/speckle
+power split. Stable centered integrands, phase-dependent depth resolution,
+order doubling and explicit nonconvergence errors prevent unresolved depth
+ridges from being reported as a signal. No pixel area sets the amplitude.
+
+The driver/checkpointed launcher regenerate the horizon scenarios, ten depth
+benchmark cases at 10/30/50 MHz, source/dependency manifests and
+`report/figures/depth_depolarization.pdf` with its inspected PNG and caption.
+Independent depth and separation refinements shift the saved normalized
+moments/power fractions by at most 5.8e-15 for this configuration. The
+configuration remains an illustrative flat-plane PR 7 benchmark; local
+screen statistics, real-beam spin-2 projection and the measured-spectra
+deliverable are still open. Scope and commands are in
+`docs/specs/2026-10-17-depth-depolarization.md`.
+
+Verification: 18 new tests pass, and all 15 deliberate implementation faults
+are caught by their corresponding tests in disposable copies. Final full
+suite: 169 passed with the same two-port measured-reference failure found in
+the baseline (151 passed, one failure). Black and source/new-driver flake8
+checks pass. Evidence and hashes are in
+`docs/depth-depolarization-validation.json`. The uncommitted notebook edits
+are unchanged; upstream checkouts and the external paper were not edited.
+
 ## Conditional Faraday horizon calculator — 2026-10-17
 
 Started implementation from `paper-implementation-plan` on
