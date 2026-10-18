@@ -1,0 +1,282 @@
+\documentclass[10pt,letterpaper]{article}
+\usepackage[margin=1in,textwidth=6.4in]{geometry}
+\usepackage{amsmath,amssymb,graphicx,booktabs,longtable,xcolor}
+\usepackage[breaklinks=true,hidelinks]{hyperref}
+\newcommand{\placeholder}[1]{\textcolor{orange}{#1}}
+\input{paper-numbers.tex}
+\title{Conditional Faraday polarization predictions for LuSEE-Night}
+\author{Implementation and numerical validation report}
+\date{Source revision \texttt{\PaperSourceRevision}}
+\begin{document}
+\maketitle
+
+\noindent\fbox{\parbox{0.95\linewidth}{\textbf{Status.} Conditional model
+calculation and simulated observations. The comparison target is future
+LuSEE-Night data. Local polarized emissivity, small-scale Faraday statistics,
+receiver current noise and fine-channel beam errors remain assumptions.
+This report makes no calibrated detection or launch-date forecast.}}
+
+\section{Question and measured predictions}
+
+The calculation predicts how much polarization survives a distribution of
+emitting depths, which part passes the loaded four-port instrument, and
+which part remains after channel averaging and smooth subtraction.
+Its outputs are means and joint covariances of calibrated Stokes spectra,
+parent/zoom residual variance, frequency correlations, and differences
+between repeated observations at the same lunar sidereal phase. Simulated
+observations exercise the same calibrated-data comparison interface that
+can later accept mission spectra with their actual calibration and responses.
+
+Across the full signed-column grid at \PhysicalRms\ K intrinsic RMS,
+the largest residual speckle to radiometer RMS ratio is \MaxSpeckleNoise;
+including smooth polarization gives \MaxTotalNoise. These amplitude ratios
+are not detection significances. The exported decision records also retain
+signal transmission, residual leakage, beam ablation mismatch, interpolation
+spread and numerical error. The interpretation is conditional on every
+input in Table~\ref{tab:inputs}.
+
+\section{Physical model and local inputs}
+
+Write the COSMO polarization as
+\begin{equation}
+ P(\hat n,x)=P_0(\hat n)\int_0^1 w(f)
+       \exp[2ifx\Phi(\hat n)]\,df,\qquad x=\lambda^2.
+\end{equation}
+Here $f$ is the accumulated rotating-column fraction: $f=0$ is unrotated
+and $f=1$ recovers the foreground-screen pilot. The prescribed fractional
+screens, uniform slab and supported Gaussian all share one column along
+each sightline. They bracket depth mixing with one intrinsic polarization
+angle; they do not represent independent emitting layers or a complete
+three-dimensional turbulent medium.
+
+For $A=\int w(f)e^{2ifx\Phi}df$, use $A=m+\delta A$ with
+$m=E_\Phi A$. The smooth field is $mP_0$ and the speckle is
+$\delta A P_0$. An isotropic intrinsic sky can have zero ensemble mean
+and still have smooth power. Here ``smooth'' means the conditional-mean
+field; at a large signed mean column it can rotate rapidly with frequency.
+Both the conjugated covariance and the
+nonconjugated relation are retained before mapping to real readouts.
+The single-depth raw relation at a coincident point is
+$e^{4i\mu x-8\sigma_\Phi^2x^2}$; this expression is not imposed on a slab
+or an angularly integrated centered covariance.
+
+\input{paper-inputs.tex}
+
+The signed-column calculation uses \MeanCaseCount\ mean columns between
+minus \MaxMeanDepth\ and plus \MaxMeanDepth rad m$^{-2}$. They follow from
+extending each adopted density/field pair uniformly over \EmittingPathPc\ pc
+with both field signs and the stated projection fractions. This is a
+sensitivity grid, not a measured distribution of local columns. Its intrinsic
+normalization is \UnitEmissivity\ K pc$^{-1}$ times that full path, giving
+\PhysicalRms\ K RMS at the reference frequency. The depth integral supplies
+depolarization; the emitting volume is not truncated again at a phase horizon.
+The measured-spectra illustration separately retains the original one-kelvin
+reference case and its preselected mean column.
+
+The horizon table uses a uniform signed rate,
+$d\Phi/ds=0.812 n_e B_\parallel$ in rad m$^{-2}$ pc$^{-1}$, with the
+electron density in cm$^{-3}$ and field in microgauss. A one-radian
+complex-polarization tolerance is $2|\Phi|\lambda^2=1$; a two-radian
+tolerance gives twice the listed distance. Zero line-of-sight field gives
+an unbounded horizon. These arithmetic scenarios do not determine a local
+$\sigma_\Phi$ or angular structure function.
+
+\input{paper-horizons.tex}
+
+The Local Interstellar Cloud model pair is taken from Tables 2 and 5 of
+\href{https://astro.uchicago.edu/~frisch/2008SlavinFrisch.pdf}{Slavin and
+Frisch (2008)}. The Local Hot Bubble density range follows the adopted values
+in \href{https://arxiv.org/html/2410.23345v1}{Yeung et al. (2024)};
+its field strength here is assumed. These density ranges do not determine
+the line-of-sight field orientation, so the phase horizon cannot establish
+a universal local-emission volume.
+
+The nearby-pulsar DM/RM constraint and HII-region synchrotron emissivity
+average over paths much longer than the phase-limited emitting volume.
+Their source and selection audit is recorded in
+\nolinkurl{docs/literature/local-faraday-horizon.md}. They cannot identify
+local polarized variance. The lunar plasma calculation likewise uses an
+explicit aligned-field density/path envelope: its largest adopted Faraday
+bound is \LunarFaradayBound\ rad m$^{-2}$, giving complex-polarization
+phase \LunarPhaseBound\ rad at the lowest modeled frequency. The
+occultation literature does not establish this as a universal nightside
+upper limit. Emissivity, emitting-depth distribution, angular coherence and
+Faraday variance remain degenerate in a single measured floor.
+
+\section{Instrument, channels and common estimator}
+
+All production polarization predictions use harmonic kernels from the
+as-built four-port response, with the beam and receiver loading frozen at
+each native band center. Signal-only calculations have zero Moon and metal
+temperatures. The calibrated complex X/Y combinations and one-kelvin loaded
+enclosure normalization are shared by every component.
+The I-only leakage controls instead evaluate the actual native-frequency
+beam and loading for the as-built, C4-symmetrized and diagonal-ZA responses.
+Each uses the as-built band's calibration, so their differences include
+the mismatch relevant to one model correcting another.
+
+Haslam synchrotron and CMB intensity maps are transformed at their native
+resolution, with no map degradation. Native response samples define linear
+and PCHIP fine-band interpolants. Differences between those interpolants
+are a model spread; they do not measure beam structure inside a native
+frequency interval. Fitting a frozen kernel would give an uninformative
+leakage-smoothness test.
+
+The actual power-response matrix $W$ carries means and both moment types
+through folded parent/zoom responses. A constant and slope in physical fine
+frequency pass through $W$ before the fit. The resulting residual map $R$
+acts on leakage, smooth polarization, speckle and noise identically. For
+structured phase coefficients, applying $R$ before forming covariance avoids
+subtraction of nearly equal large terms. Three parents retain
+\ParentResidualDof\ residual degree of freedom; the zoom fit retains
+\ZoomResidualDof. The saturated parent quadratic is rejected.
+
+Q/U subtraction is performed in kelvin before division by a common
+channelized intensity reference. The exported estimated-I alternative
+retains denominator variance and its correlations with Q/U through the
+full Jacobian. Low intensity signal-to-noise is rejected as outside that
+linearization. A zero comparison denominator remains undefined.
+
+\input{paper-channels.tex}
+\input{paper-resolution.tex}
+
+Compact all-product exports retain every real science channel in the pinned
+16-product order. Reprojection to calibrated Stokes checks each Hermite
+mode, I-only means, and raw/residual radiometer covariances with one common
+normalization. The complete channel covariance remains factorized until
+requested; selected parent/zoom blocks are also exported explicitly.
+
+\section{Receiver noise and observing exposure}
+
+The total electric-field spectral covariance sums loaded sky, Moon,
+antenna-loss and amplifier terms once. Amplifier voltage and current
+sources propagate through the full coupled antenna/load network; impedances
+alone do not supply amplifier noise. The public engineering-model voltage
+measurements set adopted reference scales, while current noise, input-source
+correlations and thermal temperatures are explicitly assumed. Missing
+legacy SPICE files are not replaced by zero noise.
+
+For proper complex voltages, real quadratic readouts obey
+\begin{equation}
+ \mathrm{Cov}(q_p,q_q)=\mathrm{Tr}(A_p S A_q S)/(B\tau).
+\end{equation}
+Fine-frequency weighting propagates cross-product and cross-channel
+covariance, including overlapping and folded responses and frequency-varying
+system power. This uses the stated independent fine-spectrum and
+long-integration approximation; a detailed temporal filter model would be
+an additional input. Receiver bias spectra are exported; the sky-I examples
+assume their mean has been calibrated. Polarization is small compared with
+I in the normalized illustrations, allowing the noise calculation to use
+I-only sky power.
+
+Every phase-bin exposure counts complete bins that are nightside at the
+actual lunar site, at both edges and at the center. A declared solar-altitude
+margin and electronics duty apply before averaging. MEPA harmonic kernels
+receive the corresponding exact boxcar sinc factor on both signal and
+leakage paths. The calendar origin is a simulation coordinate, not a launch
+date. An unavailable phase has no reported noise prediction.
+
+\input{paper-exposure.tex}
+
+\section{Numerical checks and scope}
+
+The implementation retains all helicities, pair products and the complex
+relation. Depth-averaged Hermite coefficients use a bounded omitted-mode
+tail and independently refined depth quadrature. Spin/angular, beam and
+frequency refinements are checked separately for the unfiltered mixed-depth
+cases. The residual production stage contains \ResidualCaseCount\ cases;
+their common-fit covariance positivity and subtraction identity are checked
+separately. The expanded signed-column grid adds \PhysicalCaseCount\ cases
+with exact diagonal contractions of the same complete complex operator.
+Frequency/depth refinement bounds the full Q/U covariance change; angular
+and band-limit refinements cover every reported marginal. Full joint checks
+also cover eight predeclared extreme-column screen/slab cases, and saved
+coefficients allow a complete covariance export for any grid case. Tiny
+residual power must be compared with its exported numerical error before
+interpretation.
+
+The deterministic narrow-window spherical control recovers the earlier
+flat-plane PR~7/8 source geometry. The isotropic random intrinsic E/B sky
+used in production remains a different ensemble. An independent
+bivariate-Gaussian channel control checks the global variance mixture;
+matching its RM covariance with a Gaussian screen does not match its phase
+statistics. Strong-screen controls use the direct frequency-pair solver
+when a Hermite expansion would require excessive order, and test the scalar
+floor against the full loaded readout normalization.
+
+Independent voltage ensembles and exact Gaussian fourth-moment cubature
+check radiometer normalization and sampling uncertainty. Deliberate faults
+test the covariance legs, phases, folds, depth mixing, intensity ratios,
+noise loading and repeat scaling. Repeated visits reuse one sky and screen;
+only independent measurement noise decreases. The Gaussian visibility
+draws illustrate conditional second moments. They do not establish
+Gaussianity of every weak-rotation or few-cell sky. Separate band
+illustrations use independent seeds and do not supply a joint cross-band
+sky realization; within each band, channels, phases and repeats share the
+same draw.
+
+\section{Figures and comparison with data}
+
+\input{paper-figures.tex}
+
+\clearpage
+\section{Decision table and interpretation}
+
+\input{paper-decisions.tex}
+\input{paper-leakage.tex}
+\input{paper-emissivity.tex}
+
+The HII-based emissivity brackets multiply the full emitting normalization;
+their largest total-polarization to noise RMS ratio is
+\MaxEmissivityTotalNoise. The assumed polarized fractions, spectral
+conversion and uniform local extension prevent interpreting that value as
+a measured local upper bound. The polarization remains small enough relative
+to I for the stated I-only noise approximation in these brackets.
+
+The table reports Q and U separately and distinguishes power transmission
+from amplitude ratios. Beam ablations and interpolation choices quantify
+model differences, not calibrated beam-error probabilities. A correlated
+mean-square statistic uses its full covariance sampling variance;
+channels are not counted as independent sky realizations. Independent
+simulated observations pass through the calibrated-spectrum input path,
+and paired I-only controls share the same noise draw.
+
+Angular spectra are compared with leakage only after the same instrument,
+finite time bins, actual-site night mask and Fourier operator. Masked
+fringe power is an observable comparison; it is not a reconstructed angular
+map or a map-level sensitivity claim. An approximately white input angular
+spectrum alone does not establish separation.
+
+\section{Approximations and next steps for mission data}
+
+The delivered predictions are conditional on the local-medium and receiver
+inputs, the intrinsic angular spectrum and low-frequency turnover, fixed
+narrow-band signal kernels, interpolated chromatic leakage, and independent
+radiometer averages. A measured spectral residual or a repeated sky pattern
+does not by itself identify Faraday rotation. The observing operator,
+beam/gain uncertainty and competing sky terms must accompany a physical
+model comparison.
+
+When LuSEE-Night data become available, supply their calibrated Stokes
+spectra with the actual response, flags, phase bins and integration, then
+regenerate the common estimator and noise prediction. Compare residual
+variance, named-bin frequency correlations and same-phase repeat differences
+with conditional predictive distributions. A discrepancy or an upper bound
+is a valid outcome. Converting a floor into a distance or field inference
+requires independent information that breaks the emissivity/depth/coherence
+degeneracy.
+
+\section{Provenance and regeneration}
+
+\input{paper-provenance.tex}
+
+The external paper has not been modified. The earlier instrument and
+point-source material remains on the \texttt{audit-2026-08-18} tag and in the
+existing analysis scripts. The superseded detection forecast is not a
+required result of this calculation. Regenerate with
+\nolinkurl{scripts/run_paper_implementation.sh}; use its help for stages
+and the data-free smoke mode. All large numerical arrays are checkpointed
+under \nolinkurl{generated_data/cache/}; figure and report manifests retain
+their complete hashes.
+
+\end{document}

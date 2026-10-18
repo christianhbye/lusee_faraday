@@ -1,5 +1,17 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Report source and complete reproduction runner — 2026-10-17
+
+Prepared the numerical/figure manifest verifier, derived tables and LaTeX
+number macros, and a clean temporary-worktree report builder. It preserves
+unrelated notebook edits and rejects stale/corrupt inputs, source drift,
+undefined references, overfull boxes and oversized floats. The complete
+background runner adds explicit stages, an exclusive lock and a 34-check
+smoke mode. The reproduction guide documents inputs, coordinates, covariance
+units, conditional normalizations and the future calibrated-data path.
+The PDF build and rendered-page checks follow this committed source.
+
+
 ## Complete science-product export — 2026-10-17
 
 The all-16 real science-product factorization now exports the shared

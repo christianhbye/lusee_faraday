@@ -1,14 +1,35 @@
 # Implementation plan for the Faraday paper
 
-Status: implementation started on `implementation/depth-depolarization`.
-The first increment supplies conditional horizon arithmetic and flat-plane
-depth-profile moments; its [scope and validation](../specs/2026-10-17-depth-depolarization.md)
-distinguish them from the remaining local-input and real-instrument work.
+Status: numerical implementation and the required scientific gates are
+complete on `implementation/depth-depolarization`, in
+[PR 9](https://github.com/christianhbye/lusee_faraday/pull/9). Report sources
+and the clean build are being packaged. See the
+[reproduction guide](../paper-implementation-guide.md) and
+[handoff](../implementation-handoff.md) for the completed products.
 Planning branch: `paper-implementation-plan`, based on `3ec0f12`. The governing
 prescriptions are Fable's [adopted framing](2026-10-17-paper-framing.md)
 and [feasibility assessment](2026-10-17-paper-plan-feasibility.md), introduced
-in `6f9bdf2` and `3ec0f12`. This document specifies how to implement their
-five phases; it does not mark any scientific gate passed.
+in `6f9bdf2` and `3ec0f12`.
+
+| Completed increment | Evidence under `docs/` |
+| --- | --- |
+| Horizon, local-input and lunar envelope audit | `faraday-horizon-results.json`, `local-input-audit-results.json`, literature note |
+| Flat depth moments and spin/all-pair backends | `depth-depolarization-validation.json`, `spin-channel-covariance-validation.json`, `depth-channel-backend-validation.json` |
+| Real response and mixed-depth production | `paper-kernel-results.json`, `mixed-depth-results.json`, `residual-signal-validation.json` |
+| Matched geometry, non-Gaussian and strong-screen controls | `matched-geometry-results.json`, `channel-mixture-validation.json`, `strong-screen-results.json` |
+| Chromatic leakage, loaded noise and common fit | `chromatic-leakage-results.json`, `measured-system-validation.json`, receiver/separability validation records |
+| Actual-site exposure, observing modes and repeats | `observing-exposure.json`, `common-observing-results.json`, `faraday-separability-results.json` |
+| Full signed local-column range and emissivity sensitivity | `local-medium-sensitivity-results.json`, `local-medium-joint-validation.json`, `local-medium-separability-results.json` |
+| All 16 real science products and Stokes consistency | `science-product-results.json` |
+| Integrated checks | `paper-integration-validation.json`: 227 passes and the baseline two-port reference failure; smoke 34 passes |
+
+These are conditional predictions. The local-column grid uses the full
+assumed emitting volume normalization, with depth suppression applied once.
+The original one-kelvin, fixed-mean example remains a separately labeled
+reference. The six required figure categories now have nine report figures,
+including separate covariance amplitudes, repeatability and observing modes.
+The report generator validates the numerical/figure manifests and derives
+all tables and quoted numbers before the isolated LaTeX build.
 
 The deliverable is a reproducible calculation of depth-surviving polarization,
 its covariance through the real instrument, and its separation from leakage
@@ -485,7 +506,7 @@ new scientific test, deliberately inject the specific mistake it claims to
 catch and record that it fails. Freeze acceptance settings before production
 runs; retain failures instead of relaxing a gate after seeing the result.
 
-Phases 1–3 remain sequential. Literature/interpretation and report structure
+Phases 1–3 were executed sequentially. Literature/interpretation and report structure
 can progress while Phase 3 is evaluated, but paper claims wait for the
-relevant records. This planning increment launches no scientific computation
-and adds no implementation code.
+relevant records. The original planning increment launched no scientific computation;
+the completed implementation is recorded in the evidence table above.
