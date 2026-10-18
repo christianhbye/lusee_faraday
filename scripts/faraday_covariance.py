@@ -209,8 +209,9 @@ def compute(config, record_path):
             passed = all(
                 v <= 1 for k, v in checks.items() if k.endswith("gate_ratio")
             )
+            draw_seed = [config["seed"], case_index, int(round(center * 1e6))]
             draw = gaussian_visibility_draw(
-                cov, config["seed"] + case_index, relative_tolerance=1e-8
+                cov, draw_seed, relative_tolerance=1e-8
             )
             np.savez_compressed(
                 path,
@@ -234,6 +235,7 @@ def compute(config, record_path):
                     "clipped_roundoff_eigenvalues"
                 ],
                 draw_tolerance=draw["tolerance"],
+                draw_seed=draw_seed,
                 rms_k=np.sqrt(np.diag(cov)).reshape(bins, -1).tolist(),
                 path=str(path.relative_to(REPO)),
                 sha256=digest(path),
@@ -339,6 +341,10 @@ def plot(config, record_path):
     fig.savefig(name.with_suffix(".pdf"))
     fig.savefig(name.with_suffix(".png"), dpi=180)
     plt.close(fig)
+    case = next(
+        c for c in config["screens"] if c["label"] == config["figure_case"]
+    )
+    screen = case["parameters"]
     caption = (
         "Conditional as-built four-port foreground-screen predictions at "
         "the MEPA reference sidereal phase. Top: central-parent zoom-bin Q "
@@ -349,6 +355,10 @@ def plot(config, record_path):
         f"intrinsic spin-2 RMS is {config['intrinsic']['p_ref_k']:g} K at "
         f"{config['intrinsic']['ref_mhz']:g} MHz before beam averaging, with "
         "the assumed E/B spectrum and turnover in the configuration. "
+        f"The column has mean {screen['mean_depth']:g} rad/m², dispersion "
+        f"{screen['sigma_depth']:g} rad/m², theta0={screen['theta0_rad']:g} "
+        f"rad and alpha={screen['alpha']:.6g}. The two bands are separate "
+        "draws; cross-band realization covariance has not been modeled. "
         "This is signal-only: mixed emitting depths, I leakage, radiometer "
         "noise and Gaussianity validation remain open. Future LuSEE-Night "
         "data must be compared after the same loading and channel response."

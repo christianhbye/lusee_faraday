@@ -106,3 +106,26 @@ windows, non-Gaussian screen controls and stronger rotation/channel cases.
 The measured Q/I and U/I figure still needs the common leakage, smooth-fit
 and loaded radiometer-noise treatment in Phase 3. Future LuSEE-Night data
 are the comparison target.
+
+## Reproduction and mixture control
+
+`bash scripts/run_paper_phase2.sh` launches the cached kernel, moments,
+validation and figure stages in a detached process under a 24 GB address
+space limit. Its absolute log is `generated_data/paper_phase2.log`. An
+unchanged rerun verifies every cache hash. Individual stages are available
+through `.venv/bin/python scripts/faraday_covariance.py --help`.
+
+`check_spin_screen_mixture.py` independently integrates bivariate Gaussian
+phase samples for a global equal-weight variance mixture of 0.5 and 1.5.
+These components preserve the column's mean and angular RM covariance.
+It checks the mean and both raw frequency-moment types at seven frequencies
+in 20–35 and 45–50 MHz, at three angular separations, against the conditional
+mixture prediction and a Gaussian column with the same RM covariance.
+Order 256 versus 512 checks the numerical reference separately. The
+configuration and all comparisons are saved in
+`configs/paper/screen-mixture.json` and
+`docs/spin-screen-mixture-results.json`.
+
+This control verifies phase marginals only. It does not validate a complete
+spherical screen realization or Gaussianity of the beam-averaged signal;
+those broader non-Gaussian gates remain open.

@@ -1,5 +1,42 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Real-instrument channel predictions and mixture control — 2026-10-17
+
+Saved four conditional foreground-screen cases at 30/50 MHz with the
+as-built loaded instrument, three parent bins, 64 central-parent zoom bins
+and two sidereal phases. Every case passes the preset 17/33 frequency-node,
+doubled angular-resolution and lmax-64/96 comparisons. The gate is 1% of
+on-covariance RMS scale plus 1e-8 of off-covariance RMS scale; the largest
+error/gate ratio is 0.430. Covariances, smooth/speckle components, raw
+eigenvalue diagnostics, Gaussian draw seeds and channel-overlap matrices
+are checkpointed with hashes. The record is
+`docs/faraday-covariance-results.json`.
+
+Built and inspected `report/figures/faraday_channel_covariance.pdf`, its
+PNG, caption and manifest. It shows the loss of Q channel correlation and
+separate conditional Q/U draws in each band, with common scales and
+marginal RMS bands. The assumed sigma_phi=0.02 case remains highly coherent
+across 25 kHz: minimum Q correlations are 0.9999885 at 30 MHz and 0.99999990
+at 50 MHz. These are conditional model values, not data or a sensitivity
+forecast. The band illustrations do not model joint cross-band covariance.
+
+The PR 8 equal-weight 0.5/1.5 variance mixture preserves mean/RM covariance
+but changes phase statistics. Independent bivariate quadrature at seven
+frequencies in 20–35 and 45–50 MHz and three separations agrees with its
+conditional mixture moments within 4.2e-14; order 256/512 refinement shifts
+them by at most 3.1e-14. A Gaussian screen with the same RM covariance
+differs by up to 0.0741 in dimensionless raw phase moments. Evidence is in
+`docs/spin-screen-mixture-results.json`. This verifies phase marginals,
+not a complete spherical realization or visibility Gaussianity.
+
+Final local integration suite: 193 passed, one unchanged historical
+two-port reference failure. All 24 covariance faults are caught; together
+with Phase 1 this adds 42 passing tests and 39 caught faults. CI passes on
+Python 3.12, 3.13 and 3.14 for the covariance implementation. Black and
+flake8 pass. The consolidated evidence is
+`docs/spin-channel-covariance-validation.json`; continuation order and
+remaining scientific gates are in `docs/implementation-handoff.md`.
+
 ## Spin-2 instrument and channel covariance — 2026-10-17
 
 Added explicit COSMO E/B helicity spectra, spin-2 correlation transforms,
@@ -33,7 +70,7 @@ scope are in `docs/specs/2026-10-17-spin-channel-covariance.md`.
 The spherical phase calculation currently covers fractional foreground
 screens. Mixed-depth real-beam predictions, the full local-prior range,
 matched small-beam/non-Gaussian controls, chromatic I leakage, loaded
-receiver noise and the measured Q/I/U/I deliverable remain open. This does
+receiver noise and the measured Q/I and U/I deliverable remain open. This does
 not complete Phase 2 or establish sensitivity.
 
 ## Depth-profile moments and first implementation figure — 2026-10-17
