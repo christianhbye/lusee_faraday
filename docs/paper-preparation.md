@@ -403,8 +403,15 @@ pass interval would overstate this audit.
 
 ## Paper structure proposed for review
 
-Working title: **Faraday rotation with LuSEE Night: instrument response and
-conditional diffuse detectability**.
+Superseded 2026-10-17 by the adopted framing in
+[plans/2026-10-17-paper-framing.md](plans/2026-10-17-paper-framing.md): the
+paper reports how Faraday rotation manifests in LuSEE Night spectra, with
+mechanisms and magnitudes, and promises no detection. The outline, figure
+map and corrections below are kept for the record; the depth-template
+detection result is at most a conditional illustration.
+
+Working title (superseded): **Faraday rotation with LuSEE Night: instrument
+response and conditional diffuse detectability**.
 
 The main text should develop theory, observable quantities and results in
 that order. The long report supplies derivations and reproducible artifacts;

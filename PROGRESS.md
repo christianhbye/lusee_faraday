@@ -1,5 +1,26 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Paper framing adopted and plan to the paper — 2026-10-17
+
+Reviewed and fast-forward merged `paper-framing-redistribution` into main:
+the "how Faraday rotation manifests" framing, the power-redistribution
+pilot (`scripts/faraday_redistribution.py`) and its result record. The
+pilot's numbers were checked: surviving-power ratios follow (0.6)^(8/alpha)
+to 2% for all three alphas, the channel table recomputes, and the floor
+matches a hand estimate to a factor 1.5. The review found that the pilot's
+column screen is not the screen LuSEE looks through: depth depolarization
+confines polarized emission below 50 MHz to a horizon of order 0.3–7 pc,
+so the relevant phi statistics are local and unknown. It also found that
+the speckle's frequency coherence (11 kHz at 30 MHz for sigma_phi = 10
+rad/m²) is narrower than a parent channel, so parent spectra would show a
+fixed-pattern variance excess rather than a spectral feature. The next
+steps were reordered accordingly: horizon and depth depolarization first,
+then the spin-2 real-instrument redistribution and channel covariance,
+then separability against leakage and noise, then interpretation and the
+manuscript. The phased plan with gates is in
+`docs/plans/2026-10-17-paper-framing.md`; TODO.md and the paper-preparation
+handoff now point to it and mark the detection-forecast outline superseded.
+
 ## Inference figure review and next-plan reconciliation — 2026-10-17
 
 Completed the figure walkthrough. Updated TODO, the inference plan and the

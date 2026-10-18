@@ -1,8 +1,12 @@
 # Paper framing: how Faraday rotation shows up in LuSEE Night spectra
 
-Status: proposal for discussion, 2026-10-17. Supersedes the detection-forecast
-outline in [paper-preparation.md](../paper-preparation.md#paper-structure-proposed-for-review)
-if adopted. The pilot below is a toy calculation, not a Galactic prediction.
+Status: adopted 2026-10-17 after review (merged to `main`). Supersedes the
+detection-forecast outline in
+[paper-preparation.md](../paper-preparation.md#paper-structure-proposed-for-review).
+The pilot below is a toy calculation, not a Galactic prediction. The
+[review findings](#review-findings--2026-10-17) and the
+[plan to the paper](#plan-to-the-paper) at the end are the current work plan;
+[TODO.md](../../TODO.md) points here.
 
 ## Purpose
 
@@ -159,18 +163,159 @@ The pixel-sum numerical audit is likely not a paper section. The
 depth-template detection forecast (PR 4) is at most a conditional
 illustration.
 
-## Next steps
+## Review findings — 2026-10-17
 
-1. Review this framing and the pilot figure.
-2. Replace the scalar, isotropic pilot with the spin-2 rotated field through
-   all ten pair kernels, including P_MINUS/P_PLUS cross terms.
-3. Section 6: speckle amplitude and frequency covariance against the leakage
-   residual and radiometer noise in parent and zoom channels, at 30 and 50
-   MHz. This decides how the paper ends.
-4. Add depth depolarization (slab average over screens at f·Phi) to bracket
-   the amplitude.
-5. Source the Local Interstellar Cloud n_e and B_par for the Faraday-horizon
-   estimate, and lunar nightside plasma for the no-ionosphere statement.
+The framing and the pilot were reviewed before merging. The pilot's numbers
+hang together: the recorded 30/50 MHz surviving-power ratios match
+(0.6)^(8/alpha) to within 2% for all three alphas, the channel table was
+recomputed, and the floor estimate agrees with a hand calculation to a
+factor of 1.5. Three findings change the order of the work.
+
+**1. The screen in the pilot is not the screen LuSEE looks through.** The
+pilot rotates the whole polarized sky through a screen with the column's
+structure function. Depth depolarization confines the polarized emission at
+these frequencies to the volume within which the Faraday depth spread is
+about 1/lambda²:
+
+| Frequency | depth spread that depolarizes | horizon at 0.004 rad/m²/pc (Local Bubble, n_e ~ 0.005 cm⁻³, B ~ 1 µG) | at 0.04 rad/m²/pc |
+| --- | --- | --- | --- |
+| 10 MHz | 0.001 rad/m² | 0.3 pc | 0.03 pc |
+| 30 MHz | 0.010 rad/m² | 2.5 pc | 0.25 pc |
+| 50 MHz | 0.028 rad/m² | 7 pc | 0.7 pc |
+
+The polarized sky seen below 50 MHz comes from parsecs, not the kiloparsec
+column. The phi field whose small-scale coherence sets the floor is the
+structure inside that horizon. Its rms and angular coherence are unknown and
+almost certainly far below the column values, which moves theta_c and the
+floor up by an unknown factor. Every amplitude in this document is therefore
+conditional on a horizon model. The sentence "what LuSEE measures at strong
+rotation is the small-scale coherence of phi" applies to the local medium.
+
+**2. Inside the horizon the emission is, by construction, not strongly
+rotated.** The surviving signal has a spatially coherent, spectrally smooth
+part at phi ≈ 0 (the near edge of the emitting volume) plus a speckle from
+the mixed-in remainder. The screen pilot cannot set the speckle amplitude; a
+slab or Gaussian-depth profile can. That is why depth depolarization now
+precedes the spin-2 pair-kernel work.
+
+**3. The speckle's frequency coherence decides what parent channels see.**
+With 2 sigma_phi² Delta(lambda²)² = 1 and the pilot's sigma_phi = 10 rad/m²:
+
+| Frequency | speckle coherence | parent channel | zoom bin |
+| --- | --- | --- | --- |
+| 10 MHz | 0.4 kHz | 25 kHz | 0.39 kHz |
+| 30 MHz | 11 kHz | 25 kHz | 0.39 kHz |
+| 50 MHz | 49 kHz | 25 kHz | 0.39 kHz |
+
+At 30 MHz and below, parent channels average over the speckle and adjacent
+channels are nearly independent: the manifestation is a fixed-pattern excess
+variance that does not integrate down with time and repeats with the
+sidereal day, not a spectral feature. Zoom bins resolve it everywhere. The
+coherence scales as 1/sigma_phi, so a horizon-limited sigma_phi of 1 rad/m²
+makes it 10× wider. This belongs in Section 5.
+
+Smaller points, to carry into the text:
+
+- The pilot already fixes a leakage ratio. Beam-weighted power 1e-7 of the
+  unrotated value is an amplitude of 3e-4; with an intrinsic polarized
+  fraction of order 0.2 that is Q/I ~ 6e-5 against leakage Q/I = 0.04.
+  Section 6 asks whether leakage can be modelled to one part in a thousand.
+- The Hutschenreuter structure function at 1–8° is shaped by source density
+  and the inference smoothing, not only below 1°, and the posterior mean is
+  smoother than any realization, so the rms is a lower bound on the column.
+- Panel (c)'s rise toward low frequency assumes beta = -2.8 for polarized
+  brightness down to 10 MHz; free-free absorption and the spectral turnover
+  below 20 MHz flatten it. Label it illustrative.
+- The beam window uses only the N-port auto pair; the response digest hashes
+  the first 16 MB of the FITS file (identity, not content).
+
+## Plan to the paper
+
+Each phase names its paper section, its deliverable, and the check that
+could come out the other way. Phases 1–3 are sequential; 4 and 5 can start
+in parallel with 3. Nothing here launches the old long computations.
+
+### Phase 1 — Faraday horizon and depth depolarization (Section 4)
+
+- [ ] 1a. Horizon table. Source n_e and B_par for the Local Interstellar
+  Cloud and Local Bubble (cite), compute the horizon depth at 10/30/50 MHz
+  as a range, and state the emissivity assumed inside it. Deliverable: the
+  table above with references, in `docs/literature/`.
+  Check: a horizon longer than ~100 pc at 30 MHz would restore the column
+  screen and void finding 1.
+- [ ] 1b. Depth-depolarization bracket. Extend the step-1 correlation
+  (PR 7) to emission mixed with the rotating medium: uniform slab and
+  Gaussian depth profile, screen at f·Phi for f ∈ {0, 0.6, 1} per the
+  LoTSS finding. Separate the smooth phi ≈ 0 component from the speckle
+  component and give both amplitudes at 10/30/50 MHz relative to the
+  unrotated sky and to leakage. Deliverable: `scripts/depth_depolarization.py`,
+  a result record and one figure. Check: at f = 0 the result must reduce to
+  the pilot; a speckle amplitude that depends on the quadrature grid fails.
+- [ ] 1c. Local phi statistics. Replace the column anchor with a stated range
+  for sigma_phi and D(theta) inside the horizon (from 1a and the 150–190 MHz
+  literature). Keep the Hutschenreuter column as the upper reference only.
+
+### Phase 2 — Redistribution with the real instrument (Section 5)
+
+- [ ] 2a. Spin-2 rotated field through all ten pair kernels, with the
+  P_MINUS/P_PLUS cross terms, replacing the scalar N-port pilot. Check: the
+  scalar pilot must be recovered as the high-l limit of the auto pairs, and
+  the cross terms must vanish at strong rotation as exp(-8 sigma_phi² lambda⁴).
+- [ ] 2b. Frequency covariance and channelization. Compute the speckle
+  channel–channel covariance on the fine grid through `channelization.py`
+  (parent and zoom) for the Phase 1 sigma_phi range. Deliverable: the
+  coherence table with the real channels, and the parent-channel variance
+  excess as a fixed pattern. Check: pin against the validated Gaussian-screen
+  covariance (PRs 7–8) in its 45–50 and 20–35 MHz windows.
+- [ ] 2c. Redraw the pilot figure with the real beam, the spin-2 field, the
+  Phase 1 amplitudes, and a polarized spectrum that includes the turnover.
+  Panel (c) stays illustrative and says so.
+
+### Phase 3 — Separability (Section 6; decides how the paper ends)
+
+- [ ] 3a. Leakage residual. Model I → Q,U leakage at 30 and 50 MHz with the
+  PR 3 kernels, with a stated beam-model uncertainty, and give the residual
+  after a smooth fit in parent and zoom channels.
+- [ ] 3b. Noise. Radiometer noise at the loaded reference plane with receiver
+  loading and beam-weighted antenna temperature, for 1 and 24 lunations.
+  Default-zero amplifier noise is not acceptable at 50 MHz.
+- [ ] 3c. The decision number. Speckle amplitude over leakage residual, and
+  over noise, at 30 and 50 MHz, parent and zoom, for the Phase 1 range. The
+  check that could come out the other way: if the speckle sits below both
+  across the whole range, Section 6 reports a bound and Section 7 says what
+  the bound means. Do not promote a conditional illustration to a forecast.
+
+### Phase 4 — Interpretation and framing statements (Sections 1, 7)
+
+- [ ] 4a. Lunar nightside plasma: cite the electron density and bound the
+  surface-layer Faraday rotation for the no-ionosphere statement.
+- [ ] 4b. What an amplitude or bound says about local magneto-ionic
+  structure: the floor ∝ theta_c² ∝ lambda^(-8/alpha) mapped to D(theta)
+  inside the horizon, with the degeneracy against depth depolarization
+  stated.
+
+### Phase 5 — Manuscript
+
+- [ ] 5a. Locate or create the paper source (the historical external path
+  is absent here). Build it under the `latex-memo` provenance rules: every
+  figure and quoted number regenerates from a script and a result record.
+- [ ] 5b. Figures: instrument and leakage (PR 3); channel table; the Phase 2c
+  redistribution figure; the Phase 2b covariance figure; the Phase 3c
+  separability figure.
+- [ ] 5c. Transfer the instrument and point-source material from PR 3 and
+  the measurement model; audit references, figures and quoted values.
+
+### Dropped or demoted by this plan
+
+- The pixel-sum audit is not a paper section; cite the `audit-2026-08-18`
+  tag.
+- The depth-template detection forecast (PR 4) and the template-report
+  corrections are at most a conditional illustration; they are not a
+  prerequisite for any phase.
+- The real-beam audit ladder and the A1/A2/B systematics scans in
+  [TODO.md](../../TODO.md) are deferred; none feeds Sections 4–7.
+- The Gaussian-screen benchmark (PRs 7–8) is reused as the validation
+  reference for Phase 2b, not as a section of its own.
 
 ## References
 

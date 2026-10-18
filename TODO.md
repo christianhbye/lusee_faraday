@@ -1,17 +1,20 @@
 # LuSEE Faraday work queue
 
-Updated 2026-10-17. **The conditional Gaussian-screen benchmark is
-implemented: covariance gates pass, scale recovery is unsupported, and
-17/18 null-calibration acceptance checks pass.** The unresolved fitted-beta
-constant-depth check and strong source-prior dependence remain visible in the
+Updated 2026-10-17. **The paper framing is adopted: "how Faraday rotation
+manifests in LuSEE Night spectra", mechanisms and magnitudes, no detection
+promise.** The current plan to the paper, with phases, deliverables and
+gates, is the
+[plan section of the framing document](docs/plans/2026-10-17-paper-framing.md#plan-to-the-paper).
+Work the phases in order: horizon and depth depolarization, redistribution
+with the real instrument, separability, interpretation, manuscript. The
+sections below this one are the earlier queue; the framing document lists
+which of them are deferred or demoted. The Gaussian-screen benchmark remains
+the validation reference for the covariance phase, with its open
+fitted-beta acceptance check recorded in the
 [executed notebook](notebooks/gaussian_screen_inference.ipynb) and
-[result record](docs/gaussian-screen-inference-results.json). The long
-real-beam audit remains pending review of its
-execution package. The consolidated status, paper outline, proposed commands
-and scientific gates are in
-[docs/paper-preparation.md](docs/paper-preparation.md). Machine-readable
-provenance and existing-product values are in
-[docs/paper-preparation-status.json](docs/paper-preparation-status.json).
+[result record](docs/gaussian-screen-inference-results.json).
+[docs/paper-preparation.md](docs/paper-preparation.md) holds the earlier
+consolidated status; its paper outline is superseded.
 
 ## Completed or superseded
 
@@ -248,13 +251,12 @@ them; they cannot establish the model's physical basis on their own.
 
 ## Produce the paper
 
-- [ ] Review the proposed outline and figure/evidence map in the handoff.
-- [ ] Locate/select the manuscript source; the historical external path is
-  absent here. No external paper source has been edited.
-- [ ] Transfer validated instrument/point-source material and the corrected,
-  conditional diffuse-detection result into a paper with generated numbers.
-- [ ] Verify literature supporting physical amplitude scenarios and turbulence
-  inputs; audit references, figures, quoted values and provenance.
+Superseded 2026-10-17 by the
+[plan to the paper](docs/plans/2026-10-17-paper-framing.md#plan-to-the-paper).
+The items that survive from the earlier list are its Phase 5: locate or
+create the manuscript source, transfer the PR 3 instrument and point-source
+material, and audit references, figures and quoted values. The
+conditional diffuse-detection result is no longer a paper deliverable.
 
 ## Optional cleanup and deferred work
 
