@@ -1,0 +1,7 @@
+{
+  "lunations": [1, 24],
+  "adopted_lunation_days": 29.53059,
+  "electronics_duty_cycle": 0.5,
+  "night_limit_deg": -1.0,
+  "scope": "Illustrative calendar windows starting at config.times()[0], at the configured lunar site. The 50% electronics duty is an assumption as in the Camacho et al. map-making example; no mission operations or launch schedule is asserted. The bin width and sidereal phases come from the shared config and covariance configuration."
+}

@@ -1,5 +1,18 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Nightside exposure and sidereal averaging — 2026-10-17
+
+Computed actual-site solar altitudes for complete 1/1024-sidereal-day bins
+in illustrative 1/24-lunation windows starting at the shared simulation
+epoch. At 50% electronics duty, phase 0 has 1/14 eligible visits and phase
+0.25 has 0/14. The unavailable one-lunation second phase has no noise value.
+Each eligible visit integrates 1152.6 s. The 24-lunation total per phase is
+16136.9 s. These are simulation calendar exposures, not mission dates or
+operations commitments. Signal and leakage use the same exact sinc(m)
+boxcar on MEPA kernels. Four tests and four injected faults pass; records
+are `docs/observing-exposure.json` and `docs/observing-validation.json`.
+
+
 ## Common measured-spectrum estimator — 2026-10-17
 
 Implemented physical-frequency smooth templates through the actual channel

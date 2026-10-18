@@ -1,0 +1,50 @@
+{
+  "tests_passed": 4,
+  "fault_checks": {
+    "faults": [
+      {
+        "fault": "omit electronics duty",
+        "source": "src/lusee_faraday/observing.py",
+        "test": "tests/test_observing.py::test_complete_bin_exposure_and_duty_follow_actual_nightside_visits",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "e5fdf65fad15abba914c8722d691e737103770037c85349b78a49ecfe5c92f21"
+      },
+      {
+        "fault": "count daytime visits",
+        "source": "src/lusee_faraday/observing.py",
+        "test": "tests/test_observing.py::test_no_nightside_exposure_is_explicitly_unavailable",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "3c91d682d2b0555805b90a77a0db2802578037b75d4712e761ce622997d22c46"
+      },
+      {
+        "fault": "omit finite sidereal bin averaging",
+        "source": "src/lusee_faraday/observing.py",
+        "test": "tests/test_observing.py::test_sidereal_boxcar_matches_independent_phase_integration",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "c08d97aa1d1b264df489665826659e1bbf9bd95d8eb2367ce352c1fc5c180b00"
+      },
+      {
+        "fault": "accept duty exceeding one",
+        "source": "src/lusee_faraday/observing.py",
+        "test": "tests/test_observing.py::test_invalid_observing_settings_are_rejected",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "45a76888a6a93660b97d75c786308b20f7fad2ce677d0c5c7e8ea1389504d76e"
+      }
+    ],
+    "all_caught": true,
+    "source_sha256": {
+      "src/lusee_faraday/observing.py": "db5ac0fe373eef2a6af104abf9986b412427729915cc665280dba2e18592ac7d"
+    },
+    "test_sha256": {
+      "tests/test_observing.py": "caec094309a821ad21c059ed90fe0149a726a6dc612057e26094be6e508af884"
+    },
+    "runner_sha256": "531886b66e019855ad49f34ddc04996b7f525a7ed8032536ec2476f66a5f62ae",
+    "helper_sha256": "8fe9fcca6654b373b8d72ca0914c1079fcba935bb1f4a198957b7ff8456704a5"
+  },
+  "test_log_sha256": "2f1c8a74117a44a7f2fd09624e792068ac26fa4ba96ca948e735ae43b9fadb52",
+  "scope": "Complete actual-site nightside phase bins and exact MEPA harmonic boxcar. Calendar start and duty are explicit simulation inputs."
+}
