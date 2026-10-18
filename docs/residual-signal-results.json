@@ -1,0 +1,1994 @@
+{
+  "fingerprint": "1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745",
+  "provenance": {
+    "configuration": {
+      "mixed_config": "configs/paper/mixed-depth.json",
+      "mixed_record": "docs/mixed-depth-results.json",
+      "leakage_config": "configs/paper/leakage.json",
+      "leakage_record": "docs/chromatic-leakage-results.json",
+      "noise_config": "configs/paper/receiver-noise.json",
+      "exposure_record": "docs/observing-exposure.json",
+      "smooth_degree": 1,
+      "fit_weights": "uniform, no flags",
+      "variance_mixture_scales": [
+        0.5,
+        1.5
+      ],
+      "variance_mixture_weights": [
+        0.5,
+        0.5
+      ],
+      "seed": 20261017,
+      "figure_profile_index": 3,
+      "figure_screen_index": 1,
+      "figure_phase_index": 0,
+      "figure_lunations": 24,
+      "scope": "Conditional examples at 1 K intrinsic polarization RMS at 30 MHz, with assumed local columns and angular statistics. Linear and PCHIP native-beam interpolants define a model comparison, not a measured fine-channel response. Gaussian visibility illustrations retain the complex relation and both sidereal phases. No detection significance is inferred.",
+      "mixed_fingerprint": "e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb",
+      "bin_seconds": 2305.265146875
+    },
+    "sources": {
+      "scripts/common.py": "6a67e8f3fa47970be630b77422be297cab7ac3da75bf807a89b7495ededfde45",
+      "scripts/faraday_covariance.py": "c028f158ce34140fbbb460b851ddce3ce5b9bd3cb66ece42d8b87304cfc54492",
+      "scripts/mixed_depth_predictions.py": "fc37fd057826536e5123d21f6aae4b4f79a15fa64285f799189e23ea93572b5d",
+      "scripts/paper_common.py": "2257dfa4993fc7f5c31675c8530a61547d323c4dec7429b1ab9dacf8bf5f0b92",
+      "scripts/paper_kernels.py": "d1e96bbb3506121dce5c47829c61b3c07dd233ad00cb7bba823be6aa79646098",
+      "scripts/residual_signal.py": "e4c24eeed63ea1895a1439a871dd1698520e17ff0e3bc2466864c2a4ccc5b846",
+      "src/lusee_faraday/channelization.py": "df5655f80a4aed9a712a620724df94fae7d1bee3b887ebc2193fde301e3bb910",
+      "src/lusee_faraday/config.py": "4de2a0bade4d689ea1dfe1144bd0155f4127a26603bda428013321ab8c47b2ff",
+      "src/lusee_faraday/conventions.py": "4ce2c3ae851cdff6f21b6085dd96fbd8b4347fd16f6078390916cb4d21b46bbd",
+      "src/lusee_faraday/depth_channel_covariance.py": "80f3095aa97ff9a4477a41f62124448900dcb7733b10e84a238556b0fe38b7a7",
+      "src/lusee_faraday/depth_depolarization.py": "6fcff745f2c78293040144ce9ee2a307ceb94e6bbb7dcf188219e55a1f378cbc",
+      "src/lusee_faraday/frequency_covariance.py": "a1332347e0110a389ec2e1f035ba054f3dd6687094b384a6b9702ccb87cef42e",
+      "src/lusee_faraday/gaussian_screen.py": "9b9afe77efb0f80da38619f1cb221caead4527db7348b8daffcbf81faec5958a",
+      "src/lusee_faraday/observing.py": "db5ac0fe373eef2a6af104abf9986b412427729915cc665280dba2e18592ac7d",
+      "src/lusee_faraday/separability.py": "6c209ff6dcf922655ff9022528b53a1b2bac786a800aa8abd3ad287d25069cf1",
+      "src/lusee_faraday/spin_covariance.py": "acc92b8c41fba40a2543ebc71b6f59c081d80177e73208c65ad4934d50e5609d",
+      "src/lusee_faraday/visibility_covariance.py": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa"
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "2.4.2",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+      },
+      "scipy": {
+        "version": "1.17.1",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+      },
+      "lusee": {
+        "version": "2.1.dev0",
+        "path": "/home/christian/Documents/research/lusee/luseepy/lusee/__init__.py",
+        "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef"
+      },
+      "croissant-sim": {
+        "version": "5.2.1",
+        "path": "/home/christian/Documents/projects/croissant/src/croissant/__init__.py",
+        "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c"
+      }
+    }
+  },
+  "results": [
+    {
+      "center_mhz": 30.0,
+      "screen_index": 0,
+      "profile_index": 0,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 7.982362616830741e-09,
+          "speckle": 0.0,
+          "total": 7.982362616830741e-09
+        },
+        "frequency": {
+          "smooth": 4.607741038232067e-08,
+          "speckle": 0.0,
+          "total": 4.607741038232067e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 1.3627560500188135e-18,
+        "speckle": 0.0,
+        "total": 1.3627560500188135e-18
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_0_gaussian.npz",
+      "sha256": "13ecb23a177441ca3479fc669d53889f53cf120949f0444a962e14356a9140d0"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 0,
+      "profile_index": 1,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 5.3934545805137695e-08,
+          "speckle": 2.468892190506546e-09,
+          "total": 5.14657541101652e-08
+        },
+        "frequency": {
+          "smooth": 2.1317842490771868e-07,
+          "speckle": 1.0924141627167806e-10,
+          "total": 2.1320663475393932e-07
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 3.014020589219231e-18,
+        "speckle": 4.093632083673944e-20,
+        "total": 3.014845449457385e-18
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.6
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_1_gaussian.npz",
+      "sha256": "7533d758b00197be8495ac8ab3edbd1cfc2092dc3a0c370fc74d3b9a8a77a228"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 0,
+      "profile_index": 2,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.441605312101516e-07,
+          "speckle": 1.392873358331729e-08,
+          "total": 1.3023572956106832e-07
+        },
+        "frequency": {
+          "smooth": 4.5781265024987443e-07,
+          "speckle": 4.1224970786058373e-10,
+          "total": 4.5795234706335154e-07
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 5.909736774113643e-18,
+        "speckle": 2.3093331359808983e-19,
+        "total": 5.912849532843288e-18
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 1.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_2_gaussian.npz",
+      "sha256": "c1c66615c961000437a79fbfdafd604e30e596fe84eab49cb008f89f94fd1dff"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 0,
+      "profile_index": 3,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.728680383990897e-08,
+          "speckle": 1.1903747242105154e-09,
+          "total": 1.6096442957380008e-08
+        },
+        "frequency": {
+          "smooth": 8.605959412218121e-08,
+          "speckle": 4.677297266032713e-11,
+          "total": 8.607570528182464e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 8.385990902434843e-19,
+        "speckle": 1.972436902403527e-20,
+        "total": 8.389522609720111e-19
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "slab"
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_3_gaussian.npz",
+      "sha256": "acb5059153f8f5827e68d146b659f31179a0c22d4112d5e048b04c247dddd84e"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 0,
+      "profile_index": 4,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 3.099510366560705e-08,
+          "speckle": 1.2472913702129066e-09,
+          "total": 2.974785220664302e-08
+        },
+        "frequency": {
+          "smooth": 1.8811635996864106e-07,
+          "speckle": 5.930599116563872e-11,
+          "total": 1.881756647028599e-07
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 1.6252337844032684e-18,
+        "speckle": 2.0674416378959423e-20,
+        "total": 1.6262073900212343e-18
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "gaussian",
+        "center": 0.5,
+        "width": 0.15
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_4_gaussian.npz",
+      "sha256": "173d385987323ad89aeccc95a1f78867ce68b924f2f36629c3d3360555013351"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 0,
+      "profile_index": 0,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 7.982362616830741e-09,
+          "speckle": 0.0,
+          "total": 7.982362616830741e-09
+        },
+        "frequency": {
+          "smooth": 4.607741038232067e-08,
+          "speckle": 0.0,
+          "total": 4.607741038232067e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 1.3627560500188135e-18,
+        "speckle": 0.0,
+        "total": 1.3627560500188135e-18
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_0_variance_mixture.npz",
+      "sha256": "04ae90bad5b7a549b0b089449986d4f4f6e475500188864544daf8512c44d9e8"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 0,
+      "profile_index": 1,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 5.396891209375794e-08,
+          "speckle": 2.352221619256403e-09,
+          "total": 5.161677543570916e-08
+        },
+        "frequency": {
+          "smooth": 2.132855463877088e-07,
+          "speckle": 7.507729668462494e-10,
+          "total": 2.1348424204911027e-07
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 3.0153352161422176e-18,
+        "speckle": 3.9016205082902264e-20,
+        "total": 3.0179172454832763e-18
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.6
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_1_variance_mixture.npz",
+      "sha256": "5672608f3211b13c47e3c88cc56ac24409573d6ab2983b1a80626ab861a8b808"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 0,
+      "profile_index": 2,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.4451578847602756e-07,
+          "speckle": 1.2637647573609867e-08,
+          "total": 1.318815967805113e-07
+        },
+        "frequency": {
+          "smooth": 4.5813642043507295e-07,
+          "speckle": 1.9010598394147103e-09,
+          "total": 4.590327024814077e-07
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 5.950985875484783e-18,
+        "speckle": 2.0967951870345422e-19,
+        "total": 6.004708423300197e-18
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 1.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_2_variance_mixture.npz",
+      "sha256": "fd8ddee5546b1c4d2f8c90c519b02b2d00bf9e955aa5202e89e14f1eee52651f"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 0,
+      "profile_index": 3,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.733863055472564e-08,
+          "speckle": 1.099478539454575e-09,
+          "total": 1.623916353578543e-08
+        },
+        "frequency": {
+          "smooth": 8.623661837922589e-08,
+          "speckle": 3.161350236699818e-10,
+          "total": 8.64177831272939e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 8.409419021172493e-19,
+        "speckle": 1.8227796684272568e-20,
+        "total": 8.437244342308813e-19
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "slab"
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_3_variance_mixture.npz",
+      "sha256": "27320900df63941ae1a6ee0bd7307760d43bd10aba98e9dd8e80af22edefdcf9"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 0,
+      "profile_index": 4,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 3.102490862727355e-08,
+          "speckle": 1.1880961388729745e-09,
+          "total": 2.983684752107021e-08
+        },
+        "frequency": {
+          "smooth": 1.8839192136358248e-07,
+          "speckle": 3.775711074858461e-10,
+          "total": 1.8876948441951657e-07
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 1.6271355485578122e-18,
+        "speckle": 1.9699823026183375e-20,
+        "total": 1.6301761972296987e-18
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "gaussian",
+        "center": 0.5,
+        "width": 0.15
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_4_variance_mixture.npz",
+      "sha256": "744ec5fccf664aab5a5138b624925030677be3067061ebd54541e94e03e4f666"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 1,
+      "profile_index": 0,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 7.982362616830741e-09,
+          "speckle": 0.0,
+          "total": 7.982362616830741e-09
+        },
+        "frequency": {
+          "smooth": 4.607741038232067e-08,
+          "speckle": 0.0,
+          "total": 4.607741038232067e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 1.3627560500188135e-18,
+        "speckle": 0.0,
+        "total": 1.3627560500188135e-18
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_0_gaussian.npz",
+      "sha256": "18e1b6c7d0ad24e83f51685b3119f7e13019f7b035d99fb975dbd5ed3c1a022c"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 1,
+      "profile_index": 1,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.0800490254730351e-09,
+          "speckle": 2.7744342194386604e-08,
+          "total": 2.6664268113378532e-08
+        },
+        "frequency": {
+          "smooth": 5.53210843965733e-09,
+          "speckle": 3.2637604722612426e-10,
+          "total": 5.310390868355741e-09
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 6.143704184041585e-20,
+        "speckle": 4.554024627442205e-19,
+        "total": 4.37752120970157e-19
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.6
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_1_gaussian.npz",
+      "sha256": "e07b1887a3360d0de14eea48cddb1578bfd5bd1352ed5fc067d805bb8daee1eb"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 1,
+      "profile_index": 2,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.1738972203979333e-11,
+          "speckle": 8.742686566299264e-09,
+          "total": 8.730947348765381e-09
+        },
+        "frequency": {
+          "smooth": 2.612788251312979e-11,
+          "speckle": 3.6497922882541924e-10,
+          "total": 3.6589479189311016e-10
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 1.9095401444511794e-22,
+        "speckle": 1.4362906351992389e-19,
+        "total": 1.4344072377022707e-19
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 1.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_2_gaussian.npz",
+      "sha256": "1d5581505a6d1de4357f3f88068dfb05369282583bb3a3049380adac144dd467"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 1,
+      "profile_index": 3,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 6.552020823711698e-12,
+          "speckle": 1.757575851664646e-10,
+          "total": 1.6920556286133036e-10
+        },
+        "frequency": {
+          "smooth": 9.326637663350102e-11,
+          "speckle": 6.8847123926142306e-12,
+          "total": 9.278118478261515e-11
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 1.2011458207445184e-21,
+        "speckle": 2.8806842215405802e-21,
+        "total": 2.7741046479473713e-21
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "slab"
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_3_gaussian.npz",
+      "sha256": "18b304ebd45634ad57e570e7d5aace88079648fdff425bf6af6894bc267bb034"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 1,
+      "profile_index": 4,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 4.780113639686436e-10,
+          "speckle": 5.50133589267128e-09,
+          "total": 5.023317888941128e-09
+        },
+        "frequency": {
+          "smooth": 5.521003000774859e-09,
+          "speckle": 6.285387657373798e-11,
+          "total": 5.569150865120619e-09
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 3.922707418221431e-20,
+        "speckle": 9.046409062985075e-20,
+        "total": 8.271795941641674e-20
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "gaussian",
+        "center": 0.5,
+        "width": 0.15
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_4_gaussian.npz",
+      "sha256": "a1c32c691c4e97c21c0400e39b076d4e70c735e39e01d20de464fb3ae2ea5ff8"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 1,
+      "profile_index": 0,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 7.982362616830741e-09,
+          "speckle": 0.0,
+          "total": 7.982362616830741e-09
+        },
+        "frequency": {
+          "smooth": 4.607741038232067e-08,
+          "speckle": 0.0,
+          "total": 4.607741038232067e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 1.3627560500188135e-18,
+        "speckle": 0.0,
+        "total": 1.3627560500188135e-18
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_0_variance_mixture.npz",
+      "sha256": "86e7a4c3a0aa415baabd8728e91e4ab4ba3dce4435d155b9187d2f8bd6735b8d"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 1,
+      "profile_index": 1,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 9.297463168091399e-10,
+          "speckle": 1.9929585490316212e-08,
+          "total": 1.899980554828932e-08
+        },
+        "frequency": {
+          "smooth": 7.835061530151647e-09,
+          "speckle": 9.468344590505394e-09,
+          "total": 1.7303390551950314e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 5.191144783940478e-20,
+        "speckle": 3.2856770788497334e-19,
+        "total": 3.1342719795144395e-19
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.6
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_1_variance_mixture.npz",
+      "sha256": "7ced07a16fb95917c9a74e9a25057aa784d267a9e71bfe047cdd5d59bd3fb1b5"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 1,
+      "profile_index": 2,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 2.8121419046497756e-10,
+          "speckle": 1.60955572582811e-08,
+          "total": 1.5814332319731927e-08
+        },
+        "frequency": {
+          "smooth": 1.6406715771009816e-09,
+          "speckle": 1.481227648395902e-09,
+          "total": 3.121898517946874e-09
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 9.97986746509679e-21,
+        "speckle": 2.642943176153431e-19,
+        "total": 2.5972259489481855e-19
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 1.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_2_variance_mixture.npz",
+      "sha256": "6bdd7dbc624a89c5ca9e297d1d3896c5ca92cf5fc252dbc2db1b30c6be8ea1e0"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 1,
+      "profile_index": 3,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 2.4096463581139232e-11,
+          "speckle": 5.32972105611055e-10,
+          "total": 5.088756123687195e-10
+        },
+        "frequency": {
+          "smooth": 2.967635114762136e-10,
+          "speckle": 1.1615335399580825e-10,
+          "total": 4.129168606009647e-10
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 2.2479150920191383e-21,
+        "speckle": 8.758091337309268e-21,
+        "total": 8.36664905686047e-21
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "slab"
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_3_variance_mixture.npz",
+      "sha256": "ecf7001ecec698ca9d73538d2158e8d036e7e2a6aaa8c3270b724987d1a7e804"
+    },
+    {
+      "center_mhz": 30.0,
+      "screen_index": 1,
+      "profile_index": 4,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.0180659716873372e-09,
+          "speckle": 3.7012173778178674e-09,
+          "total": 2.6831445376704715e-09
+        },
+        "frequency": {
+          "smooth": 4.90299967309439e-09,
+          "speckle": 1.3949754872687758e-09,
+          "total": 5.998256889483389e-09
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 4.877744978219357e-20,
+        "speckle": 6.100620129992964e-20,
+        "total": 5.314869067731077e-20
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "gaussian",
+        "center": 0.5,
+        "width": 0.15
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432595,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.74096046072144,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_4_variance_mixture.npz",
+      "sha256": "3984d6c7136b7fa96591b863ddf8e1959a54d18187a0d43849f7632a111562c7"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 0,
+      "profile_index": 0,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.7601865091957894e-09,
+          "speckle": 0.0,
+          "total": 1.7601865091957894e-09
+        },
+        "frequency": {
+          "smooth": 1.5771879224030025e-08,
+          "speckle": 0.0,
+          "total": 1.5771879224030025e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 6.432923896564986e-20,
+        "speckle": 0.0,
+        "total": 6.432923896564986e-20
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_0_gaussian.npz",
+      "sha256": "b04ea1a12002161be0234fb43150f431b4b45746c137198111275928423a90de"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 0,
+      "profile_index": 1,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 2.462781486133351e-09,
+          "speckle": 2.652224548118821e-11,
+          "total": 2.436259395828393e-09
+        },
+        "frequency": {
+          "smooth": 4.937192807212223e-08,
+          "speckle": 2.6758310053297974e-12,
+          "total": 4.937460389466125e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 6.99258763624246e-20,
+        "speckle": 5.431543772343055e-23,
+        "total": 6.99313393633779e-20
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.6
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_1_gaussian.npz",
+      "sha256": "3bd7fc5d1526faae8d3a4b961c3f8f9ac340f2f824cabee1e3bbde2f084318c2"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 0,
+      "profile_index": 2,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 3.7304518599058785e-09,
+          "speckle": 8.646300354957099e-11,
+          "total": 3.6439895914147046e-09
+        },
+        "frequency": {
+          "smooth": 7.193887352184972e-08,
+          "speckle": 7.848861502027093e-12,
+          "total": 7.194672234535021e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 9.044990390376037e-20,
+        "speckle": 1.7708333696230681e-22,
+        "total": 9.046592829190513e-20
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 1.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_2_gaussian.npz",
+      "sha256": "2bcfdb3db45d78f3834c96e4d92e25b31fe01d0bf33aab0c10bf856054910124"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 0,
+      "profile_index": 3,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.8153138289942742e-09,
+          "speckle": 1.722076188853852e-11,
+          "total": 1.7980931367306223e-09
+        },
+        "frequency": {
+          "smooth": 3.612937131084634e-08,
+          "speckle": 1.73753214682497e-12,
+          "total": 3.6131108839079046e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 5.47965294351861e-20,
+        "speckle": 3.5264331557964566e-23,
+        "total": 5.480007679959723e-20
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "slab"
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_3_gaussian.npz",
+      "sha256": "6560c87d54b08d278d129851f649b5b4155adec41fc7f27f225e0bda4e36e5f0"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 0,
+      "profile_index": 4,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 2.125514146341398e-09,
+          "speckle": 1.750422417758338e-11,
+          "total": 2.1080100036214236e-09
+        },
+        "frequency": {
+          "smooth": 4.04090993306205e-08,
+          "speckle": 1.7978333734611518e-12,
+          "total": 4.0410897159427814e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 6.199469818761651e-20,
+        "speckle": 3.584581304219676e-23,
+        "total": 6.199836865877624e-20
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "gaussian",
+        "center": 0.5,
+        "width": 0.15
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_4_gaussian.npz",
+      "sha256": "3af867943c3bf878338b7504afd3800ef53fbfc898692728a7f83eb34ff7871a"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 0,
+      "profile_index": 0,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.7601865091957894e-09,
+          "speckle": 0.0,
+          "total": 1.7601865091957894e-09
+        },
+        "frequency": {
+          "smooth": 1.5771879224030025e-08,
+          "speckle": 0.0,
+          "total": 1.5771879224030025e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 6.432923896564986e-20,
+        "speckle": 0.0,
+        "total": 6.432923896564986e-20
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_0_variance_mixture.npz",
+      "sha256": "0b1ba45ea6853c2891769b68531ebc7d333b0ce0e3bf1a55839ee7f0a13d6340"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 0,
+      "profile_index": 1,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 2.4628644716150625e-09,
+          "speckle": 2.6302736111875107e-11,
+          "total": 2.436561888607341e-09
+        },
+        "frequency": {
+          "smooth": 4.9373237366805203e-08,
+          "speckle": 4.226520002825036e-12,
+          "total": 4.937746387225971e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 6.992799602650003e-20,
+        "speckle": 5.386677832077943e-23,
+        "total": 6.993613971910006e-20
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.6
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_1_variance_mixture.npz",
+      "sha256": "599bb8979b1edd6c520ced4cd6a9e4c8a54872bd368ac7910249b68c2ea7828c"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 0,
+      "profile_index": 2,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 3.731112175299426e-09,
+          "speckle": 8.466679876220115e-11,
+          "total": 3.6464460828557772e-09
+        },
+        "frequency": {
+          "smooth": 7.195092976721825e-08,
+          "speckle": 2.4825354934941224e-11,
+          "total": 7.197575498722957e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 9.046549539822181e-20,
+        "speckle": 1.7341189190973536e-22,
+        "total": 9.050468953587776e-20
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 1.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_2_variance_mixture.npz",
+      "sha256": "e2da182656d8155c0a469e19e1f4e72b496b37ffa40734b50bb61241192bb7ab"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 0,
+      "profile_index": 3,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.815438985586029e-09,
+          "speckle": 1.7022329462264754e-11,
+          "total": 1.7984167243499422e-09
+        },
+        "frequency": {
+          "smooth": 3.613106098219365e-08,
+          "speckle": 3.235182275588751e-12,
+          "total": 3.6134296156346565e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 5.479926224916546e-20,
+        "speckle": 3.4858673306253134e-23,
+        "total": 5.480512317914484e-20
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "slab"
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_3_variance_mixture.npz",
+      "sha256": "fc5c40767d80df9358f89033dafb9a750c53c82f09c8b8e26cb8133317a899b4"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 0,
+      "profile_index": 4,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 2.1255774356580762e-09,
+          "speckle": 1.7375792734662448e-11,
+          "total": 2.1082017234276086e-09
+        },
+        "frequency": {
+          "smooth": 4.0409792337945125e-08,
+          "speckle": 2.6480936479137426e-12,
+          "total": 4.04124404243594e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 6.199586846949938e-20,
+        "speckle": 3.5583279019450775e-23,
+        "total": 6.200103068772424e-20
+      },
+      "screen": {
+        "sigma_depth": 0.002,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "gaussian",
+        "center": 0.5,
+        "width": 0.15
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_4_variance_mixture.npz",
+      "sha256": "1097a1527ba580545fb300c83cd11ae955946b599dc6b1f891693d34954aba2c"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 1,
+      "profile_index": 0,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.7601865091957894e-09,
+          "speckle": 0.0,
+          "total": 1.7601865091957894e-09
+        },
+        "frequency": {
+          "smooth": 1.5771879224030025e-08,
+          "speckle": 0.0,
+          "total": 1.5771879224030025e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 6.432923896564986e-20,
+        "speckle": 0.0,
+        "total": 6.432923896564986e-20
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_0_gaussian.npz",
+      "sha256": "2a1e8d015ec78751843cecb5b907977d937bb0a3d508ba22dbf7e9933df4c635"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 1,
+      "profile_index": 1,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 4.133306612189595e-10,
+          "speckle": 1.2986788002658984e-09,
+          "total": 8.853477024627538e-10
+        },
+        "frequency": {
+          "smooth": 4.598774698265714e-09,
+          "speckle": 6.240598728124084e-11,
+          "total": 4.61363553714042e-09
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 4.775220707382767e-21,
+        "speckle": 2.6527004070250065e-21,
+        "total": 4.790650131262358e-21
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.6
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_1_gaussian.npz",
+      "sha256": "5b293751cd33b82784ad91704566196ffc50f11d714c280f0dec82a4fed79359"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 1,
+      "profile_index": 2,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 8.700271050392138e-10,
+          "speckle": 1.7507668515177933e-09,
+          "total": 8.80737009197007e-10
+        },
+        "frequency": {
+          "smooth": 3.943343262202924e-09,
+          "speckle": 3.415993721838161e-11,
+          "total": 3.974441469943728e-09
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 8.571539985457377e-21,
+        "speckle": 3.5789244730771694e-21,
+        "total": 8.61937304991858e-21
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 1.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_2_gaussian.npz",
+      "sha256": "91fc04f2decb531d4ab92dc61accd837e469e4b8f1d8eb768c2d252202ebd173"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 1,
+      "profile_index": 3,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 2.022098333074002e-11,
+          "speckle": 3.9100459857513e-10,
+          "total": 3.7078359659499005e-10
+        },
+        "frequency": {
+          "smooth": 1.2947293688315141e-09,
+          "speckle": 2.2787586427805213e-11,
+          "total": 1.3175169541976753e-09
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 1.3888926318201627e-21,
+        "speckle": 7.977978135983179e-22,
+        "total": 1.4354386173216924e-21
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "slab"
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_3_gaussian.npz",
+      "sha256": "aa309a1164037e915655fff5bfc45ab30277cd341d3be17f00c9a067534d8f4a"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 1,
+      "profile_index": 4,
+      "model": "gaussian",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.5127375641365383e-10,
+          "speckle": 8.222042801502062e-10,
+          "total": 6.709302931758753e-10
+        },
+        "frequency": {
+          "smooth": 3.510285246411291e-09,
+          "speckle": 5.047735051432902e-11,
+          "total": 3.5607625884766333e-09
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 2.970474991789329e-21,
+        "speckle": 1.6795740601183318e-21,
+        "total": 3.0735615463202344e-21
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "gaussian",
+        "center": 0.5,
+        "width": 0.15
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_4_gaussian.npz",
+      "sha256": "e2983bf56cfc92f0c34bd1d13f0ab8a80b9b871631228960a6f722a6446aad92"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 1,
+      "profile_index": 0,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.7601865091957894e-09,
+          "speckle": 0.0,
+          "total": 1.7601865091957894e-09
+        },
+        "frequency": {
+          "smooth": 1.5771879224030025e-08,
+          "speckle": 0.0,
+          "total": 1.5771879224030025e-08
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 6.432923896564986e-20,
+        "speckle": 0.0,
+        "total": 6.432923896564986e-20
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_0_variance_mixture.npz",
+      "sha256": "4de285cc81f4b394fa59c65923a0b7ba1ea20acb22d00dd1813a2906d223b75f"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 1,
+      "profile_index": 1,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 3.294486589428803e-10,
+          "speckle": 8.559013225557675e-10,
+          "total": 5.264525540657985e-10
+        },
+        "frequency": {
+          "smooth": 4.2466520421470085e-09,
+          "speckle": 3.544435200171886e-09,
+          "total": 5.886725959265516e-09
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 4.411556100587764e-21,
+        "speckle": 5.747874811790639e-21,
+        "total": 7.04465017186125e-21
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.6
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_1_variance_mixture.npz",
+      "sha256": "da53752c97464f3f49762b1f378b4fa34fb2d395f81c07d615f3093333684969"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 1,
+      "profile_index": 2,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 5.128020513607457e-10,
+          "speckle": 1.9182283707999894e-09,
+          "total": 1.4054250127007882e-09
+        },
+        "frequency": {
+          "smooth": 2.2142400594797934e-09,
+          "speckle": 1.701531476723271e-09,
+          "total": 3.1780479704560103e-09
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 5.667748975117002e-21,
+        "speckle": 3.921189678490228e-21,
+        "total": 5.257805019752201e-21
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "screen",
+        "fraction": 1.0
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_2_variance_mixture.npz",
+      "sha256": "a106c9b2ac0e7a9a0042b6a45bfb131209ad5be0ad13b7228aa56865131e6fd4"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 1,
+      "profile_index": 3,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 5.7618551325836693e-11,
+          "speckle": 2.6954800102012276e-10,
+          "total": 2.1192942031073837e-10
+        },
+        "frequency": {
+          "smooth": 2.8903029164655147e-09,
+          "speckle": 1.3212904187753069e-09,
+          "total": 4.211593176334678e-09
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 3.8926893520297414e-21,
+        "speckle": 1.9828295971962564e-21,
+        "total": 5.875518949225998e-21
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "slab"
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_3_variance_mixture.npz",
+      "sha256": "e68dedae0f1f2459a67e448f919fca7254eb593d02302a8fb9c8e47e21f55c23"
+    },
+    {
+      "center_mhz": 50.0,
+      "screen_index": 1,
+      "profile_index": 4,
+      "model": "variance_mixture",
+      "passed": true,
+      "gates": {
+        "angular": {
+          "smooth": 1.7439184165254164e-10,
+          "speckle": 5.273417693130922e-10,
+          "total": 3.529497789422477e-10
+        },
+        "frequency": {
+          "smooth": 5.028761339544389e-09,
+          "speckle": 2.064687579770265e-09,
+          "total": 7.093448340039933e-09
+        }
+      },
+      "maximum_residual_covariance_error_k2": {
+        "smooth": 5.335091786393898e-21,
+        "speckle": 3.558243028655615e-21,
+        "total": 8.893334815049513e-21
+      },
+      "screen": {
+        "sigma_depth": 0.02,
+        "mean_depth": 0.01,
+        "theta0_rad": 0.01,
+        "alpha": 1.6666666666666667
+      },
+      "profile": {
+        "kind": "gaussian",
+        "center": 0.5,
+        "width": 0.15
+      },
+      "fit": [
+        {
+          "rank": 2,
+          "condition_number": 4.898680484432507,
+          "residual_dof": 1
+        },
+        {
+          "rank": 2,
+          "condition_number": 4.740960460721356,
+          "residual_dof": 190
+        }
+      ],
+      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_4_variance_mixture.npz",
+      "sha256": "53a1113fbe80a4933637c982055a8e2533ecf27bee37ca091de7706fc2014f0e"
+    }
+  ],
+  "all_passed": true,
+  "scope": "All profiles and local screens, shared physical-frequency fit, actual folded channels and finite sidereal averaging. The non-Gaussian global variance mixture has the same RM covariance as its Gaussian reference; its additional mean variation is retained in the speckle. Numerical errors are exported beside the residuals; tiny components can only support upper bounds."
+}

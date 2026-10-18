@@ -1,5 +1,23 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Common-fit Gaussian and mixed-screen production — 2026-10-17
+
+Completed all 40 local-screen/profile/band models with the exact sidereal
+boxcar and shared physical-frequency constant+slope fit, separately on
+three parents and all 192 zoom bins. The global variance mixture retains
+conditional-mean variation in its speckle term. Filtering acts on phase
+coefficients before covariance assembly. Every smooth/speckle/total residual
+passes full covariance positivity and direct R C R^T checks; all angular
+and frequency refinements pass. Their absolute covariance errors remain
+exported so numerically tiny residuals can be treated as bounds.
+
+The production mixture combination also matches an independent finite
+ensemble and catches three deliberately injected weighting/mean faults.
+Records are `docs/residual-signal-results.json` and
+`docs/residual-signal-validation.json`. Chromatic leakage, loaded noise and
+simulated observations use this same estimator in the following stage.
+
+
 ## Strong-screen real-instrument controls — 2026-10-17
 
 The direct frequency-pair solver passes 129/257-node and doubled-angular
