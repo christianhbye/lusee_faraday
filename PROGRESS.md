@@ -1,5 +1,22 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Complete science-product export — 2026-10-17
+
+The all-16 real science-product factorization now exports the shared
+loaded calibration, all channel/phase I-only means, and selected full
+signal/noise covariance blocks. Compact four-branch weights combine with
+all saved local-grid coefficients without allocating a complete frequency,
+product and time cube. Fine system PSDs and channel/readout operators
+support arbitrary requested noise blocks, across all nine receiver cases.
+
+Projection back to Stokes checks every signal mode, a complete selected
+extreme-column signal covariance, loaded means, and raw/residual noise at
+both bands and phases. All gates pass; record:
+`docs/science-product-results.json`. The science products use the pinned
+PRODUCT_LABELS order and the same one-kelvin enclosure normalization as
+the calibrated Stokes predictions.
+
+
 ## Measured-spectrum predictions and observing controls — 2026-10-17
 
 Completed the simulated Q/I and U/I spectra with paired I-only/noise
