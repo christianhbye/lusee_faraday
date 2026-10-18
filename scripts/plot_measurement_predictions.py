@@ -35,7 +35,10 @@ def save(fig, name, caption, records, generator=None):
             ax.yaxis.set_minor_formatter(NullFormatter())
     path = FIG_DIR / name
     generator = Path(generator or __file__).resolve()
-    fig.savefig(path.with_suffix(".pdf"))
+    fig.savefig(
+        path.with_suffix(".pdf"),
+        metadata={"CreationDate": None, "ModDate": None},
+    )
     fig.savefig(path.with_suffix(".png"), dpi=170)
     plt.close(fig)
     path.with_suffix(".caption.txt").write_text(caption + "\n")

@@ -1,0 +1,9 @@
+{
+  "all_passed": true,
+  "figure_path": "report/figures/faraday_redistribution_spin2.pdf",
+  "first_pdf_sha256": "b4b221a7e4fb9159e5f74294869949b49986ef3adc71ea1aee0a771ecd9746d9",
+  "second_pdf_sha256": "b4b221a7e4fb9159e5f74294869949b49986ef3adc71ea1aee0a771ecd9746d9",
+  "source_sha256": "18fcfc6fee96d084dd0493e53206e9d85d7b973adcc7fdd2c132c6fd37401d8a",
+  "scope": "Two separate invocations reproduce identical vector PDF bytes with creation/modification timestamps omitted. Numerical input record is unchanged.",
+  "result_sha256": "8560ede51d15ec707c696507b415549b50c7388a9d87ec178e306e9c2bfe5d99"
+}

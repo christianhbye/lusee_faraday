@@ -1,5 +1,14 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Deterministic figure regeneration — 2026-10-17
+
+Removed PDF creation/modification timestamps from report figure writers so
+an unchanged rerender preserves the checksums in its inspection record.
+Two separate mixed-depth plot invocations produce identical PDF bytes;
+`docs/paper-figure-reproducibility.json` records the check. The complete
+figures-to-report runner is exercised after this source commit.
+
+
 ## Report build and printed-figure checks — 2026-10-17
 
 The isolated report build verifies 29 result records and the complete hashes

@@ -136,7 +136,10 @@ def main():
         for ax in axes.ravel():
             ax.yaxis.set_major_formatter(FuncFormatter(log_tick))
             ax.yaxis.set_minor_formatter(NullFormatter())
-        fig.savefig(name.with_suffix(".pdf"))
+        fig.savefig(
+            name.with_suffix(".pdf"),
+            metadata={"CreationDate": None, "ModDate": None},
+        )
         fig.savefig(name.with_suffix(".png"), dpi=180)
         plt.close(fig)
     caption = (

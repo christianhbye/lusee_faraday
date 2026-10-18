@@ -15,7 +15,7 @@
   "max_tail_gate_ratio": 0.00037847591391865286,
   "figure": {
     "path": "report/figures/faraday_redistribution_spin2.pdf",
-    "sha256": "7c82df25b61fb56d71222abf87defcf75a1cf36d9681561e2374721eaa126299",
+    "sha256": "b4b221a7e4fb9159e5f74294869949b49986ef3adc71ea1aee0a771ecd9746d9",
     "visual_inspection": "Six panels at 6.4 inch printed width; shared scales, floor markers, native-frequency points, legend and caption inspected. Typography updated to at least 7 pt, including logarithmic labels; numerical result checksum is unchanged."
   },
   "log_sha256": "88f332cb88e4fa6a7b75c0086b35a3f17127ec743bcdf167aba916668059260d",
