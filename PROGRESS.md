@@ -1,5 +1,26 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Conditional Faraday horizon calculator — 2026-10-17
+
+Started implementation from `paper-implementation-plan` on
+`implementation/depth-depolarization`. Added constant-rate horizon arithmetic
+with the rotation coefficient derived from SI constants, separate one/two
+radian phase conventions, explicit field projections and the unbounded
+zero-field limit. The finite emitting-volume brightness is explicitly
+unrotated and uses an illustrative emissivity. Sourced plasma inputs and
+assumed magnetic geometry are distinguished in
+`docs/literature/local-faraday-horizon.md` and `configs/paper/horizon.json`.
+The regenerable `docs/faraday-horizon-results.json` contains all 54
+scenario/frequency combinations and source/dependency provenance. No local
+angular structure function or screen dispersion is inferred from this table.
+
+Four horizon tests pass within the 18-test focused implementation suite.
+Deliberate unit, phase-factor, zero-field and input-validation faults are
+caught in disposable copies by the accompanying fault audit. The existing
+suite's baseline has 151 passes and the known two-port measured-reference
+failure. Remaining local-emissivity/pulsar priors and the full five-phase
+paper implementation remain open.
+
 ## LuSEE Night observable predictions added to the plan — 2026-10-17
 
 Christian identified future LuSEE-Night mission data as the observational

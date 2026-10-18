@@ -1,0 +1,688 @@
+{
+  "fingerprint": "6dbfc239ec2db9eb26ff1e90edf78425572c56997c9c6e4997de9bfca0df69cf",
+  "manifest": {
+    "configuration": {
+      "scope": "Conditional uniform-rate scenarios; no local screen statistics or polarized emissivity are measured here.",
+      "frequencies_mhz": [
+        10.0,
+        30.0,
+        50.0
+      ],
+      "phase_limits_rad": [
+        1.0,
+        2.0
+      ],
+      "absolute_field_projection": [
+        0.0,
+        0.25,
+        1.0
+      ],
+      "projection_status": "Illustrative directions, not a field-orientation posterior.",
+      "emissivity_ref_k_per_pc": 1.0,
+      "emissivity_status": "Illustrative unit normalization; multiply by the assumed local polarized emissivity.",
+      "emissivity_ref_mhz": 30.0,
+      "emissivity_beta": -2.8,
+      "spectrum_status": "Illustrative power law; no absorption or turnover below 20 MHz.",
+      "emitting_path_pc": 5.0,
+      "path_status": "Illustrative finite emitting volume, not a measured cloud extent.",
+      "scenarios": [
+        {
+          "name": "LIC_model26",
+          "ne_cm3": 0.0653,
+          "field_ug": 2.5,
+          "source": "https://astro.uchicago.edu/~frisch/2008SlavinFrisch.pdf",
+          "source_location": "Slavin and Frisch 2008, Table 2 B0 and Table 5 n_e, model 26.",
+          "status": "One photoionization-model pair; extending B0 as a uniform local field is an additional assumption."
+        },
+        {
+          "name": "LHB_density_low_assumed_field",
+          "ne_cm3": 0.0035,
+          "field_ug": 1.0,
+          "source": "https://arxiv.org/html/2410.23345v1#S4.SS2",
+          "source_location": "Yeung et al. 2024, Section 4.2: adopted n_e=(4 +/- 0.5)e-3 cm^-3.",
+          "status": "Lower endpoint of the adopted density range; 1 microgauss field is illustrative, not measured by this source."
+        },
+        {
+          "name": "LHB_density_high_assumed_field",
+          "ne_cm3": 0.0045,
+          "field_ug": 1.0,
+          "source": "https://arxiv.org/html/2410.23345v1#S4.SS2",
+          "source_location": "Yeung et al. 2024, Section 4.2: adopted n_e=(4 +/- 0.5)e-3 cm^-3.",
+          "status": "Upper endpoint of the adopted density range; 1 microgauss field is illustrative, not measured by this source."
+        }
+      ]
+    },
+    "sources": {
+      "scripts/common.py": "6a67e8f3fa47970be630b77422be297cab7ac3da75bf807a89b7495ededfde45",
+      "scripts/faraday_horizon.py": "587ccc8a94ca13b4587dd5ccf00df4cf672f36043a2c81fa3fbe394e757aa1b4",
+      "scripts/paper_common.py": "2257dfa4993fc7f5c31675c8530a61547d323c4dec7429b1ab9dacf8bf5f0b92",
+      "src/lusee_faraday/config.py": "4de2a0bade4d689ea1dfe1144bd0155f4127a26603bda428013321ab8c47b2ff",
+      "src/lusee_faraday/conventions.py": "4ce2c3ae851cdff6f21b6085dd96fbd8b4347fd16f6078390916cb4d21b46bbd",
+      "src/lusee_faraday/faraday_horizon.py": "2cfa010e3ba3df54a4a3310b7bd29d1e2efa9d6d7620b8e58110622abc0f8c95"
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "2.4.2",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+      },
+      "scipy": {
+        "version": "1.17.1",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+      },
+      "lusee": {
+        "version": "2.1.dev0",
+        "path": "/home/christian/Documents/research/lusee/luseepy/lusee/__init__.py",
+        "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef"
+      },
+      "croissant-sim": {
+        "version": "5.2.1",
+        "path": "/home/christian/Documents/projects/croissant/src/croissant/__init__.py",
+        "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c"
+      }
+    }
+  },
+  "rows": [
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 108.37011083763115,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 5.0,
+      "longer_than_100_pc_at_30_mhz": true
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 1.196171650708153,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 108.37011083763115,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 5.0,
+      "longer_than_100_pc_at_30_mhz": true
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 1.196171650708153,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.03313571614982065,
+      "horizon_pc": 0.016789286385464775,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 0.36389136529550986,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.03313571614982065,
+      "horizon_pc": 0.15110357746918304,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 0.15110357746918304,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.03313571614982065,
+      "horizon_pc": 0.4197321596366194,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 0.10041434204956662,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.03313571614982065,
+      "horizon_pc": 0.03357857277092955,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 0.7277827305910197,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.03313571614982065,
+      "horizon_pc": 0.3022071549383661,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 0.3022071549383661,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.03313571614982065,
+      "horizon_pc": 0.8394643192732388,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 0.20082868409913324,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.1325428645992826,
+      "horizon_pc": 0.004197321596366194,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 0.09097284132387747,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.1325428645992826,
+      "horizon_pc": 0.03777589436729576,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 0.03777589436729576,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.1325428645992826,
+      "horizon_pc": 0.10493303990915485,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 0.025103585512391655,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.1325428645992826,
+      "horizon_pc": 0.008394643192732388,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 0.18194568264775493,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.1325428645992826,
+      "horizon_pc": 0.07555178873459152,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 0.07555178873459152,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LIC_model26",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.1325428645992826,
+      "horizon_pc": 0.2098660798183097,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 0.05020717102478331,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 108.37011083763115,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 5.0,
+      "longer_than_100_pc_at_30_mhz": true
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 1.196171650708153,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 108.37011083763115,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 5.0,
+      "longer_than_100_pc_at_30_mhz": true
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 1.196171650708153,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.0007104135162289266,
+      "horizon_pc": 0.78310028640775,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 16.97293296699771,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.0007104135162289266,
+      "horizon_pc": 7.047902577669753,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 5.0,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.0007104135162289266,
+      "horizon_pc": 19.577507160193754,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 1.196171650708153,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.0007104135162289266,
+      "horizon_pc": 1.5662005728155,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 33.94586593399542,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.0007104135162289266,
+      "horizon_pc": 14.095805155339505,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 5.0,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.0007104135162289266,
+      "horizon_pc": 39.15501432038751,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 1.196171650708153,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.0028416540649157064,
+      "horizon_pc": 0.1957750716019375,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 4.243233241749428,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.0028416540649157064,
+      "horizon_pc": 1.7619756444174381,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 1.7619756444174381,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.0028416540649157064,
+      "horizon_pc": 4.8943767900484385,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 1.1709029528279824,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.0028416540649157064,
+      "horizon_pc": 0.391550143203875,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 8.486466483498855,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.0028416540649157064,
+      "horizon_pc": 3.5239512888348763,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 3.5239512888348763,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_low_assumed_field",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.0028416540649157064,
+      "horizon_pc": 9.788753580096877,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 1.196171650708153,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 108.37011083763115,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 5.0,
+      "longer_than_100_pc_at_30_mhz": true
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 1.196171650708153,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 108.37011083763115,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 5.0,
+      "longer_than_100_pc_at_30_mhz": true
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.0,
+      "rate_rad_m2_pc": 0.0,
+      "horizon_pc": null,
+      "horizon_unbounded": true,
+      "unrotated_brightness_k": 1.196171650708153,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.0009133888065800484,
+      "horizon_pc": 0.6090780005393611,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 13.201170085442666,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.0009133888065800484,
+      "horizon_pc": 5.4817020048542515,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 5.0,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.0009133888065800484,
+      "horizon_pc": 15.22695001348403,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 1.196171650708153,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.0009133888065800484,
+      "horizon_pc": 1.2181560010787222,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 26.40234017088533,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.0009133888065800484,
+      "horizon_pc": 10.963404009708503,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 5.0,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 0.25,
+      "rate_rad_m2_pc": 0.0009133888065800484,
+      "horizon_pc": 30.45390002696806,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 1.196171650708153,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.0036535552263201937,
+      "horizon_pc": 0.15226950013484028,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 3.3002925213606664,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.0036535552263201937,
+      "horizon_pc": 1.3704255012135629,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 1.3704255012135629,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 1.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.0036535552263201937,
+      "horizon_pc": 3.8067375033710076,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 0.9107022966439863,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 10.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.0036535552263201937,
+      "horizon_pc": 0.30453900026968056,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 6.600585042721333,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 30.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.0036535552263201937,
+      "horizon_pc": 2.7408510024271258,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 2.7408510024271258,
+      "longer_than_100_pc_at_30_mhz": false
+    },
+    {
+      "scenario": "LHB_density_high_assumed_field",
+      "freq_mhz": 50.0,
+      "phase_limit_rad": 2.0,
+      "absolute_field_projection": 1.0,
+      "rate_rad_m2_pc": 0.0036535552263201937,
+      "horizon_pc": 7.613475006742015,
+      "horizon_unbounded": false,
+      "unrotated_brightness_k": 1.196171650708153,
+      "longer_than_100_pc_at_30_mhz": false
+    }
+  ],
+  "rotation_coefficient_rad_m2_pc": 0.8119011614044875,
+  "scope": "Conditional uniform-rate scenarios; no local screen statistics or polarized emissivity are measured here.",
+  "limitations": [
+    "A uniform signed rotation rate defines the horizon convention.",
+    "Direction, finite emitting volume and emissivity are assumed.",
+    "No angular or stochastic depth statistics are inferred.",
+    "Brightness and its spectrum are illustrative and unrotated."
+  ]
+}
