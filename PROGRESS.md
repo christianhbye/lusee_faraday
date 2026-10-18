@@ -1,5 +1,25 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Implementation PR and report complete — 2026-10-17
+
+Completed the conditional-prediction implementation in PR 9 into
+`paper-implementation-plan`. The 15-page report contains all nine figure
+products, derived input/horizon/channel/exposure/decision tables and clean
+provenance. The final build at source `2bd3103a90b5` verifies 29 result
+records and 697 referenced artifacts. All pages and the final changed
+captions were inspected; every figure page passes the 7 pt font minimum.
+LaTeX and the mechanical audit have no overfull boxes, undefined references,
+placeholders or serious findings. The figures-to-report runner passes.
+
+The final PDF and generated tables/macros/manifests are committed under
+`report/paper-*`; exact build and visual checks are in
+`docs/paper-report-build.json` and `docs/paper-report-qa.json`. The full
+suite remains 227 passes plus its pre-existing two-port reference failure;
+smoke has 34 passes. Both user notebook edits and upstream tracked files
+are preserved. The external manuscript and future mission-data comparison
+remain separate work.
+
+
 ## Deterministic figure regeneration — 2026-10-17
 
 Removed PDF creation/modification timestamps from report figure writers so
