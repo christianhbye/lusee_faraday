@@ -2,8 +2,8 @@
 
 Branch: `implementation/depth-depolarization`. PR
 [9](https://github.com/christianhbye/lusee_faraday/pull/9) targets
-`paper-implementation-plan`. The numerical implementation is complete;
-report packaging is the final step. The PR remains open for the owner to
+`paper-implementation-plan`. The numerical implementation, report and
+reproduction workflow are complete. The PR remains open for the owner to
 review and merge. No approval is needed to finish or push this work.
 
 The [accepted plan](plans/2026-10-17-paper-implementation.md) records the

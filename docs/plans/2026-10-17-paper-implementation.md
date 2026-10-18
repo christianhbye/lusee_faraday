@@ -2,8 +2,8 @@
 
 Status: numerical implementation and the required scientific gates are
 complete on `implementation/depth-depolarization`, in
-[PR 9](https://github.com/christianhbye/lusee_faraday/pull/9). Report sources
-and the clean build are being packaged. See the
+[PR 9](https://github.com/christianhbye/lusee_faraday/pull/9). The implementation report, generated tables and clean-build provenance
+complete the deliverable in this repository's permitted report area. See the
 [reproduction guide](../paper-implementation-guide.md) and
 [handoff](../implementation-handoff.md) for the completed products.
 Planning branch: `paper-implementation-plan`, based on `3ec0f12`. The governing
