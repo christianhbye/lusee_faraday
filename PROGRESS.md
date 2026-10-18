@@ -1,5 +1,32 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Measured-spectrum predictions and observing controls — 2026-10-17
+
+Completed the simulated Q/I and U/I spectra with paired I-only/noise
+controls, common-fit residuals and conditional RMS bands. Both bands use
+preselected phase 0, with independent-noise repeated visits of the same sky.
+The calibrated-spectrum input path also processes independent-noise mock
+observations. Full Q/U cross covariance and complex C/J, correlated-power
+sampling variances, named-frequency pair products and parent/zoom ratio
+quantiles are exported. All 512-ensemble predictive-mean checks pass their
+preset five-SEM gate; these are conditional Gaussian illustrations.
+
+Figures now show Q/U covariance amplitudes as well as normalized correlations,
+the complete signed-column separability range, native I-only beam controls
+and same-phase repeat differences. The separate angular/fringe control uses
+one common ell=48 observing cutoff, finite time bins and actual-site night
+mask for sky, leakage and noise. A failed broad-spectrum trapezoid is
+retained; integrating its known smooth intrinsic spectrum exactly restores
+positivity without relaxing the gate.
+
+The complete integration suite has 227 passes and the same historical
+two-port reference failure as the initial baseline; the 34-check smoke
+suite passes. CI is green on Python 3.12/3.13/3.14. Records include
+`docs/faraday-separability-results.json`,
+`docs/common-observing-results.json` and
+`docs/paper-integration-validation.json`.
+
+
 ## Full signed local-column sensitivity — 2026-10-17
 
 Completed 520 cases across the 13 signed uniform mean columns implied by the
