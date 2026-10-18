@@ -1,5 +1,28 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Loaded receiver and joint radiometer backend — 2026-10-17
+
+Added explicit voltage/current PSD propagation through the full luseepy
+parallel antenna/load network. Correlated input sources are supported and
+checked for positivity after unit rescaling. Real science products and
+calibrated pseudo-Stokes use Hermitian quadratic matrices, retaining every
+inter-product covariance. Fine-frequency power weights propagate the full
+noise overlap, including frequency-dependent system power.
+
+Seven checks pass: independent Kirchhoff samples, exact Gaussian fourth-
+moment quadrature, production readout conventions, luseepy variances,
+integration scaling and 20,000 independent channelized voltage ensembles.
+All nine deliberate faults are caught. Evidence is in
+`docs/receiver-noise-validation.json`; definitions and units are in
+`docs/specs/2026-10-17-receiver-radiometer-noise.md`.
+
+Audited Tamura et al. (2024) for the input-referred EM voltage scales.
+The 2.2/3/5 nV/√Hz cases are a PA bench value, an integrated EM value and
+a requirement, respectively. Current noise, source correlations and thermal
+temperatures remain declared assumptions in `receiver-noise.json`; missing
+legacy Model54 files are not replaced by zero receiver noise. Native
+chromatic leakage for all three response variants is computing separately.
+
 ## Mixed-depth production predictions — 2026-10-17
 
 Computed and checkpointed all five prescribed profiles for both conditional
