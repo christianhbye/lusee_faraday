@@ -1,5 +1,27 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Full signed local-column sensitivity — 2026-10-17
+
+Completed 520 cases across the 13 signed uniform mean columns implied by the
+adopted density/field/path pairs, both dispersions, both phase distributions,
+five depth profiles and both bands. All preset depth, frequency, angular,
+band-limit and omitted-mode gates pass. Frequency and depth refinements
+bound the full Q/U covariance change, not just its diagonal. Eight
+predeclared extreme-column screen/slab cases also pass complete joint C/J,
+positivity and independent refinement checks.
+
+The intrinsic normalization is polarized emissivity times the full assumed
+5 pc volume (5 K RMS at 30 MHz for the unit-emissivity case). Depth integration
+supplies depolarization without a second horizon cut. The largest residual
+speckle/noise RMS ratio is 3.53e-4; including smooth polarization gives
+7.49e-3. The brighter HII-based normalization brackets remain conditional
+rescalings rather than measured local polarized priors. Full arrays retain
+all receiver cases, both phases and unavailable exposures as NaN. Records:
+`docs/local-medium-sensitivity-results.json`,
+`docs/local-medium-joint-validation.json` and
+`docs/local-medium-separability-results.json`.
+
+
 ## Exact marginal moments for the full local-column grid — 2026-10-17
 
 Added an allocation-efficient diagonal contraction of the complete four-branch
