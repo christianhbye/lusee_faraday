@@ -1,5 +1,20 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Matched spherical/flat deterministic geometry — 2026-10-17
+
+Added a spherical Gaussian source/analyzer control with both intrinsic spin
+phases parallel transported to the same center. Its separation probability
+is computed by spherical Legendre window convolution, independently of the
+flat-plane separation integral. The same source dilution and both complex
+moments recover the PR 7/8 deterministic benchmark across 20--35 and
+45--50 MHz. Worst covariance errors are 1.07e-4 at the original width and
+7.17e-6 with widths divided by four; quadrature refinement is below 1.62e-6
+on the flat RMS scale. Window mass/positivity are also checked. Removing
+source dilution makes both controls fail by more than unity. Evidence is
+in `docs/matched-geometry-results.json` and the explicit fault record.
+The isotropic random production sky remains a different intrinsic ensemble.
+
+
 ## Correlated-spectrum statistics — 2026-10-17
 
 Added the full Gaussian sampling variance of a mean-square spectrum,
