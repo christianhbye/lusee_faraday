@@ -1,0 +1,136 @@
+{
+  "fingerprint": "e58bc9f4f434f407deab073b3172ada55c8b70d46b1a6ff7dda99dce0f0ad7f9",
+  "provenance": {
+    "configuration": {
+      "covariance": {
+        "kernel_config": "configs/paper/kernels.json",
+        "kernel_record": "docs/paper-kernel-results.json",
+        "centers_mhz": [
+          30.0,
+          50.0
+        ],
+        "sidereal_turns": [
+          0.0,
+          0.25
+        ],
+        "intrinsic": {
+          "p_ref_k": 1.0,
+          "ref_mhz": 30.0,
+          "ell_scale": 8.0,
+          "ee_fraction": 0.8,
+          "eb_fraction": 0.1,
+          "turnover_mhz": 15.0
+        },
+        "screens": [
+          {
+            "label": "weak local illustration",
+            "parameters": {
+              "sigma_depth": 0.002,
+              "mean_depth": 0.01,
+              "theta0_rad": 0.01,
+              "alpha": 1.6666666666666667
+            },
+            "frequency_nodes": [
+              17,
+              33
+            ]
+          },
+          {
+            "label": "local illustration",
+            "parameters": {
+              "sigma_depth": 0.02,
+              "mean_depth": 0.01,
+              "theta0_rad": 0.01,
+              "alpha": 1.6666666666666667
+            },
+            "frequency_nodes": [
+              17,
+              33
+            ]
+          }
+        ],
+        "angular": {
+          "theta_min_rad": 1e-10,
+          "core_nodes": 600,
+          "body_nodes": 2000
+        },
+        "check_lmax": 64,
+        "frequency_block_size": 8,
+        "relative_tolerance": 0.01,
+        "absolute_off_tolerance": 1e-08,
+        "seed": 7421,
+        "figure_case": "local illustration",
+        "scope": "Illustrative conditional foreground screens, not inferred local plasma statistics. All intrinsic amplitude, angular structure, E/B and turnover parameters are assumptions. No mixed-depth real-beam or receiver-noise result is implied."
+      },
+      "sigma_depth": 5.0,
+      "mean_depth": 0.01,
+      "theta0_rad": 0.01,
+      "alpha": 1.6666666666666667,
+      "frequency_nodes": [
+        129,
+        257
+      ],
+      "relative_tolerance": 0.01,
+      "absolute_off_tolerance": 1e-18,
+      "quick": false
+    },
+    "sources": {
+      "scripts/faraday_covariance.py": "c028f158ce34140fbbb460b851ddce3ce5b9bd3cb66ece42d8b87304cfc54492",
+      "scripts/paper_common.py": "2257dfa4993fc7f5c31675c8530a61547d323c4dec7429b1ab9dacf8bf5f0b92",
+      "scripts/validate_strong_screen.py": "7572d2bc2d195c5a43c079b5f1b6156c88d7b877bb1c3f7d6a0f8d32cccf6b06",
+      "src/lusee_faraday/channelization.py": "df5655f80a4aed9a712a620724df94fae7d1bee3b887ebc2193fde301e3bb910",
+      "src/lusee_faraday/frequency_covariance.py": "a1332347e0110a389ec2e1f035ba054f3dd6687094b384a6b9702ccb87cef42e",
+      "src/lusee_faraday/observing.py": "db5ac0fe373eef2a6af104abf9986b412427729915cc665280dba2e18592ac7d",
+      "src/lusee_faraday/spin_covariance.py": "acc92b8c41fba40a2543ebc71b6f59c081d80177e73208c65ad4934d50e5609d",
+      "src/lusee_faraday/visibility_covariance.py": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa"
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "2.4.2",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+      },
+      "scipy": {
+        "version": "1.17.1",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+      },
+      "lusee": {
+        "version": "2.1.dev0",
+        "path": "/home/christian/Documents/research/lusee/luseepy/lusee/__init__.py",
+        "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef"
+      },
+      "croissant-sim": {
+        "version": "5.2.1",
+        "path": "/home/christian/Documents/projects/croissant/src/croissant/__init__.py",
+        "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c"
+      }
+    }
+  },
+  "results": [
+    {
+      "center_mhz": 30.0,
+      "passed": true,
+      "gates": {
+        "frequency": 0.21966937540199344,
+        "angular": 0.01178083546551664
+      },
+      "white_floor_worst_error_over_rms": 5.116365995139276e-10,
+      "minimum_central_zoom_q_correlation": 0.5550398942568,
+      "path": "generated_data/cache/strong_screen/e58bc9f4f434f407deab073b3172ada55c8b70d46b1a6ff7dda99dce0f0ad7f9/30.npz",
+      "sha256": "bdd47517ff227db01af890329337e2fcb103aa5ea949221f63f60dcd42c05814"
+    },
+    {
+      "center_mhz": 50.0,
+      "passed": true,
+      "gates": {
+        "frequency": 0.0103046459871342,
+        "angular": 0.011780834528703191
+      },
+      "white_floor_worst_error_over_rms": 5.748034195364431e-09,
+      "minimum_central_zoom_q_correlation": 0.9738055126345335,
+      "path": "generated_data/cache/strong_screen/e58bc9f4f434f407deab073b3172ada55c8b70d46b1a6ff7dda99dce0f0ad7f9/50.npz",
+      "sha256": "f4ddabf824fc3059bde496802372642f15bb52990ceda21afe2fb831062950b0"
+    }
+  ],
+  "all_passed": true,
+  "scope": "Strong foreground-column control, not a local-screen prior. Full frequency-pair solver is used when Hermite mode limits would be excessive. Same frozen loaded instrument and time average; actual folded central-parent zoom bins. Native covariance also tests the scalar white-floor normalization against all real readout kernels and cross terms."
+}

@@ -1,5 +1,18 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Strong-screen real-instrument controls — 2026-10-17
+
+The direct frequency-pair solver passes 129/257-node and doubled-angular
+checks at 30/50 MHz for an explicit sigma_phi=5 rad/m^2 foreground-column
+control. This is separate from the assumed local-screen range. The maximum
+frequency gate ratio is 0.220 and angular gate ratio 0.0118. The independently
+normalized scalar white-floor covariance agrees with the full real readouts
+to 5.8e-9 on their RMS scale, including cross terms and loading. Minimum
+central zoom Q correlations are 0.555 at 30 MHz and 0.974 at 50 MHz, showing
+a measurable-coordinate decorrelation contrast to the local cases. Evidence
+and checkpoints are in `docs/strong-screen-results.json`.
+
+
 ## Independent full-channel scale-mixture control — 2026-10-17
 
 Propagated a global 0.5/1.5 variance mixture through actual parent and folded
