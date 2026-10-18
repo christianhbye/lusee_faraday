@@ -1,5 +1,19 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Local input and lunar plasma audit — 2026-10-17
+
+Added primary-source checks of a nearby pulsar's historical DM/RM, its timing
+distance, HII-region total synchrotron emissivity and SELENE occultations.
+The audit identifies which path averages cannot determine few-parsec
+polarization or angular RM statistics. Conditional density/field/path and
+emissivity/polarization brackets are exported by `local_input_audit.py` in
+`docs/local-input-audit-results.json`. The deliberately large assumed lunar
+envelope (1000 cm^-3, 100 nT, 100 km) gives 2.6e-9 rad/m^2, or a complex
+polarization phase below 4.8e-6 rad at 10 MHz. This is a conditional envelope,
+not a measured universal nightside limit. The floor's emissivity, depth and
+angular-coherence degeneracies remain explicit.
+
+
 ## Nightside exposure and sidereal averaging — 2026-10-17
 
 Computed actual-site solar altitudes for complete 1/1024-sidereal-day bins
