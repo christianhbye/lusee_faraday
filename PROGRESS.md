@@ -1,5 +1,30 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Analytic two-port normalization reference — 2026-10-17
+
+Reproduced the historical short-dipole reference failure on main. Croissant
+commit `45a94b2` changed the default horizon from an inclusive Boolean mask
+to fractional visibility, giving the equatorial row half weight. The old
+two-degree fixture's stored monopole, 1.1971034513643168, includes that row
+fully. The upper-hemisphere integral of a unit short dipole's intensity,
+`I_xx = 1 - sin(theta)^2 cos(phi)^2`, is `4*pi/3`; its monopole is therefore
+`(4*pi/3)/sqrt(4*pi) = 1.1816359006036774`.
+
+`two_port_pair_alms` now supplies the hemisphere weights explicitly, with
+half weight at 90 degrees, so its normalization is independent of that
+upstream default. The replacement test derives the expected monopole from
+the integral and checks both autos on one-degree and two-degree grids.
+The four-port production path is unchanged. Independent solid-angle
+quadrature and checks against current croissant (`cc867f1`) and the CI
+revision (`1c4d6c5`) are recorded under
+`generated_data/historical-reference/`; neither upstream checkout was
+modified.
+
+Validation: all seven two-port tests pass with each croissant revision.
+Injecting full equatorial weight makes both analytic-reference cases fail;
+halving the pair-Stokes normalization also makes both fail. Black and
+flake8 pass.
+
 ## Paper framing adopted and plan to the paper — 2026-10-17
 
 Reviewed and fast-forward merged `paper-framing-redistribution` into main:
