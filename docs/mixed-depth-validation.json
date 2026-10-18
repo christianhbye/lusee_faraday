@@ -1,0 +1,23 @@
+{
+  "result_sha256": "8560ede51d15ec707c696507b415549b50c7388a9d87ec178e306e9c2bfe5d99",
+  "cases": 50,
+  "native_cases": 30,
+  "channel_cases": 20,
+  "all_passed": true,
+  "maximum_gate_ratios": {
+    "depth": 1.2316088648820882e-10,
+    "angular": 0.13347029477380978,
+    "bandlimit": 0.43010276622837107,
+    "frequency": 1.7887039809463703e-07,
+    "foreground_reference": 0.00021573882236038887
+  },
+  "max_mode_degree": 1553,
+  "max_tail_gate_ratio": 0.00037847591391865286,
+  "figure": {
+    "path": "report/figures/faraday_redistribution_spin2.pdf",
+    "sha256": "72e0d5c513687ced09395cd9291a8447fc6c7cfe6bae7a00e5cf0eddbbcd9c89",
+    "visual_inspection": "Six panels at 6.4 inch width; shared scales, floor markers, native-frequency points, legend and caption inspected."
+  },
+  "log_sha256": "88f332cb88e4fa6a7b75c0086b35a3f17127ec743bcdf167aba916668059260d",
+  "scope": "Conditional five-profile local bracket; all three parent and 192 zoom responses; independent depth/angular/beam/frequency/foreground-reference gates."
+}

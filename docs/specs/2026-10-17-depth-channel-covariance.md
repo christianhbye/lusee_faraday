@@ -48,3 +48,12 @@ depth integral and explicit Phase 1 double-depth covariance through the
 same angular/readout estimator. A deliberately truncated series checks
 the omitted-mode bound. Underflow and unresolved-depth controls must
 reject a broken or uncertified result.
+
+`mixed_depth_predictions.py compute` produces the 30 native-band and 20
+channel cases in `mixed-depth.json`. Every smooth/centered/total component
+passes its own comparison with refined depth order, doubled angular
+resolution and lmax 64/96. The measured-bin cases also compare 12.2/24.4 Hz
+fine grids and the f=1 cases compare the independent previous frequency-pair
+solver. Mode-tail bounds are propagated to the final readout covariance.
+`plot_mixed_depth.py` regenerates the six-panel real-instrument figure
+without invalidating numerical caches when its presentation changes.

@@ -1,5 +1,26 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Mixed-depth production predictions — 2026-10-17
+
+Computed and checkpointed all five prescribed profiles for both conditional
+local columns: 30 native-band cases at 10/30/50 MHz and 20 channel cases
+at 30/50 MHz, now including all three parents and all 192 zoom bins at
+two preselected sidereal phases. Smooth, centered and total covariances
+are checked separately. All 50 pass independent depth/angular/beam and,
+where applicable, frequency-grid refinements; foreground screens also
+match the previous frequency-pair solver. The largest gate ratios are
+0.430 (beam truncation), 0.133 (angular), 1.8e-7 (frequency) and 2.2e-4
+(foreground reference). The maximum mode degree is 1553; the propagated
+omitted-mode bound uses at most 3.8e-4 of its absolute error allowance.
+
+Built and inspected `report/figures/faraday_redistribution_spin2.pdf` with
+its PNG, caption and manifest. It separates smooth and centered Q/U power
+and loaded RMS for each profile. Results and verification are in
+`docs/mixed-depth-results.json` and `docs/mixed-depth-validation.json`.
+The intrinsic E/B sky, local dispersion/angular scale and low-frequency
+turnover remain explicit assumptions. Leakage/noise and the measured
+spectra are the next stage; these signal-only results are not a forecast.
+
 ## Mixed-depth spherical/channel backend — 2026-10-17
 
 Implemented the shared-column depth average as a normalized Hermite series
