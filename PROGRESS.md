@@ -1,5 +1,19 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Native chromatic I-only beam controls — 2026-10-17
+
+Computed all 30 native-frequency response slices for as-built, C4-symmetrized
+and diagonal-ZA instruments at 30/50 MHz, with two preselected sidereal
+phases and native nside=512 Haslam+CMB inputs. Beam and loading follow the
+actual FITS native coordinates. Every lmax-32/48 and physical-covariance
+gate passes; maximum truncation error is 5.47e-6 of I. Full complex pair
+alms and raw loaded matrices are checkpointed so later mismatch comparisons
+can use one common as-built calibration. The record is
+`docs/chromatic-leakage-results.json`. Fine-channel leakage is an explicit
+interpolation comparison in the following stage, not a measured beam model
+below native resolution.
+
+
 ## Stable Gaussian visibility illustrations — 2026-10-17
 
 Added mode-based draws of the joint unit-coefficient 1/i visibility
