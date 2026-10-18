@@ -233,7 +233,9 @@ Smaller points, to carry into the text:
 
 Each phase names its paper section, its deliverable, and the check that
 could come out the other way. Phases 1–3 are sequential; 4 and 5 can start
-in parallel with 3. Nothing here launches the old long computations.
+in parallel with 3. Nothing here launches the old long computations. The
+[feasibility assessment](2026-10-17-paper-plan-feasibility.md) says, per
+phase, what exists, what to build, what to watch and the expected effort.
 
 ### Phase 1 — Faraday horizon and depth depolarization (Section 4)
 
