@@ -1,0 +1,109 @@
+{
+  "fingerprint": "3e243eb2f17a7876d6cbb799a8968e78c05e61305d2d760c0635816597e2bf2f",
+  "provenance": {
+    "configuration": {
+      "response_path": "data/BGL_v16/lusee_bgl_v16_response_v3.fits",
+      "centers_mhz": [
+        30.0,
+        50.0,
+        10.0
+      ],
+      "lmax": 96,
+      "receiver_parameters": {},
+      "scope": "As-built native-channel response; default measured JFET impedance parameters resolved in provenance. No receiver noise model is implied.",
+      "resolved_receiver_parameters": {
+        "C_pf": [
+          33.79,
+          35.32,
+          34.89,
+          36.85
+        ],
+        "L_nh": [
+          35.0,
+          36.4,
+          34.7,
+          8.5
+        ],
+        "Rs_ohm": [
+          0.21,
+          2.16,
+          3.71,
+          1.65
+        ],
+        "n": [
+          1.39,
+          2.26,
+          4.35,
+          1.88
+        ],
+        "a": [
+          5.2e-12,
+          6.9e-20,
+          2.2e-38,
+          1.9e-16
+        ],
+        "Rp_ohm": [
+          1101000.0,
+          331000.0,
+          288000.0,
+          375000.0
+        ]
+      },
+      "receiver_channel_map": [
+        "fmpre0",
+        "fmpre2",
+        "fmpre5",
+        "fmpre7"
+      ],
+      "response_sha256": "8f79a754fc60c93b72cbd33f4fa9fefd88762142fe660fc68147d66524997da3"
+    },
+    "sources": {
+      "scripts/common.py": "6a67e8f3fa47970be630b77422be297cab7ac3da75bf807a89b7495ededfde45",
+      "scripts/paper_common.py": "2257dfa4993fc7f5c31675c8530a61547d323c4dec7429b1ab9dacf8bf5f0b92",
+      "scripts/paper_kernels.py": "d1e96bbb3506121dce5c47829c61b3c07dd233ad00cb7bba823be6aa79646098",
+      "src/lusee_faraday/config.py": "4de2a0bade4d689ea1dfe1144bd0155f4127a26603bda428013321ab8c47b2ff",
+      "src/lusee_faraday/conventions.py": "4ce2c3ae851cdff6f21b6085dd96fbd8b4347fd16f6078390916cb4d21b46bbd",
+      "src/lusee_faraday/engine.py": "02573e5da1d919ba08dce2199b7419fc7e6daa5483f1b26a474ccebc0ca9ba31",
+      "src/lusee_faraday/gaussian_screen.py": "9b9afe77efb0f80da38619f1cb221caead4527db7348b8daffcbf81faec5958a",
+      "src/lusee_faraday/instrument.py": "9ee06656728dc952128f998d09592064441cc52210412b6a634ac7c6fc84acac",
+      "src/lusee_faraday/polarimeter.py": "5cbb90dc311aa6c849499d2e7a8a52e9bcaef9c3bec666bfec8419a1f3a7582e",
+      "src/lusee_faraday/response.py": "92eeae1a28c7a97af198c8fa1b78d1a36acf014f71b2ee73cbfe4db413fe64ad",
+      "src/lusee_faraday/visibility_covariance.py": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa"
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "2.4.2",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+      },
+      "scipy": {
+        "version": "1.17.1",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+      },
+      "lusee": {
+        "version": "2.1.dev0",
+        "path": "/home/christian/Documents/research/lusee/luseepy/lusee/__init__.py",
+        "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef"
+      },
+      "croissant-sim": {
+        "version": "5.2.1",
+        "path": "/home/christian/Documents/projects/croissant/src/croissant/__init__.py",
+        "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c"
+      }
+    }
+  },
+  "arrays": {
+    "30": {
+      "path": "generated_data/cache/paper_kernels/3e243eb2f17a7876d6cbb799a8968e78c05e61305d2d760c0635816597e2bf2f/30mhz.npz",
+      "sha256": "7087e88c4228270d3a605ea7f3dfce573c7a243d9bff54aa7d99832c043bfba1"
+    },
+    "50": {
+      "path": "generated_data/cache/paper_kernels/3e243eb2f17a7876d6cbb799a8968e78c05e61305d2d760c0635816597e2bf2f/50mhz.npz",
+      "sha256": "9c351f3f1da9904afe767c6c979c7c330a1596f4e9d6c4771c3ef5d7de1d5c33"
+    },
+    "10": {
+      "path": "generated_data/cache/paper_kernels/3e243eb2f17a7876d6cbb799a8968e78c05e61305d2d760c0635816597e2bf2f/10mhz.npz",
+      "sha256": "1c97a2b791a53eb282a6403486bca0a8fe05ff35d361a03bd581c6b8a5aed9a1"
+    }
+  },
+  "scope": "Complex MEPA kernels, frozen beam and receiver per band. Kelvin uses a shared loaded 1 K enclosure pseudo-I reference."
+}

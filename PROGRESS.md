@@ -1,5 +1,41 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Spin-2 instrument and channel covariance — 2026-10-17
+
+Added explicit COSMO E/B helicity spectra, spin-2 correlation transforms,
+raw/centered Gaussian foreground-screen moments, all-pair covariance and
+relation, and selected-time harmonic contraction. Loaded real readout maps
+use the production instrument functions, frozen impedances and calibrated
+zenith vectors. Real readout kernels and precontracted angular weights
+avoid repeating a full harmonic transform for every frequency pair.
+
+The exact parent/zoom power operator shares coordinate selection with the
+existing integrator and retains folded images. Block projection includes
+all frequency pairs. Optional process interpolation preserves PSD through
+a congruence; independent nonstationary modes check its refinement against
+direct fine-grid integration. Conditional Gaussian visibility draws report
+their eigenvalue tolerance and keep the sky pattern shared across days.
+
+Twenty-four new scientific tests cover independent Wigner sums, direct
+Gaussian phase averages, finite real E/B harmonic ensembles, direct loaded
+instrument assembly, spectral-mode channel projections and draw statistics.
+The 31-test spin/channel/instrument focus and four compression tests pass;
+all 24 deliberate faults are caught in disposable copies. The full
+integration suite is running and its result will be recorded separately.
+
+Full complex as-built kernels at native 10/30/50 MHz and lmax 96 are now
+cached with response/dependency/source hashes and resolved receiver
+impedances. `paper_kernels.py` and the staged `faraday_covariance.py` driver
+implement the first foreground-screen predictions. Their final result
+record and inspected figure follow in the next increment. Reproduction and
+scope are in `docs/specs/2026-10-17-spin-channel-covariance.md`.
+
+The spherical phase calculation currently covers fractional foreground
+screens. Mixed-depth real-beam predictions, the full local-prior range,
+matched small-beam/non-Gaussian controls, chromatic I leakage, loaded
+receiver noise and the measured Q/I/U/I deliverable remain open. This does
+not complete Phase 2 or establish sensitivity.
+
 ## Depth-profile moments and first implementation figure — 2026-10-17
 
 Implemented screen fractions 0/0.6/1, a uniform slab and a truncated Gaussian
