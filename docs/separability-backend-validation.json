@@ -1,0 +1,66 @@
+{
+  "tests_passed": 6,
+  "fault_checks": {
+    "faults": [
+      {
+        "fault": "smooth template ignores channel response",
+        "source": "src/lusee_faraday/separability.py",
+        "test": "tests/test_separability.py::test_smooth_templates_include_actual_zoom_fold",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "63af2599321d0ee83925181096616bce4645e146ebdcf4a8680e887ed5af5054"
+      },
+      {
+        "fault": "flags receive unit weight",
+        "source": "src/lusee_faraday/separability.py",
+        "test": "tests/test_separability.py::test_weighted_smooth_fit_uses_weighted_mean_and_excludes_flags",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "cf344476997e29c2e50a820ad6a7280fb8c32ce64913c0457bcbaa72502cbec1"
+      },
+      {
+        "fault": "covariance projected on only one leg",
+        "source": "src/lusee_faraday/separability.py",
+        "test": "tests/test_separability.py::test_residual_covariance_matches_independent_finite_ensemble",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "4a42bf261fe60972d0f3161cf33e1cfd3711d5f1ee835b1e193c34464f68640b"
+      },
+      {
+        "fault": "ignore noisy intensity in ratio covariance",
+        "source": "src/lusee_faraday/separability.py",
+        "test": "tests/test_separability.py::test_intensity_uncertainty_and_cross_covariance_match_ratio_monte_carlo",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "6ae7e45bc5eb2f298b3037e8de9e49c1ada96f0490c975109f9b97f30ca76cd1"
+      },
+      {
+        "fault": "normalize before smooth subtraction",
+        "source": "src/lusee_faraday/separability.py",
+        "test": "tests/test_separability.py::test_smooth_subtraction_precedes_intensity_division",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "9b3e2aa06475b0123ee284afd4ae2afb89e6d9ea3b00b727506882ce4395afff"
+      },
+      {
+        "fault": "zero denominator becomes infinite ratio",
+        "source": "src/lusee_faraday/separability.py",
+        "test": "tests/test_separability.py::test_undefined_ratios_and_uninformative_fits_are_explicit",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "9bbf846731075e84a4a56ced9a1cf915ca19a410208de470a9bda0bbe4c6ff32"
+      }
+    ],
+    "all_caught": true,
+    "source_sha256": {
+      "src/lusee_faraday/separability.py": "6c209ff6dcf922655ff9022528b53a1b2bac786a800aa8abd3ad287d25069cf1"
+    },
+    "test_sha256": {
+      "tests/test_separability.py": "6825a7d7548124111ca250747490c41583539b2fb7855f893ce3ef9a292d1384"
+    },
+    "runner_sha256": "264658f56df4f94e10cfe9bd82d9a1f95adfa1ab96f6f4c9a017d2cd0fde5b26",
+    "helper_sha256": "8fe9fcca6654b373b8d72ca0914c1079fcba935bb1f4a198957b7ff8456704a5"
+  },
+  "test_log_sha256": "38c46efd0780b65884515ab8aa31b01c714b498e2e6db74b59a5d99b36145b6c",
+  "scope": "Common smooth estimator and full intensity-ratio Jacobian; production leakage, noise and signal comparisons follow."
+}

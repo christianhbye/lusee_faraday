@@ -1,5 +1,17 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Common measured-spectrum estimator — 2026-10-17
+
+Implemented physical-frequency smooth templates through the actual channel
+responses, weighted residual maps with explicit flags/rank/conditioning,
+two-leg covariance projection and subtraction in K before I normalization.
+Estimated-I ratios retain denominator uncertainty and I-Q/U correlations;
+undefined denominators and saturated fits remain explicit. Six tests pass,
+and all six deliberate faults are caught. Evidence is in
+`docs/separability-backend-validation.json`; the estimator definition is in
+`docs/specs/2026-10-17-common-measurement-estimator.md`.
+
+
 ## Loaded receiver and joint radiometer backend — 2026-10-17
 
 Added explicit voltage/current PSD propagation through the full luseepy
