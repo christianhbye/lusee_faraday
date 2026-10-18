@@ -1,5 +1,24 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Mixed-depth spherical/channel backend — 2026-10-17
+
+Implemented the shared-column depth average as a normalized Hermite series
+in `depth_channel_covariance.py`. Depth averaging and actual channel
+weights act on coefficients before covariance assembly, retaining the
+smooth/centered split and every helicity/readout term. Poisson tails bound
+omitted phase power; an absolute covariance bound follows through the
+angular/readout weights. Unresolved depth order or mode limits raise an
+error. A stable logarithmic/deviance form recovers high-order power even
+when the mean underflows, without relaxing the unit-power gate.
+
+Nine new tests pass against exact fractional screens, independent Gaussian
+averages of the slab sinc law, adaptive Gaussian-profile integration and
+explicit double-depth/angular/channel covariance. All ten deliberately
+injected faults are caught. Evidence is in
+`docs/depth-channel-backend-validation.json`; the derivation and scope are
+in `docs/specs/2026-10-17-depth-channel-covariance.md`. Production mixed-depth
+channel arrays and their independent resolution checks are the next task.
+
 ## Real-instrument channel predictions and mixture control — 2026-10-17
 
 Saved four conditional foreground-screen cases at 30/50 MHz with the

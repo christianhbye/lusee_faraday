@@ -1,0 +1,79 @@
+{
+  "tests_passed": 9,
+  "test_log_sha256": "e32e51039d77db401f9c2063a32d60d3b279a66f389a98f35e3afce6249189a1",
+  "fault_checks": {
+    "source": "src/lusee_faraday/depth_channel_covariance.py",
+    "source_sha256": "80f3095aa97ff9a4477a41f62124448900dcb7733b10e84a238556b0fe38b7a7",
+    "test_sha256": "731b44e90322ef3d681400f8ade39439599db481465b96287b4f0d391887cb5e",
+    "runner_sha256": "8ab37c170ec62eaae5d439b289a4ab58f11260deed31beeff2cfe23b26e6cb8e",
+    "faults": [
+      {
+        "fault": "lost Hermite phase",
+        "test": "tests/test_depth_channel_covariance.py::test_fractional_screen_matches_exact_phase_kernels",
+        "caught": true,
+        "log_sha256": "c58b2759072e98445eb94e4e6af0296571b5efb8a314018a1763878541dd74bb"
+      },
+      {
+        "fault": "replace slab by mean emitting depth",
+        "test": "tests/test_depth_channel_covariance.py::test_slab_phase_moments_match_direct_bivariate_gaussian_averages",
+        "caught": true,
+        "log_sha256": "3d78a1b7ba68deded9f660175f46989f38f98e47297466cb9605dd80e4bccdd3"
+      },
+      {
+        "fault": "unnormalized Gaussian depth average",
+        "test": "tests/test_depth_channel_covariance.py::test_truncated_gaussian_mean_matches_independent_adaptive_integral",
+        "caught": true,
+        "log_sha256": "76ebf9845f73cf730cbc06209d36a64e103ada459c9fc6a17d8ffff950580499"
+      },
+      {
+        "fault": "all modes inherit an underflowed mean",
+        "test": "tests/test_depth_channel_covariance.py::test_log_coefficients_recover_power_after_mean_underflows",
+        "caught": true,
+        "log_sha256": "737704a302c5646d2553537d6f2e869bb10b2de42f2c864ed68f7a8c44e1fe7d"
+      },
+      {
+        "fault": "silent Hermite truncation",
+        "test": "tests/test_depth_channel_covariance.py::test_log_coefficients_recover_power_after_mean_underflows",
+        "caught": true,
+        "log_sha256": "5c1abc43f71222916a6a548943ef41ec069fa0d11696196896b0d63a0d3ea130"
+      },
+      {
+        "fault": "drop nonconjugated readout term",
+        "test": "tests/test_depth_channel_covariance.py::test_loaded_angular_channels_match_direct_double_depth_covariance",
+        "caught": true,
+        "log_sha256": "19d7cca0cbacd8787ff37af43cdd64838e6afe3aec3501033c3c0a00731edb2c"
+      },
+      {
+        "fault": "drop intrinsic frequency amplitude",
+        "test": "tests/test_depth_channel_covariance.py::test_loaded_angular_channels_match_direct_double_depth_covariance",
+        "caught": true,
+        "log_sha256": "524617818dc6ba30a50087359310d10a4f8ebbdca0e10fed3efa1a147f377e01"
+      },
+      {
+        "fault": "claim zero omitted-mode bound",
+        "test": "tests/test_depth_channel_covariance.py::test_omitted_mode_bound_covers_actual_channel_error",
+        "caught": true,
+        "log_sha256": "8c4f1ded1d0ee85af4c7f5d2088ce8faf1b8e6a363df4e152d12a4d6a3ef0461"
+      },
+      {
+        "fault": "unresolved depth returns zeros",
+        "test": "tests/test_depth_channel_covariance.py::test_unresolved_and_invalid_depth_channels_are_rejected",
+        "caught": true,
+        "log_sha256": "a36ddd9978fc5bc43d604039d395e7025ca242589fad65f9c0e23bbae1f23b1d"
+      },
+      {
+        "fault": "phase relation conjugated",
+        "test": "tests/test_depth_channel_covariance.py::test_slab_phase_moments_match_direct_bivariate_gaussian_averages",
+        "caught": true,
+        "log_sha256": "c9b37e6b03bbbff27e14a82f3e0c2190e08882b5995a9535cce88688029adbed"
+      }
+    ],
+    "all_caught": true
+  },
+  "source_sha256": {
+    "src/lusee_faraday/depth_channel_covariance.py": "80f3095aa97ff9a4477a41f62124448900dcb7733b10e84a238556b0fe38b7a7",
+    "tests/test_depth_channel_covariance.py": "731b44e90322ef3d681400f8ade39439599db481465b96287b4f0d391887cb5e",
+    "scripts/validate_depth_channel_faults.py": "8ab37c170ec62eaae5d439b289a4ab58f11260deed31beeff2cfe23b26e6cb8e"
+  },
+  "scope": "Mixed-depth Hermite backend, independent phase averages and angular/channel covariance checks. Production mixed-depth arrays are the next task."
+}
