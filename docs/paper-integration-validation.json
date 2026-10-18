@@ -11,7 +11,8 @@
   },
   "smoke": {
     "passed": 34,
-    "log_sha256": "8dbfeaeee4c99ca7a0c6dbbdd6464b9c29f3cad675261d3594a5adf58ba255ef"
+    "log_sha256": "e2444e59b3f1daad940842e187aed24224289f8d40e2a12c12f2fd3516bb733f",
+    "log_path": "generated_data/paper_smoke_final.log"
   },
   "sources": {
     "src/lusee_faraday/__init__.py": "8b48e1f3e3b0e2e1d8e0862047c00eadce72ecd8e0982e307207197797d1f788",

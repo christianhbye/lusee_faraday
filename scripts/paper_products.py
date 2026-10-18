@@ -62,6 +62,7 @@ FIGURES = [
 def latex(value):
     mapping = {
         "_": r"\_",
+        "^": r"\textasciicircum{}",
         "%": r"\%",
         "&": r"\&",
         "#": r"\#",
@@ -87,7 +88,8 @@ def latex(value):
         "—": "---",
         "μ": r"$\mu$",
     }
-    return "".join(mapping.get(c, c) for c in str(value))
+    value = str(value).replace("/m^2", "/m²").replace("K^2", "K²")
+    return "".join(mapping.get(c, c) for c in value)
 
 
 def number(value, digits=2):
