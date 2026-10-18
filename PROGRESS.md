@@ -1,5 +1,15 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Exact marginal moments for the full local-column grid — 2026-10-17
+
+Added an allocation-efficient diagonal contraction of the complete four-branch
+Hermite operator. It agrees with full physical complex covariance, including
+the relation and global-mixture conditional-mean variance. Both tests pass;
+both deliberately injected faults are caught. Evidence is in
+`docs/moment-diagonal-validation.json`. The joint mode coefficients remain
+available for full cross-channel and cross-phase exports.
+
+
 ## Loaded chromatic measurement/noise stage — 2026-10-17
 
 Completed all nine voltage/current cases at both bands and both phases.
