@@ -1,5 +1,19 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## LuSEE Night observable predictions added to the plan — 2026-10-17
+
+Christian identified future LuSEE-Night mission data as the observational
+comparison target and requested an explicit measured spectra deliverable.
+Updated `docs/plans/2026-10-17-paper-implementation.md` to specify simulated
+parent/zoom Q/I and U/I spectra at 30/50 MHz, leakage-plus-noise controls,
+the common smooth subtraction, residuals and conditional prediction bands.
+The covariance companion covers channel correlations, parent/zoom variance
+and repeatability at the same lunar sidereal phase. Predictions and future
+data use the same calibration, channel responses and estimators; repeated
+observations are not independent sky realizations. Added the six-figure
+inventory and machine-readable statistical outputs. No implementation code
+or scientific computation was added.
+
 ## Detailed paper implementation plan — 2026-10-17
 
 Read Fable's two latest commits (`6f9bdf2`, `3ec0f12`) and mapped their
