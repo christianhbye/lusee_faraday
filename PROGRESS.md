@@ -1,5 +1,18 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Stable Gaussian visibility illustrations — 2026-10-17
+
+Added mode-based draws of the joint unit-coefficient 1/i visibility
+covariance before mixing phase coefficients across channels. This retains
+tiny fitted residuals without resolving the tiny eigenvalues of a nearly
+coherent full frequency covariance. Smooth and speckle samples are accumulated
+separately; one mode realization is shared by all channels and phases and
+reused on repeated nights. Two tests pass against 50,000 latent ensembles
+and a nearly annihilated smooth-fit control. Both deliberate faults are
+caught; evidence is in `docs/visibility-draw-validation.json`. These remain
+conditional Gaussian visibility illustrations, not resolved Faraday maps.
+
+
 ## Common-fit Gaussian and mixed-screen production — 2026-10-17
 
 Completed all 40 local-screen/profile/band models with the exact sidereal
