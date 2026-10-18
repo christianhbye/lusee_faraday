@@ -1,0 +1,314 @@
+{
+  "fingerprint": "c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434",
+  "provenance": {
+    "configuration": {
+      "mixed_config": "configs/paper/mixed-depth.json",
+      "mixed_record": "docs/mixed-depth-results.json",
+      "leakage_config": "configs/paper/leakage.json",
+      "leakage_record": "docs/chromatic-leakage-results.json",
+      "noise_config": "configs/paper/receiver-noise.json",
+      "exposure_record": "docs/observing-exposure.json",
+      "smooth_degree": 1,
+      "fit_weights": "uniform, no flags",
+      "variance_mixture_scales": [
+        0.5,
+        1.5
+      ],
+      "variance_mixture_weights": [
+        0.5,
+        0.5
+      ],
+      "seed": 20261017,
+      "figure_profile_index": 3,
+      "figure_screen_index": 1,
+      "figure_phase_index": 0,
+      "figure_lunations": 24,
+      "scope": "Conditional examples at 1 K intrinsic polarization RMS at 30 MHz, with assumed local columns and angular statistics. Linear and PCHIP native-beam interpolants define a model comparison, not a measured fine-channel response. Gaussian visibility illustrations retain the complex relation and both sidereal phases. No detection significance is inferred.",
+      "leakage_fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+      "noise": {
+        "voltage_asd_nv_rt_hz": [
+          2.2,
+          3.0,
+          5.0
+        ],
+        "voltage_reference_nv_rt_hz": 3.0,
+        "voltage_input_status": "Adopted scales from Tamura et al. (2024): PA bench ~2.2 nV/sqrt(Hz) with 50 ohm termination; integrated EM ~3; requirement 5. These are different reference cases, not a posterior range or flight calibration.",
+        "current_asd_pa_rt_hz": [
+          0.03,
+          0.1,
+          0.3
+        ],
+        "current_reference_pa_rt_hz": 0.1,
+        "current_input_status": "Explicit illustrative current-noise bracket. The published low-impedance voltage bench does not determine this spectrum with the actual coupled antenna load.",
+        "cross_port_noise_correlation": 0.0,
+        "voltage_current_noise_correlation": 0.0,
+        "correlation_input_status": "Assumed independent input sources; the library also supports an explicit positive-semidefinite joint voltage/current PSD.",
+        "moon_temperature_k": 100.0,
+        "antenna_temperature_k": 100.0,
+        "thermal_input_status": "Illustrative nightside temperatures for Moon and antenna-loss emission. Receiver load impedances do not implicitly add amplifier or resistor noise.",
+        "reference_plane": "One-sided loaded receiver-input voltage spectral covariance in V2/Hz. Voltage source is additive at the measurement plane; current sources enter the full parallel antenna/load network.",
+        "frequency_model": "Constant input ASDs within each narrow band, with loading frozen at the native band center. Actual chromatic I-only sky power remains frequency dependent.",
+        "sources": [
+          "https://doi.org/10.1029/2023RS007925"
+        ],
+        "legacy_spice_status": "LUSEE_DRIVE_DIR is unset; the Model54 noise and gain files are unavailable. The legacy Throughput model is not instantiated.",
+        "scope": "Conditional receiver-noise examples with measured EM voltage scales and assumed current noise/correlations/temperatures; no flight-noise precision claim."
+      },
+      "exposure_record_sha256": "f7faa524f15c6a92744144c5cae7c02662c641d37a6d3f6fe8da7a1f88970161",
+      "reference_sidereal_day_s": 2360592.0,
+      "production_sidereal_day_s": 2360591.5104
+    },
+    "sources": {
+      "scripts/chromatic_leakage.py": "b5c4020e2f60daaa29473de90ffa03ab8d0afcffd4bbcda6711aa114a0e66f6d",
+      "scripts/common.py": "6a67e8f3fa47970be630b77422be297cab7ac3da75bf807a89b7495ededfde45",
+      "scripts/measured_system.py": "fb7cbadecc02f5ba3144220cf964f43c676df7116f723d99517097393de4cdd6",
+      "scripts/paper_common.py": "2257dfa4993fc7f5c31675c8530a61547d323c4dec7429b1ab9dacf8bf5f0b92",
+      "scripts/residual_signal.py": "e4c24eeed63ea1895a1439a871dd1698520e17ff0e3bc2466864c2a4ccc5b846",
+      "src/lusee_faraday/channelization.py": "df5655f80a4aed9a712a620724df94fae7d1bee3b887ebc2193fde301e3bb910",
+      "src/lusee_faraday/config.py": "4de2a0bade4d689ea1dfe1144bd0155f4127a26603bda428013321ab8c47b2ff",
+      "src/lusee_faraday/conventions.py": "4ce2c3ae851cdff6f21b6085dd96fbd8b4347fd16f6078390916cb4d21b46bbd",
+      "src/lusee_faraday/engine.py": "02573e5da1d919ba08dce2199b7419fc7e6daa5483f1b26a474ccebc0ca9ba31",
+      "src/lusee_faraday/instrument.py": "9ee06656728dc952128f998d09592064441cc52210412b6a634ac7c6fc84acac",
+      "src/lusee_faraday/observing.py": "db5ac0fe373eef2a6af104abf9986b412427729915cc665280dba2e18592ac7d",
+      "src/lusee_faraday/polarimeter.py": "5cbb90dc311aa6c849499d2e7a8a52e9bcaef9c3bec666bfec8419a1f3a7582e",
+      "src/lusee_faraday/receiver_noise.py": "ec07c30e72ff90061f48635106d965af83a663067b99a61d2cbb295952c0ea56",
+      "src/lusee_faraday/separability.py": "6c209ff6dcf922655ff9022528b53a1b2bac786a800aa8abd3ad287d25069cf1"
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "2.4.2",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+      },
+      "scipy": {
+        "version": "1.17.1",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+      },
+      "lusee": {
+        "version": "2.1.dev0",
+        "path": "/home/christian/Documents/research/lusee/luseepy/lusee/__init__.py",
+        "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef"
+      },
+      "croissant-sim": {
+        "version": "5.2.1",
+        "path": "/home/christian/Documents/projects/croissant/src/croissant/__init__.py",
+        "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c"
+      }
+    }
+  },
+  "leakage": [
+    {
+      "response": "asbuilt",
+      "center_mhz": 30.0,
+      "native_mhz": [
+        29.0,
+        29.5,
+        30.0,
+        30.5,
+        31.0
+      ],
+      "reference_relative_error": 0.0,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/asbuilt_30.npz",
+      "sha256": "41fb83c8fa9f732017e9732073696fbe2c69994998ca02afc427582f4863aa4c"
+    },
+    {
+      "response": "c4sym",
+      "center_mhz": 30.0,
+      "native_mhz": [
+        29.0,
+        29.5,
+        30.0,
+        30.5,
+        31.0
+      ],
+      "reference_relative_error": 0.0,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/c4sym_30.npz",
+      "sha256": "a349412b8fb10c1366c0e47168eccf065dde4b6c27a5ea44ef51fb9305c0f395"
+    },
+    {
+      "response": "diagza",
+      "center_mhz": 30.0,
+      "native_mhz": [
+        29.0,
+        29.5,
+        30.0,
+        30.5,
+        31.0
+      ],
+      "reference_relative_error": 0.0,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/diagza_30.npz",
+      "sha256": "af4acb877bb30e2b5ca0e5d20a571510d359665c2b1cb6f3cde0a4ff1ff79496"
+    },
+    {
+      "response": "asbuilt",
+      "center_mhz": 50.0,
+      "native_mhz": [
+        49.0,
+        49.5,
+        50.0,
+        50.5,
+        51.0
+      ],
+      "reference_relative_error": 0.0,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/asbuilt_50.npz",
+      "sha256": "5f4ec88c7759e3f5e7945c94760fc5f06c8e216aae35d7fca79e0af9237cca76"
+    },
+    {
+      "response": "c4sym",
+      "center_mhz": 50.0,
+      "native_mhz": [
+        49.0,
+        49.5,
+        50.0,
+        50.5,
+        51.0
+      ],
+      "reference_relative_error": 0.0,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/c4sym_50.npz",
+      "sha256": "250c35887a6f4dfb141fb22de58a9aa0c94f72ecac7c6a4255dc8a61d1241a47"
+    },
+    {
+      "response": "diagza",
+      "center_mhz": 50.0,
+      "native_mhz": [
+        49.0,
+        49.5,
+        50.0,
+        50.5,
+        51.0
+      ],
+      "reference_relative_error": 0.0,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/diagza_50.npz",
+      "sha256": "5b58844ced4bbb70dc01d196a3fee387027b7cd557d3c4f1650b21c74c2b319a"
+    }
+  ],
+  "noise": [
+    {
+      "center_mhz": 30.0,
+      "voltage_nv_rt_hz": 2.2,
+      "current_pa_rt_hz": 0.03,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_2.2_0.03.npz",
+      "sha256": "192bc1af2d5a166105b9447124cd4c5749280d63e13e8af8f44b76c76526aa10"
+    },
+    {
+      "center_mhz": 30.0,
+      "voltage_nv_rt_hz": 2.2,
+      "current_pa_rt_hz": 0.1,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_2.2_0.1.npz",
+      "sha256": "2efa35b864a7ed6063c33aa7015bd509ebb5a8cf53a4da9d0a8c6bebead55731"
+    },
+    {
+      "center_mhz": 30.0,
+      "voltage_nv_rt_hz": 2.2,
+      "current_pa_rt_hz": 0.3,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_2.2_0.3.npz",
+      "sha256": "63eccc0146b49f744ca3ad74aec98646f545fdc98f28cc7ca138563fc6d638aa"
+    },
+    {
+      "center_mhz": 30.0,
+      "voltage_nv_rt_hz": 3.0,
+      "current_pa_rt_hz": 0.03,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_3_0.03.npz",
+      "sha256": "88d26bf15919ca0b1a0ebc8c97c533783de15d68fdcfa10ff58222e4db82f622"
+    },
+    {
+      "center_mhz": 30.0,
+      "voltage_nv_rt_hz": 3.0,
+      "current_pa_rt_hz": 0.1,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_3_0.1.npz",
+      "sha256": "bd9fa22c4249f5769bf513e86035febea35abb347a3d5e4ebf97ed006f37ebf9"
+    },
+    {
+      "center_mhz": 30.0,
+      "voltage_nv_rt_hz": 3.0,
+      "current_pa_rt_hz": 0.3,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_3_0.3.npz",
+      "sha256": "75246448b206b76eaa6823bb0d5155689c9064012df8fae73869b6e30b3cf81f"
+    },
+    {
+      "center_mhz": 30.0,
+      "voltage_nv_rt_hz": 5.0,
+      "current_pa_rt_hz": 0.03,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_5_0.03.npz",
+      "sha256": "b1c062ac43f41c4ba72d3a160deb5e2c0a7f0d95b6ba45c2ef99d2d878fba955"
+    },
+    {
+      "center_mhz": 30.0,
+      "voltage_nv_rt_hz": 5.0,
+      "current_pa_rt_hz": 0.1,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_5_0.1.npz",
+      "sha256": "7d9de3a3063902aae959d83cb8dc5ab627c296a49f6d16cb4d74ed4ab4d2fcb5"
+    },
+    {
+      "center_mhz": 30.0,
+      "voltage_nv_rt_hz": 5.0,
+      "current_pa_rt_hz": 0.3,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_5_0.3.npz",
+      "sha256": "20a67328a1e6c7d475db2a99b7e286abcd00e2833a4acc8d8dc5cae1b4568f9e"
+    },
+    {
+      "center_mhz": 50.0,
+      "voltage_nv_rt_hz": 2.2,
+      "current_pa_rt_hz": 0.03,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_2.2_0.03.npz",
+      "sha256": "809f957bd369a313eb1bf6cdb46549ba791ef32de20e1f0ef931cefd8b506966"
+    },
+    {
+      "center_mhz": 50.0,
+      "voltage_nv_rt_hz": 2.2,
+      "current_pa_rt_hz": 0.1,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_2.2_0.1.npz",
+      "sha256": "6f854e7484e0049733ffa5bf69a7e63f738ad81d6996ab0c197b888a0898581d"
+    },
+    {
+      "center_mhz": 50.0,
+      "voltage_nv_rt_hz": 2.2,
+      "current_pa_rt_hz": 0.3,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_2.2_0.3.npz",
+      "sha256": "8dd17fa9e608ab098bb3d9187e0d0bde2d9f9cd2d47c5d210e31547866d6fd1f"
+    },
+    {
+      "center_mhz": 50.0,
+      "voltage_nv_rt_hz": 3.0,
+      "current_pa_rt_hz": 0.03,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_3_0.03.npz",
+      "sha256": "1888a8b6d4385dc8ccc0c1a0380f21801165db285a4f78ab2b3d03a2a43e6afc"
+    },
+    {
+      "center_mhz": 50.0,
+      "voltage_nv_rt_hz": 3.0,
+      "current_pa_rt_hz": 0.1,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_3_0.1.npz",
+      "sha256": "ad62e98244f40a1948817b1cd0ee7626f86bbd9c8d75ccfee0c508648046a6ed"
+    },
+    {
+      "center_mhz": 50.0,
+      "voltage_nv_rt_hz": 3.0,
+      "current_pa_rt_hz": 0.3,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_3_0.3.npz",
+      "sha256": "5d3ee5f86269e09cbc9a59580077cdc9670d033a12585608fbecb93e8ad25bc1"
+    },
+    {
+      "center_mhz": 50.0,
+      "voltage_nv_rt_hz": 5.0,
+      "current_pa_rt_hz": 0.03,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_5_0.03.npz",
+      "sha256": "39335ebb05c141f5c01aa81bf0576dda210c07545e8e11f943f3d979843179cd"
+    },
+    {
+      "center_mhz": 50.0,
+      "voltage_nv_rt_hz": 5.0,
+      "current_pa_rt_hz": 0.1,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_5_0.1.npz",
+      "sha256": "e041d0da88b7c726b2dd0913f94faa9cefaa70883e85dba439b90da4e9a7d5e5"
+    },
+    {
+      "center_mhz": 50.0,
+      "voltage_nv_rt_hz": 5.0,
+      "current_pa_rt_hz": 0.3,
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_5_0.3.npz",
+      "sha256": "4d3fed095fcf3fcd5519bdbfed2e5d8066ea08b33fae371122d0175917f5ec3f"
+    }
+  ],
+  "all_passed": true,
+  "scope": "Native nside=512 Haslam+CMB; full chromatic beam/loading; as-built calibration and common MEPA boxcar for all variants. Point references use the upstream engine's own rotation clock; production uses the pinned FFT-ready sidereal clock. Both periods are recorded without modifying upstream. Linear and PCHIP interpolation are model choices. Noise uses full chromatic I-only power plus separate frozen Moon, loss and voltage/current terms. Per-second covariance is divided by available exposure; zero exposure is unavailable. Bias spectra are exported and assumed calibrated for sky-I ratios. Polarized sky power is omitted from system noise and must be small compared with I for these conditional examples."
+}

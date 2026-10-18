@@ -1,5 +1,23 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Loaded chromatic measurement/noise stage — 2026-10-17
+
+Completed all nine voltage/current cases at both bands and both phases.
+Loaded sky, separate Moon/loss thermal power and amplifier PSDs are added
+once; the same as-built calibration and physical-frequency fit act on the
+linear/PCHIP leakage models and noise. All 36 raw/residual phase covariance
+pairs pass positivity and independent R C R^T checks; deliberately dropping
+one covariance leg makes every case fail. Arrays store covariance times
+integration in K^2 s, divided by available exposure to obtain K^2.
+
+The original native engine's clock is reproduced exactly before switching
+to the pinned periodic production grid. Its lunar period differs by 0.4896 s;
+the wrong-clock fault is caught without changing upstream or relaxing the
+reference gate. Records are `docs/measured-system-results.json`,
+`docs/measured-system-validation.json` and
+`docs/native-clock-reference-validation.json`.
+
+
 ## Real-observable statistics guard — 2026-10-17
 
 The correlated-power statistic now rejects complex covariance or mean

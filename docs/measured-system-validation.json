@@ -1,0 +1,389 @@
+{
+  "input_record_sha256": "094938d1e7b25209979286b98e27ffa6de974a1621b5d529489e2afa3db1149b",
+  "validator_sha256": "04db5668f93f96c9c90a65dbc10e10c8319c7be6a132559fa916978c8c49aa52",
+  "results": [
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_2.2_0.03.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 3.421808146197087e-14,
+          "minimum_raw_eigenvalue_k2_s": -7.280321801487861e-11,
+          "minimum_residual_eigenvalue_k2_s": -5.852829133684753e-09,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 2.2472763062872248e-14,
+          "minimum_raw_eigenvalue_k2_s": -5.4972358322840996e-11,
+          "minimum_residual_eigenvalue_k2_s": -5.545857397229509e-09,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_2.2_0.1.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 3.6507597960301456e-14,
+          "minimum_raw_eigenvalue_k2_s": -1.1767999768910397e-10,
+          "minimum_residual_eigenvalue_k2_s": -5.9876553517672595e-09,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 2.3794593912483404e-14,
+          "minimum_raw_eigenvalue_k2_s": -3.2985360200417523e-11,
+          "minimum_residual_eigenvalue_k2_s": -5.572495409201249e-09,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_2.2_0.3.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 3.332613535064348e-14,
+          "minimum_raw_eigenvalue_k2_s": -6.332960056865657e-11,
+          "minimum_residual_eigenvalue_k2_s": -5.90239276701958e-09,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 2.2849550266478928e-14,
+          "minimum_raw_eigenvalue_k2_s": -6.36327728839297e-11,
+          "minimum_residual_eigenvalue_k2_s": -5.552587787452424e-09,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_3_0.03.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 3.131248989329144e-14,
+          "minimum_raw_eigenvalue_k2_s": -1.1871601424043087e-10,
+          "minimum_residual_eigenvalue_k2_s": -6.088374050911699e-09,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 1.7692513377980138e-14,
+          "minimum_raw_eigenvalue_k2_s": -1.3338059391948488e-10,
+          "minimum_residual_eigenvalue_k2_s": -5.517798131618713e-09,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_3_0.1.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 3.155137456956706e-14,
+          "minimum_raw_eigenvalue_k2_s": -1.3363678844526088e-10,
+          "minimum_residual_eigenvalue_k2_s": -6.114560869418861e-09,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 1.9479559172812366e-14,
+          "minimum_raw_eigenvalue_k2_s": -3.044851402675658e-10,
+          "minimum_residual_eigenvalue_k2_s": -5.522453101837554e-09,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_3_0.3.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 3.14306185188693e-14,
+          "minimum_raw_eigenvalue_k2_s": -8.361339018989052e-11,
+          "minimum_residual_eigenvalue_k2_s": -6.1942438208680545e-09,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 2.1802053991103462e-14,
+          "minimum_raw_eigenvalue_k2_s": -1.677153890750514e-10,
+          "minimum_residual_eigenvalue_k2_s": -5.4285586761213e-09,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_5_0.03.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 2.1588928956722267e-14,
+          "minimum_raw_eigenvalue_k2_s": -1.4627656679805706e-10,
+          "minimum_residual_eigenvalue_k2_s": -6.37220012826406e-09,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 4.305714953081267e-14,
+          "minimum_raw_eigenvalue_k2_s": -1.6935524878369828e-10,
+          "minimum_residual_eigenvalue_k2_s": -9.261381945119702e-09,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_5_0.1.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 2.3499358745248837e-14,
+          "minimum_raw_eigenvalue_k2_s": -9.373915699543932e-11,
+          "minimum_residual_eigenvalue_k2_s": -6.466031039412439e-09,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 3.837052014503078e-14,
+          "minimum_raw_eigenvalue_k2_s": -1.6998171732813505e-10,
+          "minimum_residual_eigenvalue_k2_s": -9.5978606987702e-09,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_5_0.3.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 2.368956941713126e-14,
+          "minimum_raw_eigenvalue_k2_s": -1.4300608541411855e-10,
+          "minimum_residual_eigenvalue_k2_s": -6.52866407447667e-09,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 4.0273137532605914e-14,
+          "minimum_raw_eigenvalue_k2_s": -2.829500327452038e-10,
+          "minimum_residual_eigenvalue_k2_s": -9.278033904504968e-09,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_2.2_0.03.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 2.8624897287713744e-14,
+          "minimum_raw_eigenvalue_k2_s": -2.921031480196979e-10,
+          "minimum_residual_eigenvalue_k2_s": -1.2115082325406792e-08,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 2.651179381307201e-14,
+          "minimum_raw_eigenvalue_k2_s": -3.520170586197057e-10,
+          "minimum_residual_eigenvalue_k2_s": -1.1784047862259304e-08,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_2.2_0.1.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 2.7958943677002492e-14,
+          "minimum_raw_eigenvalue_k2_s": -4.658344549295909e-10,
+          "minimum_residual_eigenvalue_k2_s": -1.2201676525370195e-08,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 2.7906897717992947e-14,
+          "minimum_raw_eigenvalue_k2_s": -2.727981602682008e-10,
+          "minimum_residual_eigenvalue_k2_s": -1.1844224062500593e-08,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_2.2_0.3.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 2.984263886750175e-14,
+          "minimum_raw_eigenvalue_k2_s": -1.7007151325087212e-10,
+          "minimum_residual_eigenvalue_k2_s": -1.245453151093768e-08,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 2.801199349751986e-14,
+          "minimum_raw_eigenvalue_k2_s": -2.2327676218344801e-10,
+          "minimum_residual_eigenvalue_k2_s": -1.1949048859289721e-08,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_3_0.03.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 4.0362626631718164e-14,
+          "minimum_raw_eigenvalue_k2_s": -1.2403871161092076e-09,
+          "minimum_residual_eigenvalue_k2_s": -3.661889601211894e-08,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 4.1211920630611404e-14,
+          "minimum_raw_eigenvalue_k2_s": -5.934123059448497e-10,
+          "minimum_residual_eigenvalue_k2_s": -3.760758037346597e-08,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_3_0.1.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 4.144492299145565e-14,
+          "minimum_raw_eigenvalue_k2_s": -1.447234376931125e-09,
+          "minimum_residual_eigenvalue_k2_s": -3.7131749018739235e-08,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 4.621164672831398e-14,
+          "minimum_raw_eigenvalue_k2_s": -1.4156331179326038e-09,
+          "minimum_residual_eigenvalue_k2_s": -3.746014489866396e-08,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_3_0.3.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 4.005119421637896e-14,
+          "minimum_raw_eigenvalue_k2_s": -9.299867162553703e-10,
+          "minimum_residual_eigenvalue_k2_s": -3.681198076906305e-08,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 3.9240158295760275e-14,
+          "minimum_raw_eigenvalue_k2_s": -9.285241728814484e-10,
+          "minimum_residual_eigenvalue_k2_s": -3.7893562508939e-08,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_5_0.03.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 2.1608862531187356e-14,
+          "minimum_raw_eigenvalue_k2_s": -3.2550341509932096e-09,
+          "minimum_residual_eigenvalue_k2_s": -1.8942456405050063e-07,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 2.327877506016116e-14,
+          "minimum_raw_eigenvalue_k2_s": -6.042080736683117e-09,
+          "minimum_residual_eigenvalue_k2_s": -1.834186085215319e-07,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_5_0.1.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 1.974598773400068e-14,
+          "minimum_raw_eigenvalue_k2_s": -5.289237732187824e-09,
+          "minimum_residual_eigenvalue_k2_s": -1.8567341606623326e-07,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 2.013794548516976e-14,
+          "minimum_raw_eigenvalue_k2_s": -8.762877687907297e-09,
+          "minimum_residual_eigenvalue_k2_s": -1.8445226850833638e-07,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    },
+    {
+      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_5_0.3.npz",
+      "diagnostics": [
+        {
+          "phase_index": 0,
+          "projection_error_over_raw_scale": 1.9000502349022523e-14,
+          "minimum_raw_eigenvalue_k2_s": -6.260177674034533e-09,
+          "minimum_residual_eigenvalue_k2_s": -1.8944970509419034e-07,
+          "passed": true
+        },
+        {
+          "phase_index": 1,
+          "projection_error_over_raw_scale": 2.087656565832888e-14,
+          "minimum_raw_eigenvalue_k2_s": -7.770628263889986e-09,
+          "minimum_residual_eigenvalue_k2_s": -1.8309889774082625e-07,
+          "passed": true
+        }
+      ],
+      "component_accounting_relative_error": 0.0,
+      "passed": true
+    }
+  ],
+  "all_passed": true,
+  "injected_single_covariance_leg": false,
+  "covariance_coefficient_units": "K^2 s; divide by exposure_s to get K^2",
+  "voltage_spectral_covariance_units": "one-sided V^2/Hz at loaded receiver input",
+  "scope": "All nine voltage/current cases, both bands and both phases. Full raw and residual joint covariance positivity; independent R C R^T comparison to filtering coefficients; sky, Moon/loss and amplifier power added exactly once at the stored center."
+}

@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "native_reference_relative_error": 0.0,
+  "incorrect_clock_fault_caught": true,
+  "upstream_period_s": 2360592.0,
+  "pinned_period_s": 2360591.5104,
+  "period_difference_s": 0.4895999999716878,
+  "source_sha256": {
+    "scripts/measured_system.py": "fb7cbadecc02f5ba3144220cf964f43c676df7116f723d99517097393de4cdd6",
+    "scripts/validate_native_clock_reference.py": "59515625b7f6db94d7d4c3fe272c9d80b90be71820997d61d1a9b18f0dc18e81"
+  },
+  "scope": "The saved native snapshot uses the upstream engine clock and its actual TDB elapsed timestamps. That geometry is reproduced before averaging on the common pinned FFT-ready clock; both periods remain explicit and upstream checkouts are untouched."
+}
