@@ -48,7 +48,7 @@ RECORDS = [
 ]
 FIGURES = [
     ("faraday_instrument_leakage", "Instrument and diffuse leakage"),
-    ("depth_depolarization", "Depth-profile benchmark"),
+    ("paper_depth_depolarization", "Depth-profile benchmark"),
     ("faraday_redistribution_spin2", "Real-instrument redistribution"),
     ("faraday_measured_spectra", "Simulated measured spectra"),
     ("faraday_channel_covariance", "Frequency correlations"),

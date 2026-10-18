@@ -103,6 +103,7 @@ run_stage local .venv/bin/python scripts/local_medium_separability.py
 run_stage local .venv/bin/python scripts/validate_local_medium_joint.py
 run_stage science .venv/bin/python scripts/science_product_predictions.py
 run_stage observations .venv/bin/python scripts/faraday_separability.py
+run_stage figures .venv/bin/python scripts/plot_paper_depth.py
 run_stage figures .venv/bin/python scripts/plot_measurement_predictions.py
 run_stage figures .venv/bin/python scripts/plot_local_medium_predictions.py
 run_stage figures .venv/bin/python scripts/common_observing_control.py plot

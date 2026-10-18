@@ -37,7 +37,7 @@ input in Table~\ref{tab:inputs}.
 
 \section{Physical model and local inputs}
 
-Write the COSMO polarization as
+In the Healpy/COSMO sky convention, write the complex linear polarization as
 \begin{equation}
  P(\hat n,x)=P_0(\hat n)\int_0^1 w(f)
        \exp[2ifx\Phi(\hat n)]\,df,\qquad x=\lambda^2.
@@ -49,6 +49,17 @@ each sightline. They bracket depth mixing with one intrinsic polarization
 angle; they do not represent independent emitting layers or a complete
 three-dimensional turbulent medium.
 
+The intrinsic spin-2 sky is statistically isotropic, independent of the
+rotating column, and has the assumed E/B spectra in Table~\ref{tab:inputs}.
+E and B denote its parity-even and parity-odd polarization modes.
+For a Gaussian column, $\mu=E[\Phi]$, $\sigma_\Phi^2=\mathrm{Var}(\Phi)$,
+and the adopted angular covariance is
+\begin{equation}
+ K_\Phi(\theta)=\sigma_\Phi^2
+ \exp\!\left[-\left(\frac{2\sin(\theta/2)}{\theta_0}\right)^\alpha\right].
+\end{equation}
+The non-Gaussian control mixes global column variances at the same RM
+covariance; its phase moments are evaluated conditionally before mixing.
 For $A=\int w(f)e^{2ifx\Phi}df$, use $A=m+\delta A$ with
 $m=E_\Phi A$. The smooth field is $mP_0$ and the speckle is
 $\delta A P_0$. An isotropic intrinsic sky can have zero ensemble mean
@@ -63,7 +74,7 @@ or an angularly integrated centered covariance.
 \input{paper-inputs.tex}
 
 The signed-column calculation uses \MeanCaseCount\ mean columns between
-minus \MaxMeanDepth\ and plus \MaxMeanDepth rad m$^{-2}$. They follow from
+minus \MaxMeanDepth\ and plus \MaxMeanDepth\ rad m$^{-2}$. They follow from
 extending each adopted density/field pair uniformly over \EmittingPathPc\ pc
 with both field signs and the stated projection fractions. This is a
 sensitivity grid, not a measured distribution of local columns. Its intrinsic
@@ -171,7 +182,7 @@ I-only sky power.
 
 Every phase-bin exposure counts complete bins that are nightside at the
 actual lunar site, at both edges and at the center. A declared solar-altitude
-margin and electronics duty apply before averaging. MEPA harmonic kernels
+margin and electronics duty apply before averaging. Harmonic kernels in the lunar mean-Earth/polar-axis (MEPA) frame
 receive the corresponding exact boxcar sinc factor on both signal and
 leakage paths. The calendar origin is a simulation coordinate, not a launch
 date. An unavailable phase has no reported noise prediction.
