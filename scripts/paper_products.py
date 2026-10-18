@@ -63,6 +63,8 @@ def latex(value):
     mapping = {
         "_": r"\_",
         "^": r"\textasciicircum{}",
+        "|": r"\textbar{}",
+        "~": r"\textasciitilde{}",
         "%": r"\%",
         "&": r"\&",
         "#": r"\#",
