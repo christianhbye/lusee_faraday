@@ -508,7 +508,7 @@ def generate():
     table(
         report / "paper-resolution.tex",
         "Nominal narrow-channel top-hat first-zero Faraday depth "
-        "pi/Delta(lambda squared), in rad m$^{-2}$. This is a resolution "
+        r"$\pi/\Delta(\lambda^2)$, in rad m$^{-2}$. This is a resolution "
         "scale; actual predictions use the measured folded power weights "
         "rather than this top-hat approximation.",
         "tab:resolution",

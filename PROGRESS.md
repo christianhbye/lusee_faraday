@@ -1,5 +1,18 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Report build and printed-figure checks — 2026-10-17
+
+The isolated report build verifies 29 result records and the complete hashes
+of their referenced artifacts. LaTeX passes twice with no overfull boxes,
+undefined references or oversized floats; the mechanical prose/reference
+audit has no serious findings. All fifteen pages were inspected. The nine
+figures now have at least 7 pt text at their printed 6.4-inch width, including
+logarithmic tick labels. The preserved flat-plane benchmark has a separate
+report renderer, leaving its original result and prototype figure unchanged.
+The final PDF and its derived tables/provenance are committed after this
+source; `docs/paper-report-build.json` identifies the exact build revision.
+
+
 ## Report source and complete reproduction runner — 2026-10-17
 
 Prepared the numerical/figure manifest verifier, derived tables and LaTeX

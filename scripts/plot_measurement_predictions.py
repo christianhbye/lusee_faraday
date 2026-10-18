@@ -8,6 +8,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
+from matplotlib.ticker import FuncFormatter, LogLocator, NullFormatter
 import numpy as np
 
 from common import FIG_DIR, REPO
@@ -19,6 +20,19 @@ COLORS = ["#0072B2", "#D55E00", "#009E73"]
 
 
 def save(fig, name, caption, records, generator=None):
+    def log_tick(value, position):
+        return f"{value:.0e}".replace("e+0", "e+").replace("e-0", "e-")
+
+    for ax in fig.axes:
+        if ax.get_yscale() == "log":
+            if hasattr(ax, "_colorbar"):
+                lo, hi = ax.get_ylim()
+                if hi / lo < 100:
+                    ax.yaxis.set_major_locator(
+                        LogLocator(subs=(1, 2, 5), numticks=8)
+                    )
+            ax.yaxis.set_major_formatter(FuncFormatter(log_tick))
+            ax.yaxis.set_minor_formatter(NullFormatter())
     path = FIG_DIR / name
     generator = Path(generator or __file__).resolve()
     fig.savefig(path.with_suffix(".pdf"))

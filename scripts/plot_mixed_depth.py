@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter, NullFormatter
 import numpy as np
 
 from common import FIG_DIR, REPO
@@ -78,7 +79,7 @@ def main():
     with plt.rc_context(
         {
             "font.size": 8,
-            "axes.titlesize": 9,
+            "axes.titlesize": 10,
             "legend.fontsize": 7,
             "axes.labelsize": 8,
         }
@@ -128,6 +129,13 @@ def main():
         handles, legend = axes[0, 0].get_legend_handles_labels()
         fig.legend(handles, legend, loc="outside lower center", ncol=3)
         name = FIG_DIR / "faraday_redistribution_spin2"
+
+        def log_tick(value, position):
+            return f"{value:.0e}".replace("e+0", "e+").replace("e-0", "e-")
+
+        for ax in axes.ravel():
+            ax.yaxis.set_major_formatter(FuncFormatter(log_tick))
+            ax.yaxis.set_minor_formatter(NullFormatter())
         fig.savefig(name.with_suffix(".pdf"))
         fig.savefig(name.with_suffix(".png"), dpi=180)
         plt.close(fig)

@@ -7,7 +7,8 @@
     "failure": "tests/test_response_two_port.py::test_short_dipole_monopole_matches_measured_reference",
     "unchanged_from_baseline": true,
     "baseline_record": "docs/depth-depolarization-validation.json",
-    "log_sha256": "dfcc4cc217df2215f0fa63279d5832994cf00fe9631265f6021fa762b11ddc41"
+    "log_sha256": "dfcc4cc217df2215f0fa63279d5832994cf00fe9631265f6021fa762b11ddc41",
+    "log_path": "generated_data/paper_integration_tests.log"
   },
   "smoke": {
     "passed": 34,

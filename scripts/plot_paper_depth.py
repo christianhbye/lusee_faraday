@@ -59,17 +59,19 @@ def plot():
                 )
                 ax.set(yscale="log", ylim=(8e-13, 2))
                 ax.grid(alpha=0.15)
-        axes[0, column].set_title(f"sigma_phi={sigma:g} rad/m²")
+        axes[0, column].set_title(
+            rf"$\sigma_\Phi={sigma:g}$ rad m$^{{-2}}$", fontsize=10
+        )
         axes[1, column].set_xlabel("Frequency (MHz)")
-    axes[0, 0].set_ylabel("Smooth power / unrotated power")
-    axes[1, 0].set_ylabel("Speckle power / unrotated power")
+    axes[0, 0].set_ylabel("Smooth power fraction")
+    axes[1, 0].set_ylabel("Speckle power fraction")
     handles, labels = axes[0, 0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="outside lower center", ncol=3, fontsize=7)
     save(
         fig,
         "paper_depth_depolarization",
-        "Preserved flat-plane depth-profile benchmark, rendered at the "
-        "report's print width. Smooth |E[P]| squared and centered speckle "
+        "Conditional flat-plane depth-profile moments. Smooth |E[P]| "
+        "squared and centered speckle "
         "power are divided by the same unrotated beam-weighted reference. "
         "The Gaussian profile is supported on f in [0,1]; fractions 0/0.6/1 "
         "retain the original screen limits. Monochromatic points use "
