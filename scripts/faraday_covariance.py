@@ -298,11 +298,13 @@ def plot(config, record_path):
             freq = data["frequency_mhz"][3:]
             order = np.argsort(freq)
             offset = (freq[order] - row["center_mhz"]) * 1e3
+            half_bin = (offset[1] - offset[0]) / 2
+            limits = [offset[0] - half_bin, offset[-1] + half_bin]
             ax = axes[0, column]
             image = ax.imshow(
                 np.maximum(1 - corr[np.ix_(order, order)], 1e-12),
                 origin="lower",
-                extent=[offset[0], offset[-1]] * 2,
+                extent=limits * 2,
                 norm=LogNorm(vmin=1e-12, vmax=1e-4),
                 cmap="viridis",
                 aspect="equal",

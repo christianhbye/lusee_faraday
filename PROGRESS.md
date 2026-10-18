@@ -15,7 +15,9 @@ are checkpointed with hashes. The record is
 Built and inspected `report/figures/faraday_channel_covariance.pdf`, its
 PNG, caption and manifest. It shows the loss of Q channel correlation and
 separate conditional Q/U draws in each band, with common scales and
-marginal RMS bands. The assumed sigma_phi=0.02 case remains highly coherent
+marginal RMS bands. Image pixels are centered on the nominal channel
+frequencies; a final unchanged rerun verifies all four moment caches.
+The assumed sigma_phi=0.02 case remains highly coherent
 across 25 kHz: minimum Q correlations are 0.9999885 at 30 MHz and 0.99999990
 at 50 MHz. These are conditional model values, not data or a sensitivity
 forecast. The band illustrations do not model joint cross-band covariance.

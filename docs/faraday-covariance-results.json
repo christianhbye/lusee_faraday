@@ -1,5 +1,5 @@
 {
-  "fingerprint": "12a80fd5492a29af876d7414e58c3fd25498575c587de2920be6467065994bff",
+  "fingerprint": "a1ac9126e792f7ac368f59ec18269ed11c135c6d3c957a02c3a7d9d3add41265",
   "provenance": {
     "configuration": {
       "kernel_config": "configs/paper/kernels.json",
@@ -65,7 +65,7 @@
     },
     "sources": {
       "scripts/common.py": "6a67e8f3fa47970be630b77422be297cab7ac3da75bf807a89b7495ededfde45",
-      "scripts/faraday_covariance.py": "d3267de0f8bc8a4fc37262ef4d27de6262bb2f41b2f0f1b71a6e172ec28ae9b1",
+      "scripts/faraday_covariance.py": "c028f158ce34140fbbb460b851ddce3ce5b9bd3cb66ece42d8b87304cfc54492",
       "scripts/paper_common.py": "2257dfa4993fc7f5c31675c8530a61547d323c4dec7429b1ab9dacf8bf5f0b92",
       "scripts/paper_kernels.py": "d1e96bbb3506121dce5c47829c61b3c07dd233ad00cb7bba823be6aa79646098",
       "src/lusee_faraday/channelization.py": "df5655f80a4aed9a712a620724df94fae7d1bee3b887ebc2193fde301e3bb910",
@@ -801,7 +801,7 @@
           0.015393618554817374
         ]
       ],
-      "path": "generated_data/cache/faraday_covariance/12a80fd5492a29af876d7414e58c3fd25498575c587de2920be6467065994bff/30mhz_case0.npz",
+      "path": "generated_data/cache/faraday_covariance/a1ac9126e792f7ac368f59ec18269ed11c135c6d3c957a02c3a7d9d3add41265/30mhz_case0.npz",
       "sha256": "ebdb30fdec7834370bdf5925a6dd9455c86532b66af0142f3da384034fd4f4cf"
     },
     {
@@ -1508,7 +1508,7 @@
           0.00014018886289701802
         ]
       ],
-      "path": "generated_data/cache/faraday_covariance/12a80fd5492a29af876d7414e58c3fd25498575c587de2920be6467065994bff/30mhz_case1.npz",
+      "path": "generated_data/cache/faraday_covariance/a1ac9126e792f7ac368f59ec18269ed11c135c6d3c957a02c3a7d9d3add41265/30mhz_case1.npz",
       "sha256": "ef832f09508a5a608586af4b0fddc57e6b4c722825a7e1ef05c31cac1089db71"
     },
     {
@@ -2215,7 +2215,7 @@
           0.007623258816006159
         ]
       ],
-      "path": "generated_data/cache/faraday_covariance/12a80fd5492a29af876d7414e58c3fd25498575c587de2920be6467065994bff/50mhz_case0.npz",
+      "path": "generated_data/cache/faraday_covariance/a1ac9126e792f7ac368f59ec18269ed11c135c6d3c957a02c3a7d9d3add41265/50mhz_case0.npz",
       "sha256": "556e2faddd9e161b8385c5928b80f9cac0f6c0134314d3d50709c04fd1be45ec"
     },
     {
@@ -2922,7 +2922,7 @@
           0.0027487487185353485
         ]
       ],
-      "path": "generated_data/cache/faraday_covariance/12a80fd5492a29af876d7414e58c3fd25498575c587de2920be6467065994bff/50mhz_case1.npz",
+      "path": "generated_data/cache/faraday_covariance/a1ac9126e792f7ac368f59ec18269ed11c135c6d3c957a02c3a7d9d3add41265/50mhz_case1.npz",
       "sha256": "52bda8ddf42b7dd0def157170fd5d357c4a79303f56c0fedfb10da027d0e353e"
     }
   ],

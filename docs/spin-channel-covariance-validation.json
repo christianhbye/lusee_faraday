@@ -248,7 +248,7 @@
     "bandlimit": 0.42981622799051394
   },
   "minimum_raw_covariance_eigenvalue": -1.311185231976555e-16,
-  "result_sha256": "c160009d7a4d6104158557e1d67af98999a83be9fd77c5fe10eb8dc33d68a508",
+  "result_sha256": "c9038593bc49c0e7127df104aedeeb6510ddcff15b541186568377ae5ae7b713",
   "kernel_record_sha256": "9ac7b4eeb83e05b2dca4bedd27157a3557494d09db1d72c8b3115e2f44ecc573",
   "mixture": {
     "record_sha256": "a8d1f6e5ba080550227bbe806acb9fa940a91ec44cb46715d093e2be80ec1a96",
@@ -259,7 +259,7 @@
   },
   "source_sha256": {
     "scripts/check_spin_screen_mixture.py": "d31295e29bca0c78f9e81024c47dbd6d21546c33d219812ce97c142089107084",
-    "scripts/faraday_covariance.py": "d3267de0f8bc8a4fc37262ef4d27de6262bb2f41b2f0f1b71a6e172ec28ae9b1",
+    "scripts/faraday_covariance.py": "c028f158ce34140fbbb460b851ddce3ce5b9bd3cb66ece42d8b87304cfc54492",
     "scripts/validate_covariance_faults.py": "2c716894fcd32b52bd4b4f47640d1450a6685fd22bfd365b7f989a798b68a7dd",
     "src/lusee_faraday/channelization.py": "df5655f80a4aed9a712a620724df94fae7d1bee3b887ebc2193fde301e3bb910",
     "src/lusee_faraday/frequency_covariance.py": "a1332347e0110a389ec2e1f035ba054f3dd6687094b384a6b9702ccb87cef42e",
@@ -272,12 +272,13 @@
   },
   "figure": {
     "path": "report/figures/faraday_channel_covariance.pdf",
-    "sha256": "eaa1eb60167d8e025246850f4f6c97288174148e0538cd8d5ec44ca48fc22dae",
-    "visual_inspection": "Final PNG inspected at the 6.4 inch design width; common scales, log correlation-loss floor, raw draws and captions checked."
+    "sha256": "e5e27aac6e14e0d7f6c90f457fce2f33dea94dd88f4d1a689a3ce4a5ed3491d7",
+    "visual_inspection": "Final PNG inspected at 6.4 inch design width; pixels centered on actual channel coordinates, common scales, log correlation-loss floor, raw draws and captions checked."
   },
   "cache_recheck": {
     "log_sha256": "10d72b904dc8476e0a85c713cf2eb1839361e43df731557c22b1be5658af1742",
-    "all_four_verified": true
+    "all_four_verified": true,
+    "fingerprint": "a1ac9126e792f7ac368f59ec18269ed11c135c6d3c957a02c3a7d9d3add41265"
   },
   "ci": {
     "commit": "dc8024c",
