@@ -233,16 +233,16 @@ def two_port_pair_alms(h_theta, h_phi, theta_deg, phi_deg, lmax):
 
     Unitless: this arm has no impedance model and no receiver loading,
     so it is the direct analogue of the paper's Fig 4 pipeline rather
-    than of the as-built four-port instrument.
+    than of the as-built four-port instrument. The upper hemisphere is
+    visible, with half weight for a row exactly on the horizon.
     """
     import croissant as cro
 
     # croissant's PairStokesBeam accepts a mismatched "mwss" grid
     # without complaint -- it silently uses whatever ntheta/nphi the
     # data array has and never checks them against a caller-supplied
-    # theta_deg/phi_deg.  This is the only place that mismatch can be
-    # caught, so theta_deg and phi_deg earn their place as a guard
-    # even though nothing downstream reads them again.
+    # theta_deg/phi_deg. This is the only place that mismatch can be
+    # caught before constructing the beam.
     ntheta, nphi = np.asarray(h_theta).shape[-2:]
     if len(theta_deg) != ntheta or len(phi_deg) != nphi:
         raise ValueError(
@@ -265,11 +265,17 @@ def two_port_pair_alms(h_theta, h_phi, theta_deg, phi_deg, lmax):
     maps = pair_stokes_from_jones(
         h_theta[:, None], h_phi[:, None], TWO_PORT_PAIRS
     )  # -> (3, 1, 4, ntheta, nphi)
+    # Pin the horizon convention across croissant versions: older
+    # defaults counted the equatorial row fully. On the MWSS grid its
+    # cell is bisected by the horizon, so its response gets half weight.
+    theta = np.asarray(theta_deg)[:, None]
+    horizon = np.where(theta == 90.0, 0.5, (theta < 90.0).astype(float))
     beam = cro.PairStokesBeam(
         maps,
         np.array([1.0]),
         TWO_PORT_PAIRS,
         sampling="mwss",
         frame="topo",
+        horizon=horizon,
     )
     return np.asarray(beam.compute_alm(lmax=int(lmax)))[:, 0]
