@@ -1,0 +1,112 @@
+{
+ "kernel_config": "configs/paper/kernels.json",
+ "kernel_record": "docs/paper-kernel-results.json",
+ "centers_mhz": [
+  30.0,
+  50.0
+ ],
+ "sidereal_turns": [
+  0.0,
+  0.25
+ ],
+ "intrinsic": {
+  "p_ref_k": 1.0,
+  "ref_mhz": 30.0,
+  "ell_scale": 8.0,
+  "ee_fraction": 0.8,
+  "eb_fraction": 0.1,
+  "turnover_mhz": 15.0
+ },
+ "screens": [
+  {
+   "label": "column screen alpha=2 dphi1=0.3",
+   "parameters": {
+    "sigma_depth": 10.0,
+    "mean_depth": 0.0,
+    "theta0_rad": 0.8226530859176875,
+    "alpha": 2.0
+   },
+   "frequency_nodes": [
+    129,
+    257
+   ]
+  },
+  {
+   "label": "column screen alpha=2 dphi1=1",
+   "parameters": {
+    "sigma_depth": 10.0,
+    "mean_depth": 0.0,
+    "theta0_rad": 0.24651471631706376,
+    "alpha": 2.0
+   },
+   "frequency_nodes": [
+    129,
+    257
+   ]
+  },
+  {
+   "label": "column screen alpha=2 dphi1=3",
+   "parameters": {
+    "sigma_depth": 10.0,
+    "mean_depth": 0.0,
+    "theta0_rad": 0.0813365266793937,
+    "alpha": 2.0
+   },
+   "frequency_nodes": [
+    129,
+    257
+   ]
+  },
+  {
+   "label": "column screen alpha=5/3 dphi1=0.3",
+   "parameters": {
+    "sigma_depth": 10.0,
+    "mean_depth": 0.0,
+    "theta0_rad": 1.777811480197723,
+    "alpha": 1.6666666666666667
+   },
+   "frequency_nodes": [
+    129,
+    257
+   ]
+  },
+  {
+   "label": "column screen alpha=5/3 dphi1=1",
+   "parameters": {
+    "sigma_depth": 10.0,
+    "mean_depth": 0.0,
+    "theta0_rad": 0.4186364604027448,
+    "alpha": 1.6666666666666667
+   },
+   "frequency_nodes": [
+    129,
+    257
+   ]
+  },
+  {
+   "label": "column screen alpha=5/3 dphi1=3",
+   "parameters": {
+    "sigma_depth": 10.0,
+    "mean_depth": 0.0,
+    "theta0_rad": 0.11065432065334976,
+    "alpha": 1.6666666666666667
+   },
+   "frequency_nodes": [
+    129,
+    257
+   ]
+  }
+ ],
+ "angular": {
+  "theta_min_rad": 1e-10,
+  "core_nodes": 600,
+  "body_nodes": 2000
+ },
+ "check_lmax": 64,
+ "frequency_block_size": 8,
+ "relative_tolerance": 0.01,
+ "absolute_off_tolerance": 1e-08,
+ "seed": 7421,
+ "figure_case": "column screen alpha=5/3 dphi1=1",
+ "scope": "Column-anchored Gaussian screens: sigma 10 rad/m^2 (Hutschenreuter high-latitude rms), structure function 2 sigma^2 [1-exp(-(chord/theta0)^alpha)] with theta0 set by the rms depth difference at 1 degree (0.3, 1, 3 rad/m^2) for alpha 2 and 5/3, matching the main pilot (scripts/faraday_redistribution.py). mean_depth 0: the smooth term exp(-2 sigma^2 x^2) vanishes at every LuSEE frequency for this sigma. The posterior-mean anchor overstates coherence, so these are the upper end of the column model. Same intrinsic sky, beam kernels and gates as covariance.json."
+}

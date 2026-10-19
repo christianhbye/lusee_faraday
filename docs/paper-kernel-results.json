@@ -1,5 +1,5 @@
 {
-  "fingerprint": "3e243eb2f17a7876d6cbb799a8968e78c05e61305d2d760c0635816597e2bf2f",
+  "fingerprint": "52d16824ff1d1ad317c68fe0747c81f6b534ba0bfda59fa6a8c85b9368a21151",
   "provenance": {
     "configuration": {
       "response_path": "data/BGL_v16/lusee_bgl_v16_response_v3.fits",
@@ -67,7 +67,7 @@
       "src/lusee_faraday/gaussian_screen.py": "9b9afe77efb0f80da38619f1cb221caead4527db7348b8daffcbf81faec5958a",
       "src/lusee_faraday/instrument.py": "9ee06656728dc952128f998d09592064441cc52210412b6a634ac7c6fc84acac",
       "src/lusee_faraday/polarimeter.py": "5cbb90dc311aa6c849499d2e7a8a52e9bcaef9c3bec666bfec8419a1f3a7582e",
-      "src/lusee_faraday/response.py": "92eeae1a28c7a97af198c8fa1b78d1a36acf014f71b2ee73cbfe4db413fe64ad",
+      "src/lusee_faraday/response.py": "0b631d60db77e15698b66936fbb782e855c6f74a01b2e3caca214c2bcbacae14",
       "src/lusee_faraday/visibility_covariance.py": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa"
     },
     "dependencies": {
@@ -93,15 +93,15 @@
   },
   "arrays": {
     "30": {
-      "path": "generated_data/cache/paper_kernels/3e243eb2f17a7876d6cbb799a8968e78c05e61305d2d760c0635816597e2bf2f/30mhz.npz",
+      "path": "generated_data/cache/paper_kernels/52d16824ff1d1ad317c68fe0747c81f6b534ba0bfda59fa6a8c85b9368a21151/30mhz.npz",
       "sha256": "7087e88c4228270d3a605ea7f3dfce573c7a243d9bff54aa7d99832c043bfba1"
     },
     "50": {
-      "path": "generated_data/cache/paper_kernels/3e243eb2f17a7876d6cbb799a8968e78c05e61305d2d760c0635816597e2bf2f/50mhz.npz",
+      "path": "generated_data/cache/paper_kernels/52d16824ff1d1ad317c68fe0747c81f6b534ba0bfda59fa6a8c85b9368a21151/50mhz.npz",
       "sha256": "9c351f3f1da9904afe767c6c979c7c330a1596f4e9d6c4771c3ef5d7de1d5c33"
     },
     "10": {
-      "path": "generated_data/cache/paper_kernels/3e243eb2f17a7876d6cbb799a8968e78c05e61305d2d760c0635816597e2bf2f/10mhz.npz",
+      "path": "generated_data/cache/paper_kernels/52d16824ff1d1ad317c68fe0747c81f6b534ba0bfda59fa6a8c85b9368a21151/10mhz.npz",
       "sha256": "1c97a2b791a53eb282a6403486bca0a8fe05ff35d361a03bd581c6b8a5aed9a1"
     }
   },
