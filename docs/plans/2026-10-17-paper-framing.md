@@ -1,7 +1,10 @@
 # Paper framing: how Faraday rotation shows up in LuSEE Night spectra
 
-Status: adopted 2026-10-17 after review (merged to `main`). Supersedes the
-detection-forecast outline in
+Status: adopted 2026-10-17 after review (merged to `main`). The phase order
+below is superseded by [the paper arc of 2026-10-19](2026-10-19-paper-arc.md),
+which presents the column screen, the emitting depth and the local medium as
+a nested bracket and adds the missing column-screen scenario; the physics
+here stands. Supersedes the detection-forecast outline in
 [paper-preparation.md](../paper-preparation.md#paper-structure-proposed-for-review).
 The pilot below is a toy calculation, not a Galactic prediction. The
 [review findings](#review-findings--2026-10-17) and the

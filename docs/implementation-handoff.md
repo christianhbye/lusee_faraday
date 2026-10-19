@@ -1,10 +1,11 @@
 # Paper implementation handoff
 
 Branch: `implementation/depth-depolarization`. PR
-[9](https://github.com/christianhbye/lusee_faraday/pull/9) targets
-`paper-implementation-plan`. The numerical implementation, report and
-reproduction workflow are complete. The PR remains open for the owner to
-review and merge. No approval is needed to finish or push this work.
+[9](https://github.com/christianhbye/lusee_faraday/pull/9) is being
+retargeted at `main`. The numerical implementation, report and reproduction
+workflow are complete for the local-medium scenarios; the column-anchored
+screen scenario is the next run, per
+[the paper arc](plans/2026-10-19-paper-arc.md).
 
 The [accepted plan](plans/2026-10-17-paper-implementation.md) records the
 completed scientific gates. The [reproduction guide](paper-implementation-guide.md)
