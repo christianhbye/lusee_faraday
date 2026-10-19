@@ -223,3 +223,6 @@ report/latex.log
 # The report lives on the audit-2026-08-18 tag, not on main; figures
 # here are regenerable output of the analysis scripts.
 report/
+
+# Slide PNGs from notebooks/slides_pixel_sum_convergence.ipynb (regenerable)
+notebooks/slides_pixel_sum/
