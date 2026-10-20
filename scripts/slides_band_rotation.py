@@ -1,16 +1,25 @@
-"""Band-wide rotation of the local polarized term (slide side product).
+"""Band-wide view of the polarized term for emission in front of the column.
 
 Reads the slides_subpixel_spectra caches computed at native channels across
-10-50 MHz for screens at small fractions f of the column (the local medium)
-and plots the central parent channel's pseudo-Stokes Q and U of the Faraday
-polarized term against frequency and lambda^2, at one sidereal phase, next
-to the unrotated polarization. With a local depth of a few thousandths of
-a rad/m^2 the polarized term is no longer destroyed; it is reshaped across
-the band by of order itself, oscillating in lambda^2 where 2 lambda^2 Phi
-exceeds a radian (below ~20 MHz for 0.005 rad/m^2). The four-port pseudo-
-Stokes do not rotate as a pair the way the sky's Q and U do, so this is not
-the textbook sinusoid; it is a broadband, sidereal-dependent change rather
-than a kilohertz ripple.
+10-50 MHz and draws, for one pseudo-Stokes parameter (Q or U) and one
+sidereal phase, the layout of the fig 10 top panel across the band: the
+total parent-channel pseudo-Stokes of the I-only sky (leakage alone), of the
+I-only sky plus the unrotated WMAP polarization, and of the I-only sky plus
+the Faraday-rotated polarization. Below it, sharing the frequency axis, the
+Faraday polarized term alone against the unrotated polarization, which is
+the residual the rotation leaves. (Behind the full column, f = 1, the
+polarized term is the 0.1 K ripple of the zoom-bin figures and the total is
+indistinguishable from the unrotated one; that case is not drawn.)
+
+Two local cases are supported, as the two brackets on the local medium's
+angular structure: the RM map scaled by a fraction f (``--fractions``), the
+far end of the screen-fraction dial, which keeps the column's angular
+pattern across the beam; and a sky-constant depth (``--const``), which has
+none. The real local medium sits between them.
+
+All curves are the four-port pseudo-Stokes through the as-built instrument,
+divided by the pseudo-I of a uniform 1 K unpolarized sky, so the axes are
+kelvin of beam-weighted brightness.
 """
 
 import common  # noqa: F401
@@ -22,9 +31,12 @@ from common import REPO
 
 CACHE = REPO / "generated_data/cache/slides_subpixel"
 FIG_DIR = REPO / "notebooks" / "slides_pixel_sum"
+CENTERS = np.arange(10, 51, 2, dtype=float)
+STOKES = {"Q": 1, "U": 2}
 
 
 def load(center, f, profile="screen", const=0.0):
+    """Central-parent pseudo-Stokes (T, 4) of each term, in K, or None."""
     tag = "" if f == 1.0 else f"_f{f:g}"
     tag += "" if const == 0.0 else f"_c{const:g}"
     tag += "" if profile == "screen" else f"_{profile}"
@@ -41,6 +53,115 @@ def load(center, f, profile="screen", const=0.0):
     )
 
 
+def case_tag(f, const):
+    return f"uniform{const:g}" if const else f"f{f:g}"
+
+
+def case_label(f, const):
+    if const:
+        return f"a uniform local depth of {const:g} rad m$^{{-2}}$"
+    return f"a screen at f = {f:g} of the column (RM map $\\times$ f)"
+
+
+def band_figure(f, const, stokes, it, plt, ylim=None):
+    """One case, one Stokes parameter; ylim = (top, bottom) half-ranges."""
+    s = STOKES[stokes]
+    rows = [load(c, f, const=const) for c in CENTERS]
+    ok = np.array([r is not None for r in rows])
+    if not ok.any():
+        print(f"no caches for f={f:g} const={const:g}; skipped")
+        return None
+    cs = CENTERS[ok]
+    rows = [r for r in rows if r is not None]
+    leak = np.array([r["leak"][it, s] for r in rows])
+    unrot = np.array([r["unrot"][it, s] for r in rows])
+    far = np.array([r["faraday"][it, s] for r in rows])
+    phase = rows[0]["lst"][it]
+
+    fig, (top, bot) = plt.subplots(
+        2, 1, figsize=(9, 7.5), sharex=True, constrained_layout=True
+    )
+    # top: the total pseudo-Stokes, as fig 10's top panel across the band
+    top.plot(cs, leak, color="k", lw=1.5, label="I-only sky: leakage alone")
+    top.plot(
+        cs,
+        leak + unrot,
+        color="0.5",
+        lw=2.5,
+        label="leakage + WMAP polarization, no Faraday rotation",
+    )
+    top.plot(
+        cs,
+        leak + far,
+        color="C4",
+        lw=1.6,
+        ls="--",
+        marker="o",
+        ms=3,
+        label="leakage + WMAP polarization rotated by " + case_label(f, const),
+    )
+    top.set_ylabel(f"total pseudo-Stokes {stokes} [K]")
+    top.grid(alpha=0.3)
+    top.legend(fontsize=8, loc="best")
+    # bottom: the polarized term alone, the residual the rotation leaves
+    bot.plot(
+        cs,
+        unrot,
+        color="0.5",
+        lw=2.5,
+        label="WMAP polarization, no Faraday rotation",
+    )
+    bot.plot(
+        cs,
+        far,
+        color="C4",
+        lw=1.6,
+        ls="--",
+        marker="o",
+        ms=3,
+        label="rotated by " + case_label(f, const),
+    )
+    bot.set_ylabel(f"Faraday polarized term {stokes} alone [K]")
+    bot.set_xlabel(
+        "frequency [MHz]  (native 25 kHz parent channels every 2 MHz)"
+    )
+    bot.grid(alpha=0.3)
+    bot.legend(fontsize=8, loc="best")
+    for ax, m in zip((top, bot), ylim or (None, None)):
+        if m is None:
+            m = max(
+                np.max(np.abs(line.get_ydata())) for line in ax.get_lines()
+            )
+        ax.set_ylim(-1.08 * m, 1.08 * m)
+    fig.suptitle(
+        f"Pseudo-Stokes {stokes} of the central parent channel across the "
+        f"band at sidereal phase {phase:.2f}, as-built four-port instrument\n"
+        f"emission in front of the Galactic column: {case_label(f, const)}",
+        fontsize=10.5,
+    )
+    name = FIG_DIR / f"14_band_rotation_{case_tag(f, const)}_{stokes}.png"
+    fig.savefig(name, dpi=140)
+    plt.close(fig)
+    print("saved", name)
+    return name
+
+
+def half_ranges(cases, stokes, it):
+    """Largest |total| and |polarized term| over the cases, or None."""
+    s = STOKES[stokes]
+    top, bot = 0.0, 0.0
+    for f, k in cases:
+        for r in (load(c, f, const=k) for c in CENTERS):
+            if r is None:
+                continue
+            leak, unrot, far = (
+                r[n][it, s] for n in ("leak", "unrot", "faraday")
+            )
+            top = max(top, abs(leak), abs(leak + unrot), abs(leak + far))
+            bot = max(bot, abs(unrot), abs(far))
+    return (top, bot) if top else None
+
+
 def main():
     import matplotlib
 
@@ -50,116 +171,32 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--phase-index", type=int, default=1)
     parser.add_argument(
-        "--fractions", type=float, nargs="+", default=(0.0002,)
+        "--fractions",
+        type=float,
+        nargs="*",
+        default=(0.0002,),
+        help="screen fractions f of the column (RM map x f) to draw",
     )
     parser.add_argument(
         "--const",
         type=float,
-        default=None,
-        help="uniform local Faraday depth [rad/m^2] computed with "
-        "--rm-scale 0 --rm-const; replaces the scaled-map fractions",
+        nargs="*",
+        default=(),
+        help="uniform local Faraday depths [rad/m^2] computed with "
+        "--rm-scale 0 --rm-const, drawn as separate figures",
+    )
+    parser.add_argument(
+        "--stokes", nargs="+", choices=tuple(STOKES), default=("Q", "U")
     )
     args = parser.parse_args()
-    cases = (
-        [(0.0, args.const)]
-        if args.const is not None
-        else [(f, 0.0) for f in args.fractions]
-    )
-    it = args.phase_index
-    centers = np.arange(10, 51, 2, dtype=float)
-    fig, axes = plt.subplots(2, 1, figsize=(9, 7), sharex=True)
-    styles = (("C4", "-"), ("C1", "--"), ("C0", ":"))
-    for s, (ax, name) in enumerate(zip(axes, ("Q", "U")), start=1):
-        # the unrotated polarization and the leakage do not depend on f,
-        # so take them from whichever local run exists at each centre
-        ref = [
-            next(
-                (
-                    r
-                    for r in (load(c, f, const=k) for f, k in cases)
-                    if r is not None
-                ),
-                None,
-            )
-            for c in centers
-        ]
-        have = [r is not None for r in ref]
-        if any(have):
-            cs = centers[have]
-            ax.plot(
-                cs,
-                [r["unrot"][it, s] for r in ref if r is not None],
-                color="0.4",
-                lw=2,
-                label="WMAP polarization, no rotation",
-            )
-        for (f, k), (color, ls) in zip(cases, styles):
-            rows = [load(c, f, const=k) for c in centers]
-            ok = [r is not None for r in rows]
-            if not any(ok):
-                print(f"no caches for f={f:g} const={k:g}; skipped")
-                continue
-            case_label = (
-                f"rotated by a uniform local depth of {k:g} rad m$^{{-2}}$"
-                if k
-                else f"emission behind the local gas only: screen at f = {f:g}"
-            )
-            ax.plot(
-                centers[ok],
-                [r["faraday"][it, s] for r in rows if r],
-                color=color,
-                ls=ls,
-                lw=1.6,
-                marker="o",
-                ms=3,
-                label=case_label,
-            )
-        # the column case, where computed: the mean polarization is gone
-        col = [(c, load(c, 1.0)) for c in centers]
-        col = [(c, r) for c, r in col if r is not None]
-        if col:
-            ax.plot(
-                [c for c, _ in col],
-                [r["faraday"][it, s] for _, r in col],
-                "ks",
-                ms=7,
-                label="emission behind the full column (f = 1): "
-                "only the 0.1 K ripple is left",
-            )
-        ax.set_ylabel(f"parent-channel pseudo-Stokes {name} [K]")
-        ax.grid(alpha=0.3)
-        m = max(np.max(np.abs(line.get_ydata())) for line in ax.get_lines())
-        ax.set_ylim(-1.08 * m, 1.08 * m)
-    axes[0].legend(fontsize=8, loc="best")
-    axes[1].set_xlabel(
-        "frequency [MHz]  (native 25 kHz parent channels every 2 MHz)"
-    )
-    phase = None
-    for c in centers:
-        b = load(c, cases[0][0], const=cases[0][1])
-        if b is not None:
-            phase = b["lst"][it]
-            break
-    fig.suptitle(
-        (
-            "Emission in front of the Galactic column: a uniform local "
-            "Faraday depth reshapes the polarized term across the band\n"
-            f"(sidereal phase {phase:.2f}; the I-only leakage, 100 to "
-            "20000 K here, is not drawn)"
-            if phase is not None
-            else "Local Faraday depth across the band"
-        ),
-        fontsize=10.5,
-    )
-    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    cases = [(f, 0.0) for f in args.fractions]
+    cases += [(0.0, k) for k in args.const]
     FIG_DIR.mkdir(exist_ok=True)
-    name = FIG_DIR / (
-        "14_band_rotation.png"
-        if args.const is None
-        else f"14_band_rotation_uniform{args.const:g}.png"
-    )
-    fig.savefig(name, dpi=140)
-    print("saved", name)
+    for stokes in args.stokes:
+        # shared limits across the cases, so the figures compare directly
+        ylim = half_ranges(cases, stokes, args.phase_index)
+        for f, k in cases:
+            band_figure(f, k, stokes, args.phase_index, plt, ylim)
 
 
 if __name__ == "__main__":
