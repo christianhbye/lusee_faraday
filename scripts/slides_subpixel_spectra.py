@@ -50,9 +50,13 @@ N_NODES = 201
 TIME_INDEX = (0, 256, 512, 768)  # quarters of the lunar sidereal day
 CONTEXT_PHASE = 1  # index into TIME_INDEX for the full-spectrum panel
 SPAN = 1  # parents plotted: 1 (central) or 3 (all); set by --span
+LAYOUT = "phases"  # or "ladder": one phase, three sub-pixel models
 OUT_ROOT = CACHE_DIR / "slides_subpixel"
 FIG_DIR = REPO / "notebooks" / "slides_pixel_sum"
-COLUMN_RECORD = REPO / "docs" / "faraday-covariance-column-results.json"
+COLUMN_RECORDS = (
+    REPO / "docs" / "faraday-covariance-column-results.json",
+    REPO / "docs" / "faraday-covariance-column-alpha1-results.json",
+)
 WMAP_PIXEL_RMS_30 = 1.257e4  # K at 30 MHz, all scales incl. WMAP noise
 BETA_QU = -2.8
 WMAP_BAND_RMS_30 = 5533.0  # K at 30 MHz, ell <= 30, noise subtracted
@@ -228,10 +232,17 @@ def compute(out):
     print(f"saved {out / 'spectra.npz'} {_time.time() - t0:.0f} s", flush=True)
 
 
+def _column_rows():
+    rows = []
+    for path in COLUMN_RECORDS:
+        if path.exists():
+            rows.extend(json.loads(path.read_text())["results"])
+    return rows
+
+
 def ensemble_band(label_contains):
     """Zoom-bin speckle rms (K per 1 K intrinsic) from the column run."""
-    rec = json.loads(COLUMN_RECORD.read_text())
-    for row in rec["results"]:
+    for row in _column_rows():
         if (
             row["center_mhz"] == CENTER
             and label_contains in row["case"]["label"]
@@ -251,8 +262,7 @@ def ensemble_band(label_contains):
 
 def ensemble_draws(label_contains, n_draws=2, seed=5):
     """Gaussian realizations of the zoom-bin Q/U speckle (K per 1 K)."""
-    rec = json.loads(COLUMN_RECORD.read_text())
-    for row in rec["results"]:
+    for row in _column_rows():
         if (
             row["center_mhz"] == CENTER
             and label_contains in row["case"]["label"]
@@ -271,6 +281,128 @@ def ensemble_draws(label_contains, n_draws=2, seed=5):
             x = x.reshape(nb - 3, 2, n_draws)
             return z["frequency_mhz"][3:], x[:, 0], x[:, 1]
     raise KeyError(label_contains)
+
+
+def _shade_aliased_bins(axes, parents, off, sel, label_ax):
+    fine_off = np.arange(-100e3, 100e3, chan.FINE_STEP_HZ)
+    wz = chan.zoom_weights(fine_off)
+    outside = np.abs(fine_off) > 12.5e3
+    folded = np.sum(np.abs(wz[outside]), axis=0) / np.sum(np.abs(wz), axis=0)
+    half = chan.ZOOM_STEP_HZ * 1e-6 / 2
+    for ax in axes:
+        first = True
+        for j in sel:
+            for k in np.where(folded > 0.05)[0]:
+                f0 = parents[j] + off[k]
+                ax.axvspan(
+                    f0 - half,
+                    f0 + half,
+                    color="C3",
+                    alpha=0.08,
+                    lw=0,
+                    label=(
+                        "aliased edge zoom bins (>5 % folded response)"
+                        if first and ax is label_ax
+                        else None
+                    ),
+                )
+                first = False
+
+
+def plot_phase_panels(axes, fz, zoom, phases, colors, parents, off, sel):
+    """Faraday Q and U at four sidereal phases with the alpha=2 bands."""
+    for s, (ax, name) in enumerate(zip(axes, ("Q", "U")), start=1):
+        for it, ph in enumerate(phases):
+            ax.plot(
+                fz,
+                zoom[it, :, s],
+                color=colors[it],
+                lw=1.2,
+                label=f"Faraday polarized signal, sidereal phase {ph:.2f}",
+            )
+        for anchor, alpha_fill in (("dphi1=1", 0.25), ("dphi1=3", 0.15)):
+            fe, rq, ru = ensemble_band(f"alpha=2 {anchor}")
+            band = (rq if s == 1 else ru) * wmap_pixel_rms()
+            oe = np.argsort(fe)
+            ax.fill_between(
+                fe[oe],
+                -band[oe],
+                band[oe],
+                color="0.4",
+                alpha=alpha_fill,
+                label=(
+                    rf"ensemble $\pm$1 rms, $\alpha$=2, "
+                    rf"$\Delta\phi_{{1^\circ}}$={anchor[-1]} rad m$^{{-2}}$"
+                ),
+            )
+        fe, dq, du = ensemble_draws("alpha=2 dphi1=1", n_draws=1)
+        oe = np.argsort(fe)
+        ax.plot(
+            fe[oe],
+            (dq if s == 1 else du)[oe, 0] * wmap_pixel_rms(),
+            color="0.25",
+            lw=0.9,
+            ls="--",
+            label=(
+                r"one realization drawn from the $\alpha$=2, "
+                r"$\Delta\phi_{1^\circ}$=1 ensemble"
+            ),
+        )
+        ax.axhline(0, color="k", lw=0.5)
+        ax.ticklabel_format(axis="x", useOffset=False)
+        ax.set_ylabel(f"Faraday {name} alone [K]")
+        ax.grid(alpha=0.3)
+    _shade_aliased_bins(axes, parents, off, sel, axes[0])
+
+
+def plot_ladder_panels(axes, fz, zoom, parents, off, sel):
+    """One sidereal phase: the linear map realization against one draw and
+    the +-1 rms band of the alpha=5/3 and alpha=1 ensembles (anchor 1)."""
+    it = CONTEXT_PHASE
+    cases = (
+        ("alpha=5/3 dphi1=1", "C2", "--", r"$\alpha$ = 5/3"),
+        ("alpha=1 dphi1=1", "C3", ":", r"$\alpha$ = 1"),
+    )
+    for s, (ax, name) in enumerate(zip(axes, ("Q", "U")), start=1):
+        ax.plot(
+            fz,
+            zoom[it, :, s],
+            color="k",
+            lw=1.6,
+            label="linear interpolation (the map realization)",
+        )
+        for label, color, ls, tag in cases:
+            try:
+                fe, rq, ru = ensemble_band(label)
+            except KeyError:
+                print(f"no column record yet for {label}; skipped")
+                continue
+            band = (rq if s == 1 else ru) * wmap_pixel_rms()
+            oe = np.argsort(fe)
+            ax.fill_between(
+                fe[oe],
+                -band[oe],
+                band[oe],
+                color=color,
+                alpha=0.15,
+                lw=0,
+                label=rf"linear + Gaussian sub-pixel, {tag}: "
+                r"$\pm$1 rms of the ensemble",
+            )
+            fe, dq, du = ensemble_draws(label, n_draws=1)
+            ax.plot(
+                fe[oe],
+                (dq if s == 1 else du)[oe, 0] * wmap_pixel_rms(),
+                color=color,
+                lw=1.3,
+                ls=ls,
+                label=rf"linear + Gaussian sub-pixel, {tag}: one realization",
+            )
+        ax.axhline(0, color="k", lw=0.5)
+        ax.ticklabel_format(axis="x", useOffset=False)
+        ax.set_ylabel(f"Faraday {name} alone [K]")
+        ax.grid(alpha=0.3)
+    _shade_aliased_bins(axes, parents, off, sel, axes[0])
 
 
 def plot(out):
@@ -342,76 +474,12 @@ def plot(out):
     )
     ax.legend(fontsize=8, loc="best")
     ax.grid(alpha=0.3)
-    # The Faraday polarized signal alone, all phases, with the ensemble band.
-    for s, (ax, name) in enumerate(zip(axes[1:], ("Q", "U")), start=1):
-        for it, ph in enumerate(phases):
-            ax.plot(
-                fz,
-                zoom[it, :, s],
-                color=colors[it],
-                lw=1.2,
-                label=f"Faraday polarized signal, sidereal phase {ph:.2f}",
-            )
-        for anchor, alpha_fill in (("dphi1=1", 0.25), ("dphi1=3", 0.15)):
-            fe, rq, ru = ensemble_band(f"alpha=2 {anchor}")
-            band = (rq if s == 1 else ru) * wmap_pixel_rms()
-            oe = np.argsort(fe)
-            ax.fill_between(
-                fe[oe],
-                -band[oe],
-                band[oe],
-                color="0.4",
-                alpha=alpha_fill,
-                label=(
-                    rf"ensemble $\pm$1 rms, $\alpha$=2, "
-                    rf"$\Delta\phi_{{1^\circ}}$={anchor[-1]} rad m$^{{-2}}$"
-                ),
-            )
-        fe, dq, du = ensemble_draws("alpha=2 dphi1=1")
-        oe = np.argsort(fe)
-        for m in range(dq.shape[1]):
-            ax.plot(
-                fe[oe],
-                (dq if s == 1 else du)[oe, m] * wmap_pixel_rms(),
-                color="0.25",
-                lw=0.9,
-                ls="--",
-                label=(
-                    r"one realization drawn from the $\alpha$=2, "
-                    r"$\Delta\phi_{1^\circ}$=1 ensemble"
-                    if m == 0
-                    else None
-                ),
-            )
-        ax.axhline(0, color="k", lw=0.5)
-        ax.ticklabel_format(axis="x", useOffset=False)
-        ax.set_ylabel(f"Faraday {name} alone [K]")
-        ax.grid(alpha=0.3)
-    # Shade the zoom bins whose response folds more than 5 % of its weight
-    # from beyond the parent's edge (the aliased edge bins).
-    fine_off = np.arange(-100e3, 100e3, chan.FINE_STEP_HZ)
-    wz = chan.zoom_weights(fine_off)
-    outside = np.abs(fine_off) > 12.5e3
-    folded = np.sum(np.abs(wz[outside]), axis=0) / np.sum(np.abs(wz), axis=0)
-    half = chan.ZOOM_STEP_HZ * 1e-6 / 2
-    for ax in axes[1:]:
-        first = True
-        for j in sel:
-            for k in np.where(folded > 0.05)[0]:
-                f0 = parents[j] + off[k]
-                ax.axvspan(
-                    f0 - half,
-                    f0 + half,
-                    color="C3",
-                    alpha=0.08,
-                    lw=0,
-                    label=(
-                        "aliased edge zoom bins (>5 % folded response)"
-                        if first and ax is axes[1]
-                        else None
-                    ),
-                )
-                first = False
+    if LAYOUT == "ladder":
+        plot_ladder_panels(axes[1:], fz, zoom, parents, off, sel)
+    else:
+        plot_phase_panels(
+            axes[1:], fz, zoom, phases, colors, parents, off, sel
+        )
     handles, labels = axes[1].get_legend_handles_labels()
     fig.legend(
         handles,
@@ -438,7 +506,9 @@ def plot(out):
     )
     fig.tight_layout(rect=(0, 0.08, 1, 0.96))
     FIG_DIR.mkdir(exist_ok=True)
-    suffix = "" if SPAN == 1 else "_3parents"
+    suffix = ("" if SPAN == 1 else "_3parents") + (
+        "_ladder" if LAYOUT == "ladder" else ""
+    )
     name = FIG_DIR / f"10_subpixel_spectra_{CENTER:g}MHz{suffix}.png"
     fig.savefig(name, dpi=140)
     print("saved", name)
@@ -458,10 +528,14 @@ def main():
     parser.add_argument("stage", choices=["compute", "plot"])
     parser.add_argument("--center", type=float, default=30.0)
     parser.add_argument("--span", type=int, choices=(1, 3), default=1)
+    parser.add_argument(
+        "--layout", choices=("phases", "ladder"), default="phases"
+    )
     args = parser.parse_args()
     set_center(args.center)
-    global SPAN
+    global SPAN, LAYOUT
     SPAN = args.span
+    LAYOUT = args.layout
     if args.stage == "compute":
         compute(out_dir())
     else:

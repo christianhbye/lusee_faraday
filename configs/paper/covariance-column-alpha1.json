@@ -1,0 +1,47 @@
+{
+ "kernel_config": "configs/paper/kernels.json",
+ "kernel_record": "docs/paper-kernel-results.json",
+ "centers_mhz": [
+  30.0,
+  50.0
+ ],
+ "sidereal_turns": [
+  0.0,
+  0.25
+ ],
+ "intrinsic": {
+  "p_ref_k": 1.0,
+  "ref_mhz": 30.0,
+  "ell_scale": 8.0,
+  "ee_fraction": 0.8,
+  "eb_fraction": 0.1,
+  "turnover_mhz": 15.0
+ },
+ "screens": [
+  {
+   "label": "column screen alpha=1 dphi1=1",
+   "parameters": {
+    "sigma_depth": 10.0,
+    "mean_depth": 0.0,
+    "theta0_rad": 3.481880373500226,
+    "alpha": 1.0
+   },
+   "frequency_nodes": [
+    129,
+    257
+   ]
+  }
+ ],
+ "angular": {
+  "theta_min_rad": 1e-10,
+  "core_nodes": 600,
+  "body_nodes": 2000
+ },
+ "check_lmax": 64,
+ "frequency_block_size": 8,
+ "relative_tolerance": 0.01,
+ "absolute_off_tolerance": 1e-08,
+ "seed": 7421,
+ "figure_case": "column screen alpha=1 dphi1=1",
+ "scope": "Column-anchored Gaussian screen with alpha 1 (random-walk roughness) at the 1 rad/m^2 one-degree anchor, completing the alpha ladder of the talk; otherwise as covariance-column.json. theta0 exceeds the sphere, so the model is defined by its small-separation behaviour."
+}
