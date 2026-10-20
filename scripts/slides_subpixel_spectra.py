@@ -347,6 +347,32 @@ def plot(out):
         ax.ticklabel_format(axis="x", useOffset=False)
         ax.set_ylabel(f"Faraday {name} alone [K]")
         ax.grid(alpha=0.3)
+    # Shade the zoom bins whose response folds more than 5 % of its weight
+    # from beyond the parent's edge (the aliased edge bins).
+    fine_off = np.arange(-100e3, 100e3, chan.FINE_STEP_HZ)
+    wz = chan.zoom_weights(fine_off)
+    outside = np.abs(fine_off) > 12.5e3
+    folded = np.sum(np.abs(wz[outside]), axis=0) / np.sum(np.abs(wz), axis=0)
+    half = chan.ZOOM_STEP_HZ * 1e-6 / 2
+    for ax in axes[1:]:
+        first = True
+        for j in sel:
+            for k in np.where(folded > 0.05)[0]:
+                f0 = parents[j] + off[k]
+                ax.axvspan(
+                    f0 - half,
+                    f0 + half,
+                    color="C3",
+                    alpha=0.08,
+                    lw=0,
+                    label=(
+                        "aliased edge zoom bins (>5 % of the response "
+                        "folded from the other end of the parent)"
+                        if first and ax is axes[1]
+                        else None
+                    ),
+                )
+                first = False
     handles, labels = axes[1].get_legend_handles_labels()
     fig.legend(
         handles,
