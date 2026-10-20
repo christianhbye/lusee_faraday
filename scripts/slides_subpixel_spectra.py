@@ -46,7 +46,7 @@ from lusee_faraday import response as rsp
 CENTER = 30.0  # overridden by --center
 LMAX = 48
 NSIDE_DEG = 64
-N_NODES = 201
+N_NODES = 201  # overridden by --nodes
 TIME_INDEX = (0, 256, 512, 768)  # quarters of the lunar sidereal day
 CONTEXT_PHASE = 1  # index into TIME_INDEX for the full-spectrum panel
 SPAN = 1  # parents plotted: 1 (central) or 3 (all); set by --span
@@ -221,15 +221,19 @@ def compute(out):
     ionly_zoom, ionly_parent = through_instrument(W_ctx[:2], c_ctx[:2])
     unrot_zoom, unrot_parent = through_instrument(W_ctx[2:], c_ctx[2:])
     print(f"context terms {_time.time() - t0:.0f} s", flush=True)
-    ionly = np.load(REPO / "generated_data" / f"real{CENTER:g}_ionly.npz")
-    key = [
-        k
-        for k in ionly.files
-        if ionly[k].ndim == 2 and ionly[k].shape[-1] == 16
-    ][0]
-    stokes_ionly = pol.pseudo_stokes_from_channels(
-        ionly[key][list(TIME_INDEX)], x_vec, y_vec
-    )
+    ref_path = REPO / "generated_data" / f"real{CENTER:g}_ionly.npz"
+    if ref_path.exists():  # step_ionly reference, where it was produced
+        ionly = np.load(ref_path)
+        key = [
+            k
+            for k in ionly.files
+            if ionly[k].ndim == 2 and ionly[k].shape[-1] == 16
+        ][0]
+        stokes_ionly = pol.pseudo_stokes_from_channels(
+            ionly[key][list(TIME_INDEX)], x_vec, y_vec
+        )
+    else:
+        stokes_ionly = ionly_parent[:, 1]
     out.mkdir(parents=True, exist_ok=True)
     np.savez(
         out / "spectra.npz",
@@ -779,9 +783,11 @@ def main():
     parser.add_argument(
         "--profile", choices=("screen", "slab"), default="screen"
     )
+    parser.add_argument("--nodes", type=int, default=201)
     args = parser.parse_args()
     set_center(args.center)
-    global SPAN, LAYOUT, BANDS, RM_SCALE, PROFILE
+    global SPAN, LAYOUT, BANDS, RM_SCALE, PROFILE, N_NODES
+    N_NODES = args.nodes
     SPAN = args.span
     LAYOUT = args.layout
     BANDS = not args.no_bands
