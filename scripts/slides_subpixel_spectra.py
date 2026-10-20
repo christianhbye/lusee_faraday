@@ -54,6 +54,7 @@ LAYOUT = "phases"  # "ladder": one phase, 3 models; "fscan": linear at 3 f
 BANDS = True  # draw the +-1 rms ensemble bands
 SIGMA_COLUMN = 10.0  # rad/m^2, the column screens' dispersion
 RM_SCALE = 1.0  # screen fraction f: the RM map is multiplied by this
+PROFILE = "screen"  # or "slab": emission mixed uniformly from us to depth f
 OUT_ROOT = CACHE_DIR / "slides_subpixel"
 FIG_DIR = REPO / "notebooks" / "slides_pixel_sum"
 COLUMN_RECORDS = (
@@ -72,6 +73,7 @@ def set_center(center_mhz):
 
 def out_dir():
     tag = "" if RM_SCALE == 1.0 else f"_f{RM_SCALE:g}"
+    tag += "" if PROFILE == "screen" else f"_{PROFILE}"
     return OUT_ROOT / f"{CENTER:g}mhz{tag}"
 
 
@@ -102,7 +104,20 @@ def node_maps(maps, nodes):
     data = np.zeros((nodes.size, 4, hp.nside2npix(NSIDE_DEG)))
     for k, f in enumerate(nodes):
         _, q, u = sky_at_freq(maps, f)
-        p = (q + 1j * u) * np.exp(2j * lam2(f) * rm) * linear_factor(step, f)
+        if PROFILE == "screen":
+            # all emission behind a screen at depth f of the column
+            rot = np.exp(2j * lam2(f) * rm) * linear_factor(step, f)
+        else:
+            # emission mixed uniformly between us and depth f: the depth
+            # integral of the rotation is e^(i x Phi) sinc(x Phi) per
+            # sightline, with the pixel-average factor of the mean ramp
+            x_phi = lam2(f) * rm
+            rot = (
+                np.exp(1j * x_phi)
+                * np.sinc(x_phi / np.pi)
+                * linear_factor(step / 2, f)
+            )
+        p = (q + 1j * u) * rot
         data[k, 1] = hp.ud_grade(p.real, NSIDE_DEG)
         data[k, 2] = hp.ud_grade(p.imag, NSIDE_DEG)
     return data
@@ -743,13 +758,17 @@ def main():
     )
     parser.add_argument("--no-bands", action="store_true")
     parser.add_argument("--rm-scale", type=float, default=1.0)
+    parser.add_argument(
+        "--profile", choices=("screen", "slab"), default="screen"
+    )
     args = parser.parse_args()
     set_center(args.center)
-    global SPAN, LAYOUT, BANDS, RM_SCALE
+    global SPAN, LAYOUT, BANDS, RM_SCALE, PROFILE
     SPAN = args.span
     LAYOUT = args.layout
     BANDS = not args.no_bands
     RM_SCALE = args.rm_scale
+    PROFILE = args.profile
     if args.stage == "compute":
         compute(out_dir())
     else:
