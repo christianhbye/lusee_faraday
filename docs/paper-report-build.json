@@ -1,8 +1,8 @@
 {
-  "source_revision": "2bd3103a90b5210fa7c92a763e5b9bd61eb2d5f3",
+  "source_revision": "56975a30e7b5f9ab646e699fc7b06ac7a0f1e728",
   "clean_source_worktree": true,
-  "pdf_sha256": "bee0315ff60b84380e9030a09514e3c45868d759995c329c4dd2fb9682b5e100",
-  "latex_log_sha256": "6abcc30d7edf050f24f59a2c49622555ff2557a88ceb50af47767a3bad88e2b7",
+  "pdf_sha256": "48ec0e8487d8c9c7ffbced3686fc5dc6117ffb2f080dc14fb275989e7220ef9c",
+  "latex_log_sha256": "0507259381f0193f03fa0820c6b718d7ab02eb671bc61704f893a23a3c613580",
   "generator_sha256": "d1bb05b5ea27c08b46e0c497848e5ff3dcddeb38067bd68fe34fee8e60e37000",
   "builder_sha256": "8c24541fe3ee338122facb07dd8a60f7c7ad57d2d78f997faa31f74db0251191",
   "report_source_sha256": "0cbe0246533abccd4b95dd0357a59ce41fadd4b338a1120f413662d3008ec149"
