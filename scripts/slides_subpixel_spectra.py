@@ -25,6 +25,8 @@ import healpy as hp
 import numpy as np
 
 from common import (
+    BETA_I,
+    T_CMB,
     CACHE_DIR,
     REPO,
     RESPONSE_PATH,
@@ -46,6 +48,7 @@ LMAX = 48
 NSIDE_DEG = 64
 N_NODES = 201
 TIME_INDEX = (0, 256, 512, 768)  # quarters of the lunar sidereal day
+CONTEXT_PHASE = 1  # index into TIME_INDEX for the full-spectrum panel
 OUT_ROOT = CACHE_DIR / "slides_subpixel"
 FIG_DIR = REPO / "notebooks" / "slides_pixel_sum"
 COLUMN_RECORD = REPO / "docs" / "faraday-covariance-column-results.json"
@@ -169,6 +172,31 @@ def compute(out):
         W_unit, np.ones((1, ff.size, 4))
     )
     print(f"unit sky {_time.time() - t0:.0f} s", flush=True)
+    # Context terms through the same pipeline, as power laws across the band:
+    # the I-only sky (Haslam synchrotron + CMB) gives the leakage, and the
+    # unrotated WMAP polarization gives the no-Faraday polarized term.
+    i_sky, q0, u0 = sky_at_freq(maps, CENTER)
+    ctx = np.zeros((3, 4, hp.nside2npix(NSIDE_DEG)))
+    ctx[0, 0] = hp.ud_grade(i_sky - T_CMB, NSIDE_DEG)  # synchrotron I
+    ctx[1, 0] = T_CMB  # CMB, flat
+    ctx[2, 1] = hp.ud_grade(q0, NSIDE_DEG)  # unrotated Q at CENTER
+    ctx[2, 2] = hp.ud_grade(u0, NSIDE_DEG)  # unrotated U at CENTER
+    ctx_alm = np.asarray(
+        cro.PolarizedSky(
+            ctx,
+            np.arange(1.0, 4.0),
+            sampling="healpix",
+            coord="galactic",
+            convention="COSMO",
+        ).compute_alm(lmax=LMAX)
+    )
+    W_ctx = engine.contract(beam, ctx_alm, tt, moon_location(), LMAX)
+    ratio = ff / CENTER
+    law = np.stack([ratio**BETA_I, np.ones_like(ff), ratio**BETA_QU])  # (3, F)
+    c_ctx = law[:, :, None] * np.ones(4)
+    ionly_zoom, ionly_parent = through_instrument(W_ctx[:2], c_ctx[:2])
+    unrot_zoom, unrot_parent = through_instrument(W_ctx[2:], c_ctx[2:])
+    print(f"context terms {_time.time() - t0:.0f} s", flush=True)
     ionly = np.load(REPO / "generated_data" / f"real{CENTER:g}_ionly.npz")
     key = [
         k
@@ -186,6 +214,10 @@ def compute(out):
         stokes_ionly_parent=stokes_ionly,  # (T, 4) center parent, I-only sky
         unit_zoom=unit_zoom,  # (T, 3, 64, 4) pseudo-Stokes, 1 K uniform sky
         unit_parent=unit_parent,  # (T, 3, 4)
+        ionly_zoom=ionly_zoom,  # (T, 3, 64, 4) I-only sky: I and its leakage
+        ionly_parent=ionly_parent,
+        unrot_zoom=unrot_zoom,  # (T, 3, 64, 4) unrotated WMAP polarization
+        unrot_parent=unrot_parent,
         zoom_offsets_hz=chan.zoom_bin_offsets_hz(),
         parent_centers_mhz=parent_centers(CENTER),
         time_index=np.array(TIME_INDEX),
@@ -229,27 +261,64 @@ def plot(out):
     k_zoom = d["unit_zoom"][:, 1, :, 0][:, order]  # loaded units per K
     k_parent = d["unit_parent"][:, 1, 0]
     zoom = d["stokes_zoom"][:, 1][:, order] / k_zoom[:, :, None]  # K
-    parent = d["stokes_parent"][:, 1] / k_parent[:, None]  # (T, 4) K
-    i_ref = d["stokes_ionly_parent"][:, 0] / k_parent  # beam-weighted I, K
-    q_leak = d["stokes_ionly_parent"][:, 1] / k_parent  # I-only leakage Q, K
-    fig, axes = plt.subplots(2, 1, figsize=(9, 7.2), sharex=True)
+    leak = d["ionly_zoom"][:, 1][:, order] / k_zoom[:, :, None]  # K
+    unrot = d["unrot_zoom"][:, 1][:, order] / k_zoom[:, :, None]  # K
+    i_ref = d["ionly_parent"][:, 1, 0] / k_parent  # beam-weighted I, K
+    q_leak = d["ionly_parent"][:, 1, 1] / k_parent  # I-only leakage Q, K
+    phases = d["lst_hours"] / 24
     colors = ["C0", "C1", "C2", "C4"]
-    for s, (ax, name) in enumerate(zip(axes, ("Q", "U")), start=1):
-        for it, lst in enumerate(d["lst_hours"]):
+    fig, axes = plt.subplots(
+        3,
+        1,
+        figsize=(9, 9.6),
+        sharex=True,
+        gridspec_kw=dict(height_ratios=(1.15, 1, 1)),
+    )
+    # Context: the full Q spectrum at one sidereal phase.
+    it = CONTEXT_PHASE
+    ax = axes[0]
+    ax.plot(
+        fz,
+        leak[it, :, 1],
+        color="k",
+        lw=1.6,
+        label="I-only sky: leakage I -> Q alone",
+    )
+    ax.plot(
+        fz,
+        leak[it, :, 1] + unrot[it, :, 1],
+        color="0.5",
+        lw=1.6,
+        ls="--",
+        label="leakage + WMAP polarization, no Faraday rotation",
+    )
+    ax.plot(
+        fz,
+        leak[it, :, 1] + zoom[it, :, 1],
+        color=colors[it],
+        lw=1.2,
+        label="leakage + WMAP polarization, Faraday rotated "
+        "(indistinguishable from leakage alone)",
+    )
+    ax.set_ylabel("total pseudo-Stokes Q [K]")
+    ax.set_title(
+        f"Full Q at sidereal phase {phases[it]:.2f}: beam-weighted "
+        f"I = {i_ref[it]:.0f} K, leakage Q = {q_leak[it]:.0f} K,\n"
+        f"unrotated polarization Q = {unrot[it, :, 1].mean():.0f} K, "
+        f"Faraday speckle rms = {zoom[it, :, 1].std():.2f} K",
+        fontsize=9.5,
+    )
+    ax.legend(fontsize=8, loc="best")
+    ax.grid(alpha=0.3)
+    # The Faraday polarized signal alone, all phases, with the ensemble band.
+    for s, (ax, name) in enumerate(zip(axes[1:], ("Q", "U")), start=1):
+        for it, ph in enumerate(phases):
             ax.plot(
                 fz,
                 zoom[it, :, s],
                 color=colors[it],
                 lw=1.2,
-                label=f"linear-interpolation sky, sidereal phase {lst/24:.2f}",
-            )
-            ax.plot(
-                d["parent_centers_mhz"][1],
-                parent[it, s],
-                "o",
-                mfc="none",
-                color=colors[it],
-                ms=7,
+                label=f"Faraday polarized signal, sidereal phase {ph:.2f}",
             )
         for anchor, alpha_fill in (("dphi1=1", 0.25), ("dphi1=3", 0.15)):
             fe, rq, ru = ensemble_band(f"alpha=2 {anchor}")
@@ -268,9 +337,9 @@ def plot(out):
             )
         ax.axhline(0, color="k", lw=0.5)
         ax.ticklabel_format(axis="x", useOffset=False)
-        ax.set_ylabel(f"pseudo-Stokes {name} [K]")
+        ax.set_ylabel(f"Faraday {name} alone [K]")
         ax.grid(alpha=0.3)
-    handles, labels = axes[0].get_legend_handles_labels()
+    handles, labels = axes[1].get_legend_handles_labels()
     fig.legend(
         handles,
         labels,
@@ -279,30 +348,26 @@ def plot(out):
         loc="lower center",
         bbox_to_anchor=(0.5, 0.0),
     )
-    axes[1].set_xlabel(
+    axes[2].set_xlabel(
         "frequency [MHz], 64 zoom bins of the central 25 kHz parent channel"
     )
     fig.suptitle(
-        "Faraday polarized signal through the as-built LuSEE instrument "
-        f"at {CENTER:g} MHz\n"
-        "WMAP K rotated with the Hutschenreuter RM, linear sub-pixel "
-        "interpolation, four sidereal phases; circles: parent channel\n"
-        f"beam-weighted I = {i_ref.min():.0f} to {i_ref.max():.0f} K; "
-        "I-only leakage "
-        f"Q = {q_leak.min():.0f} to {q_leak.max():.0f} K, off scale by 10$^4$",
-        fontsize=10,
+        "WMAP K polarization rotated with the Hutschenreuter RM (linear "
+        "sub-pixel interpolation),\nthrough the as-built LuSEE instrument at "
+        f"{CENTER:g} MHz",
+        fontsize=10.5,
     )
-    fig.tight_layout(rect=(0, 0.1, 1, 0.9))
+    fig.tight_layout(rect=(0, 0.08, 1, 0.96))
     FIG_DIR.mkdir(exist_ok=True)
     fig.savefig(FIG_DIR / f"10_subpixel_spectra_{CENTER:g}MHz.png", dpi=140)
     print("saved", FIG_DIR / f"10_subpixel_spectra_{CENTER:g}MHz.png")
-    for it, lst in enumerate(d["lst_hours"]):
+    for it, ph in enumerate(phases):
         q, u = zoom[it, :, 1], zoom[it, :, 2]
         print(
-            f"phase {lst/24:.2f}: zoom rms Q {q.std():.3g} K, "
-            f"U {u.std():.3g} K; parent Q {parent[it, 1]:.3g} K; "
-            f"I {i_ref[it]:.0f} K; leak Q {q_leak[it]:.1f} K -> "
-            f"speckle/I {q.std() / i_ref[it]:.2e}, "
+            f"phase {ph:.2f}: Faraday zoom rms Q {q.std():.3g} K, "
+            f"U {u.std():.3g} K; I {i_ref[it]:.0f} K; leak Q "
+            f"{q_leak[it]:.1f} K; unrotated Q {unrot[it, :, 1].mean():.1f} K "
+            f"-> speckle/I {q.std() / i_ref[it]:.2e}, "
             f"leak/I {q_leak[it] / i_ref[it]:.3f}"
         )
 
