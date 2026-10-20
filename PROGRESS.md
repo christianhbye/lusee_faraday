@@ -1,5 +1,35 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Paper arc, column screen and the group-talk figures — 2026-10-19
+
+Adopted `docs/plans/2026-10-19-paper-arc.md`: the talk and paper present the
+column screen with a stated sub-map structure family, the emitting depth as
+a second axis, and the local medium as its far end, instead of a jump from
+the pixel-sum failure to a local model. PR 9 retargeted at `main` after
+merging it (216 non-slow tests pass; the four-port kernels recomputed after
+the merge are bit-identical to the cached ones, only the fingerprints
+changed). PR 4 closed as superseded; three stale local branches pruned.
+
+Ran the column-anchored screen through the real-instrument covariance
+stage (`configs/paper/covariance-column.json`): alpha 2 and 5/3, anchors
+0.3, 1, 3 rad/m², sigma 10. All twelve cases pass at frequency nodes
+129/257 (65/129 failed the 1 % frequency gate at 3.3 %). Smooth term
+exactly zero; parent-channel surviving power 0.61 (30 MHz) and 0.71
+(50 MHz) of the scalar pilot in every scenario. With the WMAP-K
+normalization the parent speckle rms is 0.02 to 0.67 K at 30 MHz.
+
+Slides notebook section 6 (`notebooks/slides_pixel_sum_convergence.ipynb`):
+analytic per-pixel depolarization factor under linear RM interpolation
+(exact in the Galactic plane, replaces the brute-force sub-pixel average),
+the nearest-neighbour / linear / Gaussian sub-pixel ladder, the rms pixel
+factor versus frequency for the structure-function family (the map-based
+linear sky sits between the alpha = 2 curves anchored at 1 and 3 rad/m²),
+and the beam-weighted sum as a phasor walk (nearest neighbour shrinks as
+1/sqrt(N) under refinement, the pixel-averaged sum does not). In progress:
+`scripts/slides_subpixel_spectra.py`, the linear-interpolation sky through
+the as-built instrument at four sidereal phases against the ensemble band.
+
+
 ## Implementation PR and report complete — 2026-10-17
 
 Completed the conditional-prediction implementation in PR 9 into
