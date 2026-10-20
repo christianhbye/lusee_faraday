@@ -45,7 +45,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--phase-index", type=int, default=1)
     parser.add_argument(
-        "--fractions", type=float, nargs="+", default=(0.0002, 0.002)
+        "--fractions", type=float, nargs="+", default=(0.0002,)
     )
     args = parser.parse_args()
     it = args.phase_index
@@ -98,7 +98,22 @@ def main():
                 lw=1.6,
                 marker="o",
                 ms=3,
-                label=f"rotated, screen at f = {f:g} of the column",
+                label=(
+                    "emission behind the local gas only: "
+                    f"screen at f = {f:g} of the column"
+                ),
+            )
+        # the column case, where computed: the mean polarization is gone
+        col = [(c, load(c, 1.0)) for c in centers]
+        col = [(c, r) for c, r in col if r is not None]
+        if col:
+            ax.plot(
+                [c for c, _ in col],
+                [r["faraday"][it, s] for _, r in col],
+                "ks",
+                ms=7,
+                label="emission behind the full column (f = 1): "
+                "only the 0.1 K ripple is left",
             )
         ax.set_ylabel(f"parent-channel pseudo-Stokes {name} [K]")
         ax.grid(alpha=0.3)
