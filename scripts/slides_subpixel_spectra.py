@@ -483,35 +483,47 @@ def plot_ladder_panels(axes, fz, zoom, parents, off, sel, order):
 
 
 F_SCAN = (1.0, 0.6, 0.3)
+F_LOCAL = (1.0, 0.3, 0.002, 0.0002)  # column to local medium
 
 
-def plot_fscan_panels(axes, fz, parents, off, sel, order):
-    """One sidereal phase: the linear-interpolation sky for a screen at
-    fraction f = 1, 0.6, 0.3 of the column (RM map scaled by f)."""
-    it = CONTEXT_PHASE
+def _load_f(f, sel, order):
+    """Zoom-bin pseudo-Stokes (K) of the three terms for a screen at f."""
     global RM_SCALE
     keep = RM_SCALE
-    styles = (("k", "-"), ("C0", "--"), ("C1", ":"))
+    RM_SCALE = f
+    path = out_dir() / "spectra.npz"
+    RM_SCALE = keep
+    if not path.exists():
+        return None
+    d = np.load(path)
+
+    def bins(key):
+        return np.concatenate([d[key][:, j] for j in sel], axis=1)[:, order]
+
+    k = bins("unit_zoom")[..., 0]
+    return dict(
+        faraday=bins("stokes_zoom") / k[:, :, None],
+        leak=bins("ionly_zoom") / k[:, :, None],
+        unrot=bins("unrot_zoom") / k[:, :, None],
+    )
+
+
+F_STYLES = (("k", "-"), ("C0", "--"), ("C1", ":"), ("C4", "-."))
+
+
+def plot_fscan_panels(axes, fz, parents, off, sel, order, f_values=F_SCAN):
+    """One sidereal phase: the linear-interpolation sky for screens at the
+    given fractions f of the column (RM map scaled by f)."""
+    it = CONTEXT_PHASE
     for s, (ax, name) in enumerate(zip(axes, ("Q", "U")), start=1):
-        for f, (color, ls) in zip(F_SCAN, styles):
-            RM_SCALE = f
-            path = out_dir() / "spectra.npz"
-            if not path.exists():
+        for f, (color, ls) in zip(f_values, F_STYLES):
+            terms = _load_f(f, sel, order)
+            if terms is None:
                 print(f"no cache for f={f:g}; skipped")
                 continue
-            d = np.load(path)
-            k = np.concatenate([d["unit_zoom"][:, j] for j in sel], axis=1)[
-                :, order
-            ][..., 0]
-            z = (
-                np.concatenate([d["stokes_zoom"][:, j] for j in sel], axis=1)[
-                    :, order
-                ]
-                / k[:, :, None]
-            )
             ax.plot(
                 fz,
-                z[it, :, s],
+                terms["faraday"][it, :, s],
                 color=color,
                 ls=ls,
                 lw=1.5,
@@ -521,8 +533,43 @@ def plot_fscan_panels(axes, fz, parents, off, sel, order):
         ax.set_ylabel(f"Faraday {name} alone [K]")
         ax.grid(alpha=0.3)
         _symmetric(ax)
-    RM_SCALE = keep
     _shade_aliased_bins(axes, parents, off, sel, axes[0])
+
+
+def plot_local_top(ax, fz, sel, order):
+    """Total Q for screens from the column (f = 1) to the local medium."""
+    it = CONTEXT_PHASE
+    base = _load_f(1.0, sel, order)
+    ax.plot(
+        fz,
+        base["leak"][it, :, 1],
+        color="0.6",
+        lw=2.4,
+        label="I-only sky: leakage alone",
+    )
+    ax.plot(
+        fz,
+        base["leak"][it, :, 1] + base["unrot"][it, :, 1],
+        color="0.3",
+        lw=2.4,
+        label="leakage + WMAP polarization, no rotation",
+    )
+    for f, (color, ls) in zip(F_LOCAL, F_STYLES):
+        terms = _load_f(f, sel, order)
+        if terms is None:
+            continue
+        ax.plot(
+            fz,
+            terms["leak"][it, :, 1] + terms["faraday"][it, :, 1],
+            color=color,
+            ls=ls,
+            lw=1.4,
+            label=f"rotated, screen at f = {f:g} of the column",
+        )
+    ax.ticklabel_format(axis="x", useOffset=False)
+    ax.set_ylabel("total pseudo-Stokes Q [K]")
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=7.5, loc="center right")
 
 
 def plot(out):
@@ -562,6 +609,42 @@ def plot(out):
     # Context: the full Q spectrum at one sidereal phase.
     it = CONTEXT_PHASE
     ax = axes[0]
+    if LAYOUT == "local":
+        plot_local_top(ax, fz, sel, order)
+        plot_fscan_panels(axes[1:], fz, parents, off, sel, order, F_LOCAL)
+        handles, labels = axes[1].get_legend_handles_labels()
+        fig.legend(
+            handles,
+            labels,
+            fontsize=8,
+            ncol=2,
+            loc="lower center",
+            bbox_to_anchor=(0.5, 0.0),
+        )
+        axes[2].set_xlabel(
+            "frequency [MHz], zoom bins of the three 25 kHz parent channels"
+            if SPAN == 3
+            else "frequency [MHz], 64 zoom bins of the central parent channel"
+        )
+        ax.set_title(
+            f"Total Q at sidereal phase {phases[it]:.2f}: from the Galactic "
+            "column (f = 1) to the local medium (f = 0.0002)",
+            fontsize=9.5,
+        )
+        fig.suptitle(
+            "WMAP K polarization through the as-built LuSEE instrument at "
+            f"{CENTER:g} MHz: where along the column does the emission sit?",
+            fontsize=10.5,
+        )
+        fig.tight_layout(rect=(0, 0.08, 1, 0.96))
+        FIG_DIR.mkdir(exist_ok=True)
+        name = FIG_DIR / (
+            f"10_subpixel_spectra_{CENTER:g}MHz"
+            f"{'' if SPAN == 1 else '_3parents'}_local.png"
+        )
+        fig.savefig(name, dpi=140)
+        print("saved", name)
+        return
     ax.plot(
         fz,
         leak[it, :, 1],
@@ -607,7 +690,7 @@ def plot(out):
         handles,
         labels,
         fontsize=7.5,
-        ncol=2 if LAYOUT in ("ladder", "fscan") else 3,
+        ncol=2 if LAYOUT in ("ladder", "fscan", "local") else 3,
         loc="lower center",
         bbox_to_anchor=(0.5, 0.0),
     )
@@ -654,7 +737,9 @@ def main():
     parser.add_argument("--center", type=float, default=30.0)
     parser.add_argument("--span", type=int, choices=(1, 3), default=1)
     parser.add_argument(
-        "--layout", choices=("phases", "ladder", "fscan"), default="phases"
+        "--layout",
+        choices=("phases", "ladder", "fscan", "local"),
+        default="phases",
     )
     parser.add_argument("--no-bands", action="store_true")
     parser.add_argument("--rm-scale", type=float, default=1.0)
