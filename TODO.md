@@ -1,16 +1,21 @@
 # LuSEE Faraday work queue
 
-Updated 2026-10-19. **The paper framing is adopted: "how Faraday rotation
+Updated 2026-10-20. **The paper framing is adopted: "how Faraday rotation
 manifests in LuSEE Night spectra", mechanisms and magnitudes, no detection
 promise.** The presentation order and the work queue are in
 [the paper arc](docs/plans/2026-10-19-paper-arc.md): column screen with a
 stated sub-map structure family, emitting depth as a second axis, local
-medium as its far end, then form and range, then inference. Next: run the
-column-anchored screen through the real-instrument pipeline. The current plan to the paper, with phases, deliverables and
+medium as its far end, then form and range, then inference. The column
+screen has been run through the real instrument (decision table, delay
+spectrum, analytic f-axis; see PROGRESS.md). Next, in order: the 50 MHz
+anomaly of the scaled-map case, the local scenarios' band-wide manifestation
+through the real-instrument covariance stage, the profile comparison along
+the f-axis, then the manuscript. The current plan to the paper, with phases, deliverables and
 gates, is the
 [plan section of the framing document](docs/plans/2026-10-17-paper-framing.md#plan-to-the-paper).
 The numerical phases, conditional interpretation and permitted report are
-implemented in [PR 9](https://github.com/christianhbye/lusee_faraday/pull/9).
+implemented in [PR 9](https://github.com/christianhbye/lusee_faraday/pull/9),
+merged 2026-10-20.
 The [implementation status](docs/plans/2026-10-17-paper-implementation.md)
 and [reproduction guide](docs/paper-implementation-guide.md) describe the
 completed gates and products. Transfer into the protected manuscript and
@@ -268,6 +273,21 @@ conditional diffuse-detection result is no longer a paper deliverable.
 
 ## Optional cleanup and deferred work
 
+- [ ] **50 MHz anomaly, scaled-map case.** At f = 0.0002 the polarized term
+  is 0.12 of the unrotated value at 50 MHz, where it should be close to
+  unrotated (beam cancellation is only mild). Unexplained; needs a per-pixel
+  look. Flagged as open in the 6g caption.
+- [ ] Scaled-map band loop: the f = 0.002 half was never run.
+- [ ] Pseudo-Stokes heads-up figure (`report/figures/pseudo_stokes_leakage.png`)
+  is not circulated; it needs one caption paragraph. Replace the
+  "theta > 86 deg" caveat: cutting the sky integral at 86 deg moves Q/I and
+  U/I by <= 0.1 percentage points (80 deg: ~0.2, 70 deg: ~1), so the outer
+  ring is not the cause; the size rests on the BGL off-zenith pattern.
+  Ask the BGL team what is imposed at 87 deg and what ground was assumed.
+- [ ] Fold `docs/paper-integration-validation.json` into the runner: it is
+  hand-regenerated (full-suite result keyed to source hashes) and goes stale
+  after any source change, failing the report stage at
+  `paper_products.py --verify-only`.
 - [ ] Decide what to do with untracked `audit/scripts/plot_shuffle.py` and
   `The Pixel Sum Never Converged.pdf`; do not circulate the old briefing's
   amplitude/power-weight explanation without correcting it.
