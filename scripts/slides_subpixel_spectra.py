@@ -249,6 +249,30 @@ def ensemble_band(label_contains):
     raise KeyError(label_contains)
 
 
+def ensemble_draws(label_contains, n_draws=2, seed=5):
+    """Gaussian realizations of the zoom-bin Q/U speckle (K per 1 K)."""
+    rec = json.loads(COLUMN_RECORD.read_text())
+    for row in rec["results"]:
+        if (
+            row["center_mhz"] == CENTER
+            and label_contains in row["case"]["label"]
+        ):
+            z = np.load(REPO / row["path"])
+            spk = z["speckle"]
+            nb = spk.shape[0]
+            # phase-0 Q and U over the zoom bins as one real Gaussian vector
+            block = spk[3:nb, 1:3, 3:nb, 1:3].real.reshape(
+                2 * (nb - 3), 2 * (nb - 3)
+            )
+            w, v = np.linalg.eigh((block + block.T) / 2)
+            root = v * np.sqrt(np.clip(w, 0, None))
+            rng = np.random.default_rng(seed)
+            x = root @ rng.standard_normal((root.shape[1], n_draws))
+            x = x.reshape(nb - 3, 2, n_draws)
+            return z["frequency_mhz"][3:], x[:, 0], x[:, 1]
+    raise KeyError(label_contains)
+
+
 def plot(out):
     import matplotlib
 
@@ -341,6 +365,22 @@ def plot(out):
                 label=(
                     rf"ensemble $\pm$1 rms, $\alpha$=2, "
                     rf"$\Delta\phi_{{1^\circ}}$={anchor[-1]} rad m$^{{-2}}$"
+                ),
+            )
+        fe, dq, du = ensemble_draws("alpha=2 dphi1=1")
+        oe = np.argsort(fe)
+        for m in range(dq.shape[1]):
+            ax.plot(
+                fe[oe],
+                (dq if s == 1 else du)[oe, m] * wmap_pixel_rms(),
+                color="0.25",
+                lw=0.9,
+                ls="--",
+                label=(
+                    r"one realization drawn from the $\alpha$=2, "
+                    r"$\Delta\phi_{1^\circ}$=1 ensemble"
+                    if m == 0
+                    else None
                 ),
             )
         ax.axhline(0, color="k", lw=0.5)
