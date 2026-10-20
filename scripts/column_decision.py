@@ -116,15 +116,15 @@ def plot(record_path, fig_dir):
         noise = np.array(
             [ref["exposures"][str(n)]["noise_rms_parent_k"] for n in luns]
         )
-        ax.fill_between(
+        ax.plot(
             luns,
-            qp.min() / noise,
-            qp.max() / noise,
+            np.sqrt(np.mean(qp**2)) / noise,
             color="k",
-            alpha=0.12,
-            lw=0,
+            lw=2.2,
+            marker="s",
+            ms=5,
             label="linear interpolation (map realization), "
-            "range over 4 sidereal phases",
+            "rms over 4 sidereal phases",
         )
         ax.axhline(1, color="0.4", lw=1)
         ax.set_xscale("log")
