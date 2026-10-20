@@ -53,6 +53,7 @@ SPAN = 1  # parents plotted: 1 (central) or 3 (all); set by --span
 LAYOUT = "phases"  # or "ladder": one phase, three sub-pixel models
 BANDS = True  # draw the +-1 rms ensemble bands
 SIGMA_COLUMN = 10.0  # rad/m^2, the column screens' dispersion
+RM_SCALE = 1.0  # screen fraction f: the RM map is multiplied by this
 OUT_ROOT = CACHE_DIR / "slides_subpixel"
 FIG_DIR = REPO / "notebooks" / "slides_pixel_sum"
 COLUMN_RECORDS = (
@@ -70,7 +71,8 @@ def set_center(center_mhz):
 
 
 def out_dir():
-    return OUT_ROOT / f"{CENTER:g}mhz"
+    tag = "" if RM_SCALE == 1.0 else f"_f{RM_SCALE:g}"
+    return OUT_ROOT / f"{CENTER:g}mhz{tag}"
 
 
 def wmap_pixel_rms():
@@ -95,7 +97,7 @@ def linear_factor(step, freq_mhz):
 
 def node_maps(maps, nodes):
     """(K, 4, npix_64) COSMO Stokes maps of the pixel-averaged rotated sky."""
-    rm = maps["RM"]
+    rm = maps["RM"] * RM_SCALE  # a screen at fraction f of the column
     step = neighbour_step(rm)
     data = np.zeros((nodes.size, 4, hp.nside2npix(NSIDE_DEG)))
     for k, f in enumerate(nodes):
@@ -560,12 +562,14 @@ def main():
         "--layout", choices=("phases", "ladder"), default="phases"
     )
     parser.add_argument("--no-bands", action="store_true")
+    parser.add_argument("--rm-scale", type=float, default=1.0)
     args = parser.parse_args()
     set_center(args.center)
-    global SPAN, LAYOUT, BANDS
+    global SPAN, LAYOUT, BANDS, RM_SCALE
     SPAN = args.span
     LAYOUT = args.layout
     BANDS = not args.no_bands
+    RM_SCALE = args.rm_scale
     if args.stage == "compute":
         compute(out_dir())
     else:

@@ -69,7 +69,101 @@ def exposure_s(lunations):
     return by[24] * lunations / 24
 
 
+def plot(record_path, fig_dir):
+    """Speckle over noise versus lunations, parent channel, both bands."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    rec = json.loads(record_path.read_text())
+    luns = np.array(LUNATIONS)
+    styles = {"alpha=2": "-", "alpha=5/3": "--", "alpha=1": ":"}
+    colors = {"0.3": "C0", "1": "C2", "3": "C3"}
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.8), sharey=True)
+    for ax, center in zip(axes, (30.0, 50.0)):
+        for row in rec["results"]:
+            if row["center_mhz"] != center:
+                continue
+            label = row["label"].replace("column screen ", "")
+            alpha = label.split()[0]
+            anchor = label.split("dphi1=")[1]
+            y = [
+                row["exposures"][str(n)]["speckle_over_noise_parent"]
+                for n in luns
+            ]
+            ax.plot(
+                luns,
+                y,
+                color=colors[anchor],
+                ls=styles[alpha],
+                marker="o",
+                ms=4,
+                lw=1.4,
+                label=(
+                    rf"$\alpha$={alpha.split('=')[1]}, "
+                    rf"$\Delta\phi_{{1^\circ}}$={anchor} rad m$^{{-2}}$"
+                ),
+            )
+        # the linear-interpolation map realization, range over four phases
+        d = np.load(
+            REPO
+            / "generated_data/cache/slides_subpixel"
+            / f"{center:g}mhz/spectra.npz"
+        )
+        qp = np.abs(d["stokes_parent"][:, 1, 1] / d["unit_parent"][:, 1, 0])
+        ref = [r for r in rec["results"] if r["center_mhz"] == center][0]
+        noise = np.array(
+            [ref["exposures"][str(n)]["noise_rms_parent_k"] for n in luns]
+        )
+        ax.fill_between(
+            luns,
+            qp.min() / noise,
+            qp.max() / noise,
+            color="k",
+            alpha=0.12,
+            lw=0,
+            label="linear interpolation (map realization), "
+            "range over 4 sidereal phases",
+        )
+        ax.axhline(1, color="0.4", lw=1)
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xticks(luns)
+        ax.set_xticklabels(
+            [f"{n}\n({n / 12.37:.0f} yr)" if n >= 12 else str(n) for n in luns]
+        )
+        ax.set_xlabel("lunations (one sidereal phase: 0.3 h per lunation)")
+        ax.set_title(f"{center:g} MHz, parent channel", fontsize=10)
+        ax.grid(alpha=0.3, which="both")
+    axes[0].set_ylabel("Faraday speckle rms / radiometer noise rms")
+    axes[0].set_ylim(1e-3, 10)
+    axes[1].legend(fontsize=7.5, loc="lower right", ncol=2)
+    fig.suptitle(
+        "Column-screen speckle at the WMAP-K brightness against the loaded "
+        "LuSEE noise (3 nV/$\\sqrt{\\mathrm{Hz}}$, "
+        "0.1 pA/$\\sqrt{\\mathrm{Hz}}$), "
+        "stacked at one sidereal phase",
+        fontsize=10,
+    )
+    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    fig_dir.mkdir(exist_ok=True)
+    fig.savefig(fig_dir / "13_speckle_over_noise.png", dpi=140)
+    print("saved", fig_dir / "13_speckle_over_noise.png")
+
+
 def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "stage", choices=["compute", "plot"], nargs="?", default="compute"
+    )
+    args = parser.parse_args()
+    record = REPO / "docs/column-decision-results.json"
+    if args.stage == "plot":
+        plot(record, REPO / "notebooks" / "slides_pixel_sum")
+        return
     results = []
     lines = []
     for center in (30.0, 50.0):
@@ -132,7 +226,7 @@ def main():
     )
     provenance, fingerprint = manifest(config, SOURCES)
     write_json(
-        REPO / "docs/column-decision-results.json",
+        record,
         dict(fingerprint=fingerprint, provenance=provenance, results=results),
     )
     print("\n".join(lines))
