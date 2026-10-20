@@ -297,8 +297,8 @@ def _shade_aliased_bins(axes, parents, off, sel, label_ax):
                 ax.axvspan(
                     f0 - half,
                     f0 + half,
-                    color="C3",
-                    alpha=0.08,
+                    color="0.3",
+                    alpha=0.12,
                     lw=0,
                     label=(
                         "aliased edge zoom bins (>5 % folded response)"
