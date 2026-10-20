@@ -55,6 +55,9 @@ BANDS = True  # draw the +-1 rms ensemble bands
 SIGMA_COLUMN = 10.0  # rad/m^2, the column screens' dispersion
 RM_SCALE = 1.0  # screen fraction f: the RM map is multiplied by this
 PROFILE = "screen"  # or "slab": emission mixed uniformly from us to depth f
+RM_CONST = (
+    0.0  # rad/m^2 added uniformly: a local depth constant across the sky
+)
 OUT_ROOT = CACHE_DIR / "slides_subpixel"
 FIG_DIR = REPO / "notebooks" / "slides_pixel_sum"
 COLUMN_RECORDS = (
@@ -73,6 +76,7 @@ def set_center(center_mhz):
 
 def out_dir():
     tag = "" if RM_SCALE == 1.0 else f"_f{RM_SCALE:g}"
+    tag += "" if RM_CONST == 0.0 else f"_c{RM_CONST:g}"
     tag += "" if PROFILE == "screen" else f"_{PROFILE}"
     return OUT_ROOT / f"{CENTER:g}mhz{tag}"
 
@@ -99,7 +103,8 @@ def linear_factor(step, freq_mhz):
 
 def node_maps(maps, nodes):
     """(K, 4, npix_64) COSMO Stokes maps of the pixel-averaged rotated sky."""
-    rm = maps["RM"] * RM_SCALE  # a screen at fraction f of the column
+    # a screen at fraction f of the column, plus a uniform local depth
+    rm = maps["RM"] * RM_SCALE + RM_CONST
     step = neighbour_step(rm)
     data = np.zeros((nodes.size, 4, hp.nside2npix(NSIDE_DEG)))
     for k, f in enumerate(nodes):
@@ -784,10 +789,12 @@ def main():
         "--profile", choices=("screen", "slab"), default="screen"
     )
     parser.add_argument("--nodes", type=int, default=201)
+    parser.add_argument("--rm-const", type=float, default=0.0)
     args = parser.parse_args()
     set_center(args.center)
-    global SPAN, LAYOUT, BANDS, RM_SCALE, PROFILE, N_NODES
+    global SPAN, LAYOUT, BANDS, RM_SCALE, PROFILE, N_NODES, RM_CONST
     N_NODES = args.nodes
+    RM_CONST = args.rm_const
     SPAN = args.span
     LAYOUT = args.layout
     BANDS = not args.no_bands

@@ -20,8 +20,9 @@ CACHE = REPO / "generated_data/cache/slides_subpixel"
 FIG_DIR = REPO / "notebooks" / "slides_pixel_sum"
 
 
-def load(center, f, profile="screen"):
+def load(center, f, profile="screen", const=0.0):
     tag = "" if f == 1.0 else f"_f{f:g}"
+    tag += "" if const == 0.0 else f"_c{const:g}"
     tag += "" if profile == "screen" else f"_{profile}"
     path = CACHE / f"{center:g}mhz{tag}" / "spectra.npz"
     if not path.exists():
@@ -47,7 +48,19 @@ def main():
     parser.add_argument(
         "--fractions", type=float, nargs="+", default=(0.0002,)
     )
+    parser.add_argument(
+        "--const",
+        type=float,
+        default=None,
+        help="uniform local Faraday depth [rad/m^2] computed with "
+        "--rm-scale 0 --rm-const; replaces the scaled-map fractions",
+    )
     args = parser.parse_args()
+    cases = (
+        [(0.0, args.const)]
+        if args.const is not None
+        else [(f, 0.0) for f in args.fractions]
+    )
     it = args.phase_index
     centers = np.arange(10, 51, 2, dtype=float)
     fig, axes = plt.subplots(2, 1, figsize=(9, 7), sharex=True)
@@ -59,7 +72,7 @@ def main():
             next(
                 (
                     r
-                    for r in (load(c, f) for f in args.fractions)
+                    for r in (load(c, f, const=k) for f, k in cases)
                     if r is not None
                 ),
                 None,
@@ -84,12 +97,17 @@ def main():
                 ls="-.",
                 label="I-only leakage",
             )
-        for f, (color, ls) in zip(args.fractions, styles):
-            rows = [load(c, f) for c in centers]
+        for (f, k), (color, ls) in zip(cases, styles):
+            rows = [load(c, f, const=k) for c in centers]
             ok = [r is not None for r in rows]
             if not any(ok):
-                print(f"no caches for f={f:g}; skipped")
+                print(f"no caches for f={f:g} const={k:g}; skipped")
                 continue
+            case_label = (
+                f"rotated by a uniform local depth of {k:g} rad m$^{{-2}}$"
+                if k
+                else f"emission behind the local gas only: screen at f = {f:g}"
+            )
             ax.plot(
                 centers[ok],
                 [r["faraday"][it, s] for r in rows if r],
@@ -98,10 +116,7 @@ def main():
                 lw=1.6,
                 marker="o",
                 ms=3,
-                label=(
-                    "emission behind the local gas only: "
-                    f"screen at f = {f:g} of the column"
-                ),
+                label=case_label,
             )
         # the column case, where computed: the mean polarization is gone
         col = [(c, load(c, 1.0)) for c in centers]
@@ -123,7 +138,7 @@ def main():
     )
     phase = None
     for c in centers:
-        b = load(c, args.fractions[0])
+        b = load(c, cases[0][0], const=cases[0][1])
         if b is not None:
             phase = b["lst"][it]
             break
@@ -138,7 +153,11 @@ def main():
     )
     fig.tight_layout(rect=(0, 0, 1, 0.95))
     FIG_DIR.mkdir(exist_ok=True)
-    name = FIG_DIR / "14_band_rotation.png"
+    name = FIG_DIR / (
+        "14_band_rotation.png"
+        if args.const is None
+        else f"14_band_rotation_uniform{args.const:g}.png"
+    )
     fig.savefig(name, dpi=140)
     print("saved", name)
 
