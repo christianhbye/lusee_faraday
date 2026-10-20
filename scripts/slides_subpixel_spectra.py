@@ -49,6 +49,7 @@ NSIDE_DEG = 64
 N_NODES = 201
 TIME_INDEX = (0, 256, 512, 768)  # quarters of the lunar sidereal day
 CONTEXT_PHASE = 1  # index into TIME_INDEX for the full-spectrum panel
+SPAN = 1  # parents plotted: 1 (central) or 3 (all); set by --span
 OUT_ROOT = CACHE_DIR / "slides_subpixel"
 FIG_DIR = REPO / "notebooks" / "slides_pixel_sum"
 COLUMN_RECORD = REPO / "docs" / "faraday-covariance-column-results.json"
@@ -256,13 +257,21 @@ def plot(out):
 
     d = np.load(out / "spectra.npz")
     off = d["zoom_offsets_hz"] * 1e-6
-    order = np.argsort(off)
-    fz = CENTER + off[order]
-    k_zoom = d["unit_zoom"][:, 1, :, 0][:, order]  # loaded units per K
+    parents = d["parent_centers_mhz"]
+    sel = [1] if SPAN == 1 else [0, 1, 2]
+    fz = np.concatenate([parents[j] + off for j in sel])
+    order = np.argsort(fz)
+    fz = fz[order]
+
+    def bins(key, comp=None):
+        a = np.concatenate([d[key][:, j] for j in sel], axis=1)[:, order]
+        return a if comp is None else a[..., comp]
+
+    k_zoom = bins("unit_zoom", 0)  # loaded units per K
     k_parent = d["unit_parent"][:, 1, 0]
-    zoom = d["stokes_zoom"][:, 1][:, order] / k_zoom[:, :, None]  # K
-    leak = d["ionly_zoom"][:, 1][:, order] / k_zoom[:, :, None]  # K
-    unrot = d["unrot_zoom"][:, 1][:, order] / k_zoom[:, :, None]  # K
+    zoom = bins("stokes_zoom") / k_zoom[:, :, None]  # K
+    leak = bins("ionly_zoom") / k_zoom[:, :, None]  # K
+    unrot = bins("unrot_zoom") / k_zoom[:, :, None]  # K
     i_ref = d["ionly_parent"][:, 1, 0] / k_parent  # beam-weighted I, K
     q_leak = d["ionly_parent"][:, 1, 1] / k_parent  # I-only leakage Q, K
     phases = d["lst_hours"] / 24
@@ -349,7 +358,13 @@ def plot(out):
     )
     axes[2].set_xlabel(
         "frequency [MHz], 64 zoom bins of the central 25 kHz parent channel"
+        if SPAN == 1
+        else "frequency [MHz], zoom bins of the three 25 kHz parent channels"
     )
+    if SPAN == 3:
+        for ax in axes:
+            for edge in (parents[0] + 0.0125, parents[1] + 0.0125):
+                ax.axvline(edge, color="k", lw=0.6, ls=":")
     fig.suptitle(
         "WMAP K polarization rotated with the Hutschenreuter RM (linear "
         "sub-pixel interpolation),\nthrough the as-built LuSEE instrument at "
@@ -358,8 +373,10 @@ def plot(out):
     )
     fig.tight_layout(rect=(0, 0.08, 1, 0.96))
     FIG_DIR.mkdir(exist_ok=True)
-    fig.savefig(FIG_DIR / f"10_subpixel_spectra_{CENTER:g}MHz.png", dpi=140)
-    print("saved", FIG_DIR / f"10_subpixel_spectra_{CENTER:g}MHz.png")
+    suffix = "" if SPAN == 1 else "_3parents"
+    name = FIG_DIR / f"10_subpixel_spectra_{CENTER:g}MHz{suffix}.png"
+    fig.savefig(name, dpi=140)
+    print("saved", name)
     for it, ph in enumerate(phases):
         q, u = zoom[it, :, 1], zoom[it, :, 2]
         print(
@@ -375,8 +392,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("stage", choices=["compute", "plot"])
     parser.add_argument("--center", type=float, default=30.0)
+    parser.add_argument("--span", type=int, choices=(1, 3), default=1)
     args = parser.parse_args()
     set_center(args.center)
+    global SPAN
+    SPAN = args.span
     if args.stage == "compute":
         compute(out_dir())
     else:
