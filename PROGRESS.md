@@ -1,5 +1,28 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Decision table, delay spectrum, f-axis at the column anchor — 2026-10-19 (later)
+
+`scripts/column_decision.py` puts every column-screen scenario against the
+measured-system reference receiver noise at one sidereal phase for 1, 12,
+24 and 48 lunations of actual-site exposure. Only the smoothest, lowest-
+anchor case (alpha 2, 0.3 rad/m²) reaches order unity at 24 lunations (1.9
+in the parent channel, 4 sigma variance excess over the simulated band);
+the anchor-1 cases stay at 0.2 to 0.6 and alpha 1 below 1e-2. The Faraday
+polarized sky leaks into pseudo-I at 0.8 of its Q amplitude.
+`scripts/slides_delay_spectrum.py` shows the ripple at 50 to 250 µs delay
+after per-parent constant+slope removal, under the 24-lunation noise.
+
+The mixed-depth stage refuses the column screens (Hermite degree bound), so
+the f-axis at the column anchor is done analytically in the arc plan: a
+delta screen at fraction f scales the surviving power as f^(-4/alpha)
+(checked against both the pilot and the real-instrument run to 2 %); a
+uniform slab is 5e-4 (30 MHz) to 1.3e-3 (50 MHz) of the screen power, so
+emission spread over more than 0.01 rad/m² of depth is dead on its sightline.
+Slides: the 2-D sub-pixel ladder with context figure, the three-parent
+ladder spectra at 30 and 50 MHz, the spectrometer response behind the
+aliased zoom bins, the alpha-1 column screen through the instrument.
+
+
 ## Paper arc, column screen and the group-talk figures — 2026-10-19
 
 Adopted `docs/plans/2026-10-19-paper-arc.md`: the talk and paper present the
