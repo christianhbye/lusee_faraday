@@ -51,6 +51,8 @@ TIME_INDEX = (0, 256, 512, 768)  # quarters of the lunar sidereal day
 CONTEXT_PHASE = 1  # index into TIME_INDEX for the full-spectrum panel
 SPAN = 1  # parents plotted: 1 (central) or 3 (all); set by --span
 LAYOUT = "phases"  # or "ladder": one phase, three sub-pixel models
+BANDS = True  # draw the +-1 rms ensemble bands
+SIGMA_COLUMN = 10.0  # rad/m^2, the column screens' dispersion
 OUT_ROOT = CACHE_DIR / "slides_subpixel"
 FIG_DIR = REPO / "notebooks" / "slides_pixel_sum"
 COLUMN_RECORDS = (
@@ -309,6 +311,31 @@ def _shade_aliased_bins(axes, parents, off, sel, label_ax):
                 first = False
 
 
+def ensemble_draws_on(label_contains, freqs_mhz, n_draws=1, seed=5):
+    """Gaussian realizations of the Q/U speckle on an arbitrary frequency
+    grid, from the measured central-parent variance and the Gaussian-screen
+    frequency correlation exp(-2 sigma^2 (dlambda^2)^2), which matches the
+    measured 64-bin correlation to ~1 % rms away from the aliased edge bins.
+    Q and U are drawn independently (their measured cross-correlation is
+    below 1 %). Edge-bin aliasing is not modelled here."""
+    from lusee_faraday.conventions import lambda_squared
+
+    fe, rq, ru = ensemble_band(label_contains)
+    inner = slice(8, 56)
+    oe = np.argsort(fe)
+    var = (np.mean(rq[oe][inner] ** 2), np.mean(ru[oe][inner] ** 2))
+    l2 = lambda_squared(np.asarray(freqs_mhz))
+    corr = np.exp(-2 * SIGMA_COLUMN**2 * (l2[:, None] - l2[None, :]) ** 2)
+    w, v = np.linalg.eigh(corr)
+    root = v * np.sqrt(np.clip(w, 0, None))
+    rng = np.random.default_rng(seed)
+    draws = [
+        np.sqrt(vk) * (root @ rng.standard_normal((root.shape[1], n_draws)))
+        for vk in var
+    ]
+    return draws[0], draws[1]
+
+
 def plot_phase_panels(axes, fz, zoom, phases, colors, parents, off, sel):
     """Faraday Q and U at four sidereal phases with the alpha=2 bands."""
     for s, (ax, name) in enumerate(zip(axes, ("Q", "U")), start=1):
@@ -348,7 +375,6 @@ def plot_phase_panels(axes, fz, zoom, phases, colors, parents, off, sel):
                 r"$\Delta\phi_{1^\circ}$=1 ensemble"
             ),
         )
-        ax.axhline(0, color="k", lw=0.5)
         ax.ticklabel_format(axis="x", useOffset=False)
         ax.set_ylabel(f"Faraday {name} alone [K]")
         ax.grid(alpha=0.3)
@@ -356,8 +382,8 @@ def plot_phase_panels(axes, fz, zoom, phases, colors, parents, off, sel):
 
 
 def plot_ladder_panels(axes, fz, zoom, parents, off, sel):
-    """One sidereal phase: the linear map realization against one draw and
-    the +-1 rms band of the alpha=5/3 and alpha=1 ensembles (anchor 1)."""
+    """One sidereal phase: the linear map realization against one draw of
+    the alpha=5/3 and alpha=1 ensembles (anchor 1), bands optional."""
     it = CONTEXT_PHASE
     cases = (
         ("alpha=5/3 dphi1=1", "C2", "--", r"$\alpha$ = 5/3"),
@@ -369,7 +395,7 @@ def plot_ladder_panels(axes, fz, zoom, parents, off, sel):
             zoom[it, :, s],
             color="k",
             lw=1.6,
-            label="linear interpolation (the map realization)",
+            label="linear interpolation",
         )
         for label, color, ls, tag in cases:
             try:
@@ -377,28 +403,28 @@ def plot_ladder_panels(axes, fz, zoom, parents, off, sel):
             except KeyError:
                 print(f"no column record yet for {label}; skipped")
                 continue
-            band = (rq if s == 1 else ru) * wmap_pixel_rms()
-            oe = np.argsort(fe)
-            ax.fill_between(
-                fe[oe],
-                -band[oe],
-                band[oe],
-                color=color,
-                alpha=0.15,
-                lw=0,
-                label=rf"linear + Gaussian sub-pixel, {tag}: "
-                r"$\pm$1 rms of the ensemble",
-            )
-            fe, dq, du = ensemble_draws(label, n_draws=1)
+            if BANDS and SPAN == 1:
+                band = (rq if s == 1 else ru) * wmap_pixel_rms()
+                oe = np.argsort(fe)
+                ax.fill_between(
+                    fe[oe],
+                    -band[oe],
+                    band[oe],
+                    color=color,
+                    alpha=0.15,
+                    lw=0,
+                    label=rf"linear + Gaussian sub-pixel ({tag}): "
+                    r"$\pm$1 rms of the ensemble",
+                )
+            dq, du = ensemble_draws_on(label, fz, n_draws=1)
             ax.plot(
-                fe[oe],
-                (dq if s == 1 else du)[oe, 0] * wmap_pixel_rms(),
+                fz,
+                (dq if s == 1 else du)[:, 0] * wmap_pixel_rms(),
                 color=color,
-                lw=1.3,
+                lw=1.4,
                 ls=ls,
-                label=rf"linear + Gaussian sub-pixel, {tag}: one realization",
+                label=rf"linear + Gaussian sub-pixel ({tag})",
             )
-        ax.axhline(0, color="k", lw=0.5)
         ax.ticklabel_format(axis="x", useOffset=False)
         ax.set_ylabel(f"Faraday {name} alone [K]")
         ax.grid(alpha=0.3)
@@ -506,8 +532,10 @@ def plot(out):
     )
     fig.tight_layout(rect=(0, 0.08, 1, 0.96))
     FIG_DIR.mkdir(exist_ok=True)
-    suffix = ("" if SPAN == 1 else "_3parents") + (
-        "_ladder" if LAYOUT == "ladder" else ""
+    suffix = (
+        ("" if SPAN == 1 else "_3parents")
+        + ("_ladder" if LAYOUT == "ladder" else "")
+        + ("" if BANDS or SPAN == 3 else "_nobands")
     )
     name = FIG_DIR / f"10_subpixel_spectra_{CENTER:g}MHz{suffix}.png"
     fig.savefig(name, dpi=140)
@@ -531,11 +559,13 @@ def main():
     parser.add_argument(
         "--layout", choices=("phases", "ladder"), default="phases"
     )
+    parser.add_argument("--no-bands", action="store_true")
     args = parser.parse_args()
     set_center(args.center)
-    global SPAN, LAYOUT
+    global SPAN, LAYOUT, BANDS
     SPAN = args.span
     LAYOUT = args.layout
+    BANDS = not args.no_bands
     if args.stage == "compute":
         compute(out_dir())
     else:
