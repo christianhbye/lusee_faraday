@@ -485,7 +485,7 @@ def plot(out):
         handles,
         labels,
         fontsize=7.5,
-        ncol=3,
+        ncol=2 if LAYOUT == "ladder" else 3,
         loc="lower center",
         bbox_to_anchor=(0.5, 0.0),
     )
