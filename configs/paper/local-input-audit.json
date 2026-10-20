@@ -1,0 +1,25 @@
+{
+  "pulsar": {
+    "name": "J0437-4715",
+    "distance_pc": 156.96,
+    "dm_pc_cm3": 2.64,
+    "historical_rm_rad_m2": -0.6,
+    "sources": ["https://arxiv.org/pdf/1105.4213", "https://arxiv.org/html/2410.21390v2"],
+    "status": "Historical DM/RM and a modern timing distance; illustrative path averages only. No local angular screen variance is inferred."
+  },
+  "emissivity": {
+    "reference_mhz": 74.0,
+    "total_intensity_k_per_pc": [0.53, 1.52, 2.51],
+    "spectral_index": -2.7,
+    "assumed_polarized_fractions": [0.0, 0.1, 0.7],
+    "source": "https://arxiv.org/html/1811.10310v1",
+    "status": "Mean and +/-1 quoted scatter for HII foreground paths below 1 kpc; not a local polarized-emissivity posterior. Spectrum and polarization fractions are assumed."
+  },
+  "lunar_plasma": {
+    "density_cm3": [0.1, 10.0, 1000.0],
+    "path_km": 100.0,
+    "aligned_field_nt": 100.0,
+    "source": "https://doi.org/10.1029/2011JA017141",
+    "status": "Explicit assumed density/field/path envelope. The source does not establish a universal nightside bound; transient and site-dependent plasma remain possible."
+  }
+}

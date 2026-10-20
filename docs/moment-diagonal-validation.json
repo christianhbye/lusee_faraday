@@ -1,0 +1,34 @@
+{
+  "tests_passed": 2,
+  "fault_checks": {
+    "faults": [
+      {
+        "fault": "drop the complex relation",
+        "source": "src/lusee_faraday/moment_diagonal.py",
+        "test": "tests/test_moment_diagonal.py::test_marginal_variance_retains_all_four_complex_branches",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "150f18bd8aefb6148cc41a8e56720689d833d99b4b960f05f2e225a1bb34a752"
+      },
+      {
+        "fault": "discard global mean variance",
+        "source": "src/lusee_faraday/moment_diagonal.py",
+        "test": "tests/test_moment_diagonal.py::test_mixture_marginals_include_conditional_mean_variation",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "95423046e6ec8e0eb1dce72f4e255fa382ab9e6dba5d4cd8743dc6413bdc3b48"
+      }
+    ],
+    "all_caught": true,
+    "source_sha256": {
+      "src/lusee_faraday/moment_diagonal.py": "1ca088c3c9cd6304e60692178861a570c7210d972d8880409e8fcaabae0c34ea"
+    },
+    "test_sha256": {
+      "tests/test_moment_diagonal.py": "3dd699e853f41d7cfbea8d9a6e9a61a48ead9ed1e014532494432858ae3b941a"
+    },
+    "runner_sha256": "c5a6d89a86b81a753274168349a238864e2aaaaa41dcc94c75b2364f73dc6e7b",
+    "helper_sha256": "8fe9fcca6654b373b8d72ca0914c1079fcba935bb1f4a198957b7ff8456704a5"
+  },
+  "test_log_sha256": "7c3178f0eacce0030ee95f7f98a44083255d44c3206e826585cc9bcd4b8c4092",
+  "scope": "Exact marginal variances retain all four complex branches and global conditional-mean variation. Complete physical complex covariance is the independent oracle for the diagonal contraction."
+}

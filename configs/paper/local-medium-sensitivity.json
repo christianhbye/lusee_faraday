@@ -1,0 +1,11 @@
+{
+  "horizon_config": "configs/paper/horizon.json",
+  "separability_config": "configs/paper/separability.json",
+  "signed_field_projections": [-1.0, -0.25, 0.0, 0.25, 1.0],
+  "initial_frequency_nodes": 129,
+  "maximum_frequency_nodes": 2049,
+  "depth_max_order": 1024,
+  "relative_covariance_tolerance": 0.01,
+  "absolute_off_covariance_tolerance": 1e-8,
+  "scope": "Uniform mean columns derived from each sourced density/field pair and the assumed emitting path; both field signs are sensitivity cases. Intrinsic polarization RMS is the declared volume-averaged polarized emissivity times the full emitting path; normalized depth integration applies depolarization without a second horizon truncation. Angular structure and the two dispersions remain independent conditional assumptions, not inferred local priors."
+}

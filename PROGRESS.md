@@ -1,5 +1,578 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Session handoff — 2026-10-19
+
+`docs/handoff-2026-10-19.md` summarizes the day: the paper arc, the column
+screen through the real instrument, the decision table, the Stokes I leak,
+the analytic f-axis, the column-to-local map runs (coherent rotation below
+~0.007 rad/m² of depth) and the slide figures 4d, 06–14.
+
+
+## Decision table, delay spectrum, f-axis at the column anchor — 2026-10-19 (later)
+
+`scripts/column_decision.py` puts every column-screen scenario against the
+measured-system reference receiver noise at one sidereal phase for 1, 12,
+24 and 48 lunations of actual-site exposure. Only the smoothest, lowest-
+anchor case (alpha 2, 0.3 rad/m²) reaches order unity at 24 lunations (1.9
+in the parent channel, 4 sigma variance excess over the simulated band);
+the anchor-1 cases stay at 0.2 to 0.6 and alpha 1 below 1e-2. The Faraday
+polarized sky leaks into pseudo-I at 0.8 of its Q amplitude.
+`scripts/slides_delay_spectrum.py` shows the ripple at 50 to 250 µs delay
+after per-parent constant+slope removal, under the 24-lunation noise.
+
+The mixed-depth stage refuses the column screens (Hermite degree bound), so
+the f-axis at the column anchor is done analytically in the arc plan: a
+delta screen at fraction f scales the surviving power as f^(-4/alpha)
+(checked against both the pilot and the real-instrument run to 2 %); a
+uniform slab is 5e-4 (30 MHz) to 1.3e-3 (50 MHz) of the screen power, so
+emission spread over more than 0.01 rad/m² of depth is dead on its sightline.
+Slides: the 2-D sub-pixel ladder with context figure, the three-parent
+ladder spectra at 30 and 50 MHz, the spectrometer response behind the
+aliased zoom bins, the alpha-1 column screen through the instrument.
+
+
+## Paper arc, column screen and the group-talk figures — 2026-10-19
+
+Adopted `docs/plans/2026-10-19-paper-arc.md`: the talk and paper present the
+column screen with a stated sub-map structure family, the emitting depth as
+a second axis, and the local medium as its far end, instead of a jump from
+the pixel-sum failure to a local model. PR 9 retargeted at `main` after
+merging it (216 non-slow tests pass; the four-port kernels recomputed after
+the merge are bit-identical to the cached ones, only the fingerprints
+changed). PR 4 closed as superseded; three stale local branches pruned.
+
+Ran the column-anchored screen through the real-instrument covariance
+stage (`configs/paper/covariance-column.json`): alpha 2 and 5/3, anchors
+0.3, 1, 3 rad/m², sigma 10. All twelve cases pass at frequency nodes
+129/257 (65/129 failed the 1 % frequency gate at 3.3 %). Smooth term
+exactly zero; parent-channel surviving power 0.61 (30 MHz) and 0.71
+(50 MHz) of the scalar pilot in every scenario. With the WMAP-K
+normalization the parent speckle rms is 0.02 to 0.67 K at 30 MHz.
+
+Slides notebook section 6 (`notebooks/slides_pixel_sum_convergence.ipynb`):
+analytic per-pixel depolarization factor under linear RM interpolation
+(exact in the Galactic plane, replaces the brute-force sub-pixel average),
+the nearest-neighbour / linear / Gaussian sub-pixel ladder, the rms pixel
+factor versus frequency for the structure-function family (the map-based
+linear sky sits between the alpha = 2 curves anchored at 1 and 3 rad/m²),
+and the beam-weighted sum as a phasor walk (nearest neighbour shrinks as
+1/sqrt(N) under refinement, the pixel-averaged sum does not). In progress:
+`scripts/slides_subpixel_spectra.py`, the linear-interpolation sky through
+the as-built instrument at four sidereal phases against the ensemble band.
+
+
+## Implementation PR and report complete — 2026-10-17
+
+Completed the conditional-prediction implementation in PR 9 into
+`paper-implementation-plan`. The 15-page report contains all nine figure
+products, derived input/horizon/channel/exposure/decision tables and clean
+provenance. The final build at source `2bd3103a90b5` verifies 29 result
+records and 697 referenced artifacts. All pages and the final changed
+captions were inspected; every figure page passes the 7 pt font minimum.
+LaTeX and the mechanical audit have no overfull boxes, undefined references,
+placeholders or serious findings. The figures-to-report runner passes.
+
+The final PDF and generated tables/macros/manifests are committed under
+`report/paper-*`; exact build and visual checks are in
+`docs/paper-report-build.json` and `docs/paper-report-qa.json`. The full
+suite remains 227 passes plus its pre-existing two-port reference failure;
+smoke has 34 passes. Both user notebook edits and upstream tracked files
+are preserved. The external manuscript and future mission-data comparison
+remain separate work.
+
+
+## Deterministic figure regeneration — 2026-10-17
+
+Removed PDF creation/modification timestamps from report figure writers so
+an unchanged rerender preserves the checksums in its inspection record.
+Two separate mixed-depth plot invocations produce identical PDF bytes;
+`docs/paper-figure-reproducibility.json` records the check. The complete
+figures-to-report runner is exercised after this source commit.
+
+
+## Report build and printed-figure checks — 2026-10-17
+
+The isolated report build verifies 29 result records and the complete hashes
+of their referenced artifacts. LaTeX passes twice with no overfull boxes,
+undefined references or oversized floats; the mechanical prose/reference
+audit has no serious findings. All fifteen pages were inspected. The nine
+figures now have at least 7 pt text at their printed 6.4-inch width, including
+logarithmic tick labels. The preserved flat-plane benchmark has a separate
+report renderer, leaving its original result and prototype figure unchanged.
+The final PDF and its derived tables/provenance are committed after this
+source; `docs/paper-report-build.json` identifies the exact build revision.
+
+
+## Report source and complete reproduction runner — 2026-10-17
+
+Prepared the numerical/figure manifest verifier, derived tables and LaTeX
+number macros, and a clean temporary-worktree report builder. It preserves
+unrelated notebook edits and rejects stale/corrupt inputs, source drift,
+undefined references, overfull boxes and oversized floats. The complete
+background runner adds explicit stages, an exclusive lock and a 34-check
+smoke mode. The reproduction guide documents inputs, coordinates, covariance
+units, conditional normalizations and the future calibrated-data path.
+The PDF build and rendered-page checks follow this committed source.
+
+
+## Complete science-product export — 2026-10-17
+
+The all-16 real science-product factorization now exports the shared
+loaded calibration, all channel/phase I-only means, and selected full
+signal/noise covariance blocks. Compact four-branch weights combine with
+all saved local-grid coefficients without allocating a complete frequency,
+product and time cube. Fine system PSDs and channel/readout operators
+support arbitrary requested noise blocks, across all nine receiver cases.
+
+Projection back to Stokes checks every signal mode, a complete selected
+extreme-column signal covariance, loaded means, and raw/residual noise at
+both bands and phases. All gates pass; record:
+`docs/science-product-results.json`. The science products use the pinned
+PRODUCT_LABELS order and the same one-kelvin enclosure normalization as
+the calibrated Stokes predictions.
+
+
+## Measured-spectrum predictions and observing controls — 2026-10-17
+
+Completed the simulated Q/I and U/I spectra with paired I-only/noise
+controls, common-fit residuals and conditional RMS bands. Both bands use
+preselected phase 0, with independent-noise repeated visits of the same sky.
+The calibrated-spectrum input path also processes independent-noise mock
+observations. Full Q/U cross covariance and complex C/J, correlated-power
+sampling variances, named-frequency pair products and parent/zoom ratio
+quantiles are exported. All 512-ensemble predictive-mean checks pass their
+preset five-SEM gate; these are conditional Gaussian illustrations.
+
+Figures now show Q/U covariance amplitudes as well as normalized correlations,
+the complete signed-column separability range, native I-only beam controls
+and same-phase repeat differences. The separate angular/fringe control uses
+one common ell=48 observing cutoff, finite time bins and actual-site night
+mask for sky, leakage and noise. A failed broad-spectrum trapezoid is
+retained; integrating its known smooth intrinsic spectrum exactly restores
+positivity without relaxing the gate.
+
+The complete integration suite has 227 passes and the same historical
+two-port reference failure as the initial baseline; the 34-check smoke
+suite passes. CI is green on Python 3.12/3.13/3.14. Records include
+`docs/faraday-separability-results.json`,
+`docs/common-observing-results.json` and
+`docs/paper-integration-validation.json`.
+
+
+## Full signed local-column sensitivity — 2026-10-17
+
+Completed 520 cases across the 13 signed uniform mean columns implied by the
+adopted density/field/path pairs, both dispersions, both phase distributions,
+five depth profiles and both bands. All preset depth, frequency, angular,
+band-limit and omitted-mode gates pass. Frequency and depth refinements
+bound the full Q/U covariance change, not just its diagonal. Eight
+predeclared extreme-column screen/slab cases also pass complete joint C/J,
+positivity and independent refinement checks.
+
+The intrinsic normalization is polarized emissivity times the full assumed
+5 pc volume (5 K RMS at 30 MHz for the unit-emissivity case). Depth integration
+supplies depolarization without a second horizon cut. The largest residual
+speckle/noise RMS ratio is 3.53e-4; including smooth polarization gives
+7.49e-3. The brighter HII-based normalization brackets remain conditional
+rescalings rather than measured local polarized priors. Full arrays retain
+all receiver cases, both phases and unavailable exposures as NaN. Records:
+`docs/local-medium-sensitivity-results.json`,
+`docs/local-medium-joint-validation.json` and
+`docs/local-medium-separability-results.json`.
+
+
+## Exact marginal moments for the full local-column grid — 2026-10-17
+
+Added an allocation-efficient diagonal contraction of the complete four-branch
+Hermite operator. It agrees with full physical complex covariance, including
+the relation and global-mixture conditional-mean variance. Both tests pass;
+both deliberately injected faults are caught. Evidence is in
+`docs/moment-diagonal-validation.json`. The joint mode coefficients remain
+available for full cross-channel and cross-phase exports.
+
+
+## Loaded chromatic measurement/noise stage — 2026-10-17
+
+Completed all nine voltage/current cases at both bands and both phases.
+Loaded sky, separate Moon/loss thermal power and amplifier PSDs are added
+once; the same as-built calibration and physical-frequency fit act on the
+linear/PCHIP leakage models and noise. All 36 raw/residual phase covariance
+pairs pass positivity and independent R C R^T checks; deliberately dropping
+one covariance leg makes every case fail. Arrays store covariance times
+integration in K^2 s, divided by available exposure to obtain K^2.
+
+The original native engine's clock is reproduced exactly before switching
+to the pinned periodic production grid. Its lunar period differs by 0.4896 s;
+the wrong-clock fault is caught without changing upstream or relaxing the
+reference gate. Records are `docs/measured-system-results.json`,
+`docs/measured-system-validation.json` and
+`docs/native-clock-reference-validation.json`.
+
+
+## Real-observable statistics guard — 2026-10-17
+
+The correlated-power statistic now rejects complex covariance or mean
+inputs explicitly, preventing accidental loss of the complex relation.
+The existing invalid-input check covers both cases; all three statistics
+tests pass and all four deliberate faults are caught. The regenerated
+`docs/measurement-statistics-validation.json` records the updated sources.
+
+
+## Native chromatic I-only beam controls — 2026-10-17
+
+Computed all 30 native-frequency response slices for as-built, C4-symmetrized
+and diagonal-ZA instruments at 30/50 MHz, with two preselected sidereal
+phases and native nside=512 Haslam+CMB inputs. Beam and loading follow the
+actual FITS native coordinates. Every lmax-32/48 and physical-covariance
+gate passes; maximum truncation error is 5.47e-6 of I. Full complex pair
+alms and raw loaded matrices are checkpointed so later mismatch comparisons
+can use one common as-built calibration. The record is
+`docs/chromatic-leakage-results.json`. Fine-channel leakage is an explicit
+interpolation comparison in the following stage, not a measured beam model
+below native resolution.
+
+
+## Stable Gaussian visibility illustrations — 2026-10-17
+
+Added mode-based draws of the joint unit-coefficient 1/i visibility
+covariance before mixing phase coefficients across channels. This retains
+tiny fitted residuals without resolving the tiny eigenvalues of a nearly
+coherent full frequency covariance. Smooth and speckle samples are accumulated
+separately; one mode realization is shared by all channels and phases and
+reused on repeated nights. Two tests pass against 50,000 latent ensembles
+and a nearly annihilated smooth-fit control. Both deliberate faults are
+caught; evidence is in `docs/visibility-draw-validation.json`. These remain
+conditional Gaussian visibility illustrations, not resolved Faraday maps.
+
+
+## Common-fit Gaussian and mixed-screen production — 2026-10-17
+
+Completed all 40 local-screen/profile/band models with the exact sidereal
+boxcar and shared physical-frequency constant+slope fit, separately on
+three parents and all 192 zoom bins. The global variance mixture retains
+conditional-mean variation in its speckle term. Filtering acts on phase
+coefficients before covariance assembly. Every smooth/speckle/total residual
+passes full covariance positivity and direct R C R^T checks; all angular
+and frequency refinements pass. Their absolute covariance errors remain
+exported so numerically tiny residuals can be treated as bounds.
+
+The production mixture combination also matches an independent finite
+ensemble and catches three deliberately injected weighting/mean faults.
+Records are `docs/residual-signal-results.json` and
+`docs/residual-signal-validation.json`. Chromatic leakage, loaded noise and
+simulated observations use this same estimator in the following stage.
+
+
+## Strong-screen real-instrument controls — 2026-10-17
+
+The direct frequency-pair solver passes 129/257-node and doubled-angular
+checks at 30/50 MHz for an explicit sigma_phi=5 rad/m^2 foreground-column
+control. This is separate from the assumed local-screen range. The maximum
+frequency gate ratio is 0.220 and angular gate ratio 0.0118. The independently
+normalized scalar white-floor covariance agrees with the full real readouts
+to 5.8e-9 on their RMS scale, including cross terms and loading. Minimum
+central zoom Q correlations are 0.555 at 30 MHz and 0.974 at 50 MHz, showing
+a measurable-coordinate decorrelation contrast to the local cases. Evidence
+and checkpoints are in `docs/strong-screen-results.json`.
+
+
+## Independent full-channel scale-mixture control — 2026-10-17
+
+Propagated a global 0.5/1.5 variance mixture through actual parent and folded
+zoom responses in a matched two-source geometry, retaining full cross-
+frequency Q/U covariance and relation. Independent bivariate Gaussian
+integration uses exact screen/slab phase laws, with 64/128 order refinement.
+All eight 30/50 MHz geometry/profile controls pass: covariance agreement is
+better than 7.1e-13 on the covariance RMS scale. A Gaussian column with the
+same RM covariance differs by up to 0.0890. Deliberately omitting global
+conditional-mean variation makes every control fail. The records are
+`docs/channel-mixture-validation.json` and its explicit fault companion.
+The declared 33-node frequency interpolation and deterministic intrinsic
+source geometry delimit this independent channel check.
+
+
+## Matched spherical/flat deterministic geometry — 2026-10-17
+
+Added a spherical Gaussian source/analyzer control with both intrinsic spin
+phases parallel transported to the same center. Its separation probability
+is computed by spherical Legendre window convolution, independently of the
+flat-plane separation integral. The same source dilution and both complex
+moments recover the PR 7/8 deterministic benchmark across 20--35 and
+45--50 MHz. Worst covariance errors are 1.07e-4 at the original width and
+7.17e-6 with widths divided by four; quadrature refinement is below 1.62e-6
+on the flat RMS scale. Window mass/positivity are also checked. Removing
+source dilution makes both controls fail by more than unity. Evidence is
+in `docs/matched-geometry-results.json` and the explicit fault record.
+The isotropic random production sky remains a different intrinsic ensemble.
+
+
+## Correlated-spectrum statistics — 2026-10-17
+
+Added the full Gaussian sampling variance of a mean-square spectrum,
+including off-diagonal channel covariance and a nonzero deterministic mean.
+Independent repeated measurements cancel the fixed sky and add estimator
+noise variances. Exact fourth-moment cubature and fixed-sky controls pass;
+all three deliberately injected faults are caught. Evidence is in
+`docs/measurement-statistics-validation.json`. These statistics describe
+conditional predictive scatter, not independent sky samples per channel.
+
+
+## Local input and lunar plasma audit — 2026-10-17
+
+Added primary-source checks of a nearby pulsar's historical DM/RM, its timing
+distance, HII-region total synchrotron emissivity and SELENE occultations.
+The audit identifies which path averages cannot determine few-parsec
+polarization or angular RM statistics. Conditional density/field/path and
+emissivity/polarization brackets are exported by `local_input_audit.py` in
+`docs/local-input-audit-results.json`. The deliberately large assumed lunar
+envelope (1000 cm^-3, 100 nT, 100 km) gives 2.6e-6 rad/m^2, or a complex
+polarization phase below 4.8e-3 rad at 10 MHz. This is a conditional envelope,
+not a measured universal nightside limit. The floor's emissivity, depth and
+angular-coherence degeneracies remain explicit.
+
+
+## Nightside exposure and sidereal averaging — 2026-10-17
+
+Computed actual-site solar altitudes for complete 1/1024-sidereal-day bins
+in illustrative 1/24-lunation windows starting at the shared simulation
+epoch. At 50% electronics duty, phase 0 has 1/14 eligible visits and phase
+0.25 has 0/14. The unavailable one-lunation second phase has no noise value.
+Each eligible visit integrates 1152.6 s. The 24-lunation total per phase is
+16136.9 s. These are simulation calendar exposures, not mission dates or
+operations commitments. Signal and leakage use the same exact sinc(m)
+boxcar on MEPA kernels. Four tests and four injected faults pass; records
+are `docs/observing-exposure.json` and `docs/observing-validation.json`.
+
+
+## Common measured-spectrum estimator — 2026-10-17
+
+Implemented physical-frequency smooth templates through the actual channel
+responses, weighted residual maps with explicit flags/rank/conditioning,
+two-leg covariance projection and subtraction in K before I normalization.
+Estimated-I ratios retain denominator uncertainty and I-Q/U correlations;
+undefined denominators and saturated fits remain explicit. Six tests pass,
+and all six deliberate faults are caught. Evidence is in
+`docs/separability-backend-validation.json`; the estimator definition is in
+`docs/specs/2026-10-17-common-measurement-estimator.md`.
+
+
+## Loaded receiver and joint radiometer backend — 2026-10-17
+
+Added explicit voltage/current PSD propagation through the full luseepy
+parallel antenna/load network. Correlated input sources are supported and
+checked for positivity after unit rescaling. Real science products and
+calibrated pseudo-Stokes use Hermitian quadratic matrices, retaining every
+inter-product covariance. Fine-frequency power weights propagate the full
+noise overlap, including frequency-dependent system power.
+
+Seven checks pass: independent Kirchhoff samples, exact Gaussian fourth-
+moment quadrature, production readout conventions, luseepy variances,
+integration scaling and 20,000 independent channelized voltage ensembles.
+All nine deliberate faults are caught. Evidence is in
+`docs/receiver-noise-validation.json`; definitions and units are in
+`docs/specs/2026-10-17-receiver-radiometer-noise.md`.
+
+Audited Tamura et al. (2024) for the input-referred EM voltage scales.
+The 2.2/3/5 nV/√Hz cases are a PA bench value, an integrated EM value and
+a requirement, respectively. Current noise, source correlations and thermal
+temperatures remain declared assumptions in `receiver-noise.json`; missing
+legacy Model54 files are not replaced by zero receiver noise. Native
+chromatic leakage for all three response variants is computing separately.
+
+## Mixed-depth production predictions — 2026-10-17
+
+Computed and checkpointed all five prescribed profiles for both conditional
+local columns: 30 native-band cases at 10/30/50 MHz and 20 channel cases
+at 30/50 MHz, now including all three parents and all 192 zoom bins at
+two preselected sidereal phases. Smooth, centered and total covariances
+are checked separately. All 50 pass independent depth/angular/beam and,
+where applicable, frequency-grid refinements; foreground screens also
+match the previous frequency-pair solver. The largest gate ratios are
+0.430 (beam truncation), 0.133 (angular), 1.8e-7 (frequency) and 2.2e-4
+(foreground reference). The maximum mode degree is 1553; the propagated
+omitted-mode bound uses at most 3.8e-4 of its absolute error allowance.
+
+Built and inspected `report/figures/faraday_redistribution_spin2.pdf` with
+its PNG, caption and manifest. It separates smooth and centered Q/U power
+and loaded RMS for each profile. Results and verification are in
+`docs/mixed-depth-results.json` and `docs/mixed-depth-validation.json`.
+The intrinsic E/B sky, local dispersion/angular scale and low-frequency
+turnover remain explicit assumptions. Leakage/noise and the measured
+spectra are the next stage; these signal-only results are not a forecast.
+
+## Mixed-depth spherical/channel backend — 2026-10-17
+
+Implemented the shared-column depth average as a normalized Hermite series
+in `depth_channel_covariance.py`. Depth averaging and actual channel
+weights act on coefficients before covariance assembly, retaining the
+smooth/centered split and every helicity/readout term. Poisson tails bound
+omitted phase power; an absolute covariance bound follows through the
+angular/readout weights. Unresolved depth order or mode limits raise an
+error. A stable logarithmic/deviance form recovers high-order power even
+when the mean underflows, without relaxing the unit-power gate.
+
+Nine new tests pass against exact fractional screens, independent Gaussian
+averages of the slab sinc law, adaptive Gaussian-profile integration and
+explicit double-depth/angular/channel covariance. All ten deliberately
+injected faults are caught. Evidence is in
+`docs/depth-channel-backend-validation.json`; the derivation and scope are
+in `docs/specs/2026-10-17-depth-channel-covariance.md`. Production mixed-depth
+channel arrays and their independent resolution checks are the next task.
+
+## Real-instrument channel predictions and mixture control — 2026-10-17
+
+Saved four conditional foreground-screen cases at 30/50 MHz with the
+as-built loaded instrument, three parent bins, 64 central-parent zoom bins
+and two sidereal phases. Every case passes the preset 17/33 frequency-node,
+doubled angular-resolution and lmax-64/96 comparisons. The gate is 1% of
+on-covariance RMS scale plus 1e-8 of off-covariance RMS scale; the largest
+error/gate ratio is 0.430. Covariances, smooth/speckle components, raw
+eigenvalue diagnostics, Gaussian draw seeds and channel-overlap matrices
+are checkpointed with hashes. The record is
+`docs/faraday-covariance-results.json`.
+
+Built and inspected `report/figures/faraday_channel_covariance.pdf`, its
+PNG, caption and manifest. It shows the loss of Q channel correlation and
+separate conditional Q/U draws in each band, with common scales and
+marginal RMS bands. Image pixels are centered on the nominal channel
+frequencies; a final unchanged rerun verifies all four moment caches.
+The assumed sigma_phi=0.02 case remains highly coherent
+across 25 kHz: minimum Q correlations are 0.9999885 at 30 MHz and 0.99999990
+at 50 MHz. These are conditional model values, not data or a sensitivity
+forecast. The band illustrations do not model joint cross-band covariance.
+
+The PR 8 equal-weight 0.5/1.5 variance mixture preserves mean/RM covariance
+but changes phase statistics. Independent bivariate quadrature at seven
+frequencies in 20–35 and 45–50 MHz and three separations agrees with its
+conditional mixture moments within 4.2e-14; order 256/512 refinement shifts
+them by at most 3.1e-14. A Gaussian screen with the same RM covariance
+differs by up to 0.0741 in dimensionless raw phase moments. Evidence is in
+`docs/spin-screen-mixture-results.json`. This verifies phase marginals,
+not a complete spherical realization or visibility Gaussianity.
+
+Final local integration suite: 193 passed, one unchanged historical
+two-port reference failure. All 24 covariance faults are caught; together
+with Phase 1 this adds 42 passing tests and 39 caught faults. CI passes on
+Python 3.12, 3.13 and 3.14 for the covariance implementation. Black and
+flake8 pass. The consolidated evidence is
+`docs/spin-channel-covariance-validation.json`; continuation order and
+remaining scientific gates are in `docs/implementation-handoff.md`.
+
+## Spin-2 instrument and channel covariance — 2026-10-17
+
+Added explicit COSMO E/B helicity spectra, spin-2 correlation transforms,
+raw/centered Gaussian foreground-screen moments, all-pair covariance and
+relation, and selected-time harmonic contraction. Loaded real readout maps
+use the production instrument functions, frozen impedances and calibrated
+zenith vectors. Real readout kernels and precontracted angular weights
+avoid repeating a full harmonic transform for every frequency pair.
+
+The exact parent/zoom power operator shares coordinate selection with the
+existing integrator and retains folded images. Block projection includes
+all frequency pairs. Optional process interpolation preserves PSD through
+a congruence; independent nonstationary modes check its refinement against
+direct fine-grid integration. Conditional Gaussian visibility draws report
+their eigenvalue tolerance and keep the sky pattern shared across days.
+
+Twenty-four new scientific tests cover independent Wigner sums, direct
+Gaussian phase averages, finite real E/B harmonic ensembles, direct loaded
+instrument assembly, spectral-mode channel projections and draw statistics.
+The 31-test spin/channel/instrument focus and four compression tests pass;
+all 24 deliberate faults are caught in disposable copies. The full
+integration suite is running and its result will be recorded separately.
+
+Full complex as-built kernels at native 10/30/50 MHz and lmax 96 are now
+cached with response/dependency/source hashes and resolved receiver
+impedances. `paper_kernels.py` and the staged `faraday_covariance.py` driver
+implement the first foreground-screen predictions. Their final result
+record and inspected figure follow in the next increment. Reproduction and
+scope are in `docs/specs/2026-10-17-spin-channel-covariance.md`.
+
+The spherical phase calculation currently covers fractional foreground
+screens. Mixed-depth real-beam predictions, the full local-prior range,
+matched small-beam/non-Gaussian controls, chromatic I leakage, loaded
+receiver noise and the measured Q/I and U/I deliverable remain open. This does
+not complete Phase 2 or establish sensitivity.
+
+## Depth-profile moments and first implementation figure — 2026-10-17
+
+Implemented screen fractions 0/0.6/1, a uniform slab and a truncated Gaussian
+profile in `lusee_faraday.depth_depolarization`. The calculation retains both
+complex moment types, the full joint Q/U covariance and the smooth/speckle
+power split. Stable centered integrands, phase-dependent depth resolution,
+order doubling and explicit nonconvergence errors prevent unresolved depth
+ridges from being reported as a signal. No pixel area sets the amplitude.
+
+The driver/checkpointed launcher regenerate the horizon scenarios, ten depth
+benchmark cases at 10/30/50 MHz, source/dependency manifests and
+`report/figures/depth_depolarization.pdf` with its inspected PNG and caption.
+Independent depth and separation refinements shift the saved normalized
+moments/power fractions by at most 5.8e-15 for this configuration. The
+configuration remains an illustrative flat-plane PR 7 benchmark; local
+screen statistics, real-beam spin-2 projection and the measured-spectra
+deliverable are still open. Scope and commands are in
+`docs/specs/2026-10-17-depth-depolarization.md`.
+
+Verification: 18 new tests pass, and all 15 deliberate implementation faults
+are caught by their corresponding tests in disposable copies. Final full
+suite: 169 passed with the same two-port measured-reference failure found in
+the baseline (151 passed, one failure). Black and source/new-driver flake8
+checks pass. Evidence and hashes are in
+`docs/depth-depolarization-validation.json`. The uncommitted notebook edits
+are unchanged; upstream checkouts and the external paper were not edited.
+
+## Conditional Faraday horizon calculator — 2026-10-17
+
+Started implementation from `paper-implementation-plan` on
+`implementation/depth-depolarization`. Added constant-rate horizon arithmetic
+with the rotation coefficient derived from SI constants, separate one/two
+radian phase conventions, explicit field projections and the unbounded
+zero-field limit. The finite emitting-volume brightness is explicitly
+unrotated and uses an illustrative emissivity. Sourced plasma inputs and
+assumed magnetic geometry are distinguished in
+`docs/literature/local-faraday-horizon.md` and `configs/paper/horizon.json`.
+The regenerable `docs/faraday-horizon-results.json` contains all 54
+scenario/frequency combinations and source/dependency provenance. No local
+angular structure function or screen dispersion is inferred from this table.
+
+Four horizon tests pass within the 18-test focused implementation suite.
+Deliberate unit, phase-factor, zero-field and input-validation faults are
+caught in disposable copies by the accompanying fault audit. The existing
+suite's baseline has 151 passes and the known two-port measured-reference
+failure. Remaining local-emissivity/pulsar priors and the full five-phase
+paper implementation remain open.
+
+## LuSEE Night observable predictions added to the plan — 2026-10-17
+
+Christian identified future LuSEE-Night mission data as the observational
+comparison target and requested an explicit measured spectra deliverable.
+Updated `docs/plans/2026-10-17-paper-implementation.md` to specify simulated
+parent/zoom Q/I and U/I spectra at 30/50 MHz, leakage-plus-noise controls,
+the common smooth subtraction, residuals and conditional prediction bands.
+The covariance companion covers channel correlations, parent/zoom variance
+and repeatability at the same lunar sidereal phase. Predictions and future
+data use the same calibration, channel responses and estimators; repeated
+observations are not independent sky realizations. Added the six-figure
+inventory and machine-readable statistical outputs. No implementation code
+or scientific computation was added.
+
+## Detailed paper implementation plan — 2026-10-17
+
+Read Fable's two latest commits (`6f9bdf2`, `3ec0f12`) and mapped their
+five phases to existing production interfaces and proposed code in
+`docs/plans/2026-10-17-paper-implementation.md`. The plan specifies depth
+moments, spin-2 all-pair covariance, exact channel-weight propagation,
+leakage residuals, loaded receiver/radiometer noise, result provenance and
+phase gates. It flags the contradictory `f=0` pilot check: with the stated
+`f Phi` convention, `f=0` is unrotated and `f=1` recovers the screen pilot.
+It also scopes the exponential cross-term check to its exact screen limit,
+retains broad frequency covariance for near-edge slab emission, and requires
+the same smooth-fit operator on signal, leakage and noise.
+
+Prepared on `paper-implementation-plan` for Christian's requested review
+before coding. No implementation code or scientific runs were added; the
+pre-existing edits to both Gaussian-screen notebooks were left untouched.
+
 ## Analytic two-port normalization reference — 2026-10-17
 
 Reproduced the historical short-dipole reference failure on main. Croissant

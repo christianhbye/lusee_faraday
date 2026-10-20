@@ -1,0 +1,573 @@
+{
+  "fingerprint": "87109adc1a5deb53a1fbfa03b2e9f3265c5de01b219baaab0024d252e5d5abff",
+  "provenance": {
+    "configuration": {
+      "horizon_config": "configs/paper/horizon.json",
+      "separability_config": "configs/paper/separability.json",
+      "signed_field_projections": [
+        -1.0,
+        -0.25,
+        0.0,
+        0.25,
+        1.0
+      ],
+      "initial_frequency_nodes": 129,
+      "maximum_frequency_nodes": 2049,
+      "depth_max_order": 1024,
+      "relative_covariance_tolerance": 0.01,
+      "absolute_off_covariance_tolerance": 1e-08,
+      "scope": "Uniform mean columns derived from each sourced density/field pair and the assumed emitting path; both field signs are sensitivity cases. Intrinsic polarization RMS is the declared volume-averaged polarized emissivity times the full emitting path; normalized depth integration applies depolarization without a second horizon truncation. Angular structure and the two dispersions remain independent conditional assumptions, not inferred local priors.",
+      "input_record_sha256": "77a9112733dd831408de3c0cf0c0b157b7a59d74fec597369742ec5f204f76dc"
+    },
+    "sources": {
+      "scripts/local_medium_joint.py": "e0622c6c04fb5359d5769cc6609a498949fdf1799e8009bd4899c11ddc7ee9a4",
+      "scripts/local_medium_sensitivity.py": "614c21f82b737a33fdda61b871c492682cb4193122177314c0f160188799b05f",
+      "scripts/validate_local_medium_joint.py": "2000402637daf330088b9030ce201e42d3786fecb1d8083e59157554878849d4",
+      "src/lusee_faraday/moment_diagonal.py": "1ca088c3c9cd6304e60692178861a570c7210d972d8880409e8fcaabae0c34ea"
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "2.4.2",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+      },
+      "scipy": {
+        "version": "1.17.1",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+      },
+      "lusee": {
+        "version": "2.1.dev0",
+        "path": "/home/christian/Documents/research/lusee/luseepy/lusee/__init__.py",
+        "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef"
+      },
+      "croissant-sim": {
+        "version": "5.2.1",
+        "path": "/home/christian/Documents/projects/croissant/src/croissant/__init__.py",
+        "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c"
+      }
+    }
+  },
+  "results": [
+    {
+      "case_id": "30_m0_s0_p2_gaussian",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/30_m0_s0_p2_gaussian_joint.json",
+      "sha256": "8bd03c8ab3e6d877def954950ffb33f4c0afdca882a2456e8819b4337a6874d3",
+      "checks": {
+        "raw": {
+          "angular": {
+            "smooth": 0.001482887899873531,
+            "speckle": 0.07031998347242796,
+            "total": 0.0014202860967015632
+          },
+          "bandlimit": {
+            "smooth": 1.0428627249525352e-06,
+            "speckle": 0.3563083989647719,
+            "total": 0.00026230424414431955
+          },
+          "frequency": {
+            "smooth": 0.0008495651140041395,
+            "speckle": 0.0008392442677322288,
+            "total": 0.0008495627111037249
+          },
+          "depth": {
+            "smooth": 0.0,
+            "speckle": 0.0,
+            "total": 0.0
+          }
+        },
+        "residual": {
+          "angular": {
+            "smooth": 0.0014067948130933004,
+            "speckle": 0.02153470246384763,
+            "total": 0.001347328126924421
+          },
+          "bandlimit": {
+            "smooth": 1.0366538769593058e-06,
+            "speckle": 0.10082818970589168,
+            "total": 0.0002617552791788419
+          },
+          "frequency": {
+            "smooth": 0.3446712434860317,
+            "speckle": 0.0030858049216342274,
+            "total": 0.34466712642850755
+          },
+          "depth": {
+            "smooth": 0.0,
+            "speckle": 0.0,
+            "total": 0.0
+          }
+        }
+      },
+      "eigenvalues": {
+        "raw": {
+          "minimum": -7.4433260125821e-15,
+          "tolerance": 6.410907671496428e-10,
+          "passed": true
+        },
+        "residual": {
+          "minimum": -2.8007506421036944e-18,
+          "tolerance": 3.9011824646104695e-13,
+          "passed": true
+        }
+      },
+      "marginal_error_over_off": 1.2559442552078998e-15,
+      "passed": true
+    },
+    {
+      "case_id": "30_m0_s0_p3_gaussian",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/30_m0_s0_p3_gaussian_joint.json",
+      "sha256": "b18a2927a352a2a28aaf69d426d56e1594ef38da8ace2e3f031ca3785c14dbd5",
+      "checks": {
+        "raw": {
+          "angular": {
+            "smooth": 0.0011771782191022408,
+            "speckle": 0.0027366866659172965,
+            "total": 0.0010807780246344988
+          },
+          "bandlimit": {
+            "smooth": 9.937078759584015e-07,
+            "speckle": 0.012397559120414289,
+            "total": 0.005911026163361245
+          },
+          "frequency": {
+            "smooth": 0.018278789034728064,
+            "speckle": 0.0001528428364588084,
+            "total": 0.017956768306590543
+          },
+          "depth": {
+            "smooth": 1.6763854077992602e-09,
+            "speckle": 3.811110425699582e-12,
+            "total": 1.6690007612242838e-09
+          }
+        },
+        "residual": {
+          "angular": {
+            "smooth": 3.871531806738667e-05,
+            "speckle": 1.7790114666999045e-06,
+            "total": 3.710615546974074e-05
+          },
+          "bandlimit": {
+            "smooth": 3.062714939472187e-08,
+            "speckle": 8.020417312787412e-06,
+            "total": 7.73649839377657e-06
+          },
+          "frequency": {
+            "smooth": 0.005986867241705623,
+            "speckle": 1.5474827989270855e-06,
+            "total": 0.0059881141455709426
+          },
+          "depth": {
+            "smooth": 4.305368333090517e-11,
+            "speckle": 1.0209546113841954e-14,
+            "total": 4.306192755089125e-11
+          }
+        }
+      },
+      "eigenvalues": {
+        "raw": {
+          "minimum": -1.6672412398443299e-19,
+          "tolerance": 1.7862405089186564e-14,
+          "passed": true
+        },
+        "residual": {
+          "minimum": -7.63656579417865e-23,
+          "tolerance": 1.7354380718918656e-17,
+          "passed": true
+        }
+      },
+      "marginal_error_over_off": 2.1710610242707024e-20,
+      "passed": true
+    },
+    {
+      "case_id": "30_m12_s0_p2_gaussian",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/30_m12_s0_p2_gaussian_joint.json",
+      "sha256": "ed3f2fedb288e8dad9dc91919a86c984bcf6f3ff074c28713a470bf7292a8b6e",
+      "checks": {
+        "raw": {
+          "angular": {
+            "smooth": 0.0012552018399682066,
+            "speckle": 0.0703199834724131,
+            "total": 0.0012023860222251628
+          },
+          "bandlimit": {
+            "smooth": 1.0386961425024319e-06,
+            "speckle": 0.3563083989650751,
+            "total": 0.0002611182723910223
+          },
+          "frequency": {
+            "smooth": 0.0008550330645526187,
+            "speckle": 0.0008392442677323452,
+            "total": 0.0008550276317551912
+          },
+          "depth": {
+            "smooth": 0.0,
+            "speckle": 0.0,
+            "total": 0.0
+          }
+        },
+        "residual": {
+          "angular": {
+            "smooth": 0.0012156940307733765,
+            "speckle": 0.021534702463848195,
+            "total": 0.0011634802712052665
+          },
+          "bandlimit": {
+            "smooth": 1.0262173696256145e-06,
+            "speckle": 0.1008281897059398,
+            "total": 0.0002591184696822411
+          },
+          "frequency": {
+            "smooth": 0.35620858222190127,
+            "speckle": 0.0030858049216343285,
+            "total": 0.35619213000015165
+          },
+          "depth": {
+            "smooth": 0.0,
+            "speckle": 0.0,
+            "total": 0.0
+          }
+        }
+      },
+      "eigenvalues": {
+        "raw": {
+          "minimum": -7.531174942532219e-15,
+          "tolerance": 6.017790731339362e-10,
+          "passed": true
+        },
+        "residual": {
+          "minimum": -2.3560347414362916e-18,
+          "tolerance": 3.301906978730226e-13,
+          "passed": true
+        }
+      },
+      "marginal_error_over_off": 1.2559442552078998e-15,
+      "passed": true
+    },
+    {
+      "case_id": "30_m12_s0_p3_gaussian",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/30_m12_s0_p3_gaussian_joint.json",
+      "sha256": "87c744ec2368f5a4021592c491238883675052a151f33344a35e0b3a18d62ba0",
+      "checks": {
+        "raw": {
+          "angular": {
+            "smooth": 0.0011625097116436242,
+            "speckle": 0.0027366866659172926,
+            "total": 0.0010673286269145426
+          },
+          "bandlimit": {
+            "smooth": 9.813196668485383e-07,
+            "speckle": 0.012397559120411744,
+            "total": 0.005863117419846006
+          },
+          "frequency": {
+            "smooth": 0.018512149659781676,
+            "speckle": 0.00015284283645880756,
+            "total": 0.018256386678289622
+          },
+          "depth": {
+            "smooth": 1.7853027516572231e-09,
+            "speckle": 3.811110425699562e-12,
+            "total": 1.7746238157526921e-09
+          }
+        },
+        "residual": {
+          "angular": {
+            "smooth": 3.9266748144917735e-05,
+            "speckle": 1.7790114666999045e-06,
+            "total": 3.763189217325051e-05
+          },
+          "bandlimit": {
+            "smooth": 3.0636924024407255e-08,
+            "speckle": 8.020417312783032e-06,
+            "total": 7.738929972216337e-06
+          },
+          "frequency": {
+            "smooth": 0.005513885285163307,
+            "speckle": 1.5474827989265681e-06,
+            "total": 0.005515159165021741
+          },
+          "depth": {
+            "smooth": 3.285840908391605e-11,
+            "speckle": 1.0209546113841954e-14,
+            "total": 3.28666570246076e-11
+          }
+        }
+      },
+      "eigenvalues": {
+        "raw": {
+          "minimum": -9.139783581698574e-20,
+          "tolerance": 1.418790043125405e-14,
+          "passed": true
+        },
+        "residual": {
+          "minimum": -7.534365230092354e-23,
+          "tolerance": 1.6924396424560916e-17,
+          "passed": true
+        }
+      },
+      "marginal_error_over_off": 2.713826280338378e-20,
+      "passed": true
+    },
+    {
+      "case_id": "50_m0_s0_p2_gaussian",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/50_m0_s0_p2_gaussian_joint.json",
+      "sha256": "cae828965cb9bc41020776f24a228bd284dee32f2d8f8e8013ac62ae0f9be8f1",
+      "checks": {
+        "raw": {
+          "angular": {
+            "smooth": 0.0010966265455628667,
+            "speckle": 0.06550644746413288,
+            "total": 0.0010911648713517964
+          },
+          "bandlimit": {
+            "smooth": 8.807956747630925e-07,
+            "speckle": 0.3376298519555109,
+            "total": 2.717488571330065e-05
+          },
+          "frequency": {
+            "smooth": 0.00018578322868430277,
+            "speckle": 0.0001791878935072238,
+            "total": 0.00018578306416515295
+          },
+          "depth": {
+            "smooth": 0.0,
+            "speckle": 0.0,
+            "total": 0.0
+          }
+        },
+        "residual": {
+          "angular": {
+            "smooth": 0.0006781913997486878,
+            "speckle": 8.304422290506095e-06,
+            "total": 0.0006748090772569064
+          },
+          "bandlimit": {
+            "smooth": 4.900305112521003e-07,
+            "speckle": 3.643217599378333e-05,
+            "total": 1.5168795228812302e-05
+          },
+          "frequency": {
+            "smooth": 0.045326214800620795,
+            "speckle": 7.55473436712034e-06,
+            "total": 0.04532988556986431
+          },
+          "depth": {
+            "smooth": 0.0,
+            "speckle": 0.0,
+            "total": 0.0
+          }
+        }
+      },
+      "eigenvalues": {
+        "raw": {
+          "minimum": -1.959499912883534e-15,
+          "tolerance": 9.561292208282647e-11,
+          "passed": true
+        },
+        "residual": {
+          "minimum": -7.535246272165359e-22,
+          "tolerance": 1.3397254336470815e-16,
+          "passed": true
+        }
+      },
+      "marginal_error_over_off": 9.845355180155956e-16,
+      "passed": true
+    },
+    {
+      "case_id": "50_m0_s0_p3_gaussian",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/50_m0_s0_p3_gaussian_joint.json",
+      "sha256": "a32276d8f6715ccd2a39a578ee8c2646313fe3d4b635ef08075ad1ca7a12122b",
+      "checks": {
+        "raw": {
+          "angular": {
+            "smooth": 0.0013246955794124736,
+            "speckle": 0.002589125341114515,
+            "total": 0.001322899384491946
+          },
+          "bandlimit": {
+            "smooth": 1.07514799224099e-06,
+            "speckle": 0.011433334046598775,
+            "total": 8.362779722754496e-06
+          },
+          "frequency": {
+            "smooth": 9.689063299746989e-05,
+            "speckle": 7.0659043434812585e-06,
+            "total": 9.689267589288945e-05
+          },
+          "depth": {
+            "smooth": 2.5089702517644306e-11,
+            "speckle": 6.483492760555497e-13,
+            "total": 2.5089077216519787e-11
+          }
+        },
+        "residual": {
+          "angular": {
+            "smooth": 7.373112740285825e-07,
+            "speckle": 3.6352672816937804e-09,
+            "total": 7.336822784874703e-07
+          },
+          "bandlimit": {
+            "smooth": 5.007298530456399e-10,
+            "speckle": 1.594842634488585e-08,
+            "total": 1.544004380984236e-08
+          },
+          "frequency": {
+            "smooth": 0.00010398499969565728,
+            "speckle": 3.300628432698783e-09,
+            "total": 0.00010398826880368792
+          },
+          "depth": {
+            "smooth": 4.151661778596513e-12,
+            "speckle": 9.624040242019849e-17,
+            "total": 4.151783184675347e-12
+          }
+        }
+      },
+      "eigenvalues": {
+        "raw": {
+          "minimum": -3.465407780102092e-18,
+          "tolerance": 1.672949551320744e-13,
+          "passed": true
+        },
+        "residual": {
+          "minimum": -5.228457323457881e-25,
+          "tolerance": 5.880822441034549e-20,
+          "passed": true
+        }
+      },
+      "marginal_error_over_off": 2.567870282652028e-18,
+      "passed": true
+    },
+    {
+      "case_id": "50_m12_s0_p2_gaussian",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/50_m12_s0_p2_gaussian_joint.json",
+      "sha256": "e8be42f5f71132fdd5e1b968f118ab6fe480a910f2fa51c3b402938aa1a30b29",
+      "checks": {
+        "raw": {
+          "angular": {
+            "smooth": 0.0011401637579586425,
+            "speckle": 0.06550644746413407,
+            "total": 0.0011343464605509822
+          },
+          "bandlimit": {
+            "smooth": 9.254005040281888e-07,
+            "speckle": 0.337629851956072,
+            "total": 2.8551421846607506e-05
+          },
+          "frequency": {
+            "smooth": 0.00018889250016546625,
+            "speckle": 0.00017918789350723598,
+            "total": 0.00018889214716061035
+          },
+          "depth": {
+            "smooth": 0.0,
+            "speckle": 0.0,
+            "total": 0.0
+          }
+        },
+        "residual": {
+          "angular": {
+            "smooth": 0.0006178190344203375,
+            "speckle": 8.304422290506095e-06,
+            "total": 0.0006146810319305946
+          },
+          "bandlimit": {
+            "smooth": 5.014487573786775e-07,
+            "speckle": 3.643217599382975e-05,
+            "total": 1.5522448553378243e-05
+          },
+          "frequency": {
+            "smooth": 0.06753884131722616,
+            "speckle": 7.554734367122243e-06,
+            "total": 0.06754245630597328
+          },
+          "depth": {
+            "smooth": 0.0,
+            "speckle": 0.0,
+            "total": 0.0
+          }
+        }
+      },
+      "eigenvalues": {
+        "raw": {
+          "minimum": -1.4098035370096854e-15,
+          "tolerance": 8.65049082240224e-11,
+          "passed": true
+        },
+        "residual": {
+          "minimum": -6.553599340170904e-22,
+          "tolerance": 1.1472951354162632e-16,
+          "passed": true
+        }
+      },
+      "marginal_error_over_off": 9.85781547575809e-16,
+      "passed": true
+    },
+    {
+      "case_id": "50_m12_s0_p3_gaussian",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/50_m12_s0_p3_gaussian_joint.json",
+      "sha256": "3b7afb181352e237c80fb591ed563b6e16de923398faeb1594c0f4f1802388e1",
+      "checks": {
+        "raw": {
+          "angular": {
+            "smooth": 0.0012882554311018338,
+            "speckle": 0.0025891253411145076,
+            "total": 0.0012865095858748904
+          },
+          "bandlimit": {
+            "smooth": 1.0455806348328695e-06,
+            "speckle": 0.011433334046579615,
+            "total": 8.079926011630594e-06
+          },
+          "frequency": {
+            "smooth": 0.00010451857282500236,
+            "speckle": 7.065904343481238e-06,
+            "total": 0.00010451995700434173
+          },
+          "depth": {
+            "smooth": 2.538789213069009e-11,
+            "speckle": 6.483492760555478e-13,
+            "total": 2.5387419101024565e-11
+          }
+        },
+        "residual": {
+          "angular": {
+            "smooth": 7.375589940293726e-07,
+            "speckle": 3.6352672816937804e-09,
+            "total": 7.339287792140487e-07
+          },
+          "bandlimit": {
+            "smooth": 5.007249368272557e-10,
+            "speckle": 1.594842634486237e-08,
+            "total": 1.5439666377504808e-08
+          },
+          "frequency": {
+            "smooth": 8.488747330393438e-05,
+            "speckle": 3.300628432698783e-09,
+            "total": 8.489074456803296e-05
+          },
+          "depth": {
+            "smooth": 3.2205221887259594e-12,
+            "speckle": 9.624040242019849e-17,
+            "total": 3.2206132638278533e-12
+          }
+        }
+      },
+      "eigenvalues": {
+        "raw": {
+          "minimum": -2.0053087724276167e-18,
+          "tolerance": 1.612185602071744e-13,
+          "passed": true
+        },
+        "residual": {
+          "minimum": -2.8654542047547466e-25,
+          "tolerance": 5.483440373792326e-20,
+          "passed": true
+        }
+      },
+      "marginal_error_over_off": 1.9264528965927937e-18,
+      "passed": true
+    }
+  ],
+  "all_passed": true,
+  "scope": "Full cross-channel/cross-phase covariance and complex relation at both extreme signed mean columns, both bands, screen f=1/slab profiles and the smaller dispersion. All other cases retain exact diagonal moments and complete latent phase coefficients for requested joint exports."
+}

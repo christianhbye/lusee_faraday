@@ -1,0 +1,692 @@
+{
+  "fingerprint": "ada997413c1c2ce53cfb4f9308710a3c2adbc73e17ef8862cf70bcaaf0a324a8",
+  "provenance": {
+    "configuration": {
+      "local_record_sha256": "77a9112733dd831408de3c0cf0c0b157b7a59d74fec597369742ec5f204f76dc",
+      "system_record_sha256": "87377c699179c96fe4d6069f33a0f3195254bc4c86d82a0599d7ac08b54ff7bd",
+      "joint_record_sha256": "67ffaaf496e6c945787053cb1d2ae63fa8ecd3917bd64cecf4d8022542379e1e",
+      "local_configuration": {
+        "horizon_config": "configs/paper/horizon.json",
+        "separability_config": "configs/paper/separability.json",
+        "signed_field_projections": [
+          -1.0,
+          -0.25,
+          0.0,
+          0.25,
+          1.0
+        ],
+        "initial_frequency_nodes": 129,
+        "maximum_frequency_nodes": 2049,
+        "depth_max_order": 1024,
+        "relative_covariance_tolerance": 0.01,
+        "absolute_off_covariance_tolerance": 1e-08,
+        "scope": "Uniform mean columns derived from each sourced density/field pair and the assumed emitting path; both field signs are sensitivity cases. Intrinsic polarization RMS is the declared volume-averaged polarized emissivity times the full emitting path; normalized depth integration applies depolarization without a second horizon truncation. Angular structure and the two dispersions remain independent conditional assumptions, not inferred local priors.",
+        "separability": {
+          "mixed_config": "configs/paper/mixed-depth.json",
+          "mixed_record": "docs/mixed-depth-results.json",
+          "leakage_config": "configs/paper/leakage.json",
+          "leakage_record": "docs/chromatic-leakage-results.json",
+          "noise_config": "configs/paper/receiver-noise.json",
+          "exposure_record": "docs/observing-exposure.json",
+          "smooth_degree": 1,
+          "fit_weights": "uniform, no flags",
+          "variance_mixture_scales": [
+            0.5,
+            1.5
+          ],
+          "variance_mixture_weights": [
+            0.5,
+            0.5
+          ],
+          "seed": 20261017,
+          "figure_profile_index": 3,
+          "figure_screen_index": 1,
+          "figure_phase_index": 0,
+          "figure_lunations": 24,
+          "scope": "Conditional examples at 1 K intrinsic polarization RMS at 30 MHz, with assumed local columns and angular statistics. Linear and PCHIP native-beam interpolants define a model comparison, not a measured fine-channel response. Gaussian visibility illustrations retain the complex relation and both sidereal phases. No detection significance is inferred."
+        },
+        "horizon": {
+          "scope": "Conditional uniform-rate scenarios; no local screen statistics or polarized emissivity are measured here.",
+          "frequencies_mhz": [
+            10.0,
+            30.0,
+            50.0
+          ],
+          "phase_limits_rad": [
+            1.0,
+            2.0
+          ],
+          "absolute_field_projection": [
+            0.0,
+            0.25,
+            1.0
+          ],
+          "projection_status": "Illustrative directions, not a field-orientation posterior.",
+          "emissivity_ref_k_per_pc": 1.0,
+          "emissivity_status": "Illustrative unit normalization; multiply by the assumed local polarized emissivity.",
+          "emissivity_ref_mhz": 30.0,
+          "emissivity_beta": -2.8,
+          "spectrum_status": "Illustrative power law; no absorption or turnover below 20 MHz.",
+          "emitting_path_pc": 5.0,
+          "path_status": "Illustrative finite emitting volume, not a measured cloud extent.",
+          "scenarios": [
+            {
+              "name": "LIC_model26",
+              "ne_cm3": 0.0653,
+              "field_ug": 2.5,
+              "source": "https://astro.uchicago.edu/~frisch/2008SlavinFrisch.pdf",
+              "source_location": "Slavin and Frisch 2008, Table 2 B0 and Table 5 n_e, model 26.",
+              "status": "One photoionization-model pair; extending B0 as a uniform local field is an additional assumption."
+            },
+            {
+              "name": "LHB_density_low_assumed_field",
+              "ne_cm3": 0.0035,
+              "field_ug": 1.0,
+              "source": "https://arxiv.org/html/2410.23345v1#S4.SS2",
+              "source_location": "Yeung et al. 2024, Section 4.2: adopted n_e=(4 +/- 0.5)e-3 cm^-3.",
+              "status": "Lower endpoint of the adopted density range; 1 microgauss field is illustrative, not measured by this source."
+            },
+            {
+              "name": "LHB_density_high_assumed_field",
+              "ne_cm3": 0.0045,
+              "field_ug": 1.0,
+              "source": "https://arxiv.org/html/2410.23345v1#S4.SS2",
+              "source_location": "Yeung et al. 2024, Section 4.2: adopted n_e=(4 +/- 0.5)e-3 cm^-3.",
+              "status": "Upper endpoint of the adopted density range; 1 microgauss field is illustrative, not measured by this source."
+            }
+          ]
+        },
+        "reference_fingerprint": "83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f",
+        "system_record_sha256": "87377c699179c96fe4d6069f33a0f3195254bc4c86d82a0599d7ac08b54ff7bd",
+        "exposure_record_sha256": "f7faa524f15c6a92744144c5cae7c02662c641d37a6d3f6fe8da7a1f88970161"
+      }
+    },
+    "sources": {
+      "scripts/faraday_covariance.py": "c028f158ce34140fbbb460b851ddce3ce5b9bd3cb66ece42d8b87304cfc54492",
+      "scripts/paper_common.py": "2257dfa4993fc7f5c31675c8530a61547d323c4dec7429b1ab9dacf8bf5f0b92",
+      "scripts/residual_signal.py": "e4c24eeed63ea1895a1439a871dd1698520e17ff0e3bc2466864c2a4ccc5b846",
+      "scripts/science_product_predictions.py": "f5b1dc2cd606a463be510145ee9abf592b4daa5f9ee7962886e516758076b67e",
+      "src/lusee_faraday/depth_channel_covariance.py": "80f3095aa97ff9a4477a41f62124448900dcb7733b10e84a238556b0fe38b7a7",
+      "src/lusee_faraday/receiver_noise.py": "ec07c30e72ff90061f48635106d965af83a663067b99a61d2cbb295952c0ea56",
+      "src/lusee_faraday/visibility_covariance.py": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa"
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "2.4.2",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+      },
+      "scipy": {
+        "version": "1.17.1",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+      },
+      "lusee": {
+        "version": "2.1.dev0",
+        "path": "/home/christian/Documents/research/lusee/luseepy/lusee/__init__.py",
+        "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef"
+      },
+      "croissant-sim": {
+        "version": "5.2.1",
+        "path": "/home/christian/Documents/projects/croissant/src/croissant/__init__.py",
+        "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c"
+      }
+    }
+  },
+  "results": [
+    {
+      "center_mhz": 30.0,
+      "path": "generated_data/cache/science_predictions/ada997413c1c2ce53cfb4f9308710a3c2adbc73e17ef8862cf70bcaaf0a324a8/30.npz",
+      "sha256": "a224500e06e026cd7326245a992b3ea84d38a5a74d2a4d96554e3f455ad90692",
+      "passed": true,
+      "operator_relative_error": 4.52766467987434e-15,
+      "maximum_mode_stokes_projection_error": 4.201371908276932e-15,
+      "intensity_relative_error": 1.001362593243147e-14,
+      "maximum_noise_stokes_projection_error": 5.821281912128839e-11,
+      "maximum_signal_stokes_projection_error": 3.2599520714024595e-15,
+      "selected_signal_case_id": "30_m0_s0_p2_gaussian",
+      "mode_psd": [
+        {
+          "mode": 0,
+          "minimum": 8.582165494828144e-09,
+          "passed": true
+        },
+        {
+          "mode": 1,
+          "minimum": 9.439856687620469e-11,
+          "passed": true
+        },
+        {
+          "mode": 2,
+          "minimum": 4.123514589918626e-11,
+          "passed": true
+        },
+        {
+          "mode": 3,
+          "minimum": 2.5372987731329858e-11,
+          "passed": true
+        },
+        {
+          "mode": 4,
+          "minimum": 1.797047009577949e-11,
+          "passed": true
+        },
+        {
+          "mode": 5,
+          "minimum": 1.374978414436994e-11,
+          "passed": true
+        },
+        {
+          "mode": 6,
+          "minimum": 1.1048159936307443e-11,
+          "passed": true
+        },
+        {
+          "mode": 7,
+          "minimum": 9.182614629926468e-12,
+          "passed": true
+        },
+        {
+          "mode": 8,
+          "minimum": 7.823323664961033e-12,
+          "passed": true
+        },
+        {
+          "mode": 9,
+          "minimum": 6.792419368189711e-12,
+          "passed": true
+        },
+        {
+          "mode": 10,
+          "minimum": 5.985922102438444e-12,
+          "passed": true
+        },
+        {
+          "mode": 11,
+          "minimum": 5.3391719462252555e-12,
+          "passed": true
+        },
+        {
+          "mode": 12,
+          "minimum": 4.809943459033884e-12,
+          "passed": true
+        },
+        {
+          "mode": 13,
+          "minimum": 4.369543995801277e-12,
+          "passed": true
+        },
+        {
+          "mode": 14,
+          "minimum": 3.997824249844106e-12,
+          "passed": true
+        },
+        {
+          "mode": 15,
+          "minimum": 3.680236944083476e-12,
+          "passed": true
+        },
+        {
+          "mode": 16,
+          "minimum": 3.4060280274335907e-12,
+          "passed": true
+        },
+        {
+          "mode": 17,
+          "minimum": 3.1670835878242208e-12,
+          "passed": true
+        },
+        {
+          "mode": 18,
+          "minimum": 2.9571716537459954e-12,
+          "passed": true
+        },
+        {
+          "mode": 19,
+          "minimum": 2.7714300454291943e-12,
+          "passed": true
+        },
+        {
+          "mode": 20,
+          "minimum": 2.6060121463508335e-12,
+          "passed": true
+        },
+        {
+          "mode": 21,
+          "minimum": 2.4578367243035633e-12,
+          "passed": true
+        },
+        {
+          "mode": 22,
+          "minimum": 2.324407911317174e-12,
+          "passed": true
+        },
+        {
+          "mode": 23,
+          "minimum": 2.203683481243762e-12,
+          "passed": true
+        },
+        {
+          "mode": 24,
+          "minimum": 2.093977003663114e-12,
+          "passed": true
+        },
+        {
+          "mode": 25,
+          "minimum": 1.9938841572279102e-12,
+          "passed": true
+        },
+        {
+          "mode": 26,
+          "minimum": 1.9022265409082964e-12,
+          "passed": true
+        },
+        {
+          "mode": 27,
+          "minimum": 1.8180083369909704e-12,
+          "passed": true
+        },
+        {
+          "mode": 28,
+          "minimum": 1.7403825327916742e-12,
+          "passed": true
+        },
+        {
+          "mode": 29,
+          "minimum": 1.6686243367992788e-12,
+          "passed": true
+        },
+        {
+          "mode": 30,
+          "minimum": 1.6021100690019799e-12,
+          "passed": true
+        },
+        {
+          "mode": 31,
+          "minimum": 1.5403002589232999e-12,
+          "passed": true
+        },
+        {
+          "mode": 32,
+          "minimum": 1.4827260073690176e-12,
+          "passed": true
+        },
+        {
+          "mode": 33,
+          "minimum": 1.4289779015020126e-12,
+          "passed": true
+        },
+        {
+          "mode": 34,
+          "minimum": 1.3786969460429081e-12,
+          "passed": true
+        },
+        {
+          "mode": 35,
+          "minimum": 1.331567094712524e-12,
+          "passed": true
+        },
+        {
+          "mode": 36,
+          "minimum": 1.2873090656101492e-12,
+          "passed": true
+        },
+        {
+          "mode": 37,
+          "minimum": 1.245675188526467e-12,
+          "passed": true
+        },
+        {
+          "mode": 38,
+          "minimum": 1.2064450913297792e-12,
+          "passed": true
+        },
+        {
+          "mode": 39,
+          "minimum": 1.1694220703019232e-12,
+          "passed": true
+        },
+        {
+          "mode": 40,
+          "minimum": 1.1344300212213033e-12,
+          "passed": true
+        },
+        {
+          "mode": 41,
+          "minimum": 1.1013108335497577e-12,
+          "passed": true
+        },
+        {
+          "mode": 42,
+          "minimum": 1.0699221682473317e-12,
+          "passed": true
+        },
+        {
+          "mode": 43,
+          "minimum": 1.0401355550623352e-12,
+          "passed": true
+        },
+        {
+          "mode": 44,
+          "minimum": 1.011834757748352e-12,
+          "passed": true
+        },
+        {
+          "mode": 45,
+          "minimum": 9.849143632859322e-13,
+          "passed": true
+        },
+        {
+          "mode": 46,
+          "minimum": 9.592785615302387e-13,
+          "passed": true
+        },
+        {
+          "mode": 47,
+          "minimum": 9.348400849297288e-13,
+          "passed": true
+        },
+        {
+          "mode": 48,
+          "minimum": 9.115192851595683e-13,
+          "passed": true
+        },
+        {
+          "mode": 49,
+          "minimum": 8.892433263100786e-13,
+          "passed": true
+        },
+        {
+          "mode": 50,
+          "minimum": 8.679454779191493e-13,
+          "passed": true
+        },
+        {
+          "mode": 51,
+          "minimum": 8.475644936542199e-13,
+          "passed": true
+        },
+        {
+          "mode": 52,
+          "minimum": 8.280440640567945e-13,
+          "passed": true
+        },
+        {
+          "mode": 53,
+          "minimum": 8.093323331440298e-13,
+          "passed": true
+        },
+        {
+          "mode": 54,
+          "minimum": 7.913814703735726e-13,
+          "passed": true
+        },
+        {
+          "mode": 55,
+          "minimum": 7.74147290755286e-13,
+          "passed": true
+        },
+        {
+          "mode": 56,
+          "minimum": 7.575889170010053e-13,
+          "passed": true
+        },
+        {
+          "mode": 57,
+          "minimum": 7.416684783239925e-13,
+          "passed": true
+        },
+        {
+          "mode": 58,
+          "minimum": 7.263508413471549e-13,
+          "passed": true
+        },
+        {
+          "mode": 59,
+          "minimum": 7.116033693687394e-13,
+          "passed": true
+        },
+        {
+          "mode": 60,
+          "minimum": 6.97395706126088e-13,
+          "passed": true
+        },
+        {
+          "mode": 61,
+          "minimum": 6.836995820716574e-13,
+          "passed": true
+        },
+        {
+          "mode": 62,
+          "minimum": 6.704886393662137e-13,
+          "passed": true
+        },
+        {
+          "mode": 63,
+          "minimum": 6.577382744583655e-13,
+          "passed": true
+        },
+        {
+          "mode": 64,
+          "minimum": 6.454254958106289e-13,
+          "passed": true
+        },
+        {
+          "mode": 65,
+          "minimum": 6.335287950895859e-13,
+          "passed": true
+        },
+        {
+          "mode": 66,
+          "minimum": 6.220280305043938e-13,
+          "passed": true
+        }
+      ],
+      "noise_coordinates": [
+        {
+          "voltage_nv_rt_hz": 2.2,
+          "current_pa_rt_hz": 0.03
+        },
+        {
+          "voltage_nv_rt_hz": 2.2,
+          "current_pa_rt_hz": 0.1
+        },
+        {
+          "voltage_nv_rt_hz": 2.2,
+          "current_pa_rt_hz": 0.3
+        },
+        {
+          "voltage_nv_rt_hz": 3.0,
+          "current_pa_rt_hz": 0.03
+        },
+        {
+          "voltage_nv_rt_hz": 3.0,
+          "current_pa_rt_hz": 0.1
+        },
+        {
+          "voltage_nv_rt_hz": 3.0,
+          "current_pa_rt_hz": 0.3
+        },
+        {
+          "voltage_nv_rt_hz": 5.0,
+          "current_pa_rt_hz": 0.03
+        },
+        {
+          "voltage_nv_rt_hz": 5.0,
+          "current_pa_rt_hz": 0.1
+        },
+        {
+          "voltage_nv_rt_hz": 5.0,
+          "current_pa_rt_hz": 0.3
+        }
+      ]
+    },
+    {
+      "center_mhz": 50.0,
+      "path": "generated_data/cache/science_predictions/ada997413c1c2ce53cfb4f9308710a3c2adbc73e17ef8862cf70bcaaf0a324a8/50.npz",
+      "sha256": "d39f48c4368711cc0749b17919aef6009fa6d7853ccc20ea99bad9df8173f7c7",
+      "passed": true,
+      "operator_relative_error": 3.0235036144632567e-15,
+      "maximum_mode_stokes_projection_error": 2.3743185878931325e-15,
+      "intensity_relative_error": 5.769850326705858e-15,
+      "maximum_noise_stokes_projection_error": 3.4927882486169054e-10,
+      "maximum_signal_stokes_projection_error": 2.2653654378382663e-15,
+      "selected_signal_case_id": "50_m0_s0_p2_gaussian",
+      "mode_psd": [
+        {
+          "mode": 0,
+          "minimum": 1.31452766234857e-06,
+          "passed": true
+        },
+        {
+          "mode": 1,
+          "minimum": 9.073854884676063e-09,
+          "passed": true
+        },
+        {
+          "mode": 2,
+          "minimum": 3.963458531089453e-09,
+          "passed": true
+        },
+        {
+          "mode": 3,
+          "minimum": 2.438778520288787e-09,
+          "passed": true
+        },
+        {
+          "mode": 4,
+          "minimum": 1.7272585234611263e-09,
+          "passed": true
+        },
+        {
+          "mode": 5,
+          "minimum": 1.3215760303492638e-09,
+          "passed": true
+        },
+        {
+          "mode": 6,
+          "minimum": 1.0619038008412909e-09,
+          "passed": true
+        },
+        {
+          "mode": 7,
+          "minimum": 8.825937628973312e-10,
+          "passed": true
+        },
+        {
+          "mode": 8,
+          "minimum": 7.519435927325414e-10,
+          "passed": true
+        },
+        {
+          "mode": 9,
+          "minimum": 6.528569831459052e-10,
+          "passed": true
+        },
+        {
+          "mode": 10,
+          "minimum": 5.753396538195156e-10,
+          "passed": true
+        },
+        {
+          "mode": 11,
+          "minimum": 5.13176666433831e-10,
+          "passed": true
+        },
+        {
+          "mode": 12,
+          "minimum": 4.623094363407833e-10,
+          "passed": true
+        },
+        {
+          "mode": 13,
+          "minimum": 4.199801176826971e-10,
+          "passed": true
+        },
+        {
+          "mode": 14,
+          "minimum": 3.842520267241214e-10,
+          "passed": true
+        },
+        {
+          "mode": 15,
+          "minimum": 3.537269302365017e-10,
+          "passed": true
+        },
+        {
+          "mode": 16,
+          "minimum": 3.2737118799765325e-10,
+          "passed": true
+        },
+        {
+          "mode": 17,
+          "minimum": 3.044049211325211e-10,
+          "passed": true
+        },
+        {
+          "mode": 18,
+          "minimum": 2.8422913654158826e-10,
+          "passed": true
+        },
+        {
+          "mode": 19,
+          "minimum": 2.6637650056826355e-10,
+          "passed": true
+        },
+        {
+          "mode": 20,
+          "minimum": 2.504772918420662e-10,
+          "passed": true
+        },
+        {
+          "mode": 21,
+          "minimum": 2.3623535485343165e-10,
+          "passed": true
+        },
+        {
+          "mode": 22,
+          "minimum": 2.2341079703704598e-10,
+          "passed": true
+        }
+      ],
+      "noise_coordinates": [
+        {
+          "voltage_nv_rt_hz": 2.2,
+          "current_pa_rt_hz": 0.03
+        },
+        {
+          "voltage_nv_rt_hz": 2.2,
+          "current_pa_rt_hz": 0.1
+        },
+        {
+          "voltage_nv_rt_hz": 2.2,
+          "current_pa_rt_hz": 0.3
+        },
+        {
+          "voltage_nv_rt_hz": 3.0,
+          "current_pa_rt_hz": 0.03
+        },
+        {
+          "voltage_nv_rt_hz": 3.0,
+          "current_pa_rt_hz": 0.1
+        },
+        {
+          "voltage_nv_rt_hz": 3.0,
+          "current_pa_rt_hz": 0.3
+        },
+        {
+          "voltage_nv_rt_hz": 5.0,
+          "current_pa_rt_hz": 0.03
+        },
+        {
+          "voltage_nv_rt_hz": 5.0,
+          "current_pa_rt_hz": 0.1
+        },
+        {
+          "voltage_nv_rt_hz": 5.0,
+          "current_pa_rt_hz": 0.3
+        }
+      ]
+    }
+  ],
+  "all_passed": true,
+  "scope": "All 16 real science products in PRODUCT_LABELS order, common loaded enclosure-K normalization. Compact four-branch mode weights combine with any saved local-grid coefficients to reconstruct joint signal moments without a dense cube. I-only means cover all bins/phases; all nine noise models export selected parent/zoom covariances plus fine PSD and operators for arbitrary requested bin pairs. Projection back to Stokes checks operators, every signal mode, means and noise."
+}

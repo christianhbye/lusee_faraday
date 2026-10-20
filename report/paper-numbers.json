@@ -1,0 +1,17 @@
+{
+  "MaxSpeckleNoise": 0.00035251928296252605,
+  "MaxTotalNoise": 0.00749159516214583,
+  "MaxEmissivityTotalNoise": 0.15067608156442452,
+  "ReferenceSpeckleNoise": 9.001387560845815e-08,
+  "PhysicalCaseCount": 520,
+  "PhysicalRms": 5.0,
+  "EmittingPathPc": 5.0,
+  "UnitEmissivity": 1.0,
+  "MeanCaseCount": 13,
+  "MaxMeanDepth": 0.662714322996413,
+  "LunarFaradayBound": 2.63119246895549e-06,
+  "LunarPhaseBound": 0.00472959571545412,
+  "ParentResidualDof": 1,
+  "ZoomResidualDof": 190,
+  "ResidualCaseCount": 40
+}

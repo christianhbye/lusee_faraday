@@ -1,0 +1,40 @@
+{
+  "scope": "Conditional uniform-rate scenarios; no local screen statistics or polarized emissivity are measured here.",
+  "frequencies_mhz": [10.0, 30.0, 50.0],
+  "phase_limits_rad": [1.0, 2.0],
+  "absolute_field_projection": [0.0, 0.25, 1.0],
+  "projection_status": "Illustrative directions, not a field-orientation posterior.",
+  "emissivity_ref_k_per_pc": 1.0,
+  "emissivity_status": "Illustrative unit normalization; multiply by the assumed local polarized emissivity.",
+  "emissivity_ref_mhz": 30.0,
+  "emissivity_beta": -2.8,
+  "spectrum_status": "Illustrative power law; no absorption or turnover below 20 MHz.",
+  "emitting_path_pc": 5.0,
+  "path_status": "Illustrative finite emitting volume, not a measured cloud extent.",
+  "scenarios": [
+    {
+      "name": "LIC_model26",
+      "ne_cm3": 0.0653,
+      "field_ug": 2.5,
+      "source": "https://astro.uchicago.edu/~frisch/2008SlavinFrisch.pdf",
+      "source_location": "Slavin and Frisch 2008, Table 2 B0 and Table 5 n_e, model 26.",
+      "status": "One photoionization-model pair; extending B0 as a uniform local field is an additional assumption."
+    },
+    {
+      "name": "LHB_density_low_assumed_field",
+      "ne_cm3": 0.0035,
+      "field_ug": 1.0,
+      "source": "https://arxiv.org/html/2410.23345v1#S4.SS2",
+      "source_location": "Yeung et al. 2024, Section 4.2: adopted n_e=(4 +/- 0.5)e-3 cm^-3.",
+      "status": "Lower endpoint of the adopted density range; 1 microgauss field is illustrative, not measured by this source."
+    },
+    {
+      "name": "LHB_density_high_assumed_field",
+      "ne_cm3": 0.0045,
+      "field_ug": 1.0,
+      "source": "https://arxiv.org/html/2410.23345v1#S4.SS2",
+      "source_location": "Yeung et al. 2024, Section 4.2: adopted n_e=(4 +/- 0.5)e-3 cm^-3.",
+      "status": "Upper endpoint of the adopted density range; 1 microgauss field is illustrative, not measured by this source."
+    }
+  ]
+}

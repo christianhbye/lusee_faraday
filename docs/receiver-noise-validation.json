@@ -1,0 +1,98 @@
+{
+  "tests_passed": 7,
+  "fault_checks": {
+    "faults": [
+      {
+        "fault": "current noise ignores parallel loading",
+        "source": "src/lusee_faraday/receiver_noise.py",
+        "test": "tests/test_receiver_noise.py::test_loaded_voltage_current_noise_matches_direct_kirchhoff_samples",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "c35ae7f4388e2149aa5b92687873ec846bc954676d0a45d6f6ce46eb1cfa8459"
+      },
+      {
+        "fault": "omit voltage/current correlation",
+        "source": "src/lusee_faraday/receiver_noise.py",
+        "test": "tests/test_receiver_noise.py::test_loaded_voltage_current_noise_matches_direct_kirchhoff_samples",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "144006bf77875011a8d5f238f258fcfe13bd521bbfe22dea26c1775a5eba14fc"
+      },
+      {
+        "fault": "voltage ASD treated as PSD",
+        "source": "src/lusee_faraday/receiver_noise.py",
+        "test": "tests/test_receiver_noise.py::test_explicit_asds_and_missing_receiver_data",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "51f777c2d9b9fee96ba28190f305dd9f5981b2d724fd70d8ad982842b83f81ce"
+      },
+      {
+        "fault": "science imaginary product sign flipped",
+        "source": "src/lusee_faraday/receiver_noise.py",
+        "test": "tests/test_receiver_noise.py::test_quadratic_readouts_match_production_science_and_stokes",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "a01e26c36f7d2e6f9ca61a064e46b61a61f0477afd4f8b79e389a66d0330c817"
+      },
+      {
+        "fault": "drop cross-product radiometer covariance",
+        "source": "src/lusee_faraday/receiver_noise.py",
+        "test": "tests/test_receiver_noise.py::test_full_product_covariance_matches_exact_gaussian_quadrature",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "722422463cfbcbfde69e51e6d26bebe62e15b6c6cf7aee1f6319e63e1878f9e8"
+      },
+      {
+        "fault": "two-sided sample-count factor inserted",
+        "source": "src/lusee_faraday/receiver_noise.py",
+        "test": "tests/test_receiver_noise.py::test_diagonal_variances_match_luseepy_and_scale_with_integration",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "d818f1b891c6c6ca1328e6ae480251881313c7fe76fb7c90082c4200518a5dfa"
+      },
+      {
+        "fault": "drop noise covariance between overlapping bins",
+        "source": "src/lusee_faraday/receiver_noise.py",
+        "test": "tests/test_receiver_noise.py::test_channel_overlap_and_variable_system_power_match_voltage_monte_carlo",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "9e1936d96d65e26a74c427c1a35478d557002cdbc6587ebe445efac978c06bc0"
+      },
+      {
+        "fault": "ignore frequency variation of system power",
+        "source": "src/lusee_faraday/receiver_noise.py",
+        "test": "tests/test_receiver_noise.py::test_channel_overlap_and_variable_system_power_match_voltage_monte_carlo",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "ede3af4072243d3a0f48213ad47a42a1cde71ff2d1ae8c914f46bea3faa45b9d"
+      },
+      {
+        "fault": "negative spectral power accepted",
+        "source": "src/lusee_faraday/receiver_noise.py",
+        "test": "tests/test_receiver_noise.py::test_invalid_system_readout_and_exposure_are_rejected",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "b3956a6af7bc3975a037c5dc0fadfef33a0fbeac2489f205f08ba26b5f25ce01"
+      }
+    ],
+    "all_caught": true,
+    "source_sha256": {
+      "src/lusee_faraday/receiver_noise.py": "ec07c30e72ff90061f48635106d965af83a663067b99a61d2cbb295952c0ea56"
+    },
+    "test_sha256": {
+      "tests/test_receiver_noise.py": "7f02c6e935f1f35bd7b9b6a1a35581b9328bbffaf2d53f89ba42f1baa8b9265b"
+    },
+    "runner_sha256": "52156a4ddb0e274ced11df12153a968b0cd15f24e60213e08a0505c39c2e876c",
+    "helper_sha256": "8fe9fcca6654b373b8d72ca0914c1079fcba935bb1f4a198957b7ff8456704a5"
+  },
+  "test_log_sha256": "ac0820a6ed6774771e95e25d7bf46b29890d4a15d1e1d16881123b0225574da1",
+  "gaussian_fourth_moment_quadrature_points": 6561,
+  "voltage_monte_carlo": {
+    "ensembles": 20000,
+    "fine_channels": 3,
+    "independent_samples_per_channel": 32,
+    "relative_covariance_tolerance": 0.06
+  },
+  "conventions": "Proper complex voltages, one-sided PSDs, independent sample count B*tau, full real science-product and channel overlap covariance.",
+  "scope": "Loaded amplifier and joint radiometer backend; physical receiver scenarios and sky/Moon/loss power are assembled in the production measurement stage."
+}

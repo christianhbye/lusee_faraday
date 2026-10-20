@@ -1,0 +1,161 @@
+{
+  "fingerprint": "606bafdd09cbff0beb2db88bc7638f83c50f96ec2c083eeff5219e2cc123de29",
+  "provenance": {
+    "configuration": {
+      "covariance": {
+        "kernel_config": "configs/paper/kernels.json",
+        "kernel_record": "docs/paper-kernel-results.json",
+        "centers_mhz": [
+          30.0,
+          50.0
+        ],
+        "sidereal_turns": [
+          0.0,
+          0.25
+        ],
+        "intrinsic": {
+          "p_ref_k": 1.0,
+          "ref_mhz": 30.0,
+          "ell_scale": 8.0,
+          "ee_fraction": 0.8,
+          "eb_fraction": 0.1,
+          "turnover_mhz": 15.0
+        },
+        "screens": [
+          {
+            "label": "weak local illustration",
+            "parameters": {
+              "sigma_depth": 0.002,
+              "mean_depth": 0.01,
+              "theta0_rad": 0.01,
+              "alpha": 1.6666666666666667
+            },
+            "frequency_nodes": [
+              17,
+              33
+            ]
+          },
+          {
+            "label": "local illustration",
+            "parameters": {
+              "sigma_depth": 0.02,
+              "mean_depth": 0.01,
+              "theta0_rad": 0.01,
+              "alpha": 1.6666666666666667
+            },
+            "frequency_nodes": [
+              17,
+              33
+            ]
+          }
+        ],
+        "angular": {
+          "theta_min_rad": 1e-10,
+          "core_nodes": 600,
+          "body_nodes": 2000
+        },
+        "check_lmax": 64,
+        "frequency_block_size": 8,
+        "relative_tolerance": 0.01,
+        "absolute_off_tolerance": 1e-08,
+        "seed": 7421,
+        "figure_case": "local illustration",
+        "scope": "Illustrative conditional foreground screens, not inferred local plasma statistics. All intrinsic amplitude, angular structure, E/B and turnover parameters are assumptions. No mixed-depth real-beam or receiver-noise result is implied."
+      },
+      "noise": {
+        "voltage_asd_nv_rt_hz": [
+          2.2,
+          3.0,
+          5.0
+        ],
+        "voltage_reference_nv_rt_hz": 3.0,
+        "voltage_input_status": "Adopted scales from Tamura et al. (2024): PA bench ~2.2 nV/sqrt(Hz) with 50 ohm termination; integrated EM ~3; requirement 5. These are different reference cases, not a posterior range or flight calibration.",
+        "current_asd_pa_rt_hz": [
+          0.03,
+          0.1,
+          0.3
+        ],
+        "current_reference_pa_rt_hz": 0.1,
+        "current_input_status": "Explicit illustrative current-noise bracket. The published low-impedance voltage bench does not determine this spectrum with the actual coupled antenna load.",
+        "cross_port_noise_correlation": 0.0,
+        "voltage_current_noise_correlation": 0.0,
+        "correlation_input_status": "Assumed independent input sources; the library also supports an explicit positive-semidefinite joint voltage/current PSD.",
+        "moon_temperature_k": 100.0,
+        "antenna_temperature_k": 100.0,
+        "thermal_input_status": "Illustrative nightside temperatures for Moon and antenna-loss emission. Receiver load impedances do not implicitly add amplifier or resistor noise.",
+        "reference_plane": "One-sided loaded receiver-input voltage spectral covariance in V2/Hz. Voltage source is additive at the measurement plane; current sources enter the full parallel antenna/load network.",
+        "frequency_model": "Constant input ASDs within each narrow band, with loading frozen at the native band center. Actual chromatic I-only sky power remains frequency dependent.",
+        "sources": [
+          "https://doi.org/10.1029/2023RS007925"
+        ],
+        "legacy_spice_status": "LUSEE_DRIVE_DIR is unset; the Model54 noise and gain files are unavailable. The legacy Throughput model is not instantiated.",
+        "scope": "Conditional receiver-noise examples with measured EM voltage scales and assumed current noise/correlations/temperatures; no flight-noise precision claim."
+      },
+      "leakage_fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
+      "kernel_record_sha256": "75a5cc373105763a600007c2d0f40f6a15ea399018276968d5fed9bef0dac994",
+      "sidereal_samples": 256,
+      "bin_seconds": 9221.0605875,
+      "duty": 0.5,
+      "night_margin_deg": -1.0
+    },
+    "sources": {
+      "scripts/chromatic_leakage.py": "b5c4020e2f60daaa29473de90ffa03ab8d0afcffd4bbcda6711aa114a0e66f6d",
+      "scripts/common_observing_control.py": "74f426fe5a8d1869772bf66f14d39587c42ab114f4760e7709fe23b8937060a9",
+      "scripts/faraday_covariance.py": "c028f158ce34140fbbb460b851ddce3ce5b9bd3cb66ece42d8b87304cfc54492",
+      "scripts/measured_system.py": "fb7cbadecc02f5ba3144220cf964f43c676df7116f723d99517097393de4cdd6",
+      "scripts/paper_common.py": "2257dfa4993fc7f5c31675c8530a61547d323c4dec7429b1ab9dacf8bf5f0b92",
+      "src/lusee_faraday/depth_channel_covariance.py": "80f3095aa97ff9a4477a41f62124448900dcb7733b10e84a238556b0fe38b7a7",
+      "src/lusee_faraday/engine.py": "02573e5da1d919ba08dce2199b7419fc7e6daa5483f1b26a474ccebc0ca9ba31",
+      "src/lusee_faraday/observing.py": "db5ac0fe373eef2a6af104abf9986b412427729915cc665280dba2e18592ac7d",
+      "src/lusee_faraday/receiver_noise.py": "ec07c30e72ff90061f48635106d965af83a663067b99a61d2cbb295952c0ea56",
+      "src/lusee_faraday/spin_covariance.py": "acc92b8c41fba40a2543ebc71b6f59c081d80177e73208c65ad4934d50e5609d",
+      "src/lusee_faraday/visibility_covariance.py": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa"
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "2.4.2",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+      },
+      "scipy": {
+        "version": "1.17.1",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+      },
+      "lusee": {
+        "version": "2.1.dev0",
+        "path": "/home/christian/Documents/research/lusee/luseepy/lusee/__init__.py",
+        "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef"
+      },
+      "croissant-sim": {
+        "version": "5.2.1",
+        "path": "/home/christian/Documents/projects/croissant/src/croissant/__init__.py",
+        "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c"
+      }
+    }
+  },
+  "results": [
+    {
+      "center_mhz": 30.0,
+      "passed": true,
+      "minimum_signal_eigenvalue": -1.5962411225547206e-17,
+      "observed_bins": 126,
+      "total_bins": 256,
+      "common_observed_lmax": 48,
+      "theory_lmax": 96,
+      "path": "generated_data/cache/observing_control/606bafdd09cbff0beb2db88bc7638f83c50f96ec2c083eeff5219e2cc123de29/30.npz",
+      "sha256": "1c5b988c5882b0cd76400c97f61d0cbb47e1023abd7714c72678ee05d4bfb75d"
+    },
+    {
+      "center_mhz": 50.0,
+      "passed": true,
+      "minimum_signal_eigenvalue": -6.1258735585123784e-18,
+      "observed_bins": 126,
+      "total_bins": 256,
+      "common_observed_lmax": 48,
+      "theory_lmax": 96,
+      "path": "generated_data/cache/observing_control/606bafdd09cbff0beb2db88bc7638f83c50f96ec2c083eeff5219e2cc123de29/50.npz",
+      "sha256": "a84fdaf836758217e9a32e4c1d1f72ec0e0f4eea0b02175501c15923a225f82b"
+    }
+  ],
+  "all_passed": true,
+  "scope": "Native-band angular and data fringe spectra through the same finite bin, actual-site nightside mask and Fourier operator. The mask mixes fringe modes; no angular map is reconstructed. Noise uses an explicit 25 kHz top-hat and one 50%-duty phase bin, separately from the measured parent/zoom forecast. No white-input or map-level sensitivity claim is made."
+}

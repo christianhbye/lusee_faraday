@@ -1,0 +1,16 @@
+{
+  "responses": {
+    "asbuilt": "data/BGL_v16/lusee_bgl_v16_response_v3.fits",
+    "c4sym": "data/BGL_v16/lusee_bgl_v16_response_v3_c4sym.fits",
+    "diagza": "data/BGL_v16/lusee_bgl_v16_response_v3_diagza.fits"
+  },
+  "intensity_map": "data/haslam408_dsds_Remazeilles2014.fits",
+  "centers_mhz": [30.0, 50.0],
+  "sidereal_turns": [0.0, 0.25],
+  "receiver_parameters": {},
+  "native_neighbors_each_side": 2,
+  "lmax": 48,
+  "check_lmax": 32,
+  "beam_error_over_i": 0.001,
+  "scope": "Conditional Haslam power-law I-only sky plus CMB. Native-frequency beam/loading samples define interpolation comparisons, not measured fine-channel chromatic structure or a calibrated beam uncertainty distribution."
+}

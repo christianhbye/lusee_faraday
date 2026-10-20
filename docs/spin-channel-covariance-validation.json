@@ -1,0 +1,302 @@
+{
+  "baseline": {
+    "passed": 151,
+    "failed": 1,
+    "evidence": "docs/depth-depolarization-validation.json"
+  },
+  "full_suite": {
+    "passed": 193,
+    "failed": 1,
+    "seconds": 381.08,
+    "failure": "tests/test_response_two_port.py::test_short_dipole_monopole_matches_measured_reference",
+    "unchanged_from_baseline": true,
+    "log_sha256": "e05b7c9785bb7c5c8d4c3607fb79cf00bf73e391410ab449a7b1160a33f8ed88"
+  },
+  "new_covariance_tests": 24,
+  "depth_and_covariance_new_tests": 42,
+  "focused": {
+    "spin_channel_instrument_passed": 31,
+    "compression_passed": 4
+  },
+  "fault_checks": {
+    "runner_sha256": "2c716894fcd32b52bd4b4f47640d1450a6685fd22bfd365b7f989a798b68a7dd",
+    "faults": [
+      {
+        "fault": "interpolation weights halved",
+        "test": "tests/test_frequency_covariance.py::test_interpolation_is_exact_for_affine_process_and_preserves_gain",
+        "source": "src/lusee_faraday/frequency_covariance.py",
+        "caught": true,
+        "source_sha256": "a1332347e0110a389ec2e1f035ba054f3dd6687094b384a6b9702ccb87cef42e",
+        "log_sha256": "28c1068e2ce38cef8d8ad84fed28669f7968e959d9d14589357fc6aeb38ed15d",
+        "returncode": 1
+      },
+      {
+        "fault": "compressed cross-frequency tiles omitted",
+        "test": "tests/test_frequency_covariance.py::test_compressed_covariance_refines_to_direct_nonstationary_modes",
+        "source": "src/lusee_faraday/frequency_covariance.py",
+        "caught": true,
+        "source_sha256": "a1332347e0110a389ec2e1f035ba054f3dd6687094b384a6b9702ccb87cef42e",
+        "log_sha256": "fd12fe01e0f6d51e1c19fa40f20f0ae1c0c444fe8f0f2e5f4f356c37e0c45b5d",
+        "returncode": 1
+      },
+      {
+        "fault": "Gaussian draw variance halved",
+        "test": "tests/test_frequency_covariance.py::test_gaussian_draw_reproducibility_covariance_and_psd_rejection",
+        "source": "src/lusee_faraday/frequency_covariance.py",
+        "caught": true,
+        "source_sha256": "a1332347e0110a389ec2e1f035ba054f3dd6687094b384a6b9702ccb87cef42e",
+        "log_sha256": "d61576a039dabec2a06916e51e70aaedc4ff39e67e94ecadc1b41dc37afac19e",
+        "returncode": 1
+      },
+      {
+        "fault": "complex power map silently accepted",
+        "test": "tests/test_frequency_covariance.py::test_invalid_compression_coordinates_and_blocks",
+        "source": "src/lusee_faraday/frequency_covariance.py",
+        "caught": true,
+        "source_sha256": "a1332347e0110a389ec2e1f035ba054f3dd6687094b384a6b9702ccb87cef42e",
+        "log_sha256": "934e382c9e69b0ec14305a625dbe53de2d760c5db4d2603c948e43543a830519",
+        "returncode": 1
+      },
+      {
+        "fault": "unnormalized channel rows",
+        "test": "tests/test_channel_covariance.py::test_channel_operator_matches_direct_bin_responses",
+        "source": "src/lusee_faraday/channelization.py",
+        "caught": true,
+        "source_sha256": "df5655f80a4aed9a712a620724df94fae7d1bee3b887ebc2193fde301e3bb910",
+        "log_sha256": "546ce3d8a446fb22964ecb210ff249b7e774129c8e6a13c6042bfa965ed9372c",
+        "returncode": 1
+      },
+      {
+        "fault": "zoom fold replaced by ideal response",
+        "test": "tests/test_channel_covariance.py::test_zoom_operator_retains_nyquist_fold",
+        "source": "src/lusee_faraday/channelization.py",
+        "caught": true,
+        "source_sha256": "df5655f80a4aed9a712a620724df94fae7d1bee3b887ebc2193fde301e3bb910",
+        "log_sha256": "e367b56a7ccb2f4cd5fe73a41e1f5b09fd52f90340c4deeff9ccde64b47ec1d2",
+        "returncode": 1
+      },
+      {
+        "fault": "covariance loses conjugation",
+        "test": "tests/test_channel_covariance.py::test_complex_moments_match_independent_finite_sample_ensemble",
+        "source": "src/lusee_faraday/channelization.py",
+        "caught": true,
+        "source_sha256": "df5655f80a4aed9a712a620724df94fae7d1bee3b887ebc2193fde301e3bb910",
+        "log_sha256": "5fbf301025d8c8c7d85800bda4587ebd31c2edd36c1c7a13b47d9e66cd3c74b0",
+        "returncode": 1
+      },
+      {
+        "fault": "off-diagonal frequency blocks omitted",
+        "test": "tests/test_channel_covariance.py::test_block_projection_includes_broad_nonstationary_covariance",
+        "source": "src/lusee_faraday/channelization.py",
+        "caught": true,
+        "source_sha256": "df5655f80a4aed9a712a620724df94fae7d1bee3b887ebc2193fde301e3bb910",
+        "log_sha256": "648cdfe0901e54fb0e3ca01723d979dfa9d3935521a60fcec441d3116f263ec4",
+        "returncode": 1
+      },
+      {
+        "fault": "noise bandwidth units lost",
+        "test": "tests/test_channel_covariance.py::test_white_noise_overlap_and_effective_bandwidth",
+        "source": "src/lusee_faraday/channelization.py",
+        "caught": true,
+        "source_sha256": "df5655f80a4aed9a712a620724df94fae7d1bee3b887ebc2193fde301e3bb910",
+        "log_sha256": "7f80cd6f43bd1ac0c13313a922fd06f3d7b4b18f7db12582791a41b1593f0275",
+        "returncode": 1
+      },
+      {
+        "fault": "unknown channel accepted",
+        "test": "tests/test_channel_covariance.py::test_invalid_channel_covariance_coordinates_and_shapes",
+        "source": "src/lusee_faraday/channelization.py",
+        "caught": true,
+        "source_sha256": "df5655f80a4aed9a712a620724df94fae7d1bee3b887ebc2193fde301e3bb910",
+        "log_sha256": "e3dda362dcb97050738c5092cb43ba04963dbd0af0289b98359b6a617f3b029f",
+        "returncode": 1
+      },
+      {
+        "fault": "spin Jacobi indices swapped",
+        "test": "tests/test_spin_covariance.py::test_wigner_rows_match_independent_factorial_sum",
+        "source": "src/lusee_faraday/spin_covariance.py",
+        "caught": true,
+        "source_sha256": "acc92b8c41fba40a2543ebc71b6f59c081d80177e73208c65ad4934d50e5609d",
+        "log_sha256": "2c7d09043f0b1225e07a196e55387c6e663d54f02d10a80b8b352842bc2d8b3a",
+        "returncode": 1
+      },
+      {
+        "fault": "spin inverse missing two pi",
+        "test": "tests/test_spin_covariance.py::test_spin_roundtrip_including_eb_relation",
+        "source": "src/lusee_faraday/spin_covariance.py",
+        "caught": true,
+        "source_sha256": "acc92b8c41fba40a2543ebc71b6f59c081d80177e73208c65ad4934d50e5609d",
+        "log_sha256": "072ec937b253e5c10c21190c086e86d74c57b6e96b623708150b426b45ee5223",
+        "returncode": 1
+      },
+      {
+        "fault": "relation deterministic phase halved",
+        "test": "tests/test_spin_covariance.py::test_uniform_deterministic_rotation_mixes_eb_without_losing_power",
+        "source": "src/lusee_faraday/spin_covariance.py",
+        "caught": true,
+        "source_sha256": "acc92b8c41fba40a2543ebc71b6f59c081d80177e73208c65ad4934d50e5609d",
+        "log_sha256": "141d4aa851c71fad9f435612e77526296f5abb695d6bb981e5d038fd13a60243",
+        "returncode": 1
+      },
+      {
+        "fault": "Gaussian phase cross term halved",
+        "test": "tests/test_spin_covariance.py::test_screen_phase_kernels_match_direct_gaussian_ensemble",
+        "source": "src/lusee_faraday/spin_covariance.py",
+        "caught": true,
+        "source_sha256": "acc92b8c41fba40a2543ebc71b6f59c081d80177e73208c65ad4934d50e5609d",
+        "log_sha256": "bb16d587b006e7401146a8dc47619a6fd913da824df50d85779c64c8a198b9cf",
+        "returncode": 1
+      },
+      {
+        "fault": "speckle relation omitted",
+        "test": "tests/test_spin_covariance.py::test_rotated_power_split_conservation_and_spectral_positivity",
+        "source": "src/lusee_faraday/spin_covariance.py",
+        "caught": true,
+        "source_sha256": "acc92b8c41fba40a2543ebc71b6f59c081d80177e73208c65ad4934d50e5609d",
+        "log_sha256": "9f737c1fd6933c8accf5939594a204c5b5fdb44039a12ecac470d16e16650f2b",
+        "returncode": 1
+      },
+      {
+        "fault": "coherence phase factor halved",
+        "test": "tests/test_spin_covariance.py::test_strong_screen_recovers_scalar_low_ell_floor_and_coherence",
+        "source": "src/lusee_faraday/spin_covariance.py",
+        "caught": true,
+        "source_sha256": "acc92b8c41fba40a2543ebc71b6f59c081d80177e73208c65ad4934d50e5609d",
+        "log_sha256": "d0adba84a5339d055c3613873b1fea28e26835f050a0d5a33fb8d973a7c5aa5a",
+        "returncode": 1
+      },
+      {
+        "fault": "inadmissible angular exponent accepted",
+        "test": "tests/test_spin_covariance.py::test_invalid_spin_inputs_are_rejected",
+        "source": "src/lusee_faraday/spin_covariance.py",
+        "caught": true,
+        "source_sha256": "acc92b8c41fba40a2543ebc71b6f59c081d80177e73208c65ad4934d50e5609d",
+        "log_sha256": "b41fcd2d621a207bd530772104cc9163189c808d21eef1c394ea3db28a66bc63",
+        "returncode": 1
+      },
+      {
+        "fault": "harmonic relation parity omitted",
+        "test": "tests/test_visibility_covariance.py::test_pair_covariance_and_relation_match_harmonic_ensemble",
+        "source": "src/lusee_faraday/visibility_covariance.py",
+        "caught": true,
+        "source_sha256": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa",
+        "log_sha256": "147af9bd923c1655dec32ed6b7882e4f86136ad58a8aa29332c5e7d9e973777e",
+        "returncode": 1
+      },
+      {
+        "fault": "cross-frequency helicity conjugation lost",
+        "test": "tests/test_visibility_covariance.py::test_cross_frequency_rotation_and_different_pair_kernels",
+        "source": "src/lusee_faraday/visibility_covariance.py",
+        "caught": true,
+        "source_sha256": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa",
+        "log_sha256": "9df88f1293aa920743bd7ffee28bcd8ed930e6428246bc1c936b9be49e7bab07",
+        "returncode": 1
+      },
+      {
+        "fault": "real readout drops relation",
+        "test": "tests/test_visibility_covariance.py::test_real_readout_keeps_relation_and_batch_dimensions",
+        "source": "src/lusee_faraday/visibility_covariance.py",
+        "caught": true,
+        "source_sha256": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa",
+        "log_sha256": "1ff959644bd27a463bd60f31dde415b2d12de6cc6d51ba3614f6062ad0d43bc4",
+        "returncode": 1
+      },
+      {
+        "fault": "effective kernel conjugate parity omitted",
+        "test": "tests/test_visibility_covariance.py::test_real_kernels_match_pair_readout_on_independent_harmonic_samples",
+        "source": "src/lusee_faraday/visibility_covariance.py",
+        "caught": true,
+        "source_sha256": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa",
+        "log_sha256": "34c097db2c1b5e2218e416a66c159212fa568f380fbdbdb350757b31e17ec202",
+        "returncode": 1
+      },
+      {
+        "fault": "precontracted angular normalization halved",
+        "test": "tests/test_visibility_covariance.py::test_precontracted_angular_weights_match_full_spin_pair_time_chain",
+        "source": "src/lusee_faraday/visibility_covariance.py",
+        "caught": true,
+        "source_sha256": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa",
+        "log_sha256": "4183f45a71609bc2ec0374e606ad5efac630e96020e0509c57f4c621e3346faf",
+        "returncode": 1
+      },
+      {
+        "fault": "blackbody normalization doubled",
+        "test": "tests/test_visibility_covariance.py::test_loaded_operator_matches_direct_instrument_and_blackbody",
+        "source": "src/lusee_faraday/visibility_covariance.py",
+        "caught": true,
+        "source_sha256": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa",
+        "log_sha256": "86d55e4c06a1a4154b541cd9848df5d020500def2b76401a3e8c212d1771d951",
+        "returncode": 1
+      },
+      {
+        "fault": "unknown readout accepted",
+        "test": "tests/test_visibility_covariance.py::test_invalid_covariance_readout_requests",
+        "source": "src/lusee_faraday/visibility_covariance.py",
+        "caught": true,
+        "source_sha256": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa",
+        "log_sha256": "17ae2a77080475010934afa49e374381d12c484a940dbebf7d4de07f44e24a9e",
+        "returncode": 1
+      }
+    ],
+    "all_caught": true,
+    "scope": "Disposable mutated copies; working source was not changed."
+  },
+  "conditional_cases": 4,
+  "numerical_gate_maximum_ratios": {
+    "frequency": 0.00033325700706671494,
+    "angular": 0.014066300210251959,
+    "bandlimit": 0.42981622799051394
+  },
+  "minimum_raw_covariance_eigenvalue": -1.311185231976555e-16,
+  "result_sha256": "c9038593bc49c0e7127df104aedeeb6510ddcff15b541186568377ae5ae7b713",
+  "kernel_record_sha256": "9ac7b4eeb83e05b2dca4bedd27157a3557494d09db1d72c8b3115e2f44ecc573",
+  "mixture": {
+    "record_sha256": "a8d1f6e5ba080550227bbe806acb9fa940a91ec44cb46715d093e2be80ec1a96",
+    "max_direct_error": 4.1239039422678816e-14,
+    "max_refinement_shift": 3.0934633420032e-14,
+    "max_matched_rm_gaussian_error": 0.07407259992350411,
+    "scope": "Independent direct Gaussian quadrature of bivariate phase marginals for a global scale mixture with matched RM covariance. Tests both frequency-moment types; does not validate full spherical realizations or visibility Gaussianity."
+  },
+  "source_sha256": {
+    "scripts/check_spin_screen_mixture.py": "d31295e29bca0c78f9e81024c47dbd6d21546c33d219812ce97c142089107084",
+    "scripts/faraday_covariance.py": "c028f158ce34140fbbb460b851ddce3ce5b9bd3cb66ece42d8b87304cfc54492",
+    "scripts/validate_covariance_faults.py": "2c716894fcd32b52bd4b4f47640d1450a6685fd22bfd365b7f989a798b68a7dd",
+    "src/lusee_faraday/channelization.py": "df5655f80a4aed9a712a620724df94fae7d1bee3b887ebc2193fde301e3bb910",
+    "src/lusee_faraday/frequency_covariance.py": "a1332347e0110a389ec2e1f035ba054f3dd6687094b384a6b9702ccb87cef42e",
+    "src/lusee_faraday/spin_covariance.py": "acc92b8c41fba40a2543ebc71b6f59c081d80177e73208c65ad4934d50e5609d",
+    "src/lusee_faraday/visibility_covariance.py": "82ae8d82de69f766cd993decd4ac100b76f7d7cc253f921443008c59f8c981fa",
+    "tests/test_channel_covariance.py": "d5ae04a8e912f3d6f57f6004907af876dd034748d284d07923c9f04f38a310ea",
+    "tests/test_frequency_covariance.py": "0c4bf32791349e9a12ebaa541241cbe980bb6bca09ad1af6b76b027c75ea62a7",
+    "tests/test_spin_covariance.py": "f10d80924dec90132b820d1f8404e5e40df70b71a37e7bc1d1b523544a203fb8",
+    "tests/test_visibility_covariance.py": "70e2368f03c62f8679a1324df964e68547e8a5d38ade0bd12db908b8ff25127a"
+  },
+  "figure": {
+    "path": "report/figures/faraday_channel_covariance.pdf",
+    "sha256": "e5e27aac6e14e0d7f6c90f457fce2f33dea94dd88f4d1a689a3ce4a5ed3491d7",
+    "visual_inspection": "Final PNG inspected at 6.4 inch design width; pixels centered on actual channel coordinates, common scales, log correlation-loss floor, raw draws and captions checked."
+  },
+  "cache_recheck": {
+    "log_sha256": "10d72b904dc8476e0a85c713cf2eb1839361e43df731557c22b1be5658af1742",
+    "all_four_verified": true,
+    "fingerprint": "a1ac9126e792f7ac368f59ec18269ed11c135c6d3c957a02c3a7d9d3add41265"
+  },
+  "ci": {
+    "commit": "dc8024c",
+    "python_versions": [
+      "3.12",
+      "3.13",
+      "3.14"
+    ],
+    "all_passed": true,
+    "url": "https://github.com/christianhbye/lusee_faraday/actions/runs/39091557705"
+  },
+  "scope": "Conditional foreground-screen spin/instrument/channel predictions and phase-mixture control. Full mixed-depth real-beam, leakage/noise and scientific acceptance gates remain open.",
+  "mixture_gate_fault_check": {
+    "fault": "Use Gaussian moments for the matched-RM scale mixture",
+    "caught": true,
+    "returncode": 1,
+    "source_sha256": "d31295e29bca0c78f9e81024c47dbd6d21546c33d219812ce97c142089107084",
+    "scope": "Disposable copied source and products; working source and records unchanged.",
+    "log_sha256": "a877e93381d79ed5ba098716a23a34f518415398d850dc327ffaf08e2d351962"
+  }
+}

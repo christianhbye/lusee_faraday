@@ -1,0 +1,7 @@
+{
+  "response_path": "data/BGL_v16/lusee_bgl_v16_response_v3.fits",
+  "centers_mhz": [30.0, 50.0, 10.0],
+  "lmax": 96,
+  "receiver_parameters": {},
+  "scope": "As-built native-channel response; default measured JFET impedance parameters resolved in provenance. No receiver noise model is implied."
+}

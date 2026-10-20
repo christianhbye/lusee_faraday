@@ -1,0 +1,973 @@
+{
+  "fingerprint": "de355825d0c040ab074f41e77c779113c27caaa94ea129c1caad06fa5f6ed075",
+  "manifest": {
+    "configuration": {
+      "scope": "Conditional flat-plane depth-profile benchmark; not a Galactic or LuSEE sensitivity prediction.",
+      "frequencies_mhz": [
+        10.0,
+        30.0,
+        50.0
+      ],
+      "screen_model": {
+        "distance_pc": 100.0,
+        "correlation_pc": 0.5,
+        "mean_depth": 0.01,
+        "sigma_depth": 0.02
+      },
+      "sigma_depth_values": [
+        0.002,
+        0.02
+      ],
+      "input_status": "Illustrative screen parameters, not inferred from the horizon table. Remaining source/beam parameters use the recorded PR 7 ScreenModel defaults.",
+      "profiles": [
+        {
+          "kind": "screen",
+          "fraction": 0.0
+        },
+        {
+          "kind": "screen",
+          "fraction": 0.6
+        },
+        {
+          "kind": "screen",
+          "fraction": 1.0
+        },
+        {
+          "kind": "slab"
+        },
+        {
+          "kind": "gaussian",
+          "center": 0.5,
+          "width": 0.15
+        }
+      ],
+      "depth_numerical": {
+        "order": 16,
+        "max_order": 256,
+        "epsabs": 2e-10,
+        "epsrel": 2e-06
+      },
+      "separation_numerical": {
+        "epsabs": 2e-11,
+        "epsrel": 2e-10,
+        "upper_u": 40.0
+      },
+      "resolved_screen_model": {
+        "distance_pc": 100.0,
+        "correlation_pc": 0.5,
+        "mean_depth": 0.01,
+        "sigma_depth": 0.02,
+        "beam_sigma_deg": 1.0,
+        "source_sigma_deg": 1.5,
+        "i_ref_k": 2.0,
+        "p_ref_k": 1.0,
+        "angle_deg": 20.0,
+        "ref_mhz": 30.0,
+        "beta": -2.8,
+        "jones_angle_deg": 45.0,
+        "jones_phase_deg": 60.0,
+        "readout": null
+      }
+    },
+    "sources": {
+      "scripts/common.py": "6a67e8f3fa47970be630b77422be297cab7ac3da75bf807a89b7495ededfde45",
+      "scripts/depth_depolarization.py": "97e8b1a0bdefeae7758cbe1b1c8601a0f4351ab55545cebfa5beb660f8037eba",
+      "scripts/paper_common.py": "2257dfa4993fc7f5c31675c8530a61547d323c4dec7429b1ab9dacf8bf5f0b92",
+      "src/lusee_faraday/config.py": "4de2a0bade4d689ea1dfe1144bd0155f4127a26603bda428013321ab8c47b2ff",
+      "src/lusee_faraday/conventions.py": "4ce2c3ae851cdff6f21b6085dd96fbd8b4347fd16f6078390916cb4d21b46bbd",
+      "src/lusee_faraday/depth_depolarization.py": "6fcff745f2c78293040144ce9ee2a307ceb94e6bbb7dcf188219e55a1f378cbc",
+      "src/lusee_faraday/gaussian_screen.py": "9b9afe77efb0f80da38619f1cb221caead4527db7348b8daffcbf81faec5958a"
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "2.4.2",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+      },
+      "scipy": {
+        "version": "1.17.1",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+      },
+      "lusee": {
+        "version": "2.1.dev0",
+        "path": "/home/christian/Documents/research/lusee/luseepy/lusee/__init__.py",
+        "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef"
+      },
+      "croissant-sim": {
+        "version": "5.2.1",
+        "path": "/home/christian/Documents/projects/croissant/src/croissant/__init__.py",
+        "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c"
+      }
+    }
+  },
+  "rows": [
+    {
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.0,
+        "center": 0.5,
+        "width": 0.15
+      },
+      "sigma_depth_rad_m2": 0.002,
+      "depth_order": 1,
+      "depth_error": 0.0,
+      "separation_error_estimate": 8.496708510583178e-18,
+      "min_real_covariance_eigenvalue": 0.0,
+      "numerical_refinements": {
+        "depth_smooth_max_fraction_shift": 0.0,
+        "depth_speckle_max_fraction_shift": 0.0,
+        "depth_total_max_fraction_shift": 0.0,
+        "depth_complex_covariance_max_shift": 0.0,
+        "depth_complex_relation_max_shift": 0.0,
+        "separation_smooth_max_fraction_shift": 0.0,
+        "separation_speckle_max_fraction_shift": 0.0,
+        "separation_total_max_fraction_shift": 0.0,
+        "separation_complex_covariance_max_shift": 0.0,
+        "separation_complex_relation_max_shift": 0.0
+      },
+      "smooth_power_k2": [
+        225.15279402598748,
+        0.4792899408284022,
+        0.02743123220226918
+      ],
+      "smooth_rms_k": [
+        15.00509226982585,
+        0.6923076923076922,
+        0.16562376702112888
+      ],
+      "smooth_fraction": [
+        1.0,
+        0.9999999999999998,
+        1.0
+      ],
+      "speckle_power_k2": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "speckle_rms_k": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "speckle_fraction": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_power_k2": [
+        225.15279402598748,
+        0.4792899408284022,
+        0.02743123220226918
+      ],
+      "total_rms_k": [
+        15.00509226982585,
+        0.6923076923076922,
+        0.16562376702112888
+      ],
+      "total_fraction": [
+        1.0,
+        0.9999999999999998,
+        1.0
+      ],
+      "off_power_k2": [
+        225.15279402598748,
+        0.4792899408284023,
+        0.02743123220226918
+      ],
+      "off_rms_k": [
+        15.00509226982585,
+        0.6923076923076923,
+        0.16562376702112888
+      ],
+      "off_fraction": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.6,
+        "center": 0.5,
+        "width": 0.15
+      },
+      "sigma_depth_rad_m2": 0.002,
+      "depth_order": 1,
+      "depth_error": 0.0,
+      "separation_error_estimate": 1.0271153556538764e-13,
+      "min_real_covariance_eigenvalue": 9.02192871012915e-13,
+      "numerical_refinements": {
+        "depth_smooth_max_fraction_shift": 0.0,
+        "depth_speckle_max_fraction_shift": 0.0,
+        "depth_total_max_fraction_shift": 0.0,
+        "depth_complex_covariance_max_shift": 0.0,
+        "depth_complex_relation_max_shift": 0.0,
+        "separation_smooth_max_fraction_shift": 0.0,
+        "separation_speckle_max_fraction_shift": 0.0,
+        "separation_total_max_fraction_shift": 0.0,
+        "separation_complex_covariance_max_shift": 0.0,
+        "separation_complex_relation_max_shift": 0.0
+      },
+      "smooth_power_k2": [
+        2.1470109898129177,
+        0.4525349264385245,
+        0.0272277834257087
+      ],
+      "smooth_rms_k": [
+        1.4652682313531942,
+        0.6727071624700636,
+        0.16500843440778626
+      ],
+      "smooth_fraction": [
+        0.009535795454375336,
+        0.9441778094828475,
+        0.9925833161609251
+      ],
+      "speckle_power_k2": [
+        3.6119165215726885,
+        0.0014762915772980846,
+        1.136365244048618e-05
+      ],
+      "speckle_rms_k": [
+        1.9005042808614476,
+        0.038422539964167966,
+        0.003371001696897553
+      ],
+      "speckle_fraction": [
+        0.016042068397142766,
+        0.003080163908189831,
+        0.0004142596423191719
+      ],
+      "total_power_k2": [
+        5.758927511385606,
+        0.45401121801582256,
+        0.027239147078149187
+      ],
+      "total_rms_k": [
+        2.399776554470354,
+        0.6738035455648943,
+        0.1650428643660464
+      ],
+      "total_fraction": [
+        0.025577863851518102,
+        0.9472579733910373,
+        0.9929975758032443
+      ],
+      "off_power_k2": [
+        225.15279402598748,
+        0.4792899408284023,
+        0.02743123220226918
+      ],
+      "off_rms_k": [
+        15.00509226982585,
+        0.6923076923076923,
+        0.16562376702112888
+      ],
+      "off_fraction": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "profile": {
+        "kind": "screen",
+        "fraction": 1.0,
+        "center": 0.5,
+        "width": 0.15
+      },
+      "sigma_depth_rad_m2": 0.002,
+      "depth_order": 1,
+      "depth_error": 0.0,
+      "separation_error_estimate": 2.702168036930891e-14,
+      "min_real_covariance_eigenvalue": 1.3220722930368799e-10,
+      "numerical_refinements": {
+        "depth_smooth_max_fraction_shift": 0.0,
+        "depth_speckle_max_fraction_shift": 0.0,
+        "depth_total_max_fraction_shift": 0.0,
+        "depth_complex_covariance_max_shift": 0.0,
+        "depth_complex_relation_max_shift": 0.0,
+        "separation_smooth_max_fraction_shift": 0.0,
+        "separation_speckle_max_fraction_shift": 0.0,
+        "separation_total_max_fraction_shift": 0.0,
+        "separation_complex_covariance_max_shift": 0.0,
+        "separation_complex_relation_max_shift": 0.0
+      },
+      "smooth_power_k2": [
+        0.0005490095701666109,
+        0.4086046308428199,
+        0.026869815261568973
+      ],
+      "smooth_rms_k": [
+        0.023430953249208852,
+        0.6392218948399843,
+        0.1639201490408332
+      ],
+      "smooth_fraction": [
+        2.4383866633395783e-06,
+        0.8525207729930441,
+        0.9795336594229345
+      ],
+      "speckle_power_k2": [
+        1.122939616410051,
+        0.0038033569017100507,
+        3.1257200834265426e-05
+      ],
+      "speckle_rms_k": [
+        1.0596884525227455,
+        0.06167136208735827,
+        0.005590813968847955
+      ],
+      "speckle_fraction": [
+        0.0049874558353490365,
+        0.007935398967765416,
+        0.0011394749096134205
+      ],
+      "total_power_k2": [
+        1.1234886259802175,
+        0.41240798774452997,
+        0.02690107246240324
+      ],
+      "total_rms_k": [
+        1.059947463783096,
+        0.6421899934945499,
+        0.1640154640953201
+      ],
+      "total_fraction": [
+        0.004989894222012376,
+        0.8604561719608095,
+        0.980673134332548
+      ],
+      "off_power_k2": [
+        225.15279402598748,
+        0.4792899408284023,
+        0.02743123220226918
+      ],
+      "off_rms_k": [
+        15.00509226982585,
+        0.6923076923076923,
+        0.16562376702112888
+      ],
+      "off_fraction": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "profile": {
+        "kind": "slab",
+        "fraction": 1.0,
+        "center": 0.5,
+        "width": 0.15
+      },
+      "sigma_depth_rad_m2": 0.002,
+      "depth_order": 36,
+      "depth_error": 3.782911548562364e-14,
+      "separation_error_estimate": 6.202977003319493e-14,
+      "min_real_covariance_eigenvalue": 5.61092122558845e-12,
+      "numerical_refinements": {
+        "depth_smooth_max_fraction_shift": 5.773159728050814e-15,
+        "depth_speckle_max_fraction_shift": 5.854691731421724e-18,
+        "depth_total_max_fraction_shift": 5.773159728050814e-15,
+        "depth_complex_covariance_max_shift": 5.881465536701507e-18,
+        "depth_complex_relation_max_shift": 2.5162249559084634e-17,
+        "separation_smooth_max_fraction_shift": 0.0,
+        "separation_speckle_max_fraction_shift": 0.0,
+        "separation_total_max_fraction_shift": 0.0,
+        "separation_complex_covariance_max_shift": 0.0,
+        "separation_complex_relation_max_shift": 0.0
+      },
+      "smooth_power_k2": [
+        0.7626733874802977,
+        0.3229629099601565,
+        0.026090242921313796
+      ],
+      "smooth_rms_k": [
+        0.8733117355677168,
+        0.5682982579246187,
+        0.1615247439908629
+      ],
+      "smooth_fraction": [
+        0.0033873591965830493,
+        0.6738361948551413,
+        0.9511145080517216
+      ],
+      "speckle_power_k2": [
+        0.0062565554263141945,
+        0.000803984675500441,
+        7.648943702260632e-06
+      ],
+      "speckle_rms_k": [
+        0.07909839079471968,
+        0.028354623529513505,
+        0.002765672377968987
+      ],
+      "speckle_fraction": [
+        2.7788042575176985e-05,
+        0.0016774495081428955,
+        0.0002788406895417513
+      ],
+      "total_power_k2": [
+        0.7689299429066119,
+        0.3237668946356569,
+        0.026097891865016057
+      ],
+      "total_rms_k": [
+        0.8768865051456841,
+        0.5690051797968599,
+        0.16154841956830174
+      ],
+      "total_fraction": [
+        0.003415147239158226,
+        0.6755136443632842,
+        0.9513933487412634
+      ],
+      "off_power_k2": [
+        225.15279402598748,
+        0.4792899408284023,
+        0.02743123220226918
+      ],
+      "off_rms_k": [
+        15.00509226982585,
+        0.6923076923076923,
+        0.16562376702112888
+      ],
+      "off_fraction": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "profile": {
+        "kind": "gaussian",
+        "fraction": 1.0,
+        "center": 0.5,
+        "width": 0.15
+      },
+      "sigma_depth_rad_m2": 0.002,
+      "depth_order": 36,
+      "depth_error": 1.6296155205208165e-15,
+      "separation_error_estimate": 6.84225790701922e-14,
+      "min_real_covariance_eigenvalue": 4.518410639451197e-13,
+      "numerical_refinements": {
+        "depth_smooth_max_fraction_shift": 1.2212453270876722e-15,
+        "depth_speckle_max_fraction_shift": 2.894819800536297e-17,
+        "depth_total_max_fraction_shift": 1.2212453270876722e-15,
+        "depth_complex_covariance_max_shift": 6.285329100770708e-17,
+        "depth_complex_relation_max_shift": 5.134668723175444e-17,
+        "separation_smooth_max_fraction_shift": 0.0,
+        "separation_speckle_max_fraction_shift": 0.0,
+        "separation_total_max_fraction_shift": 0.0,
+        "separation_complex_covariance_max_shift": 0.0,
+        "separation_complex_relation_max_shift": 0.0
+      },
+      "smooth_power_k2": [
+        0.05058474889229703,
+        0.42007364691654564,
+        0.026965186080804348
+      ],
+      "smooth_rms_k": [
+        0.2249105353074796,
+        0.6481308871798548,
+        0.16421079769858116
+      ],
+      "smooth_fraction": [
+        0.00022466853725323284,
+        0.8764499546777311,
+        0.9830103832730387
+      ],
+      "speckle_power_k2": [
+        0.03422598138612325,
+        0.0009499025973967681,
+        7.813487940509469e-06
+      ],
+      "speckle_rms_k": [
+        0.18500265237591393,
+        0.030820489895469996,
+        0.0027952616944589407
+      ],
+      "speckle_fraction": [
+        0.00015201224365962268,
+        0.001981895542716714,
+        0.000284839116336273
+      ],
+      "total_power_k2": [
+        0.08481073027842027,
+        0.4210235495139424,
+        0.026972999568744858
+      ],
+      "total_rms_k": [
+        0.2912228189521217,
+        0.6488632748999918,
+        0.1642345870051277
+      ],
+      "total_fraction": [
+        0.00037668078091285554,
+        0.8784318502204478,
+        0.983295222389375
+      ],
+      "off_power_k2": [
+        225.15279402598748,
+        0.4792899408284023,
+        0.02743123220226918
+      ],
+      "off_rms_k": [
+        15.00509226982585,
+        0.6923076923076923,
+        0.16562376702112888
+      ],
+      "off_fraction": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.0,
+        "center": 0.5,
+        "width": 0.15
+      },
+      "sigma_depth_rad_m2": 0.02,
+      "depth_order": 1,
+      "depth_error": 0.0,
+      "separation_error_estimate": 8.496708510583178e-18,
+      "min_real_covariance_eigenvalue": 0.0,
+      "numerical_refinements": {
+        "depth_smooth_max_fraction_shift": 0.0,
+        "depth_speckle_max_fraction_shift": 0.0,
+        "depth_total_max_fraction_shift": 0.0,
+        "depth_complex_covariance_max_shift": 0.0,
+        "depth_complex_relation_max_shift": 0.0,
+        "separation_smooth_max_fraction_shift": 0.0,
+        "separation_speckle_max_fraction_shift": 0.0,
+        "separation_total_max_fraction_shift": 0.0,
+        "separation_complex_covariance_max_shift": 0.0,
+        "separation_complex_relation_max_shift": 0.0
+      },
+      "smooth_power_k2": [
+        225.15279402598748,
+        0.4792899408284022,
+        0.02743123220226918
+      ],
+      "smooth_rms_k": [
+        15.00509226982585,
+        0.6923076923076922,
+        0.16562376702112888
+      ],
+      "smooth_fraction": [
+        1.0,
+        0.9999999999999998,
+        1.0
+      ],
+      "speckle_power_k2": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "speckle_rms_k": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "speckle_fraction": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_power_k2": [
+        225.15279402598748,
+        0.4792899408284022,
+        0.02743123220226918
+      ],
+      "total_rms_k": [
+        15.00509226982585,
+        0.6923076923076922,
+        0.16562376702112888
+      ],
+      "total_fraction": [
+        1.0,
+        0.9999999999999998,
+        1.0
+      ],
+      "off_power_k2": [
+        225.15279402598748,
+        0.4792899408284023,
+        0.02743123220226918
+      ],
+      "off_rms_k": [
+        15.00509226982585,
+        0.6923076923076923,
+        0.16562376702112888
+      ],
+      "off_fraction": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "profile": {
+        "kind": "screen",
+        "fraction": 0.6,
+        "center": 0.5,
+        "width": 0.15
+      },
+      "sigma_depth_rad_m2": 0.02,
+      "depth_order": 1,
+      "depth_error": 0.0,
+      "separation_error_estimate": 7.705589545026153e-15,
+      "min_real_covariance_eigenvalue": 6.85624097928816e-05,
+      "numerical_refinements": {
+        "depth_smooth_max_fraction_shift": 0.0,
+        "depth_speckle_max_fraction_shift": 0.0,
+        "depth_total_max_fraction_shift": 0.0,
+        "depth_complex_covariance_max_shift": 0.0,
+        "depth_complex_relation_max_shift": 0.0,
+        "separation_smooth_max_fraction_shift": 0.0,
+        "separation_speckle_max_fraction_shift": 0.0,
+        "separation_total_max_fraction_shift": 0.0,
+        "separation_complex_covariance_max_shift": 0.0,
+        "separation_complex_relation_max_shift": 0.0
+      },
+      "smooth_power_k2": [
+        1.9416458364166943e-200,
+        0.0015345365469882546,
+        0.013029940264223912
+      ],
+      "smooth_rms_k": [
+        1.3934295233045316e-100,
+        0.039173161054327166,
+        0.11414876374373886
+      ],
+      "smooth_fraction": [
+        8.623680842231017e-203,
+        0.0032016873634693214,
+        0.47500382659245044
+      ],
+      "speckle_power_k2": [
+        0.028741475233664302,
+        0.006087784329882333,
+        0.0006668084550705512
+      ],
+      "speckle_rms_k": [
+        0.16953310954991743,
+        0.07802425475377726,
+        0.025822634549374533
+      ],
+      "speckle_fraction": [
+        0.00012765320260847804,
+        0.012701673478396474,
+        0.024308366833604766
+      ],
+      "total_power_k2": [
+        0.028741475233664302,
+        0.0076223208768705876,
+        0.013696748719294462
+      ],
+      "total_rms_k": [
+        0.16953310954991743,
+        0.08730590402069374,
+        0.11703310950023699
+      ],
+      "total_fraction": [
+        0.00012765320260847804,
+        0.015903360841865794,
+        0.49931219342605515
+      ],
+      "off_power_k2": [
+        225.15279402598748,
+        0.4792899408284023,
+        0.02743123220226918
+      ],
+      "off_rms_k": [
+        15.00509226982585,
+        0.6923076923076923,
+        0.16562376702112888
+      ],
+      "off_fraction": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "profile": {
+        "kind": "screen",
+        "fraction": 1.0,
+        "center": 0.5,
+        "width": 0.15
+      },
+      "sigma_depth_rad_m2": 0.02,
+      "depth_order": 1,
+      "depth_error": 0.0,
+      "separation_error_estimate": 2.924169169909571e-14,
+      "min_real_covariance_eigenvalue": 0.00025492896885867273,
+      "numerical_refinements": {
+        "depth_smooth_max_fraction_shift": 0.0,
+        "depth_speckle_max_fraction_shift": 0.0,
+        "depth_total_max_fraction_shift": 0.0,
+        "depth_complex_covariance_max_shift": 0.0,
+        "depth_complex_relation_max_shift": 0.0,
+        "separation_smooth_max_fraction_shift": 0.0,
+        "separation_speckle_max_fraction_shift": 0.0,
+        "separation_total_max_fraction_shift": 0.0,
+        "separation_complex_covariance_max_shift": 0.0,
+        "separation_complex_relation_max_shift": 0.0
+      },
+      "smooth_power_k2": [
+        0.0,
+        5.637613774160103e-08,
+        0.0034688197107309022
+      ],
+      "smooth_rms_k": [
+        0.0,
+        0.00023743659730884165,
+        0.05889668675512148
+      ],
+      "smooth_fraction": [
+        0.0,
+        1.1762428738679723e-07,
+        0.12645511820806768
+      ],
+      "speckle_power_k2": [
+        0.0103334928308876,
+        0.0019014592187748995,
+        0.000770172804193484
+      ],
+      "speckle_rms_k": [
+        0.10165378906311166,
+        0.043605724610134615,
+        0.027751987391779424
+      ],
+      "speckle_fraction": [
+        4.5895467900322356e-05,
+        0.003967242073740223,
+        0.028076493192667203
+      ],
+      "total_power_k2": [
+        0.0103334928308876,
+        0.0019015155949126412,
+        0.004238992514924387
+      ],
+      "total_rms_k": [
+        0.10165378906311166,
+        0.04360637103580899,
+        0.06510754576026029
+      ],
+      "total_fraction": [
+        4.5895467900322356e-05,
+        0.00396735969802761,
+        0.1545316114007349
+      ],
+      "off_power_k2": [
+        225.15279402598748,
+        0.4792899408284023,
+        0.02743123220226918
+      ],
+      "off_rms_k": [
+        15.00509226982585,
+        0.6923076923076923,
+        0.16562376702112888
+      ],
+      "off_fraction": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "profile": {
+        "kind": "slab",
+        "fraction": 1.0,
+        "center": 0.5,
+        "width": 0.15
+      },
+      "sigma_depth_rad_m2": 0.02,
+      "depth_order": 144,
+      "depth_error": 5.056855506627288e-15,
+      "separation_error_estimate": 5.1233914905810515e-14,
+      "min_real_covariance_eigenvalue": 1.7992277407215566e-05,
+      "numerical_refinements": {
+        "depth_smooth_max_fraction_shift": 5.10702591327572e-15,
+        "depth_speckle_max_fraction_shift": 5.39499001028787e-16,
+        "depth_total_max_fraction_shift": 5.440092820663267e-15,
+        "depth_complex_covariance_max_shift": 5.392848377499921e-16,
+        "depth_complex_relation_max_shift": 4.0756242728414756e-16,
+        "separation_smooth_max_fraction_shift": 0.0,
+        "separation_speckle_max_fraction_shift": 0.0,
+        "separation_total_max_fraction_shift": 0.0,
+        "separation_complex_covariance_max_shift": 1.405785563618963e-29,
+        "separation_complex_relation_max_shift": 0.0
+      },
+      "smooth_power_k2": [
+        0.2500364897839716,
+        0.0431139514425603,
+        0.01447177791147774
+      ],
+      "smooth_rms_k": [
+        0.5000364884525644,
+        0.20763899306864378,
+        0.12029870286697916
+      ],
+      "smooth_fraction": [
+        0.0011105191515194432,
+        0.08995379992336656,
+        0.5275657252567968
+      ],
+      "speckle_power_k2": [
+        0.025502107572887272,
+        0.0033842557715522558,
+        0.000372749991653518
+      ],
+      "speckle_rms_k": [
+        0.1596937931570519,
+        0.05817435664923382,
+        0.019306734360153142
+      ],
+      "speckle_fraction": [
+        0.00011326578327934843,
+        0.007060978091263349,
+        0.013588525258543916
+      ],
+      "total_power_k2": [
+        0.27553859735685887,
+        0.046498207214112554,
+        0.014844527903131259
+      ],
+      "total_rms_k": [
+        0.5249177053185183,
+        0.21563442956567153,
+        0.12183812171537797
+      ],
+      "total_fraction": [
+        0.0012237849347987917,
+        0.0970147780146299,
+        0.5411542505153407
+      ],
+      "off_power_k2": [
+        225.15279402598748,
+        0.4792899408284023,
+        0.02743123220226918
+      ],
+      "off_rms_k": [
+        15.00509226982585,
+        0.6923076923076923,
+        0.16562376702112888
+      ],
+      "off_fraction": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "profile": {
+        "kind": "gaussian",
+        "fraction": 1.0,
+        "center": 0.5,
+        "width": 0.15
+      },
+      "sigma_depth_rad_m2": 0.02,
+      "depth_order": 72,
+      "depth_error": 9.694605782913356e-16,
+      "separation_error_estimate": 1.0658243771220169e-14,
+      "min_real_covariance_eigenvalue": 2.0371362271965873e-05,
+      "numerical_refinements": {
+        "depth_smooth_max_fraction_shift": 7.771561172376096e-16,
+        "depth_speckle_max_fraction_shift": 6.938893903907228e-17,
+        "depth_total_max_fraction_shift": 8.881784197001252e-16,
+        "depth_complex_covariance_max_shift": 6.87678659775885e-17,
+        "depth_complex_relation_max_shift": 3.192678699248184e-17,
+        "separation_smooth_max_fraction_shift": 0.0,
+        "separation_speckle_max_fraction_shift": 0.0,
+        "separation_total_max_fraction_shift": 0.0,
+        "separation_complex_covariance_max_shift": 0.0,
+        "separation_complex_relation_max_shift": 0.0
+      },
+      "smooth_power_k2": [
+        7.595542132741019e-05,
+        0.01751428706172357,
+        0.015822502518106494
+      ],
+      "smooth_rms_k": [
+        0.008715240749824998,
+        0.132341554553827,
+        0.12578752926306525
+      ],
+      "smooth_fraction": [
+        3.3735056078692633e-07,
+        0.03654215448680597,
+        0.5768061165257322
+      ],
+      "speckle_power_k2": [
+        0.005668830360734192,
+        0.006695785875415639,
+        0.0004897146288802613
+      ],
+      "speckle_rms_k": [
+        0.07529163539686326,
+        0.0818277818067656,
+        0.02212949680585307
+      ],
+      "speckle_fraction": [
+        2.517770381334858e-05,
+        0.013970219912904237,
+        0.017852447358881342
+      ],
+      "total_power_k2": [
+        0.005744785782061603,
+        0.02421007293713921,
+        0.016312217146986756
+      ],
+      "total_rms_k": [
+        0.07579436510758304,
+        0.1555958641389263,
+        0.12771929042625768
+      ],
+      "total_fraction": [
+        2.5515054374135506e-05,
+        0.05051237439971021,
+        0.5946585638846136
+      ],
+      "off_power_k2": [
+        225.15279402598748,
+        0.4792899408284023,
+        0.02743123220226918
+      ],
+      "off_rms_k": [
+        15.00509226982585,
+        0.6923076923076923,
+        0.16562376702112888
+      ],
+      "off_fraction": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "array_sha256": {
+    "generated_data/cache/depth_depolarization/de355825d0c040ab074f41e77c779113c27caaa94ea129c1caad06fa5f6ed075/sigma0.002_profile0.npz": "0ef90761fd2f3e34409cd799e8ca55118601dc5ea4b8d4cf9bd34dba24b4bde8",
+    "generated_data/cache/depth_depolarization/de355825d0c040ab074f41e77c779113c27caaa94ea129c1caad06fa5f6ed075/sigma0.002_profile1.npz": "4110beec625d46628108e46092287f61bde42d7bb893a3c448ad1a19fa15e6fa",
+    "generated_data/cache/depth_depolarization/de355825d0c040ab074f41e77c779113c27caaa94ea129c1caad06fa5f6ed075/sigma0.002_profile2.npz": "4a22a66bbdc0c41a5a5d77a360c462c772709cad9dcd9a25c84773d3a1603b7d",
+    "generated_data/cache/depth_depolarization/de355825d0c040ab074f41e77c779113c27caaa94ea129c1caad06fa5f6ed075/sigma0.002_profile3.npz": "d7b02b4ae85e13bd5a29d7d1820d7ad6f5e26f42ae1a59540968f3b73aa45e4d",
+    "generated_data/cache/depth_depolarization/de355825d0c040ab074f41e77c779113c27caaa94ea129c1caad06fa5f6ed075/sigma0.002_profile4.npz": "73b6a15be9b0e26cdc8e432e378fe9be5f1898a6c1c2cd19e3cbc3bae8a12dbf",
+    "generated_data/cache/depth_depolarization/de355825d0c040ab074f41e77c779113c27caaa94ea129c1caad06fa5f6ed075/sigma0.02_profile0.npz": "0ef90761fd2f3e34409cd799e8ca55118601dc5ea4b8d4cf9bd34dba24b4bde8",
+    "generated_data/cache/depth_depolarization/de355825d0c040ab074f41e77c779113c27caaa94ea129c1caad06fa5f6ed075/sigma0.02_profile1.npz": "33626fed1d87afeb77d9c9165b446e628dda7176643618fceda619ba557aacea",
+    "generated_data/cache/depth_depolarization/de355825d0c040ab074f41e77c779113c27caaa94ea129c1caad06fa5f6ed075/sigma0.02_profile2.npz": "dfe80ff13d32b9aaabe397ab36c123850a236f78f69fcc48f3eefb51f30749d8",
+    "generated_data/cache/depth_depolarization/de355825d0c040ab074f41e77c779113c27caaa94ea129c1caad06fa5f6ed075/sigma0.02_profile3.npz": "9c077e0be9481cad13de32ff5a2073c7e0789ee6855ab7be36a1c3604c1944f4",
+    "generated_data/cache/depth_depolarization/de355825d0c040ab074f41e77c779113c27caaa94ea129c1caad06fa5f6ed075/sigma0.02_profile4.npz": "13d15def8f2cd479cdc99e77361a0d9b01f68ff1db65ca3d73b8a9cf102d1951"
+  },
+  "freqs_mhz": [
+    10.0,
+    30.0,
+    50.0
+  ],
+  "scope": "Conditional flat-plane depth-profile benchmark; not a Galactic or LuSEE sensitivity prediction.",
+  "validation_scope": "Analytic/independent moments and quadrature checks; no real beam, channelization, loading, leakage or noise."
+}

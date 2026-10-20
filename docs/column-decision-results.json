@@ -1,0 +1,605 @@
+{
+  "fingerprint": "99898c35724ca0e3c4bb8e3799eb33a825dcf7fec9617ab3468dafd53a976c21",
+  "provenance": {
+    "configuration": {
+      "receiver": [
+        3.0,
+        0.1
+      ],
+      "lunations": [
+        1,
+        12,
+        24,
+        48
+      ],
+      "wmap_rms_30": 12570.0,
+      "phases_independent": 10,
+      "scope": "Column-screen speckle at the WMAP-K polarized brightness (all scales, WMAP noise included) against the loaded radiometer noise of the measured-system reference receiver at one sidereal phase; 12 and 48 lunations scale the 24-lunation actual-site exposure. Conditional on the column screen, the structure-function family and the intrinsic sky."
+    },
+    "sources": {
+      "scripts/column_decision.py": "1ee32907b5f611731fd4884de611b6fa33c888f8c7c0f16b3c08d620192df754"
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "2.4.2",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+      },
+      "scipy": {
+        "version": "1.17.1",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+      },
+      "lusee": {
+        "version": "2.1.dev0",
+        "path": "/home/christian/Documents/research/lusee/luseepy/lusee/__init__.py",
+        "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef"
+      },
+      "croissant-sim": {
+        "version": "5.2.1",
+        "path": "/home/christian/Documents/projects/croissant/src/croissant/__init__.py",
+        "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c"
+      }
+    }
+  },
+  "results": [
+    {
+      "center_mhz": 30.0,
+      "label": "column screen alpha=2 dphi1=0.3",
+      "speckle_rms_parent_k": 1.1157067572710697,
+      "speckle_rms_zoom_k": 1.3610336559114378,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 2.196716479008598,
+          "noise_rms_zoom_k": 13.648095283274085,
+          "speckle_over_noise_parent": 0.5078974769536942,
+          "speckle_over_noise_zoom": 0.09972334070523393,
+          "variance_excess_sigma": 0.3081266442671529
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 0.8302807863391699,
+          "noise_rms_zoom_k": 5.158495141322409,
+          "speckle_over_noise_parent": 1.3437704155366341,
+          "speckle_over_noise_zoom": 0.26384315941461356,
+          "variance_excess_sigma": 2.1568865098700702
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 0.5870971743093261,
+          "noise_rms_zoom_k": 3.6476068951469336,
+          "speckle_over_noise_parent": 1.9003783463676376,
+          "speckle_over_noise_zoom": 0.373130574383513,
+          "variance_excess_sigma": 4.31377301974014
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 0.41514039316958495,
+          "noise_rms_zoom_k": 2.5792475706612046,
+          "speckle_over_noise_parent": 2.6875408310732682,
+          "speckle_over_noise_zoom": 0.5276863188292271,
+          "variance_excess_sigma": 8.627546039480281
+        }
+      }
+    },
+    {
+      "center_mhz": 30.0,
+      "label": "column screen alpha=2 dphi1=1",
+      "speckle_rms_parent_k": 0.33433203031210434,
+      "speckle_rms_zoom_k": 0.4078465443884569,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 2.196716479008598,
+          "noise_rms_zoom_k": 13.648095283274085,
+          "speckle_over_noise_parent": 0.1521962590561491,
+          "speckle_over_noise_zoom": 0.02988303759047448,
+          "variance_excess_sigma": 0.02766846709552218
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 0.8302807863391699,
+          "noise_rms_zoom_k": 5.158495141322409,
+          "speckle_over_noise_parent": 0.4026734519369326,
+          "speckle_over_noise_zoom": 0.0790630858835903,
+          "variance_excess_sigma": 0.19367926966865526
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 0.5870971743093261,
+          "noise_rms_zoom_k": 3.6476068951469336,
+          "speckle_over_noise_parent": 0.5694662569368008,
+          "speckle_over_noise_zoom": 0.1118120883396422,
+          "variance_excess_sigma": 0.38735853933731046
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 0.41514039316958495,
+          "noise_rms_zoom_k": 2.5792475706612046,
+          "speckle_over_noise_parent": 0.8053469038738652,
+          "speckle_over_noise_zoom": 0.1581261717671806,
+          "variance_excess_sigma": 0.774717078674621
+        }
+      }
+    },
+    {
+      "center_mhz": 30.0,
+      "label": "column screen alpha=2 dphi1=3",
+      "speckle_rms_parent_k": 0.11031153203978929,
+      "speckle_rms_zoom_k": 0.13456735541199713,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 2.196716479008598,
+          "noise_rms_zoom_k": 13.648095283274085,
+          "speckle_over_noise_parent": 0.05021655415885717,
+          "speckle_over_noise_zoom": 0.009859790147927172,
+          "variance_excess_sigma": 0.003012110915158747
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 0.8302807863391699,
+          "noise_rms_zoom_k": 5.158495141322409,
+          "speckle_over_noise_parent": 0.13286051400294238,
+          "speckle_over_noise_zoom": 0.02608655271070005,
+          "variance_excess_sigma": 0.021084776406111227
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 0.5870971743093261,
+          "noise_rms_zoom_k": 3.6476068951469336,
+          "speckle_over_noise_parent": 0.1878931408068216,
+          "speckle_over_noise_zoom": 0.036891956639032636,
+          "variance_excess_sigma": 0.042169552812222455
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 0.41514039316958495,
+          "noise_rms_zoom_k": 2.5792475706612046,
+          "speckle_over_noise_parent": 0.26572102800588476,
+          "speckle_over_noise_zoom": 0.0521731054214001,
+          "variance_excess_sigma": 0.08433910562444491
+        }
+      }
+    },
+    {
+      "center_mhz": 30.0,
+      "label": "column screen alpha=5/3 dphi1=0.3",
+      "speckle_rms_parent_k": 0.5535878336185545,
+      "speckle_rms_zoom_k": 0.6753133414109668,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 2.196716479008598,
+          "noise_rms_zoom_k": 13.648095283274085,
+          "speckle_over_noise_parent": 0.2520069562497181,
+          "speckle_over_noise_zoom": 0.04948040934609915,
+          "variance_excess_sigma": 0.07585813901694224
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 0.8302807863391699,
+          "noise_rms_zoom_k": 5.158495141322409,
+          "speckle_over_noise_parent": 0.6667477348950884,
+          "speckle_over_noise_zoom": 0.13091285789945445,
+          "variance_excess_sigma": 0.5310069731185957
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 0.5870971743093261,
+          "noise_rms_zoom_k": 3.6476068951469336,
+          "speckle_over_noise_parent": 0.942923689370175,
+          "speckle_over_noise_zoom": 0.18513873913043025,
+          "variance_excess_sigma": 1.0620139462371911
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 0.41514039316958495,
+          "noise_rms_zoom_k": 2.5792475706612046,
+          "speckle_over_noise_parent": 1.3334954697901769,
+          "speckle_over_noise_zoom": 0.2618257157989089,
+          "variance_excess_sigma": 2.1240278924743827
+        }
+      }
+    },
+    {
+      "center_mhz": 30.0,
+      "label": "column screen alpha=5/3 dphi1=1",
+      "speckle_rms_parent_k": 0.13035822726736507,
+      "speckle_rms_zoom_k": 0.15902201004113395,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 2.196716479008598,
+          "noise_rms_zoom_k": 13.648095283274085,
+          "speckle_over_noise_parent": 0.05934230862883004,
+          "speckle_over_noise_zoom": 0.011651589964792923,
+          "variance_excess_sigma": 0.004206355769867312
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 0.8302807863391699,
+          "noise_rms_zoom_k": 5.158495141322409,
+          "speckle_over_noise_parent": 0.15700499085632663,
+          "speckle_over_noise_zoom": 0.0308272094253379,
+          "variance_excess_sigma": 0.029444490389071185
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 0.5870971743093261,
+          "noise_rms_zoom_k": 3.6476068951469336,
+          "speckle_over_noise_parent": 0.2220385874292809,
+          "speckle_over_noise_zoom": 0.04359625765942857,
+          "variance_excess_sigma": 0.05888898077814237
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 0.41514039316958495,
+          "noise_rms_zoom_k": 2.5792475706612046,
+          "speckle_over_noise_parent": 0.31400998171265326,
+          "speckle_over_noise_zoom": 0.0616544188506758,
+          "variance_excess_sigma": 0.11777796155628474
+        }
+      }
+    },
+    {
+      "center_mhz": 30.0,
+      "label": "column screen alpha=5/3 dphi1=3",
+      "speckle_rms_parent_k": 0.03445639228757681,
+      "speckle_rms_zoom_k": 0.042032826582538596,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 2.196716479008598,
+          "noise_rms_zoom_k": 13.648095283274085,
+          "speckle_over_noise_parent": 0.015685407114133982,
+          "speckle_over_noise_zoom": 0.0030797577031903027,
+          "variance_excess_sigma": 0.0002938791106235357
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 0.8302807863391699,
+          "noise_rms_zoom_k": 5.158495141322409,
+          "speckle_over_noise_parent": 0.04149968643680184,
+          "speckle_over_noise_zoom": 0.008148272980977015,
+          "variance_excess_sigma": 0.0020571537743647498
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 0.5870971743093261,
+          "noise_rms_zoom_k": 3.6476068951469336,
+          "speckle_over_noise_parent": 0.05868941939315594,
+          "speckle_over_noise_zoom": 0.011523398159615943,
+          "variance_excess_sigma": 0.0041143075487294995
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 0.41514039316958495,
+          "noise_rms_zoom_k": 2.5792475706612046,
+          "speckle_over_noise_parent": 0.08299937287360368,
+          "speckle_over_noise_zoom": 0.01629654596195403,
+          "variance_excess_sigma": 0.008228615097458999
+        }
+      }
+    },
+    {
+      "center_mhz": 30.0,
+      "label": "column screen alpha=1 dphi1=1",
+      "speckle_rms_parent_k": 0.0033437625368433256,
+      "speckle_rms_zoom_k": 0.004079004788113175,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 2.196716479008598,
+          "noise_rms_zoom_k": 13.648095283274085,
+          "speckle_over_noise_parent": 0.0015221639063555446,
+          "speckle_over_noise_zoom": 0.0002988698938167619,
+          "variance_excess_sigma": 2.767578544354284e-06
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 0.8302807863391699,
+          "noise_rms_zoom_k": 5.158495141322409,
+          "speckle_over_noise_parent": 0.004027267150895381,
+          "speckle_over_noise_zoom": 0.0007907354134034329,
+          "variance_excess_sigma": 1.937304981047999e-05
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 0.5870971743093261,
+          "noise_rms_zoom_k": 3.6476068951469336,
+          "speckle_over_noise_parent": 0.0056954158240959014,
+          "speckle_over_noise_zoom": 0.0011182687458838308,
+          "variance_excess_sigma": 3.874609962095998e-05
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 0.41514039316958495,
+          "noise_rms_zoom_k": 2.5792475706612046,
+          "speckle_over_noise_parent": 0.008054534301790763,
+          "speckle_over_noise_zoom": 0.0015814708268068658,
+          "variance_excess_sigma": 7.749219924191996e-05
+        }
+      }
+    },
+    {
+      "center_mhz": 50.0,
+      "label": "column screen alpha=2 dphi1=0.3",
+      "speckle_rms_parent_k": 0.3085048341308488,
+      "speckle_rms_zoom_k": 0.31098852669978855,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 5.475540651821198,
+          "noise_rms_zoom_k": 34.031666644581655,
+          "speckle_over_noise_parent": 0.05634235114814428,
+          "speckle_over_noise_zoom": 0.00913821030123726,
+          "variance_excess_sigma": 0.002587366276947577
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 2.0695598369062,
+          "noise_rms_zoom_k": 12.862760948945,
+          "speckle_over_noise_parent": 0.14906784941866427,
+          "speckle_over_noise_zoom": 0.02417743188528243,
+          "variance_excess_sigma": 0.018111563938633043
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 1.4633997947476993,
+          "noise_rms_zoom_k": 9.095345491780522,
+          "speckle_over_noise_parent": 0.2108137743616653,
+          "speckle_over_noise_zoom": 0.03419205207551812,
+          "variance_excess_sigma": 0.03622312787726609
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 1.0347799184531,
+          "noise_rms_zoom_k": 6.4313804744725,
+          "speckle_over_noise_parent": 0.29813569883732854,
+          "speckle_over_noise_zoom": 0.04835486377056486,
+          "variance_excess_sigma": 0.07244625575453217
+        }
+      }
+    },
+    {
+      "center_mhz": 50.0,
+      "label": "column screen alpha=2 dphi1=1",
+      "speckle_rms_parent_k": 0.09244763326058685,
+      "speckle_rms_zoom_k": 0.09319190522766442,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 5.475540651821198,
+          "noise_rms_zoom_k": 34.031666644581655,
+          "speckle_over_noise_parent": 0.016883745211504948,
+          "speckle_over_noise_zoom": 0.0027383879314797515,
+          "variance_excess_sigma": 0.0002323408430026032
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 2.0695598369062,
+          "noise_rms_zoom_k": 12.862760948945,
+          "speckle_over_noise_parent": 0.04467019102901972,
+          "speckle_over_noise_zoom": 0.007245093459916006,
+          "variance_excess_sigma": 0.0016263859010182229
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 1.4633997947476993,
+          "noise_rms_zoom_k": 9.095345491780522,
+          "speckle_over_noise_parent": 0.06317318998703665,
+          "speckle_over_noise_zoom": 0.010246109431673827,
+          "variance_excess_sigma": 0.0032527718020364453
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 1.0347799184531,
+          "noise_rms_zoom_k": 6.4313804744725,
+          "speckle_over_noise_parent": 0.08934038205803944,
+          "speckle_over_noise_zoom": 0.014490186919832011,
+          "variance_excess_sigma": 0.0065055436040728915
+        }
+      }
+    },
+    {
+      "center_mhz": 50.0,
+      "label": "column screen alpha=2 dphi1=3",
+      "speckle_rms_parent_k": 0.03050276766286219,
+      "speckle_rms_zoom_k": 0.03074833755025788,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 5.475540651821198,
+          "noise_rms_zoom_k": 34.031666644581655,
+          "speckle_over_noise_parent": 0.005570731659661185,
+          "speckle_over_noise_zoom": 0.0009035213547248786,
+          "variance_excess_sigma": 2.5293705615644866e-05
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 2.0695598369062,
+          "noise_rms_zoom_k": 12.862760948945,
+          "speckle_over_noise_parent": 0.014738770592137601,
+          "speckle_over_noise_zoom": 0.0023904928088382027,
+          "variance_excess_sigma": 0.00017705593930951409
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 1.4633997947476993,
+          "noise_rms_zoom_k": 9.095345491780522,
+          "speckle_over_noise_parent": 0.020843769264106728,
+          "speckle_over_noise_zoom": 0.0033806673510143404,
+          "variance_excess_sigma": 0.0003541118786190281
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 1.0347799184531,
+          "noise_rms_zoom_k": 6.4313804744725,
+          "speckle_over_noise_parent": 0.029477541184275202,
+          "speckle_over_noise_zoom": 0.004780985617676405,
+          "variance_excess_sigma": 0.0007082237572380563
+        }
+      }
+    },
+    {
+      "center_mhz": 50.0,
+      "label": "column screen alpha=5/3 dphi1=0.3",
+      "speckle_rms_parent_k": 0.18777652193460592,
+      "speckle_rms_zoom_k": 0.18928826138231444,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 5.475540651821198,
+          "noise_rms_zoom_k": 34.031666644581655,
+          "speckle_over_noise_parent": 0.03429369515723535,
+          "speckle_over_noise_zoom": 0.005562121401787177,
+          "variance_excess_sigma": 0.0009585539122500151
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 2.0695598369062,
+          "noise_rms_zoom_k": 12.862760948945,
+          "speckle_over_noise_parent": 0.09073258892350483,
+          "speckle_over_noise_zoom": 0.014715989991078844,
+          "variance_excess_sigma": 0.0067098773857501084
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 1.4633997947476993,
+          "noise_rms_zoom_k": 9.095345491780522,
+          "speckle_over_noise_parent": 0.12831525780484337,
+          "speckle_over_noise_zoom": 0.020811552629130422,
+          "variance_excess_sigma": 0.013419754771500213
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 1.0347799184531,
+          "noise_rms_zoom_k": 6.4313804744725,
+          "speckle_over_noise_parent": 0.18146517784700966,
+          "speckle_over_noise_zoom": 0.02943197998215769,
+          "variance_excess_sigma": 0.026839509543000434
+        }
+      }
+    },
+    {
+      "center_mhz": 50.0,
+      "label": "column screen alpha=5/3 dphi1=1",
+      "speckle_rms_parent_k": 0.04421771244494877,
+      "speckle_rms_zoom_k": 0.044573697631520345,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 5.475540651821198,
+          "noise_rms_zoom_k": 34.031666644581655,
+          "speckle_over_noise_parent": 0.008075497061690463,
+          "speckle_over_noise_zoom": 0.0013097712226978792,
+          "variance_excess_sigma": 5.315284376280272e-05
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 2.0695598369062,
+          "noise_rms_zoom_k": 12.862760948945,
+          "speckle_over_noise_parent": 0.02136575693846579,
+          "speckle_over_noise_zoom": 0.003465328929647586,
+          "variance_excess_sigma": 0.00037206990633961907
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 1.4633997947476993,
+          "noise_rms_zoom_k": 9.095345491780522,
+          "speckle_over_noise_parent": 0.03021574323274538,
+          "speckle_over_noise_zoom": 0.004900715170391456,
+          "variance_excess_sigma": 0.0007441398126792379
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 1.0347799184531,
+          "noise_rms_zoom_k": 6.4313804744725,
+          "speckle_over_noise_parent": 0.04273151387693158,
+          "speckle_over_noise_zoom": 0.006930657859295172,
+          "variance_excess_sigma": 0.0014882796253584763
+        }
+      }
+    },
+    {
+      "center_mhz": 50.0,
+      "label": "column screen alpha=5/3 dphi1=3",
+      "speckle_rms_parent_k": 0.011687666106013033,
+      "speckle_rms_zoom_k": 0.011781760435395843,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 5.475540651821198,
+          "noise_rms_zoom_k": 34.031666644581655,
+          "speckle_over_noise_parent": 0.002134522752949637,
+          "speckle_over_noise_zoom": 0.0003461999248653217,
+          "variance_excess_sigma": 3.7135523888308178e-06
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 2.0695598369062,
+          "noise_rms_zoom_k": 12.862760948945,
+          "speckle_over_noise_parent": 0.005647416372113701,
+          "speckle_over_noise_zoom": 0.0009159589051028876,
+          "variance_excess_sigma": 2.5994866721815722e-05
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 1.4633997947476993,
+          "noise_rms_zoom_k": 9.095345491780522,
+          "speckle_over_noise_parent": 0.007986652825811057,
+          "speckle_over_noise_zoom": 0.0012953615061729142,
+          "variance_excess_sigma": 5.198973344363143e-05
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 1.0347799184531,
+          "noise_rms_zoom_k": 6.4313804744725,
+          "speckle_over_noise_parent": 0.011294832744227401,
+          "speckle_over_noise_zoom": 0.0018319178102057753,
+          "variance_excess_sigma": 0.00010397946688726289
+        }
+      }
+    },
+    {
+      "center_mhz": 50.0,
+      "label": "column screen alpha=1 dphi1=1",
+      "speckle_rms_parent_k": 0.0025683369226753073,
+      "speckle_rms_zoom_k": 0.0025890139539536793,
+      "exposures": {
+        "1": {
+          "exposure_s": 1152.6325734375,
+          "noise_rms_parent_k": 5.475540651821198,
+          "noise_rms_zoom_k": 34.031666644581655,
+          "speckle_over_noise_parent": 0.0004690563153468804,
+          "speckle_over_noise_zoom": 7.607661361380573e-05,
+          "variance_excess_sigma": 1.7932381179831704e-07
+        },
+        "12": {
+          "exposure_s": 8068.428014062501,
+          "noise_rms_parent_k": 2.0695598369062,
+          "noise_rms_zoom_k": 12.862760948945,
+          "speckle_over_noise_parent": 0.0012410063612921349,
+          "speckle_over_noise_zoom": 0.00020127980021008082,
+          "variance_excess_sigma": 1.2552666825882196e-06
+        },
+        "24": {
+          "exposure_s": 16136.856028125,
+          "noise_rms_parent_k": 1.4633997947476993,
+          "noise_rms_zoom_k": 9.095345491780522,
+          "speckle_over_noise_parent": 0.0017550480271306223,
+          "speckle_over_noise_zoom": 0.0002846526232888432,
+          "variance_excess_sigma": 2.510533365176439e-06
+        },
+        "48": {
+          "exposure_s": 32273.712056250002,
+          "noise_rms_parent_k": 1.0347799184531,
+          "noise_rms_zoom_k": 6.4313804744725,
+          "speckle_over_noise_parent": 0.0024820127225842698,
+          "speckle_over_noise_zoom": 0.00040255960042016165,
+          "variance_excess_sigma": 5.0210667303528785e-06
+        }
+      }
+    }
+  ]
+}

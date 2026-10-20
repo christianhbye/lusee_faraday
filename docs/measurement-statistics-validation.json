@@ -1,0 +1,50 @@
+{
+  "tests_passed": 3,
+  "fault_checks": {
+    "faults": [
+      {
+        "fault": "count correlated channels as independent",
+        "source": "src/lusee_faraday/measurement_statistics.py",
+        "test": "tests/test_measurement_statistics.py::test_power_uncertainty_matches_exact_gaussian_fourth_moments",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "e488e2ba44c56d87a450e1a9dbe9576bb695dcd101314286294567ff2a7d0717"
+      },
+      {
+        "fault": "add repeat noise amplitudes instead of variances",
+        "source": "src/lusee_faraday/measurement_statistics.py",
+        "test": "tests/test_measurement_statistics.py::test_repeat_difference_cancels_fixed_sky_and_adds_independent_noise",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "c9e6d9e682088d34481f16e650ccb00383bb7e4eba6c62de8d34988dc10f6937"
+      },
+      {
+        "fault": "accept negative variance",
+        "source": "src/lusee_faraday/measurement_statistics.py",
+        "test": "tests/test_measurement_statistics.py::test_invalid_statistics_covariance_is_rejected",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "9caaa8236c5180971af1679f445f95228a90db9f0430bd9f6743667b00cd0b3f"
+      },
+      {
+        "fault": "silently discard complex covariance",
+        "source": "src/lusee_faraday/measurement_statistics.py",
+        "test": "tests/test_measurement_statistics.py::test_invalid_statistics_covariance_is_rejected",
+        "caught": true,
+        "returncode": 1,
+        "log_sha256": "5b5486031e93eff20db727118d5fbe7d5d62bea363f7bd8c17f95c4a929d309d"
+      }
+    ],
+    "all_caught": true,
+    "source_sha256": {
+      "src/lusee_faraday/measurement_statistics.py": "f30937309b5b617e9ba9bbd689b2b242853f25026ed003585dd84f60780c0233"
+    },
+    "test_sha256": {
+      "tests/test_measurement_statistics.py": "947c61d0e245eab8b8da2ebfed077f6e3722d655e67da0c16101aae0816f7c9f"
+    },
+    "runner_sha256": "2752e64ead5590dbc4e7f9a5b07a34f57c11fa86ffe1a8c90188aad02b616d8b",
+    "helper_sha256": "8fe9fcca6654b373b8d72ca0914c1079fcba935bb1f4a198957b7ff8456704a5"
+  },
+  "test_log_sha256": "35a1d58c48b74e0e3e7b158b5545a9552f2371583edfef1ea0d022c59f5a0a1c",
+  "scope": "Full real-Gaussian power sampling variance with correlated bins and nonzero means; complex covariance/means are rejected rather than silently dropping their imaginary part. Independent repeats retain one sky and add noise variances."
+}

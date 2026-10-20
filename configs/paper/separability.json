@@ -1,0 +1,18 @@
+{
+  "mixed_config": "configs/paper/mixed-depth.json",
+  "mixed_record": "docs/mixed-depth-results.json",
+  "leakage_config": "configs/paper/leakage.json",
+  "leakage_record": "docs/chromatic-leakage-results.json",
+  "noise_config": "configs/paper/receiver-noise.json",
+  "exposure_record": "docs/observing-exposure.json",
+  "smooth_degree": 1,
+  "fit_weights": "uniform, no flags",
+  "variance_mixture_scales": [0.5, 1.5],
+  "variance_mixture_weights": [0.5, 0.5],
+  "seed": 20261017,
+  "figure_profile_index": 3,
+  "figure_screen_index": 1,
+  "figure_phase_index": 0,
+  "figure_lunations": 24,
+  "scope": "Conditional examples at 1 K intrinsic polarization RMS at 30 MHz, with assumed local columns and angular statistics. Linear and PCHIP native-beam interpolants define a model comparison, not a measured fine-channel response. Gaussian visibility illustrations retain the complex relation and both sidereal phases. No detection significance is inferred."
+}

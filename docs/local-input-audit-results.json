@@ -1,0 +1,197 @@
+{
+  "fingerprint": "a1513cbd44e68f89ff074dfdfac80db065575bb454abe2046c0c598bcba8c4f2",
+  "provenance": {
+    "configuration": {
+      "pulsar": {
+        "name": "J0437-4715",
+        "distance_pc": 156.96,
+        "dm_pc_cm3": 2.64,
+        "historical_rm_rad_m2": -0.6,
+        "sources": [
+          "https://arxiv.org/pdf/1105.4213",
+          "https://arxiv.org/html/2410.21390v2"
+        ],
+        "status": "Historical DM/RM and a modern timing distance; illustrative path averages only. No local angular screen variance is inferred."
+      },
+      "emissivity": {
+        "reference_mhz": 74.0,
+        "total_intensity_k_per_pc": [
+          0.53,
+          1.52,
+          2.51
+        ],
+        "spectral_index": -2.7,
+        "assumed_polarized_fractions": [
+          0.0,
+          0.1,
+          0.7
+        ],
+        "source": "https://arxiv.org/html/1811.10310v1",
+        "status": "Mean and +/-1 quoted scatter for HII foreground paths below 1 kpc; not a local polarized-emissivity posterior. Spectrum and polarization fractions are assumed."
+      },
+      "lunar_plasma": {
+        "density_cm3": [
+          0.1,
+          10.0,
+          1000.0
+        ],
+        "path_km": 100.0,
+        "aligned_field_nt": 100.0,
+        "source": "https://doi.org/10.1029/2011JA017141",
+        "status": "Explicit assumed density/field/path envelope. The source does not establish a universal nightside bound; transient and site-dependent plasma remain possible."
+      }
+    },
+    "sources": {
+      "scripts/local_input_audit.py": "3319f673a11441e5124d166b0cd65d8250d6e82d5af196e402278067eb5c75ae",
+      "scripts/paper_common.py": "2257dfa4993fc7f5c31675c8530a61547d323c4dec7429b1ab9dacf8bf5f0b92",
+      "src/lusee_faraday/conventions.py": "4ce2c3ae851cdff6f21b6085dd96fbd8b4347fd16f6078390916cb4d21b46bbd",
+      "src/lusee_faraday/faraday_horizon.py": "2cfa010e3ba3df54a4a3310b7bd29d1e2efa9d6d7620b8e58110622abc0f8c95"
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "2.4.2",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+      },
+      "scipy": {
+        "version": "1.17.1",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+      },
+      "lusee": {
+        "version": "2.1.dev0",
+        "path": "/home/christian/Documents/research/lusee/luseepy/lusee/__init__.py",
+        "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef"
+      },
+      "croissant-sim": {
+        "version": "5.2.1",
+        "path": "/home/christian/Documents/projects/croissant/src/croissant/__init__.py",
+        "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c"
+      }
+    }
+  },
+  "frequencies_mhz": [
+    10.0,
+    30.0,
+    50.0
+  ],
+  "path_average_ne_cm3": 0.016819571865443424,
+  "historical_path_average_field_ug": -0.2799265946110655,
+  "lunar_plasma": [
+    {
+      "density_cm3": 0.1,
+      "path_pc": 3.240779289444365e-12,
+      "field_ug": 1000.0,
+      "faraday_bound_rad_m2": 2.6311924689554896e-10,
+      "complex_polarization_phase_bound_rad": [
+        4.729595715454119e-07,
+        5.255106350504576e-08,
+        1.8918382861816475e-08
+      ]
+    },
+    {
+      "density_cm3": 10.0,
+      "path_pc": 3.240779289444365e-12,
+      "field_ug": 1000.0,
+      "faraday_bound_rad_m2": 2.6311924689554898e-08,
+      "complex_polarization_phase_bound_rad": [
+        4.72959571545412e-05,
+        5.255106350504576e-06,
+        1.8918382861816477e-06
+      ]
+    },
+    {
+      "density_cm3": 1000.0,
+      "path_pc": 3.240779289444365e-12,
+      "field_ug": 1000.0,
+      "faraday_bound_rad_m2": 2.63119246895549e-06,
+      "complex_polarization_phase_bound_rad": [
+        0.00472959571545412,
+        0.0005255106350504577,
+        0.0001891838286181648
+      ]
+    }
+  ],
+  "emissivity": [
+    {
+      "total_intensity_at_ref_k_per_pc": 0.53,
+      "assumed_polarized_fraction": 0.0,
+      "polarized_emissivity_k_per_pc": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "total_intensity_at_ref_k_per_pc": 0.53,
+      "assumed_polarized_fraction": 0.1,
+      "polarized_emissivity_k_per_pc": [
+        11.781525101160815,
+        0.6067001818688533,
+        0.15275045099438112
+      ]
+    },
+    {
+      "total_intensity_at_ref_k_per_pc": 0.53,
+      "assumed_polarized_fraction": 0.7,
+      "polarized_emissivity_k_per_pc": [
+        82.4706757081257,
+        4.246901273081973,
+        1.0692531569606676
+      ]
+    },
+    {
+      "total_intensity_at_ref_k_per_pc": 1.52,
+      "assumed_polarized_fraction": 0.0,
+      "polarized_emissivity_k_per_pc": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "total_intensity_at_ref_k_per_pc": 1.52,
+      "assumed_polarized_fraction": 0.1,
+      "polarized_emissivity_k_per_pc": [
+        33.78852481842347,
+        1.7399703329069003,
+        0.43807676511596094
+      ]
+    },
+    {
+      "total_intensity_at_ref_k_per_pc": 1.52,
+      "assumed_polarized_fraction": 0.7,
+      "polarized_emissivity_k_per_pc": [
+        236.51967372896422,
+        12.179792330348299,
+        3.0665373558117257
+      ]
+    },
+    {
+      "total_intensity_at_ref_k_per_pc": 2.51,
+      "assumed_polarized_fraction": 0.0,
+      "polarized_emissivity_k_per_pc": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "total_intensity_at_ref_k_per_pc": 2.51,
+      "assumed_polarized_fraction": 0.1,
+      "polarized_emissivity_k_per_pc": [
+        55.79552453568612,
+        2.873240483944947,
+        0.7234030792375407
+      ]
+    },
+    {
+      "total_intensity_at_ref_k_per_pc": 2.51,
+      "assumed_polarized_fraction": 0.7,
+      "polarized_emissivity_k_per_pc": [
+        390.5686717498027,
+        20.112683387614624,
+        5.063821554662783
+      ]
+    }
+  ],
+  "scope": "Conditional unit-checked arithmetic. Historical pulsar path averages and kpc-scale total emissivity do not identify local polarized variance. Lunar envelope is assumed, not a measured universal nightside limit. No launch date is assumed."
+}

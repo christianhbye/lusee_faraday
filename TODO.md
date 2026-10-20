@@ -1,13 +1,21 @@
 # LuSEE Faraday work queue
 
-Updated 2026-10-17. **The paper framing is adopted: "how Faraday rotation
+Updated 2026-10-19. **The paper framing is adopted: "how Faraday rotation
 manifests in LuSEE Night spectra", mechanisms and magnitudes, no detection
-promise.** The current plan to the paper, with phases, deliverables and
+promise.** The presentation order and the work queue are in
+[the paper arc](docs/plans/2026-10-19-paper-arc.md): column screen with a
+stated sub-map structure family, emitting depth as a second axis, local
+medium as its far end, then form and range, then inference. Next: run the
+column-anchored screen through the real-instrument pipeline. The current plan to the paper, with phases, deliverables and
 gates, is the
 [plan section of the framing document](docs/plans/2026-10-17-paper-framing.md#plan-to-the-paper).
-Work the phases in order: horizon and depth depolarization, redistribution
-with the real instrument, separability, interpretation, manuscript. The
-sections below this one are the earlier queue; the framing document lists
+The numerical phases, conditional interpretation and permitted report are
+implemented in [PR 9](https://github.com/christianhbye/lusee_faraday/pull/9).
+The [implementation status](docs/plans/2026-10-17-paper-implementation.md)
+and [reproduction guide](docs/paper-implementation-guide.md) describe the
+completed gates and products. Transfer into the protected manuscript and
+comparison with future mission data follow separately. The sections below
+this one are the earlier queue; the framing document lists
 which of them are deferred or demoted. The Gaussian-screen benchmark remains
 the validation reference for the covariance phase, with its open
 fitted-beta acceptance check recorded in the

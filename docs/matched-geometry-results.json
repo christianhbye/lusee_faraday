@@ -1,0 +1,102 @@
+{
+  "fingerprint": "0162eae1692118aa27121ea85de56137d50041a792fc85ef00bab4b6b081b555",
+  "provenance": {
+    "configuration": {
+      "frequencies_mhz": [
+        20.0,
+        27.5,
+        35.0,
+        45.0,
+        47.5,
+        50.0
+      ],
+      "ell_max": 1536,
+      "low": [
+        256,
+        6000
+      ],
+      "high": [
+        512,
+        12000
+      ],
+      "tolerance": 0.01,
+      "deliberate_normalization_fault": false
+    },
+    "sources": {
+      "scripts/paper_common.py": "2257dfa4993fc7f5c31675c8530a61547d323c4dec7429b1ab9dacf8bf5f0b92",
+      "scripts/validate_matched_geometry.py": "7d270cbc29f5d368f2742f9cb05e6eb5a79c9fd85fbc8e126ef3a0612ea6f9ae",
+      "src/lusee_faraday/conventions.py": "4ce2c3ae851cdff6f21b6085dd96fbd8b4347fd16f6078390916cb4d21b46bbd",
+      "src/lusee_faraday/gaussian_screen.py": "9b9afe77efb0f80da38619f1cb221caead4527db7348b8daffcbf81faec5958a"
+    },
+    "dependencies": {
+      "numpy": {
+        "version": "2.4.2",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/numpy/__init__.py"
+      },
+      "scipy": {
+        "version": "1.17.1",
+        "path": "/home/christian/Documents/research/lusee/lusee_faraday/.venv/lib/python3.12/site-packages/scipy/__init__.py"
+      },
+      "lusee": {
+        "version": "2.1.dev0",
+        "path": "/home/christian/Documents/research/lusee/luseepy/lusee/__init__.py",
+        "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef"
+      },
+      "croissant-sim": {
+        "version": "5.2.1",
+        "path": "/home/christian/Documents/projects/croissant/src/croissant/__init__.py",
+        "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c"
+      }
+    }
+  },
+  "results": [
+    {
+      "model": {
+        "distance_pc": 100.0,
+        "correlation_pc": 0.5,
+        "mean_depth": 0.01,
+        "sigma_depth": 0.02,
+        "beam_sigma_deg": 1.0,
+        "source_sigma_deg": 1.5,
+        "i_ref_k": 2.0,
+        "p_ref_k": 1.0,
+        "angle_deg": 20.0,
+        "ref_mhz": 30.0,
+        "beta": -2.8,
+        "jones_angle_deg": 45.0,
+        "jones_phase_deg": 60.0,
+        "readout": null
+      },
+      "worst_covariance_error_over_flat_rms": 0.00010730481574180085,
+      "worst_refinement_error_over_flat_rms": 1.6157585263138422e-06,
+      "window_probability_mass": 1.000000538408643,
+      "minimum_pair_probability_density": -6.94845027854248e-14,
+      "passed": true
+    },
+    {
+      "model": {
+        "distance_pc": 100.0,
+        "correlation_pc": 0.5,
+        "mean_depth": 0.01,
+        "sigma_depth": 0.02,
+        "beam_sigma_deg": 0.25,
+        "source_sigma_deg": 0.375,
+        "i_ref_k": 2.0,
+        "p_ref_k": 1.0,
+        "angle_deg": 20.0,
+        "ref_mhz": 30.0,
+        "beta": -2.8,
+        "jones_angle_deg": 45.0,
+        "jones_phase_deg": 60.0,
+        "readout": null
+      },
+      "worst_covariance_error_over_flat_rms": 7.170591610206433e-06,
+      "worst_refinement_error_over_flat_rms": 1.4145690903084363e-06,
+      "window_probability_mass": 1.000000471415002,
+      "minimum_pair_probability_density": -4.6732270388855515e-12,
+      "passed": true
+    }
+  ],
+  "all_passed": true,
+  "scope": "Deterministic Gaussian source and analyzer both parallel transported to the window center, cancelling their intrinsic spin phases. Exact spherical separation distribution from Legendre window convolution; no isotropic random intrinsic E/B ensemble substitution. Flat geometry is the PR 7/8 benchmark, including dilution and both complex moments. Angular widths shrink while physical screen statistics stay fixed. This validates the matched narrow-window limit, not visibility Gaussianity for the whole production sky."
+}

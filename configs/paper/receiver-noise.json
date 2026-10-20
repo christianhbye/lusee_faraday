@@ -1,0 +1,19 @@
+{
+  "voltage_asd_nv_rt_hz": [2.2, 3.0, 5.0],
+  "voltage_reference_nv_rt_hz": 3.0,
+  "voltage_input_status": "Adopted scales from Tamura et al. (2024): PA bench ~2.2 nV/sqrt(Hz) with 50 ohm termination; integrated EM ~3; requirement 5. These are different reference cases, not a posterior range or flight calibration.",
+  "current_asd_pa_rt_hz": [0.03, 0.1, 0.3],
+  "current_reference_pa_rt_hz": 0.1,
+  "current_input_status": "Explicit illustrative current-noise bracket. The published low-impedance voltage bench does not determine this spectrum with the actual coupled antenna load.",
+  "cross_port_noise_correlation": 0.0,
+  "voltage_current_noise_correlation": 0.0,
+  "correlation_input_status": "Assumed independent input sources; the library also supports an explicit positive-semidefinite joint voltage/current PSD.",
+  "moon_temperature_k": 100.0,
+  "antenna_temperature_k": 100.0,
+  "thermal_input_status": "Illustrative nightside temperatures for Moon and antenna-loss emission. Receiver load impedances do not implicitly add amplifier or resistor noise.",
+  "reference_plane": "One-sided loaded receiver-input voltage spectral covariance in V2/Hz. Voltage source is additive at the measurement plane; current sources enter the full parallel antenna/load network.",
+  "frequency_model": "Constant input ASDs within each narrow band, with loading frozen at the native band center. Actual chromatic I-only sky power remains frequency dependent.",
+  "sources": ["https://doi.org/10.1029/2023RS007925"],
+  "legacy_spice_status": "LUSEE_DRIVE_DIR is unset; the Model54 noise and gain files are unavailable. The legacy Throughput model is not instantiated.",
+  "scope": "Conditional receiver-noise examples with measured EM voltage scales and assumed current noise/correlations/temperatures; no flight-noise precision claim."
+}

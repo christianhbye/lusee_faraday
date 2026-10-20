@@ -1,5 +1,9 @@
 # LuSEE Faraday analysis and paper preparation
 
+Current plan, 2026-10-19: [the paper arc](plans/2026-10-19-paper-arc.md).
+The handoff text below is the 2026-10-17 state and is kept for its record of
+what exists.
+
 Current handoff, 2026-10-17: step 1 was reviewed and merged as PR 7
 (`3bf50ce`). The [toy inference plan](plans/2026-10-16-gaussian-screen-inference.md)
 now has passing full joint-Q/U covariance gates at five scales in 45–50 MHz

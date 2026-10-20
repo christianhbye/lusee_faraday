@@ -1,0 +1,18 @@
+\begin{table}[htbp]\centering\small
+\caption{Adopted inputs and their status.}\label{tab:inputs}
+\begin{tabular}{p{0.22\linewidth}p{0.26\linewidth}p{0.43\linewidth}}\toprule
+Quantity & Input & Source/status\\\midrule
+Reference / volume RMS & 1 / 5 K at 30 MHz & Illustrative reference / emissivity times full path\\
+Volume emissivity / path & 1 K pc$^{-1}$ / 5 pc & Assumed polarized RMS; depth integration supplies suppression\\
+Intrinsic angular shape & ell scale 8; EE 0.8, EB 0.1 & Gaussian-decaying spectrum; BB is the remaining fraction\\
+Intrinsic frequency shape & Index -2.8; turnover 15 MHz & Assumed absorbed power law, not a measured local spectrum\\
+Angular RM structure & theta0=0.01 rad; alpha=1.667 & Assumed powered-chord covariance, fixed across mean columns\\
+Local dispersion & 0.002 / 0.02 rad m$^{-2}$ & Conditional angular screens; no column-map substitution\\
+Voltage scales & 2.2 / 3 / 5 nV Hz$^{-1/2}$ & Adopted EM/requirement scales; \href{https://doi.org/10.1029/2023RS007925}{Tamura et al.}\\
+Current scales & 0.03 / 0.1 / 0.3 pA Hz$^{-1/2}$ & Assumed; independent input sources\\
+Moon / loss temperatures & 100 K / 100 K & Illustrative nightside values\\
+Emissivity audit & Total I, paths below 1 kpc & \href{https://arxiv.org/html/1811.10310v1}{Polderman et al.}; no local polarized prior\\
+Nearby RM/DM & Historical J0437-4715 values & \href{https://arxiv.org/pdf/1105.4213}{Yan et al.}; path averages\\
+Lunar plasma & Assumed density/field/path envelope & \href{https://doi.org/10.1029/2011JA017141}{Ando et al.}; no universal nightside limit\\
+Observing duty & 50 percent & Assumed as in \href{https://arxiv.org/html/2508.16773v2}{Camacho et al.}; actual-site visibility calculated\\
+\bottomrule\end{tabular}\end{table}

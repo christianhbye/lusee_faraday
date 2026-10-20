@@ -46,6 +46,25 @@ def contract_blocks(beam_alm, sky_alm, phases):
     )
 
 
+def response_in_mepa(pair_alms, time, loc, lmax):
+    """Rotate topocentric pair alms into MEPA at one reference timestamp."""
+    import croissant as cro
+    from lunarsky import LunarTopo
+    from lusee.spice_utils import ensure_lunarsky_moon_frame
+
+    ensure_lunarsky_moon_frame()
+    et = cro.rotations.jd_to_et(time.tdb.jd)
+    topo = LunarTopo(obstime=time, location=loc)
+    beam_rotation, beam_dl = cro.rotations.generate_euler_dl(
+        int(lmax), topo, "mepa", et=et
+    )
+    return np.asarray(
+        cro.rotations.rotate_alm(
+            np.asarray(pair_alms), beam_rotation, dl_array=beam_dl
+        )
+    )
+
+
 def contract(
     pair_alms, component_alms, times, loc, lmax, sky_frame="galactic"
 ):
@@ -72,7 +91,6 @@ def contract(
     (K, 4, ntime, npair) complex
     """
     import croissant as cro
-    from lunarsky import LunarTopo
 
     beam = np.asarray(pair_alms)
     sky = np.asarray(component_alms)
@@ -82,17 +100,8 @@ def contract(
         phases = np.ones((len(times), n_m), dtype=complex)
         return contract_blocks(beam, sky, phases)
 
-    from lusee.spice_utils import ensure_lunarsky_moon_frame
-
-    ensure_lunarsky_moon_frame()
+    beam_work = response_in_mepa(beam, times[0], loc, lmax)
     et = cro.rotations.jd_to_et(times[0].tdb.jd)
-    topo = LunarTopo(obstime=times[0], location=loc)
-    beam_rotation, beam_dl = cro.rotations.generate_euler_dl(
-        int(lmax), topo, "mepa", et=et
-    )
-    beam_work = np.asarray(
-        cro.rotations.rotate_alm(beam, beam_rotation, dl_array=beam_dl)
-    )
     if sky_frame == "galactic":
         sky_work = np.asarray(cro.rotations.gal2mepa(sky, et=et))
     elif sky_frame == "mepa":

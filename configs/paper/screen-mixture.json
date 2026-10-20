@@ -1,0 +1,10 @@
+{
+  "screen": {"sigma_depth": 0.02, "mean_depth": 0.01, "theta0_rad": 0.01, "alpha": 1.6666666666666667},
+  "variance_scales": [0.5, 1.5],
+  "probabilities": [0.5, 0.5],
+  "frequencies_mhz": [20.0, 25.0, 30.0, 35.0, 45.0, 47.5, 50.0],
+  "separations_rad": [0.0, 0.005, 0.02],
+  "quadrature_order": 256,
+  "absolute_tolerance": 2e-12,
+  "scope": "PR 8 global scale-mixture control: equal-probability variances 0.5/1.5 preserve mean and RM covariance. These local screen parameters remain illustrative."
+}

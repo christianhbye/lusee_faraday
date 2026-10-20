@@ -1,0 +1,186 @@
+{
+  "source_revision": "2bd3103a90b5210fa7c92a763e5b9bd61eb2d5f3",
+  "pdf_sha256": "bee0315ff60b84380e9030a09514e3c45868d759995c329c4dd2fb9682b5e100",
+  "pages": 15,
+  "figure_pages": [
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "figure_minimum_pt": 7.0,
+  "font_scan": [
+    {
+      "page": 1,
+      "minimum_pt": 5.0,
+      "figure_page": false
+    },
+    {
+      "page": 2,
+      "minimum_pt": 6.0,
+      "figure_page": false
+    },
+    {
+      "page": 3,
+      "minimum_pt": 6.0,
+      "figure_page": false
+    },
+    {
+      "page": 4,
+      "minimum_pt": 6.0,
+      "figure_page": false
+    },
+    {
+      "page": 5,
+      "minimum_pt": 7.0,
+      "figure_page": true
+    },
+    {
+      "page": 6,
+      "minimum_pt": 7.0,
+      "figure_page": true
+    },
+    {
+      "page": 7,
+      "minimum_pt": 7.0,
+      "figure_page": true
+    },
+    {
+      "page": 8,
+      "minimum_pt": 7.0,
+      "figure_page": true
+    },
+    {
+      "page": 9,
+      "minimum_pt": 7.0,
+      "figure_page": true
+    },
+    {
+      "page": 10,
+      "minimum_pt": 8.0,
+      "figure_page": true
+    },
+    {
+      "page": 11,
+      "minimum_pt": 7.0,
+      "figure_page": true
+    },
+    {
+      "page": 12,
+      "minimum_pt": 7.0,
+      "figure_page": true
+    },
+    {
+      "page": 13,
+      "minimum_pt": 7.0,
+      "figure_page": true
+    },
+    {
+      "page": 14,
+      "minimum_pt": 6.0,
+      "figure_page": false
+    },
+    {
+      "page": 15,
+      "minimum_pt": 6.0,
+      "figure_page": false
+    }
+  ],
+  "rendered_pages": [
+    {
+      "path": "generated_data/paper_pdf_qa/page-01.png",
+      "sha256": "305d7f0ce6f9aa86edda169e4d98c2e7ae505f2d26daddc2a30a4bb2e4c6482d"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-02.png",
+      "sha256": "009f04e89a2f584d8d0df841ba40816ce8ed7b442dd72617907c888844eb24ed"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-03.png",
+      "sha256": "dbaf08517db57292b01475b099d3adf88b76b39d3b84bf7135c204a5ae75023a"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-04.png",
+      "sha256": "0076ddd8f9e3c9f6ca9ff82ed6d8e31445ae647547b74e702701dfad1c16c14a"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-05.png",
+      "sha256": "292f8d04f1cb61c36095dcd4c2f4dd6d5ff988fb7bb2b1884caf4ac8e2b65b41"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-06.png",
+      "sha256": "280d2b3d987163010c06102c38f5d5e0440123fe63be847cd37074e2b214ae3d"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-07.png",
+      "sha256": "6142f7c804576bd492da018ce7f1be28292a43517a774ec0d12d72d4a1eeb32d"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-08.png",
+      "sha256": "1efba739b101cce0c73f1c5b502732d24936173ca8135c7cb54dd85d5a5dd4d0"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-09.png",
+      "sha256": "14df75ee815615d941215f06b316bd20a35caf0a1d603a139a77f2f3d64f72e3"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-10.png",
+      "sha256": "f456bc6d1a35fbdb3d5b599b844952d7cf9ab2fffd545073cb3bfa45eb6484e4"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-11.png",
+      "sha256": "5e7a1f791517fa4ed6a3010a15616723ced4c415fe7f4c6f75c5168eb77d314b"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-12.png",
+      "sha256": "06e8df84792437e77dae5049b98c05e4d4bcd0a7fd12b8c0ebb6c046b0f7b908"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-13.png",
+      "sha256": "e9a94fb71f9b6d9fb5a9cfbc8458f718759a3f160999bcf10e2e866e359b7e15"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-14.png",
+      "sha256": "1d8f409ec9c5dcacd1ff35083b3cac1b0ed308f3b217c5d325ff524ae3be1ace"
+    },
+    {
+      "path": "generated_data/paper_pdf_qa/page-15.png",
+      "sha256": "0b33196b049d2eab22a689793115183b5d99f5374fade2919c32086c6aca4312"
+    }
+  ],
+  "text_path": "generated_data/paper_report_text.txt",
+  "text_sha256": "f06516a4113e8f2c9fa9fcbac4a6602a71fa7f653920ec76ca0671f19bebf97f",
+  "latex_log_sha256": "62ddc68adc12d9269530aaa9d9871e0504eb3dc06f7bd5616da78a98efe76d50",
+  "clean_build": true,
+  "all_automatic_checks_passed": true,
+  "visual_inspection": "All fifteen rendered pages inspected. The three changed pages were re-inspected after the final source/caption change; all other rendered pages are byte-identical to the preceding inspected build.",
+  "changed_pages_from_preceding_inspection": [
+    1,
+    6,
+    15
+  ],
+  "font_scope": "All text on the nine printed figure pages, including log labels and captions, is at least 7 pt. Smaller spans elsewhere are mathematical subscripts/superscripts in body text and tables.",
+  "qa_tool": "PyMuPDF 1.28.2",
+  "visual_inspection_passed": true,
+  "preserved_notebook_sha256": {
+    "notebooks/gaussian_screen_inference.ipynb": "57d91765ad8ac10c7b68912a0db503d6f7b7aa307309db99f2b53c74db3c399d",
+    "notebooks/gaussian_screen_step1.ipynb": "115a67c05c17509a0ddc739b2500f0c52f1e463afbe358856efefeb23c2cdeba"
+  },
+  "upstreams": {
+    "../luseepy": {
+      "revision": "eb51360e8a6d7f6253c20d1b826888e0602018ef",
+      "tracked_changes": false,
+      "status": ""
+    },
+    "/home/christian/Documents/projects/croissant": {
+      "revision": "cc867f1f0e0f0dcd163b7c50c5e043f599a3536c",
+      "tracked_changes": false,
+      "status": "?? docs/superpowers/\n"
+    }
+  }
+}
