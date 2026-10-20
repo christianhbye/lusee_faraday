@@ -267,6 +267,7 @@ def plot(out):
                 ),
             )
         ax.axhline(0, color="k", lw=0.5)
+        ax.ticklabel_format(axis="x", useOffset=False)
         ax.set_ylabel(f"pseudo-Stokes {name} [K]")
         ax.grid(alpha=0.3)
     handles, labels = axes[0].get_legend_handles_labels()
