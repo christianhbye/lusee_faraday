@@ -366,8 +366,7 @@ def plot(out):
                     alpha=0.08,
                     lw=0,
                     label=(
-                        "aliased edge zoom bins (>5 % of the response "
-                        "folded from the other end of the parent)"
+                        "aliased edge zoom bins (>5 % folded response)"
                         if first and ax is axes[1]
                         else None
                     ),
@@ -377,7 +376,7 @@ def plot(out):
     fig.legend(
         handles,
         labels,
-        fontsize=8,
+        fontsize=7.5,
         ncol=3,
         loc="lower center",
         bbox_to_anchor=(0.5, 0.0),
