@@ -338,7 +338,53 @@ def ensemble_draws_on(label_contains, freqs_mhz, n_draws=1, seed=5):
     return draws[0], draws[1]
 
 
-def plot_phase_panels(axes, fz, zoom, phases, colors, parents, off, sel):
+def ensemble_draws_channelized(label_contains, n_draws=1, seed=5):
+    """Gaussian realizations of the Q/U speckle drawn on the fine frequency
+    grid with the Gaussian-screen correlation exp(-2 sigma^2 (dlambda^2)^2)
+    and pushed through the real zoom-bin channel operator, so the draws
+    carry the same edge-bin folding as the map realization. Returned in
+    parent-major FFT-bin order for the three parents: (192, n_draws) for Q
+    and for U. Variance is matched to the measured central-parent zoom
+    bins away from the aliased edges."""
+    fine = fine_freqs(CENTER)
+    parents = parent_centers(CENTER)
+    w_zoom = chan.channel_operator(fine, parents, "zoom")  # (192, F)
+    lam2 = (299.792458 / CENTER) ** 2
+    a = 2 * SIGMA_COLUMN**2 * (2 * lam2 / CENTER) ** 2  # corr = exp(-a dnu^2)
+    step = fine[1] - fine[0]
+    kernel_sigma = 1 / (2 * np.sqrt(a)) / step  # in fine samples
+    n = fine.size
+    t = np.arange(-n, n + 1)
+    kernel = np.exp(-0.5 * (t / kernel_sigma) ** 2)
+    kernel /= np.sqrt(np.sum(kernel**2))
+    rng = np.random.default_rng(seed)
+    fe, rq, ru = ensemble_band(label_contains)
+    oe = np.argsort(fe)
+    inner = slice(8, 56)
+    target = (np.mean(rq[oe][inner] ** 2), np.mean(ru[oe][inner] ** 2))
+    o1 = np.argsort(chan.zoom_bin_offsets_hz())
+    out = []
+    for var in target:
+        draws = np.empty((w_zoom.shape[0], n_draws))
+        for m in range(n_draws):
+            white = rng.standard_normal(3 * n)
+            x = np.convolve(white, kernel, mode="same")[n:][:n]
+            z = w_zoom @ x
+            central = z[64:128]
+            z *= np.sqrt(var / np.mean(central[o1][inner] ** 2))
+            draws[:, m] = z
+        out.append(draws)
+    return out[0], out[1]
+
+
+def _symmetric(ax):
+    m = max(np.max(np.abs(line.get_ydata())) for line in ax.get_lines())
+    ax.set_ylim(-1.08 * m, 1.08 * m)
+
+
+def plot_phase_panels(
+    axes, fz, zoom, phases, colors, parents, off, sel, order
+):
     """Faraday Q and U at four sidereal phases with the alpha=2 bands."""
     for s, (ax, name) in enumerate(zip(axes, ("Q", "U")), start=1):
         for it, ph in enumerate(phases):
@@ -364,11 +410,11 @@ def plot_phase_panels(axes, fz, zoom, phases, colors, parents, off, sel):
                     rf"$\Delta\phi_{{1^\circ}}$={anchor[-1]} rad m$^{{-2}}$"
                 ),
             )
-        fe, dq, du = ensemble_draws("alpha=2 dphi1=1", n_draws=1)
-        oe = np.argsort(fe)
+        dq, du = ensemble_draws_channelized("alpha=2 dphi1=1", n_draws=1)
+        pick = np.concatenate([np.arange(64) + 64 * j for j in sel])[order]
         ax.plot(
-            fe[oe],
-            (dq if s == 1 else du)[oe, 0] * wmap_pixel_rms(),
+            fz,
+            (dq if s == 1 else du)[pick, 0] * wmap_pixel_rms(),
             color="0.25",
             lw=0.9,
             ls="--",
@@ -380,10 +426,11 @@ def plot_phase_panels(axes, fz, zoom, phases, colors, parents, off, sel):
         ax.ticklabel_format(axis="x", useOffset=False)
         ax.set_ylabel(f"Faraday {name} alone [K]")
         ax.grid(alpha=0.3)
+        _symmetric(ax)
     _shade_aliased_bins(axes, parents, off, sel, axes[0])
 
 
-def plot_ladder_panels(axes, fz, zoom, parents, off, sel):
+def plot_ladder_panels(axes, fz, zoom, parents, off, sel, order):
     """One sidereal phase: the linear map realization against one draw of
     the alpha=5/3 and alpha=1 ensembles (anchor 1), bands optional."""
     it = CONTEXT_PHASE
@@ -418,10 +465,11 @@ def plot_ladder_panels(axes, fz, zoom, parents, off, sel):
                     label=rf"linear + Gaussian sub-pixel ({tag}): "
                     r"$\pm$1 rms of the ensemble",
                 )
-            dq, du = ensemble_draws_on(label, fz, n_draws=1)
+            dq, du = ensemble_draws_channelized(label, n_draws=1)
+            pick = np.concatenate([np.arange(64) + 64 * j for j in sel])[order]
             ax.plot(
                 fz,
-                (dq if s == 1 else du)[:, 0] * wmap_pixel_rms(),
+                (dq if s == 1 else du)[pick, 0] * wmap_pixel_rms(),
                 color=color,
                 lw=1.4,
                 ls=ls,
@@ -430,6 +478,7 @@ def plot_ladder_panels(axes, fz, zoom, parents, off, sel):
         ax.ticklabel_format(axis="x", useOffset=False)
         ax.set_ylabel(f"Faraday {name} alone [K]")
         ax.grid(alpha=0.3)
+        _symmetric(ax)
     _shade_aliased_bins(axes, parents, off, sel, axes[0])
 
 
@@ -471,6 +520,7 @@ def plot_fscan_panels(axes, fz, parents, off, sel, order):
         ax.ticklabel_format(axis="x", useOffset=False)
         ax.set_ylabel(f"Faraday {name} alone [K]")
         ax.grid(alpha=0.3)
+        _symmetric(ax)
     RM_SCALE = keep
     _shade_aliased_bins(axes, parents, off, sel, axes[0])
 
@@ -545,12 +595,12 @@ def plot(out):
     ax.legend(fontsize=8, loc="best")
     ax.grid(alpha=0.3)
     if LAYOUT == "ladder":
-        plot_ladder_panels(axes[1:], fz, zoom, parents, off, sel)
+        plot_ladder_panels(axes[1:], fz, zoom, parents, off, sel, order)
     elif LAYOUT == "fscan":
         plot_fscan_panels(axes[1:], fz, parents, off, sel, order)
     else:
         plot_phase_panels(
-            axes[1:], fz, zoom, phases, colors, parents, off, sel
+            axes[1:], fz, zoom, phases, colors, parents, off, sel, order
         )
     handles, labels = axes[1].get_legend_handles_labels()
     fig.legend(
