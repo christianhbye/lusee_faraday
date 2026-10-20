@@ -581,6 +581,7 @@ def plot(out):
     suffix = (
         ("" if SPAN == 1 else "_3parents")
         + ("_ladder" if LAYOUT == "ladder" else "")
+        + ("_fscan" if LAYOUT == "fscan" else "")
         + ("" if BANDS or SPAN == 3 else "_nobands")
     )
     name = FIG_DIR / f"10_subpixel_spectra_{CENTER:g}MHz{suffix}.png"
