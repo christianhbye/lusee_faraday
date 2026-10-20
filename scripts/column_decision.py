@@ -80,7 +80,7 @@ def plot(record_path, fig_dir):
     luns = np.array(LUNATIONS)
     styles = {"alpha=2": "-", "alpha=5/3": "--", "alpha=1": ":"}
     colors = {"0.3": "C0", "1": "C2", "3": "C3"}
-    fig, axes = plt.subplots(1, 2, figsize=(12, 4.8), sharey=True)
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5.8), sharey=True)
     for ax, center in zip(axes, (30.0, 50.0)):
         for row in rec["results"]:
             if row["center_mhz"] != center:
@@ -138,7 +138,15 @@ def plot(record_path, fig_dir):
         ax.grid(alpha=0.3, which="both")
     axes[0].set_ylabel("Faraday speckle rms / radiometer noise rms")
     axes[0].set_ylim(1e-3, 10)
-    axes[1].legend(fontsize=7.5, loc="lower right", ncol=2)
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(
+        handles,
+        labels,
+        fontsize=8,
+        ncol=4,
+        loc="lower center",
+        bbox_to_anchor=(0.5, 0.0),
+    )
     fig.suptitle(
         "Column-screen speckle at the WMAP-K brightness against the loaded "
         "LuSEE noise (3 nV/$\\sqrt{\\mathrm{Hz}}$, "
@@ -146,7 +154,7 @@ def plot(record_path, fig_dir):
         "stacked at one sidereal phase",
         fontsize=10,
     )
-    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    fig.tight_layout(rect=(0, 0.12, 1, 0.94))
     fig_dir.mkdir(exist_ok=True)
     fig.savefig(fig_dir / "13_speckle_over_noise.png", dpi=140)
     print("saved", fig_dir / "13_speckle_over_noise.png")

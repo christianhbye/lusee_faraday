@@ -50,7 +50,7 @@ N_NODES = 201
 TIME_INDEX = (0, 256, 512, 768)  # quarters of the lunar sidereal day
 CONTEXT_PHASE = 1  # index into TIME_INDEX for the full-spectrum panel
 SPAN = 1  # parents plotted: 1 (central) or 3 (all); set by --span
-LAYOUT = "phases"  # or "ladder": one phase, three sub-pixel models
+LAYOUT = "phases"  # "ladder": one phase, 3 models; "fscan": linear at 3 f
 BANDS = True  # draw the +-1 rms ensemble bands
 SIGMA_COLUMN = 10.0  # rad/m^2, the column screens' dispersion
 RM_SCALE = 1.0  # screen fraction f: the RM map is multiplied by this
@@ -433,6 +433,48 @@ def plot_ladder_panels(axes, fz, zoom, parents, off, sel):
     _shade_aliased_bins(axes, parents, off, sel, axes[0])
 
 
+F_SCAN = (1.0, 0.6, 0.3)
+
+
+def plot_fscan_panels(axes, fz, parents, off, sel, order):
+    """One sidereal phase: the linear-interpolation sky for a screen at
+    fraction f = 1, 0.6, 0.3 of the column (RM map scaled by f)."""
+    it = CONTEXT_PHASE
+    global RM_SCALE
+    keep = RM_SCALE
+    styles = (("k", "-"), ("C0", "--"), ("C1", ":"))
+    for s, (ax, name) in enumerate(zip(axes, ("Q", "U")), start=1):
+        for f, (color, ls) in zip(F_SCAN, styles):
+            RM_SCALE = f
+            path = out_dir() / "spectra.npz"
+            if not path.exists():
+                print(f"no cache for f={f:g}; skipped")
+                continue
+            d = np.load(path)
+            k = np.concatenate([d["unit_zoom"][:, j] for j in sel], axis=1)[
+                :, order
+            ][..., 0]
+            z = (
+                np.concatenate([d["stokes_zoom"][:, j] for j in sel], axis=1)[
+                    :, order
+                ]
+                / k[:, :, None]
+            )
+            ax.plot(
+                fz,
+                z[it, :, s],
+                color=color,
+                ls=ls,
+                lw=1.5,
+                label=f"linear interpolation, screen at f = {f:g}",
+            )
+        ax.ticklabel_format(axis="x", useOffset=False)
+        ax.set_ylabel(f"Faraday {name} alone [K]")
+        ax.grid(alpha=0.3)
+    RM_SCALE = keep
+    _shade_aliased_bins(axes, parents, off, sel, axes[0])
+
+
 def plot(out):
     import matplotlib
 
@@ -504,6 +546,8 @@ def plot(out):
     ax.grid(alpha=0.3)
     if LAYOUT == "ladder":
         plot_ladder_panels(axes[1:], fz, zoom, parents, off, sel)
+    elif LAYOUT == "fscan":
+        plot_fscan_panels(axes[1:], fz, parents, off, sel, order)
     else:
         plot_phase_panels(
             axes[1:], fz, zoom, phases, colors, parents, off, sel
@@ -513,7 +557,7 @@ def plot(out):
         handles,
         labels,
         fontsize=7.5,
-        ncol=2 if LAYOUT == "ladder" else 3,
+        ncol=2 if LAYOUT in ("ladder", "fscan") else 3,
         loc="lower center",
         bbox_to_anchor=(0.5, 0.0),
     )
@@ -559,7 +603,7 @@ def main():
     parser.add_argument("--center", type=float, default=30.0)
     parser.add_argument("--span", type=int, choices=(1, 3), default=1)
     parser.add_argument(
-        "--layout", choices=("phases", "ladder"), default="phases"
+        "--layout", choices=("phases", "ladder", "fscan"), default="phases"
     )
     parser.add_argument("--no-bands", action="store_true")
     parser.add_argument("--rm-scale", type=float, default=1.0)
