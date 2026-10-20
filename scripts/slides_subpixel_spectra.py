@@ -41,16 +41,31 @@ from lusee_faraday import engine, instrument
 from lusee_faraday import polarimeter as pol
 from lusee_faraday import response as rsp
 
-CENTER = 30.0
+CENTER = 30.0  # overridden by --center
 LMAX = 48
 NSIDE_DEG = 64
 N_NODES = 201
 TIME_INDEX = (0, 256, 512, 768)  # quarters of the lunar sidereal day
-OUT_DIR = CACHE_DIR / "slides_subpixel"
+OUT_ROOT = CACHE_DIR / "slides_subpixel"
 FIG_DIR = REPO / "notebooks" / "slides_pixel_sum"
 COLUMN_RECORD = REPO / "docs" / "faraday-covariance-column-results.json"
 WMAP_PIXEL_RMS_30 = 1.257e4  # K at 30 MHz, all scales incl. WMAP noise
+BETA_QU = -2.8
 WMAP_BAND_RMS_30 = 5533.0  # K at 30 MHz, ell <= 30, noise subtracted
+
+
+def set_center(center_mhz):
+    global CENTER
+    CENTER = float(center_mhz)
+
+
+def out_dir():
+    return OUT_ROOT / f"{CENTER:g}mhz"
+
+
+def wmap_pixel_rms():
+    """WMAP K pixel rms (all scales, noise included) scaled to CENTER."""
+    return WMAP_PIXEL_RMS_30 * (CENTER / 30.0) ** BETA_QU
 
 
 def neighbour_step(rm):
@@ -154,7 +169,7 @@ def compute(out):
         W_unit, np.ones((1, ff.size, 4))
     )
     print(f"unit sky {_time.time() - t0:.0f} s", flush=True)
-    ionly = np.load(REPO / "generated_data" / "real30_ionly.npz")
+    ionly = np.load(REPO / "generated_data" / f"real{CENTER:g}_ionly.npz")
     key = [
         k
         for k in ionly.files
@@ -238,7 +253,7 @@ def plot(out):
             )
         for anchor, alpha_fill in (("dphi1=1", 0.25), ("dphi1=3", 0.15)):
             fe, rq, ru = ensemble_band(f"alpha=2 {anchor}")
-            band = (rq if s == 1 else ru) * WMAP_PIXEL_RMS_30
+            band = (rq if s == 1 else ru) * wmap_pixel_rms()
             oe = np.argsort(fe)
             ax.fill_between(
                 fe[oe],
@@ -278,8 +293,8 @@ def plot(out):
     )
     fig.tight_layout(rect=(0, 0.1, 1, 0.9))
     FIG_DIR.mkdir(exist_ok=True)
-    fig.savefig(FIG_DIR / "10_subpixel_spectra.png", dpi=140)
-    print("saved", FIG_DIR / "10_subpixel_spectra.png")
+    fig.savefig(FIG_DIR / f"10_subpixel_spectra_{CENTER:g}MHz.png", dpi=140)
+    print("saved", FIG_DIR / f"10_subpixel_spectra_{CENTER:g}MHz.png")
     for it, lst in enumerate(d["lst_hours"]):
         q, u = zoom[it, :, 1], zoom[it, :, 2]
         print(
@@ -294,11 +309,13 @@ def plot(out):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("stage", choices=["compute", "plot"])
+    parser.add_argument("--center", type=float, default=30.0)
     args = parser.parse_args()
+    set_center(args.center)
     if args.stage == "compute":
-        compute(OUT_DIR)
+        compute(out_dir())
     else:
-        plot(OUT_DIR)
+        plot(out_dir())
 
 
 if __name__ == "__main__":
