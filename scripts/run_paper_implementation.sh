@@ -84,7 +84,8 @@ run_stage depth .venv/bin/python scripts/depth_depolarization.py plot
 run_stage kernels .venv/bin/python scripts/faraday_covariance.py kernels
 run_stage foreground .venv/bin/python scripts/faraday_covariance.py moments
 run_stage foreground .venv/bin/python scripts/faraday_covariance.py validate
-run_stage mixed .venv/bin/python scripts/mixed_depth_predictions.py
+run_stage mixed .venv/bin/python scripts/mixed_depth_predictions.py compute
+run_stage mixed .venv/bin/python scripts/mixed_depth_predictions.py validate
 run_stage mixed .venv/bin/python scripts/plot_mixed_depth.py
 run_stage exposure .venv/bin/python scripts/observing_exposure.py
 run_stage leakage .venv/bin/python scripts/chromatic_leakage.py

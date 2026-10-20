@@ -1,5 +1,5 @@
 {
-  "fingerprint": "8d8a5ca3c5f8230c72baa96f824d68ff3179ba849818d444a14d9975d12f276f",
+  "fingerprint": "87109adc1a5deb53a1fbfa03b2e9f3265c5de01b219baaab0024d252e5d5abff",
   "provenance": {
     "configuration": {
       "horizon_config": "configs/paper/horizon.json",
@@ -17,7 +17,7 @@
       "relative_covariance_tolerance": 0.01,
       "absolute_off_covariance_tolerance": 1e-08,
       "scope": "Uniform mean columns derived from each sourced density/field pair and the assumed emitting path; both field signs are sensitivity cases. Intrinsic polarization RMS is the declared volume-averaged polarized emissivity times the full emitting path; normalized depth integration applies depolarization without a second horizon truncation. Angular structure and the two dispersions remain independent conditional assumptions, not inferred local priors.",
-      "input_record_sha256": "85f4ad1bdd05c55775697daac60752db5b6b4d50038f3ae10dbdc51b1a327785"
+      "input_record_sha256": "77a9112733dd831408de3c0cf0c0b157b7a59d74fec597369742ec5f204f76dc"
     },
     "sources": {
       "scripts/local_medium_joint.py": "e0622c6c04fb5359d5769cc6609a498949fdf1799e8009bd4899c11ddc7ee9a4",
@@ -49,8 +49,8 @@
   "results": [
     {
       "case_id": "30_m0_s0_p2_gaussian",
-      "path": "generated_data/cache/local_medium/e837936a1bd214f30f5701f334c18e8b13c7d28c045226c45dec4775be52090b/30_m0_s0_p2_gaussian_joint.json",
-      "sha256": "07c6e98c6e0ddebce04b7e5fcaee5a2c367a28001c431e669db816d66305da4e",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/30_m0_s0_p2_gaussian_joint.json",
+      "sha256": "8bd03c8ab3e6d877def954950ffb33f4c0afdca882a2456e8819b4337a6874d3",
       "checks": {
         "raw": {
           "angular": {
@@ -114,8 +114,8 @@
     },
     {
       "case_id": "30_m0_s0_p3_gaussian",
-      "path": "generated_data/cache/local_medium/e837936a1bd214f30f5701f334c18e8b13c7d28c045226c45dec4775be52090b/30_m0_s0_p3_gaussian_joint.json",
-      "sha256": "8997f24aec5e9b8bf735b47c47bc3980ae228ecb995b3f8a17d59bff88615629",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/30_m0_s0_p3_gaussian_joint.json",
+      "sha256": "b18a2927a352a2a28aaf69d426d56e1594ef38da8ace2e3f031ca3785c14dbd5",
       "checks": {
         "raw": {
           "angular": {
@@ -179,8 +179,8 @@
     },
     {
       "case_id": "30_m12_s0_p2_gaussian",
-      "path": "generated_data/cache/local_medium/e837936a1bd214f30f5701f334c18e8b13c7d28c045226c45dec4775be52090b/30_m12_s0_p2_gaussian_joint.json",
-      "sha256": "79e7dd73a6c70c3b1caae54272d3690c14d8dc1cf50a07944bbe2c979e776221",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/30_m12_s0_p2_gaussian_joint.json",
+      "sha256": "ed3f2fedb288e8dad9dc91919a86c984bcf6f3ff074c28713a470bf7292a8b6e",
       "checks": {
         "raw": {
           "angular": {
@@ -244,8 +244,8 @@
     },
     {
       "case_id": "30_m12_s0_p3_gaussian",
-      "path": "generated_data/cache/local_medium/e837936a1bd214f30f5701f334c18e8b13c7d28c045226c45dec4775be52090b/30_m12_s0_p3_gaussian_joint.json",
-      "sha256": "3e0d343eba66af29628b1a820415e8537755216d01a39672a51545322c1b2ff2",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/30_m12_s0_p3_gaussian_joint.json",
+      "sha256": "87c744ec2368f5a4021592c491238883675052a151f33344a35e0b3a18d62ba0",
       "checks": {
         "raw": {
           "angular": {
@@ -309,8 +309,8 @@
     },
     {
       "case_id": "50_m0_s0_p2_gaussian",
-      "path": "generated_data/cache/local_medium/e837936a1bd214f30f5701f334c18e8b13c7d28c045226c45dec4775be52090b/50_m0_s0_p2_gaussian_joint.json",
-      "sha256": "978bcc7ef5eae0ad0d665148debde02eb266fe2373bb9442d33568a917ec87d6",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/50_m0_s0_p2_gaussian_joint.json",
+      "sha256": "cae828965cb9bc41020776f24a228bd284dee32f2d8f8e8013ac62ae0f9be8f1",
       "checks": {
         "raw": {
           "angular": {
@@ -374,8 +374,8 @@
     },
     {
       "case_id": "50_m0_s0_p3_gaussian",
-      "path": "generated_data/cache/local_medium/e837936a1bd214f30f5701f334c18e8b13c7d28c045226c45dec4775be52090b/50_m0_s0_p3_gaussian_joint.json",
-      "sha256": "11fb3bee6cd5994be263f202333dbd9f886ddd2838c2aa8ceae4df9d63934d10",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/50_m0_s0_p3_gaussian_joint.json",
+      "sha256": "a32276d8f6715ccd2a39a578ee8c2646313fe3d4b635ef08075ad1ca7a12122b",
       "checks": {
         "raw": {
           "angular": {
@@ -439,8 +439,8 @@
     },
     {
       "case_id": "50_m12_s0_p2_gaussian",
-      "path": "generated_data/cache/local_medium/e837936a1bd214f30f5701f334c18e8b13c7d28c045226c45dec4775be52090b/50_m12_s0_p2_gaussian_joint.json",
-      "sha256": "dc90b378f7eb91ec8c445ce222bc5fade9d18fb2bab966c93aae248a28c03434",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/50_m12_s0_p2_gaussian_joint.json",
+      "sha256": "e8be42f5f71132fdd5e1b968f118ab6fe480a910f2fa51c3b402938aa1a30b29",
       "checks": {
         "raw": {
           "angular": {
@@ -504,8 +504,8 @@
     },
     {
       "case_id": "50_m12_s0_p3_gaussian",
-      "path": "generated_data/cache/local_medium/e837936a1bd214f30f5701f334c18e8b13c7d28c045226c45dec4775be52090b/50_m12_s0_p3_gaussian_joint.json",
-      "sha256": "372fd8e94bcb6ecb779c8047b2ad02eb656ebea57db2df8e5f9dcecc5ccf4035",
+      "path": "generated_data/cache/local_medium/dbbee483729d68141786278d4e3b9bf55edda942bde4f41d1bd8a920d9d390c7/50_m12_s0_p3_gaussian_joint.json",
+      "sha256": "3b7afb181352e237c80fb591ed563b6e16de923398faeb1594c0f4f1802388e1",
       "checks": {
         "raw": {
           "angular": {

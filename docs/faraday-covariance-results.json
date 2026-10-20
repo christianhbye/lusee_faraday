@@ -1,5 +1,5 @@
 {
-  "fingerprint": "a1ac9126e792f7ac368f59ec18269ed11c135c6d3c957a02c3a7d9d3add41265",
+  "fingerprint": "f3d23200567ce0913954d1f878c7f958f5a1d3d1f30a67f26750927a7c686e01",
   "provenance": {
     "configuration": {
       "kernel_config": "configs/paper/kernels.json",
@@ -60,7 +60,7 @@
       "seed": 7421,
       "figure_case": "local illustration",
       "scope": "Illustrative conditional foreground screens, not inferred local plasma statistics. All intrinsic amplitude, angular structure, E/B and turnover parameters are assumptions. No mixed-depth real-beam or receiver-noise result is implied.",
-      "kernel_fingerprint": "3e243eb2f17a7876d6cbb799a8968e78c05e61305d2d760c0635816597e2bf2f",
+      "kernel_fingerprint": "52d16824ff1d1ad317c68fe0747c81f6b534ba0bfda59fa6a8c85b9368a21151",
       "beta_qu": -2.8
     },
     "sources": {
@@ -801,7 +801,7 @@
           0.015393618554817374
         ]
       ],
-      "path": "generated_data/cache/faraday_covariance/a1ac9126e792f7ac368f59ec18269ed11c135c6d3c957a02c3a7d9d3add41265/30mhz_case0.npz",
+      "path": "generated_data/cache/faraday_covariance/f3d23200567ce0913954d1f878c7f958f5a1d3d1f30a67f26750927a7c686e01/30mhz_case0.npz",
       "sha256": "ebdb30fdec7834370bdf5925a6dd9455c86532b66af0142f3da384034fd4f4cf"
     },
     {
@@ -1508,7 +1508,7 @@
           0.00014018886289701802
         ]
       ],
-      "path": "generated_data/cache/faraday_covariance/a1ac9126e792f7ac368f59ec18269ed11c135c6d3c957a02c3a7d9d3add41265/30mhz_case1.npz",
+      "path": "generated_data/cache/faraday_covariance/f3d23200567ce0913954d1f878c7f958f5a1d3d1f30a67f26750927a7c686e01/30mhz_case1.npz",
       "sha256": "ef832f09508a5a608586af4b0fddc57e6b4c722825a7e1ef05c31cac1089db71"
     },
     {
@@ -2215,7 +2215,7 @@
           0.007623258816006159
         ]
       ],
-      "path": "generated_data/cache/faraday_covariance/a1ac9126e792f7ac368f59ec18269ed11c135c6d3c957a02c3a7d9d3add41265/50mhz_case0.npz",
+      "path": "generated_data/cache/faraday_covariance/f3d23200567ce0913954d1f878c7f958f5a1d3d1f30a67f26750927a7c686e01/50mhz_case0.npz",
       "sha256": "556e2faddd9e161b8385c5928b80f9cac0f6c0134314d3d50709c04fd1be45ec"
     },
     {
@@ -2922,7 +2922,7 @@
           0.0027487487185353485
         ]
       ],
-      "path": "generated_data/cache/faraday_covariance/a1ac9126e792f7ac368f59ec18269ed11c135c6d3c957a02c3a7d9d3add41265/50mhz_case1.npz",
+      "path": "generated_data/cache/faraday_covariance/f3d23200567ce0913954d1f878c7f958f5a1d3d1f30a67f26750927a7c686e01/50mhz_case1.npz",
       "sha256": "52bda8ddf42b7dd0def157170fd5d357c4a79303f56c0fedfb10da027d0e353e"
     }
   ],

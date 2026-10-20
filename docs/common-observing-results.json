@@ -1,5 +1,5 @@
 {
-  "fingerprint": "ed0a7d972eb4570ddf5b25fcaa115199fb48e132a9100f42953a1357f6d85905",
+  "fingerprint": "606bafdd09cbff0beb2db88bc7638f83c50f96ec2c083eeff5219e2cc123de29",
   "provenance": {
     "configuration": {
       "covariance": {
@@ -91,8 +91,8 @@
         "legacy_spice_status": "LUSEE_DRIVE_DIR is unset; the Model54 noise and gain files are unavailable. The legacy Throughput model is not instantiated.",
         "scope": "Conditional receiver-noise examples with measured EM voltage scales and assumed current noise/correlations/temperatures; no flight-noise precision claim."
       },
-      "leakage_fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
-      "kernel_record_sha256": "9ac7b4eeb83e05b2dca4bedd27157a3557494d09db1d72c8b3115e2f44ecc573",
+      "leakage_fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
+      "kernel_record_sha256": "75a5cc373105763a600007c2d0f40f6a15ea399018276968d5fed9bef0dac994",
       "sidereal_samples": 256,
       "bin_seconds": 9221.0605875,
       "duty": 0.5,
@@ -141,7 +141,7 @@
       "total_bins": 256,
       "common_observed_lmax": 48,
       "theory_lmax": 96,
-      "path": "generated_data/cache/observing_control/ed0a7d972eb4570ddf5b25fcaa115199fb48e132a9100f42953a1357f6d85905/30.npz",
+      "path": "generated_data/cache/observing_control/606bafdd09cbff0beb2db88bc7638f83c50f96ec2c083eeff5219e2cc123de29/30.npz",
       "sha256": "1c5b988c5882b0cd76400c97f61d0cbb47e1023abd7714c72678ee05d4bfb75d"
     },
     {
@@ -152,7 +152,7 @@
       "total_bins": 256,
       "common_observed_lmax": 48,
       "theory_lmax": 96,
-      "path": "generated_data/cache/observing_control/ed0a7d972eb4570ddf5b25fcaa115199fb48e132a9100f42953a1357f6d85905/50.npz",
+      "path": "generated_data/cache/observing_control/606bafdd09cbff0beb2db88bc7638f83c50f96ec2c083eeff5219e2cc123de29/50.npz",
       "sha256": "a84fdaf836758217e9a32e4c1d1f72ec0e0f4eea0b02175501c15923a225f82b"
     }
   ],

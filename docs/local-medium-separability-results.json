@@ -1,5 +1,5 @@
 {
-  "fingerprint": "147624bcff106e507199396c4b1280d11897a233bd8804e479ed3a321c53f8dd",
+  "fingerprint": "73e2633d35f8220e63fdde261b3067e4cf8a86bcc5d51bbcfa565c2b32328732",
   "provenance": {
     "configuration": {
       "local_config": {
@@ -20,8 +20,8 @@
         "scope": "Uniform mean columns derived from each sourced density/field pair and the assumed emitting path; both field signs are sensitivity cases. Intrinsic polarization RMS is the declared volume-averaged polarized emissivity times the full emitting path; normalized depth integration applies depolarization without a second horizon truncation. Angular structure and the two dispersions remain independent conditional assumptions, not inferred local priors."
       },
       "input_records": {
-        "docs/local-medium-sensitivity-results.json": "85f4ad1bdd05c55775697daac60752db5b6b4d50038f3ae10dbdc51b1a327785",
-        "docs/measured-system-results.json": "094938d1e7b25209979286b98e27ffa6de974a1621b5d529489e2afa3db1149b",
+        "docs/local-medium-sensitivity-results.json": "77a9112733dd831408de3c0cf0c0b157b7a59d74fec597369742ec5f204f76dc",
+        "docs/measured-system-results.json": "87377c699179c96fe4d6069f33a0f3195254bc4c86d82a0599d7ac08b54ff7bd",
         "docs/observing-exposure.json": "f7faa524f15c6a92744144c5cae7c02662c641d37a6d3f6fe8da7a1f88970161",
         "docs/local-input-audit-results.json": "9cc70b212d8a47d04d38fafded3fdc337bf708501c44da877e2ac26fc87decce"
       }
@@ -12576,7 +12576,7 @@
     }
   ],
   "arrays": {
-    "path": "generated_data/cache/local_medium_separability/147624bcff106e507199396c4b1280d11897a233bd8804e479ed3a321c53f8dd/decision_grid.npz",
+    "path": "generated_data/cache/local_medium_separability/73e2633d35f8220e63fdde261b3067e4cf8a86bcc5d51bbcfa565c2b32328732/decision_grid.npz",
     "sha256": "26556436835d730f4bbbd71716779bcc144c10bd9358992f6d7f8db32cb1ba95"
   },
   "axes": {

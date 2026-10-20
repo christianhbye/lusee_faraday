@@ -1,5 +1,5 @@
 {
-  "fingerprint": "9879b9387fd55687f87d0c8d5ff95bb87e83648d711a0e8b600278daf9428168",
+  "fingerprint": "632e00d9f7e10cf9602a8a53c986028be3dff430691998c8daadd2e1e1c13cf6",
   "provenance": {
     "configuration": {
       "mixed_config": "configs/paper/mixed-depth.json",
@@ -25,8 +25,8 @@
       "figure_lunations": 24,
       "scope": "Conditional examples at 1 K intrinsic polarization RMS at 30 MHz, with assumed local columns and angular statistics. Linear and PCHIP native-beam interpolants define a model comparison, not a measured fine-channel response. Gaussian visibility illustrations retain the complex relation and both sidereal phases. No detection significance is inferred.",
       "input_records": {
-        "docs/residual-signal-results.json": "7c53868b25e38aa1c545a70d570d085465ddb8b13b014022ac89314261fd77a6",
-        "docs/measured-system-results.json": "094938d1e7b25209979286b98e27ffa6de974a1621b5d529489e2afa3db1149b",
+        "docs/residual-signal-results.json": "18acd4714e7dc1a824a72998189e0b2809ce0369319c278fd7512e1813f80628",
+        "docs/measured-system-results.json": "87377c699179c96fe4d6069f33a0f3195254bc4c86d82a0599d7ac08b54ff7bd",
         "docs/observing-exposure.json": "f7faa524f15c6a92744144c5cae7c02662c641d37a6d3f6fe8da7a1f88970161",
         "configs/paper/receiver-noise.json": "8e62a7a1f36c26682428aec2edd1b2c923b2a1eb9e24a3b084479b3f0c9c32f2"
       }
@@ -167635,11 +167635,11 @@
         }
       ],
       "native_to_signal_pol_rms_fraction": 9.15237387277092e-07,
-      "observation_path": "generated_data/cache/faraday_separability/9879b9387fd55687f87d0c8d5ff95bb87e83648d711a0e8b600278daf9428168/observation_30.npz",
+      "observation_path": "generated_data/cache/faraday_separability/632e00d9f7e10cf9602a8a53c986028be3dff430691998c8daadd2e1e1c13cf6/observation_30.npz",
       "observation_sha256": "ba8453573466aaef40032c7da1da3b00fbe63ee469c4f0c1e5a23f14741d50cc",
-      "independent_mock_path": "generated_data/cache/faraday_separability/9879b9387fd55687f87d0c8d5ff95bb87e83648d711a0e8b600278daf9428168/independent_mock_30.npz",
+      "independent_mock_path": "generated_data/cache/faraday_separability/632e00d9f7e10cf9602a8a53c986028be3dff430691998c8daadd2e1e1c13cf6/independent_mock_30.npz",
       "independent_mock_sha256": "49eb546079dbf5f53ad137508f033ca91ae9dee29d96c9f8c8d02794765a27e0",
-      "path": "generated_data/cache/faraday_separability/9879b9387fd55687f87d0c8d5ff95bb87e83648d711a0e8b600278daf9428168/spectrum_products_30.npz",
+      "path": "generated_data/cache/faraday_separability/632e00d9f7e10cf9602a8a53c986028be3dff430691998c8daadd2e1e1c13cf6/spectrum_products_30.npz",
       "sha256": "02a997e0a94f29ec1cbf33c21c4ba781e38d4d9b121eab89fdf0958d88afe93c"
     },
     {
@@ -167995,11 +167995,11 @@
         }
       ],
       "native_to_signal_pol_rms_fraction": 2.83784025607991e-06,
-      "observation_path": "generated_data/cache/faraday_separability/9879b9387fd55687f87d0c8d5ff95bb87e83648d711a0e8b600278daf9428168/observation_50.npz",
+      "observation_path": "generated_data/cache/faraday_separability/632e00d9f7e10cf9602a8a53c986028be3dff430691998c8daadd2e1e1c13cf6/observation_50.npz",
       "observation_sha256": "6746f47aa25a91bdb7de15fea0b2ad180d895d8415e48534e13e51e654d65066",
-      "independent_mock_path": "generated_data/cache/faraday_separability/9879b9387fd55687f87d0c8d5ff95bb87e83648d711a0e8b600278daf9428168/independent_mock_50.npz",
+      "independent_mock_path": "generated_data/cache/faraday_separability/632e00d9f7e10cf9602a8a53c986028be3dff430691998c8daadd2e1e1c13cf6/independent_mock_50.npz",
       "independent_mock_sha256": "67cb42b47d72fb960534cfdad2bbea336da6eb0abf1b3b8451e460a6a36a87f1",
-      "path": "generated_data/cache/faraday_separability/9879b9387fd55687f87d0c8d5ff95bb87e83648d711a0e8b600278daf9428168/spectrum_products_50.npz",
+      "path": "generated_data/cache/faraday_separability/632e00d9f7e10cf9602a8a53c986028be3dff430691998c8daadd2e1e1c13cf6/spectrum_products_50.npz",
       "sha256": "5133f44683280684c586a09147764ed2018180e0c057938b1149201fa1425258"
     }
   ],

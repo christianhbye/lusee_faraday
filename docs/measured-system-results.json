@@ -1,5 +1,5 @@
 {
-  "fingerprint": "c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434",
+  "fingerprint": "9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e",
   "provenance": {
     "configuration": {
       "mixed_config": "configs/paper/mixed-depth.json",
@@ -24,7 +24,7 @@
       "figure_phase_index": 0,
       "figure_lunations": 24,
       "scope": "Conditional examples at 1 K intrinsic polarization RMS at 30 MHz, with assumed local columns and angular statistics. Linear and PCHIP native-beam interpolants define a model comparison, not a measured fine-channel response. Gaussian visibility illustrations retain the complex relation and both sidereal phases. No detection significance is inferred.",
-      "leakage_fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+      "leakage_fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
       "noise": {
         "voltage_asd_nv_rt_hz": [
           2.2,
@@ -107,7 +107,7 @@
         31.0
       ],
       "reference_relative_error": 0.0,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/asbuilt_30.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/asbuilt_30.npz",
       "sha256": "41fb83c8fa9f732017e9732073696fbe2c69994998ca02afc427582f4863aa4c"
     },
     {
@@ -121,7 +121,7 @@
         31.0
       ],
       "reference_relative_error": 0.0,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/c4sym_30.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/c4sym_30.npz",
       "sha256": "a349412b8fb10c1366c0e47168eccf065dde4b6c27a5ea44ef51fb9305c0f395"
     },
     {
@@ -135,7 +135,7 @@
         31.0
       ],
       "reference_relative_error": 0.0,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/diagza_30.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/diagza_30.npz",
       "sha256": "af4acb877bb30e2b5ca0e5d20a571510d359665c2b1cb6f3cde0a4ff1ff79496"
     },
     {
@@ -149,7 +149,7 @@
         51.0
       ],
       "reference_relative_error": 0.0,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/asbuilt_50.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/asbuilt_50.npz",
       "sha256": "5f4ec88c7759e3f5e7945c94760fc5f06c8e216aae35d7fca79e0af9237cca76"
     },
     {
@@ -163,7 +163,7 @@
         51.0
       ],
       "reference_relative_error": 0.0,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/c4sym_50.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/c4sym_50.npz",
       "sha256": "250c35887a6f4dfb141fb22de58a9aa0c94f72ecac7c6a4255dc8a61d1241a47"
     },
     {
@@ -177,7 +177,7 @@
         51.0
       ],
       "reference_relative_error": 0.0,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/diagza_50.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/diagza_50.npz",
       "sha256": "5b58844ced4bbb70dc01d196a3fee387027b7cd557d3c4f1650b21c74c2b319a"
     }
   ],
@@ -186,126 +186,126 @@
       "center_mhz": 30.0,
       "voltage_nv_rt_hz": 2.2,
       "current_pa_rt_hz": 0.03,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_2.2_0.03.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_30_2.2_0.03.npz",
       "sha256": "192bc1af2d5a166105b9447124cd4c5749280d63e13e8af8f44b76c76526aa10"
     },
     {
       "center_mhz": 30.0,
       "voltage_nv_rt_hz": 2.2,
       "current_pa_rt_hz": 0.1,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_2.2_0.1.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_30_2.2_0.1.npz",
       "sha256": "2efa35b864a7ed6063c33aa7015bd509ebb5a8cf53a4da9d0a8c6bebead55731"
     },
     {
       "center_mhz": 30.0,
       "voltage_nv_rt_hz": 2.2,
       "current_pa_rt_hz": 0.3,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_2.2_0.3.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_30_2.2_0.3.npz",
       "sha256": "63eccc0146b49f744ca3ad74aec98646f545fdc98f28cc7ca138563fc6d638aa"
     },
     {
       "center_mhz": 30.0,
       "voltage_nv_rt_hz": 3.0,
       "current_pa_rt_hz": 0.03,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_3_0.03.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_30_3_0.03.npz",
       "sha256": "88d26bf15919ca0b1a0ebc8c97c533783de15d68fdcfa10ff58222e4db82f622"
     },
     {
       "center_mhz": 30.0,
       "voltage_nv_rt_hz": 3.0,
       "current_pa_rt_hz": 0.1,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_3_0.1.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_30_3_0.1.npz",
       "sha256": "bd9fa22c4249f5769bf513e86035febea35abb347a3d5e4ebf97ed006f37ebf9"
     },
     {
       "center_mhz": 30.0,
       "voltage_nv_rt_hz": 3.0,
       "current_pa_rt_hz": 0.3,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_3_0.3.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_30_3_0.3.npz",
       "sha256": "75246448b206b76eaa6823bb0d5155689c9064012df8fae73869b6e30b3cf81f"
     },
     {
       "center_mhz": 30.0,
       "voltage_nv_rt_hz": 5.0,
       "current_pa_rt_hz": 0.03,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_5_0.03.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_30_5_0.03.npz",
       "sha256": "b1c062ac43f41c4ba72d3a160deb5e2c0a7f0d95b6ba45c2ef99d2d878fba955"
     },
     {
       "center_mhz": 30.0,
       "voltage_nv_rt_hz": 5.0,
       "current_pa_rt_hz": 0.1,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_5_0.1.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_30_5_0.1.npz",
       "sha256": "7d9de3a3063902aae959d83cb8dc5ab627c296a49f6d16cb4d74ed4ab4d2fcb5"
     },
     {
       "center_mhz": 30.0,
       "voltage_nv_rt_hz": 5.0,
       "current_pa_rt_hz": 0.3,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_30_5_0.3.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_30_5_0.3.npz",
       "sha256": "20a67328a1e6c7d475db2a99b7e286abcd00e2833a4acc8d8dc5cae1b4568f9e"
     },
     {
       "center_mhz": 50.0,
       "voltage_nv_rt_hz": 2.2,
       "current_pa_rt_hz": 0.03,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_2.2_0.03.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_50_2.2_0.03.npz",
       "sha256": "809f957bd369a313eb1bf6cdb46549ba791ef32de20e1f0ef931cefd8b506966"
     },
     {
       "center_mhz": 50.0,
       "voltage_nv_rt_hz": 2.2,
       "current_pa_rt_hz": 0.1,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_2.2_0.1.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_50_2.2_0.1.npz",
       "sha256": "6f854e7484e0049733ffa5bf69a7e63f738ad81d6996ab0c197b888a0898581d"
     },
     {
       "center_mhz": 50.0,
       "voltage_nv_rt_hz": 2.2,
       "current_pa_rt_hz": 0.3,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_2.2_0.3.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_50_2.2_0.3.npz",
       "sha256": "8dd17fa9e608ab098bb3d9187e0d0bde2d9f9cd2d47c5d210e31547866d6fd1f"
     },
     {
       "center_mhz": 50.0,
       "voltage_nv_rt_hz": 3.0,
       "current_pa_rt_hz": 0.03,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_3_0.03.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_50_3_0.03.npz",
       "sha256": "1888a8b6d4385dc8ccc0c1a0380f21801165db285a4f78ab2b3d03a2a43e6afc"
     },
     {
       "center_mhz": 50.0,
       "voltage_nv_rt_hz": 3.0,
       "current_pa_rt_hz": 0.1,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_3_0.1.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_50_3_0.1.npz",
       "sha256": "ad62e98244f40a1948817b1cd0ee7626f86bbd9c8d75ccfee0c508648046a6ed"
     },
     {
       "center_mhz": 50.0,
       "voltage_nv_rt_hz": 3.0,
       "current_pa_rt_hz": 0.3,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_3_0.3.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_50_3_0.3.npz",
       "sha256": "5d3ee5f86269e09cbc9a59580077cdc9670d033a12585608fbecb93e8ad25bc1"
     },
     {
       "center_mhz": 50.0,
       "voltage_nv_rt_hz": 5.0,
       "current_pa_rt_hz": 0.03,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_5_0.03.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_50_5_0.03.npz",
       "sha256": "39335ebb05c141f5c01aa81bf0576dda210c07545e8e11f943f3d979843179cd"
     },
     {
       "center_mhz": 50.0,
       "voltage_nv_rt_hz": 5.0,
       "current_pa_rt_hz": 0.1,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_5_0.1.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_50_5_0.1.npz",
       "sha256": "e041d0da88b7c726b2dd0913f94faa9cefaa70883e85dba439b90da4e9a7d5e5"
     },
     {
       "center_mhz": 50.0,
       "voltage_nv_rt_hz": 5.0,
       "current_pa_rt_hz": 0.3,
-      "path": "generated_data/cache/measured_system/c489bec9e468928101e91e800fce768e8e46aaadbc1bc78740ed28d55ca36434/noise_50_5_0.3.npz",
+      "path": "generated_data/cache/measured_system/9795359172acebf6fc1bf1871c5f5fa3c336cb6d5a810c885e36b4e66f9ad72e/noise_50_5_0.3.npz",
       "sha256": "4d3fed095fcf3fcd5519bdbfed2e5d8066ea08b33fae371122d0175917f5ec3f"
     }
   ],

@@ -1,5 +1,5 @@
 {
-  "fingerprint": "e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb",
+  "fingerprint": "bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6",
   "provenance": {
     "configuration": {
       "covariance_config": "configs/paper/covariance.json",
@@ -107,8 +107,8 @@
         "figure_case": "local illustration",
         "scope": "Illustrative conditional foreground screens, not inferred local plasma statistics. All intrinsic amplitude, angular structure, E/B and turnover parameters are assumptions. No mixed-depth real-beam or receiver-noise result is implied."
       },
-      "kernel_fingerprint": "3e243eb2f17a7876d6cbb799a8968e78c05e61305d2d760c0635816597e2bf2f",
-      "foreground_reference_sha256": "c9038593bc49c0e7127df104aedeeb6510ddcff15b541186568377ae5ae7b713"
+      "kernel_fingerprint": "52d16824ff1d1ad317c68fe0747c81f6b534ba0bfda59fa6a8c85b9368a21151",
+      "foreground_reference_sha256": "d8523fb7c7d6469f6f7d56d0cf46ff7fc220d00e313a97a030c80e5da6dbc679"
     },
     "sources": {
       "scripts/common.py": "6a67e8f3fa47970be630b77422be297cab7ac3da75bf807a89b7495ededfde45",
@@ -215,7 +215,7 @@
           0.015397128865386285
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/10mhz_native_s0_p0.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/10mhz_native_s0_p0.npz",
       "sha256": "c79e5214cfabe51f8f98944de2d262109b4c67fede34a3c8110da7a1af18a9e1"
     },
     {
@@ -285,7 +285,7 @@
           0.0030332749152886425
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/10mhz_native_s0_p1.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/10mhz_native_s0_p1.npz",
       "sha256": "1ff4dffb38dcdbb5bb4f0cc8c32a9a200ec442e23a4c92ebc67ab4e79096e43f"
     },
     {
@@ -355,7 +355,7 @@
           0.00024981145802587895
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/10mhz_native_s0_p2.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/10mhz_native_s0_p2.npz",
       "sha256": "c35da1ae7f1235bec7960388185a4447146fe435ab6528d93294269d0cae8aff"
     },
     {
@@ -424,7 +424,7 @@
           0.0017657535637914197
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/10mhz_native_s0_p3.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/10mhz_native_s0_p3.npz",
       "sha256": "ccb859702edfeba15691e2dc80483ab1df89f453e1c4ad8c5771ed37a316f8d1"
     },
     {
@@ -495,7 +495,7 @@
           0.0003810816482587829
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/10mhz_native_s0_p4.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/10mhz_native_s0_p4.npz",
       "sha256": "34483faa6caa6ba4df2dcbf8044fe0f8b1736c04e27ff1ef7a616884d6b6bbaf"
     },
     {
@@ -565,7 +565,7 @@
           0.015397128865386285
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/10mhz_native_s1_p0.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/10mhz_native_s1_p0.npz",
       "sha256": "3fdcdd0816d111acff6d40ab6536712dc5b1c42da59e618ae03ae6c842360be6"
     },
     {
@@ -635,7 +635,7 @@
           2.7155251780797827e-05
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/10mhz_native_s1_p1.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/10mhz_native_s1_p1.npz",
       "sha256": "b14022a560e06068442ed27fe7cf67150a454fede4d2c7e88d969fd0fe356da5"
     },
     {
@@ -705,7 +705,7 @@
           1.4697362311889368e-05
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/10mhz_native_s1_p2.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/10mhz_native_s1_p2.npz",
       "sha256": "6a2f7914a58558f7fdd33eaef65fcedf8c52a0e242eb8143d66808b1f5cb1982"
     },
     {
@@ -774,7 +774,7 @@
           0.0006833826354634999
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/10mhz_native_s1_p3.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/10mhz_native_s1_p3.npz",
       "sha256": "c180bd698e12ad10389973d8395c3b6ad6178875bcb53ec623f1f1802313c287"
     },
     {
@@ -845,7 +845,7 @@
           1.8383405061638775e-05
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/10mhz_native_s1_p4.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/10mhz_native_s1_p4.npz",
       "sha256": "4de5e23808579085680dde426de617104d7a27a0b8765569ee0b45b29da32d94"
     },
     {
@@ -915,7 +915,7 @@
           0.009852992757817472
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_native_s0_p0.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_native_s0_p0.npz",
       "sha256": "264aaa7dc0d2e456740f5639a1b47aed83928a350bb14116c47a56d18b05bc68"
     },
     {
@@ -985,7 +985,7 @@
           0.017839734069396398
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_native_s0_p1.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_native_s0_p1.npz",
       "sha256": "9546a2e01313bc47276ce3ccdddfe31ae33edba3aeac70d21629d12bcb3f88f5"
     },
     {
@@ -1055,7 +1055,7 @@
           0.015393556664522514
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_native_s0_p2.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_native_s0_p2.npz",
       "sha256": "787015a517be19edb08872eaa3c15821cf1fbb5cfe010053b63a5834454fc15d"
     },
     {
@@ -1124,7 +1124,7 @@
           0.01426881183812579
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_native_s0_p3.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_native_s0_p3.npz",
       "sha256": "ca20a4fc3549133144cdce775a94d9839410f29c65a3081586fb3264175ae9a0"
     },
     {
@@ -1195,7 +1195,7 @@
           0.01633074251012952
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_native_s0_p4.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_native_s0_p4.npz",
       "sha256": "4db995db19f511889a820d33ce0cbbb37cb486f972e7d973e611279d72c80876"
     },
     {
@@ -3210,7 +3210,7 @@
           0.009834340985385857
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_channels_s0_p0.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_channels_s0_p0.npz",
       "sha256": "3093c953f95b9c9a9bc59fd3181023de03f6768acf57004392b2bf86b87f0776"
     },
     {
@@ -5225,7 +5225,7 @@
           0.017801474817617118
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_channels_s0_p1.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_channels_s0_p1.npz",
       "sha256": "15cef8fd2244c0805bea5463ec670ceaa51dc5948ae3f21f5b04fe9403f7bff6"
     },
     {
@@ -7245,7 +7245,7 @@
           0.015389502115874212
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_channels_s0_p2.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_channels_s0_p2.npz",
       "sha256": "6d2933c272c5f16a720a21f156c3e0fd8aada5a5d07d90fd38089df75ba5d035"
     },
     {
@@ -9259,7 +9259,7 @@
           0.014243726992352523
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_channels_s0_p3.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_channels_s0_p3.npz",
       "sha256": "1af33e07b4a7f95daedb52380ebed3a975986be996bbd295afc56ba5c4a701e0"
     },
     {
@@ -11275,7 +11275,7 @@
           0.016294658095058066
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_channels_s0_p4.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_channels_s0_p4.npz",
       "sha256": "bdd31de24d12e5b245bb310fc78dd07463342a9bf5e240a8c1ef63b8fa60c2a8"
     },
     {
@@ -11345,7 +11345,7 @@
           0.009852992757817472
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_native_s1_p0.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_native_s1_p0.npz",
       "sha256": "67dc946decde8e88620d4add19f88de2444286f8f74b98574e8d7290e698000d"
     },
     {
@@ -11415,7 +11415,7 @@
           0.0010780542849515376
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_native_s1_p1.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_native_s1_p1.npz",
       "sha256": "ee67ec622918cb010702e4472770514c13330b8063f138668f48a4e359664222"
     },
     {
@@ -11485,7 +11485,7 @@
           0.00014018953059561772
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_native_s1_p2.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_native_s1_p2.npz",
       "sha256": "c004014cb27ba9cef0e149e32996cd3a1a4447f9f2a1bf9e64555dd0c869127f"
     },
     {
@@ -11554,7 +11554,7 @@
           0.003782608146818496
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_native_s1_p3.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_native_s1_p3.npz",
       "sha256": "473bd3ef011a404b084c9685e53e708597e10aff5ed32b4f06e8bd81f09e7c8b"
     },
     {
@@ -11625,7 +11625,7 @@
           0.003003847937728199
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_native_s1_p4.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_native_s1_p4.npz",
       "sha256": "ba2aec794891a3ce7b23aff2d0927db8c0c4276cf0e483ea36fec75af93d847e"
     },
     {
@@ -13640,7 +13640,7 @@
           0.009834340985385857
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_channels_s1_p0.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_channels_s1_p0.npz",
       "sha256": "07ad08b6d42dfb94c532162224fd72916809b4ea1e1676b2980418d420f82783"
     },
     {
@@ -15655,7 +15655,7 @@
           0.0010852897864641407
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_channels_s1_p1.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_channels_s1_p1.npz",
       "sha256": "1936fec98ae06c330fd370f4b5ab07d2bc2d63a7a88d37cdc1816f9c3639b505"
     },
     {
@@ -17675,7 +17675,7 @@
           0.00014023078311546901
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_channels_s1_p2.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_channels_s1_p2.npz",
       "sha256": "d28b59cf64462cf4593a828cc8d34326cbf3cf612d6dd88527faa8984ec6fa38"
     },
     {
@@ -19689,7 +19689,7 @@
           0.003781636779502938
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_channels_s1_p3.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_channels_s1_p3.npz",
       "sha256": "a986e445e4416c032ed94bf20be944b2151c5d0b0567d32e0b440d2831592ee6"
     },
     {
@@ -21705,7 +21705,7 @@
           0.003009375595419409
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/30mhz_channels_s1_p4.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/30mhz_channels_s1_p4.npz",
       "sha256": "09a8101ec080555db2218df6c22991d3f7f0e1af766e57708936ab83c56a4132"
     },
     {
@@ -21775,7 +21775,7 @@
           0.005143158291608935
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_native_s0_p0.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_native_s0_p0.npz",
       "sha256": "2aacde70749514cfaa9305cc0dab60c93b4405cec84afb1ec59d3dc2b3d88db7"
     },
     {
@@ -21845,7 +21845,7 @@
           0.0065357407011106235
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_native_s0_p1.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_native_s0_p1.npz",
       "sha256": "bcb20e6137fc117c4f2ef08bc9f363a94a97c5cf3bef2c85736447377e7aa123"
     },
     {
@@ -21915,7 +21915,7 @@
           0.007623064768248297
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_native_s0_p2.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_native_s0_p2.npz",
       "sha256": "b26a4b298550872b07116aa617a598c28fb51ceaf742167b6eeebac817344cd3"
     },
     {
@@ -21984,7 +21984,7 @@
           0.006112144170066704
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_native_s0_p3.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_native_s0_p3.npz",
       "sha256": "9f912670d22f0bebece002e99a94f0e151aaa699bdc60c8a19744894d06a7969"
     },
     {
@@ -22055,7 +22055,7 @@
           0.006215595419648483
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_native_s0_p4.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_native_s0_p4.npz",
       "sha256": "53f864ecc6eeff7873026c0fd74a95d8fdfecfdd6376d703159b57cb0cf11496"
     },
     {
@@ -24070,7 +24070,7 @@
           0.005136499641235553
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_channels_s0_p0.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_channels_s0_p0.npz",
       "sha256": "28a3c762fc9c4233a50247e0347d9d64f63ee2efcefb09eb9b7667b4394bdb07"
     },
     {
@@ -26085,7 +26085,7 @@
           0.0065256038264816406
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_channels_s0_p1.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_channels_s0_p1.npz",
       "sha256": "c676b07036a66c4aa55ba8a2143575e915a39269eaf07e70312f2086c6453c40"
     },
     {
@@ -28105,7 +28105,7 @@
           0.007610780519888106
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_channels_s0_p2.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_channels_s0_p2.npz",
       "sha256": "eb1420bb53c444c1744a890f64550597843c29b3c67f2018c1181594f50a8330"
     },
     {
@@ -30119,7 +30119,7 @@
           0.0061031693701507845
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_channels_s0_p3.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_channels_s0_p3.npz",
       "sha256": "241cbefc26d6c4f4b9426a8cda33737703b4c6bc2516916ed75fec8058d06dbe"
     },
     {
@@ -32135,7 +32135,7 @@
           0.006206261182436442
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_channels_s0_p4.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_channels_s0_p4.npz",
       "sha256": "1d1be2c24dced47b57fe0069961c0f6cb21160d08a1f739e38ddeaffdffe55a1"
     },
     {
@@ -32205,7 +32205,7 @@
           0.005143158291608935
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_native_s1_p0.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_native_s1_p0.npz",
       "sha256": "7b605492e5e2a742e3e5505210409360dede56e84c24a26c22ba6bbf782b4307"
     },
     {
@@ -32275,7 +32275,7 @@
           0.004526735840410185
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_native_s1_p1.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_native_s1_p1.npz",
       "sha256": "1e60170747a79f4aaf3da56904ae70da6dc39be11825385fb9bbd1199b9755a2"
     },
     {
@@ -32345,7 +32345,7 @@
           0.0027487657902522454
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_native_s1_p2.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_native_s1_p2.npz",
       "sha256": "f22179a5442fd880e8908502bc6cf55accd6f9822bc3ebeef4798c5eac4c1562"
     },
     {
@@ -32414,7 +32414,7 @@
           0.004394334769871206
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_native_s1_p3.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_native_s1_p3.npz",
       "sha256": "95886557874092ac080edd3b044f6bac56b81702a13ea94b2876527c73641805"
     },
     {
@@ -32485,7 +32485,7 @@
           0.0047178983109980475
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_native_s1_p4.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_native_s1_p4.npz",
       "sha256": "374f6fe2a841131083e126c66d6687f7ff65870d0a03216c6a263a7677f728bf"
     },
     {
@@ -34500,7 +34500,7 @@
           0.005136499641235553
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_channels_s1_p0.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_channels_s1_p0.npz",
       "sha256": "81ee6f1680d8544d63c56071f2e48efa62ef0cd969b8553bd48a5a3ee0adf915"
     },
     {
@@ -36515,7 +36515,7 @@
           0.004522981410631151
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_channels_s1_p1.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_channels_s1_p1.npz",
       "sha256": "0252ee2540e28ae729482a2425a6489f451771eb80cdba6889ecd05b63674990"
     },
     {
@@ -38535,7 +38535,7 @@
           0.0027498402978212264
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_channels_s1_p2.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_channels_s1_p2.npz",
       "sha256": "811d4bbf3c7b79b1c2f05a46e4a2b32c773f8f607b6f3d0efd9e9ec72cacaf56"
     },
     {
@@ -40549,7 +40549,7 @@
           0.004390483630034393
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_channels_s1_p3.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_channels_s1_p3.npz",
       "sha256": "5f55215331e99b88ce4ac8dff4193db78d83594ef0079b2a23a944e9daf014b3"
     },
     {
@@ -42565,7 +42565,7 @@
           0.004713302601942787
         ]
       ],
-      "path": "generated_data/cache/mixed_depth/e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb/50mhz_channels_s1_p4.npz",
+      "path": "generated_data/cache/mixed_depth/bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6/50mhz_channels_s1_p4.npz",
       "sha256": "1f615d01576ed46dde04e80237d9b720a3b50eb55a24bf3eb55e9b4f1e570fb0"
     }
   ],

@@ -1,5 +1,5 @@
 {
-  "fingerprint": "1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745",
+  "fingerprint": "83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f",
   "provenance": {
     "configuration": {
       "mixed_config": "configs/paper/mixed-depth.json",
@@ -24,7 +24,7 @@
       "figure_phase_index": 0,
       "figure_lunations": 24,
       "scope": "Conditional examples at 1 K intrinsic polarization RMS at 30 MHz, with assumed local columns and angular statistics. Linear and PCHIP native-beam interpolants define a model comparison, not a measured fine-channel response. Gaussian visibility illustrations retain the complex relation and both sidereal phases. No detection significance is inferred.",
-      "mixed_fingerprint": "e681e529cf1966b8a2dd7698d603f95c4bd8a047b211ca2590f4f685618af8cb",
+      "mixed_fingerprint": "bec5bd6cdb2ace8f4db082b8776bbe965b40954e6777c061e06bf7f135db06e6",
       "bin_seconds": 2305.265146875
     },
     "sources": {
@@ -113,7 +113,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_0_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_0_0_gaussian.npz",
       "sha256": "13ecb23a177441ca3479fc669d53889f53cf120949f0444a962e14356a9140d0"
     },
     {
@@ -161,7 +161,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_1_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_0_1_gaussian.npz",
       "sha256": "7533d758b00197be8495ac8ab3edbd1cfc2092dc3a0c370fc74d3b9a8a77a228"
     },
     {
@@ -209,7 +209,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_2_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_0_2_gaussian.npz",
       "sha256": "c1c66615c961000437a79fbfdafd604e30e596fe84eab49cb008f89f94fd1dff"
     },
     {
@@ -256,7 +256,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_3_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_0_3_gaussian.npz",
       "sha256": "acb5059153f8f5827e68d146b659f31179a0c22d4112d5e048b04c247dddd84e"
     },
     {
@@ -305,7 +305,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_4_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_0_4_gaussian.npz",
       "sha256": "173d385987323ad89aeccc95a1f78867ce68b924f2f36629c3d3360555013351"
     },
     {
@@ -353,7 +353,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_0_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_0_0_variance_mixture.npz",
       "sha256": "04ae90bad5b7a549b0b089449986d4f4f6e475500188864544daf8512c44d9e8"
     },
     {
@@ -401,7 +401,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_1_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_0_1_variance_mixture.npz",
       "sha256": "5672608f3211b13c47e3c88cc56ac24409573d6ab2983b1a80626ab861a8b808"
     },
     {
@@ -449,7 +449,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_2_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_0_2_variance_mixture.npz",
       "sha256": "fd8ddee5546b1c4d2f8c90c519b02b2d00bf9e955aa5202e89e14f1eee52651f"
     },
     {
@@ -496,7 +496,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_3_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_0_3_variance_mixture.npz",
       "sha256": "27320900df63941ae1a6ee0bd7307760d43bd10aba98e9dd8e80af22edefdcf9"
     },
     {
@@ -545,7 +545,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_0_4_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_0_4_variance_mixture.npz",
       "sha256": "744ec5fccf664aab5a5138b624925030677be3067061ebd54541e94e03e4f666"
     },
     {
@@ -593,7 +593,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_0_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_1_0_gaussian.npz",
       "sha256": "18e1b6c7d0ad24e83f51685b3119f7e13019f7b035d99fb975dbd5ed3c1a022c"
     },
     {
@@ -641,7 +641,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_1_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_1_1_gaussian.npz",
       "sha256": "e07b1887a3360d0de14eea48cddb1578bfd5bd1352ed5fc067d805bb8daee1eb"
     },
     {
@@ -689,7 +689,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_2_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_1_2_gaussian.npz",
       "sha256": "1d5581505a6d1de4357f3f88068dfb05369282583bb3a3049380adac144dd467"
     },
     {
@@ -736,7 +736,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_3_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_1_3_gaussian.npz",
       "sha256": "18b304ebd45634ad57e570e7d5aace88079648fdff425bf6af6894bc267bb034"
     },
     {
@@ -785,7 +785,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_4_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_1_4_gaussian.npz",
       "sha256": "a1c32c691c4e97c21c0400e39b076d4e70c735e39e01d20de464fb3ae2ea5ff8"
     },
     {
@@ -833,7 +833,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_0_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_1_0_variance_mixture.npz",
       "sha256": "86e7a4c3a0aa415baabd8728e91e4ab4ba3dce4435d155b9187d2f8bd6735b8d"
     },
     {
@@ -881,7 +881,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_1_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_1_1_variance_mixture.npz",
       "sha256": "7ced07a16fb95917c9a74e9a25057aa784d267a9e71bfe047cdd5d59bd3fb1b5"
     },
     {
@@ -929,7 +929,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_2_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_1_2_variance_mixture.npz",
       "sha256": "6bdd7dbc624a89c5ca9e297d1d3896c5ca92cf5fc252dbc2db1b30c6be8ea1e0"
     },
     {
@@ -976,7 +976,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_3_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_1_3_variance_mixture.npz",
       "sha256": "ecf7001ecec698ca9d73538d2158e8d036e7e2a6aaa8c3270b724987d1a7e804"
     },
     {
@@ -1025,7 +1025,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/30_1_4_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/30_1_4_variance_mixture.npz",
       "sha256": "3984d6c7136b7fa96591b863ddf8e1959a54d18187a0d43849f7632a111562c7"
     },
     {
@@ -1073,7 +1073,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_0_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_0_0_gaussian.npz",
       "sha256": "b04ea1a12002161be0234fb43150f431b4b45746c137198111275928423a90de"
     },
     {
@@ -1121,7 +1121,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_1_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_0_1_gaussian.npz",
       "sha256": "3bd7fc5d1526faae8d3a4b961c3f8f9ac340f2f824cabee1e3bbde2f084318c2"
     },
     {
@@ -1169,7 +1169,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_2_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_0_2_gaussian.npz",
       "sha256": "2bcfdb3db45d78f3834c96e4d92e25b31fe01d0bf33aab0c10bf856054910124"
     },
     {
@@ -1216,7 +1216,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_3_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_0_3_gaussian.npz",
       "sha256": "6560c87d54b08d278d129851f649b5b4155adec41fc7f27f225e0bda4e36e5f0"
     },
     {
@@ -1265,7 +1265,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_4_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_0_4_gaussian.npz",
       "sha256": "3af867943c3bf878338b7504afd3800ef53fbfc898692728a7f83eb34ff7871a"
     },
     {
@@ -1313,7 +1313,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_0_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_0_0_variance_mixture.npz",
       "sha256": "0b1ba45ea6853c2891769b68531ebc7d333b0ce0e3bf1a55839ee7f0a13d6340"
     },
     {
@@ -1361,7 +1361,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_1_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_0_1_variance_mixture.npz",
       "sha256": "599bb8979b1edd6c520ced4cd6a9e4c8a54872bd368ac7910249b68c2ea7828c"
     },
     {
@@ -1409,7 +1409,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_2_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_0_2_variance_mixture.npz",
       "sha256": "e2da182656d8155c0a469e19e1f4e72b496b37ffa40734b50bb61241192bb7ab"
     },
     {
@@ -1456,7 +1456,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_3_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_0_3_variance_mixture.npz",
       "sha256": "fc5c40767d80df9358f89033dafb9a750c53c82f09c8b8e26cb8133317a899b4"
     },
     {
@@ -1505,7 +1505,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_0_4_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_0_4_variance_mixture.npz",
       "sha256": "1097a1527ba580545fb300c83cd11ae955946b599dc6b1f891693d34954aba2c"
     },
     {
@@ -1553,7 +1553,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_0_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_1_0_gaussian.npz",
       "sha256": "2a1e8d015ec78751843cecb5b907977d937bb0a3d508ba22dbf7e9933df4c635"
     },
     {
@@ -1601,7 +1601,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_1_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_1_1_gaussian.npz",
       "sha256": "5b293751cd33b82784ad91704566196ffc50f11d714c280f0dec82a4fed79359"
     },
     {
@@ -1649,7 +1649,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_2_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_1_2_gaussian.npz",
       "sha256": "91fc04f2decb531d4ab92dc61accd837e469e4b8f1d8eb768c2d252202ebd173"
     },
     {
@@ -1696,7 +1696,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_3_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_1_3_gaussian.npz",
       "sha256": "aa309a1164037e915655fff5bfc45ab30277cd341d3be17f00c9a067534d8f4a"
     },
     {
@@ -1745,7 +1745,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_4_gaussian.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_1_4_gaussian.npz",
       "sha256": "e2983bf56cfc92f0c34bd1d13f0ab8a80b9b871631228960a6f722a6446aad92"
     },
     {
@@ -1793,7 +1793,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_0_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_1_0_variance_mixture.npz",
       "sha256": "4de285cc81f4b394fa59c65923a0b7ba1ea20acb22d00dd1813a2906d223b75f"
     },
     {
@@ -1841,7 +1841,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_1_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_1_1_variance_mixture.npz",
       "sha256": "da53752c97464f3f49762b1f378b4fa34fb2d395f81c07d615f3093333684969"
     },
     {
@@ -1889,7 +1889,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_2_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_1_2_variance_mixture.npz",
       "sha256": "a106c9b2ac0e7a9a0042b6a45bfb131209ad5be0ad13b7228aa56865131e6fd4"
     },
     {
@@ -1936,7 +1936,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_3_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_1_3_variance_mixture.npz",
       "sha256": "e68dedae0f1f2459a67e448f919fca7254eb593d02302a8fb9c8e47e21f55c23"
     },
     {
@@ -1985,7 +1985,7 @@
           "residual_dof": 190
         }
       ],
-      "path": "generated_data/cache/residual_signal/1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745/50_1_4_variance_mixture.npz",
+      "path": "generated_data/cache/residual_signal/83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f/50_1_4_variance_mixture.npz",
       "sha256": "53a1113fbe80a4933637c982055a8e2533ecf27bee37ca091de7706fc2014f0e"
     }
   ],

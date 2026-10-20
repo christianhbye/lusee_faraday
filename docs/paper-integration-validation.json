@@ -1,18 +1,15 @@
 {
   "full_suite": {
-    "passed": 227,
-    "failed": 1,
-    "seconds": 375.18,
+    "passed": 232,
+    "failed": 0,
+    "seconds": 247.24,
     "coverage_percent": 89,
-    "failure": "tests/test_response_two_port.py::test_short_dipole_monopole_matches_measured_reference",
-    "unchanged_from_baseline": true,
-    "baseline_record": "docs/depth-depolarization-validation.json",
-    "log_sha256": "dfcc4cc217df2215f0fa63279d5832994cf00fe9631265f6021fa762b11ddc41",
+    "log_sha256": "bb87d6b280d165c96ac81ec42f073f3a6471cd2f37faa490d6b3b2aae1293254",
     "log_path": "generated_data/paper_integration_tests.log"
   },
   "smoke": {
     "passed": 34,
-    "log_sha256": "e2444e59b3f1daad940842e187aed24224289f8d40e2a12c12f2fd3516bb733f",
+    "log_sha256": "8949ca3f96fdb8366166638431381dc9a568452eb3aca892008fef4feced60e7",
     "log_path": "generated_data/paper_smoke_final.log"
   },
   "sources": {
@@ -33,7 +30,7 @@
     "src/lusee_faraday/pixel_arm.py": "99dfdf4ea56762025c712a85066f2fc407a97bea67dbb7af18fcd315c1b40576",
     "src/lusee_faraday/polarimeter.py": "5cbb90dc311aa6c849499d2e7a8a52e9bcaef9c3bec666bfec8419a1f3a7582e",
     "src/lusee_faraday/receiver_noise.py": "ec07c30e72ff90061f48635106d965af83a663067b99a61d2cbb295952c0ea56",
-    "src/lusee_faraday/response.py": "92eeae1a28c7a97af198c8fa1b78d1a36acf014f71b2ee73cbfe4db413fe64ad",
+    "src/lusee_faraday/response.py": "0b631d60db77e15698b66936fbb782e855c6f74a01b2e3caca214c2bcbacae14",
     "src/lusee_faraday/screen_draws.py": "861dd27db0c2d08dfc5a66d4720ce522811b44545b4db63949577823d72d71cc",
     "src/lusee_faraday/screen_inference.py": "f31c4262e32d3bdc8cbaf100bd8a5a84e8cefcb0578cd2ac77a87265ff70bf19",
     "src/lusee_faraday/screen_validation.py": "e4fd2e3c47cc19404d7dbc3a9e7e3b833771aafc44b8fec1eb49b6b07772ba97",
@@ -69,7 +66,7 @@
     "tests/test_receiver_noise.py": "7f02c6e935f1f35bd7b9b6a1a35581b9328bbffaf2d53f89ba42f1baa8b9265b",
     "tests/test_regression_fixture.py": "3fbb32f4a82bafad088ab635f7d52465c727b022f9fcad95db083f0b7cbbf860",
     "tests/test_response.py": "ee13a6e3d9a4ac5f6594a1d39f19c9122fd451dbaeb34b1c9e1cfad984235c5e",
-    "tests/test_response_two_port.py": "2d8ec086437685136fda4448a88b659321b6432112878fc38a734dbbb1a4cb97",
+    "tests/test_response_two_port.py": "7ce0199ee037469434ef8044f47fb3fe1cef0deda24a009cced12ce01e606c84",
     "tests/test_screen_draws.py": "dce92573ca92232c372e8908a571e114625d982a1755ebe4f6c39f313f101617",
     "tests/test_screen_inference.py": "7e8625d035a89a6ce2efb42d4ebec24c046e423ca2feb6d6408408f635a8aaa9",
     "tests/test_separability.py": "6825a7d7548124111ca250747490c41583539b2fb7855f893ce3ef9a292d1384",
@@ -82,5 +79,5 @@
     "tests/test_visibility_draws.py": "41761409644089a1d5345a80d52c5f0ddb565994de951a0544c28212bea3de8d",
     "tests/test_zenith_weights_regression.py": "7295aea2467fc4266e3d77fa2f5da0b997455a8095d8f7dcb48ddff0eab745a5"
   },
-  "scope": "Full local environment including the real BGL artifact; one pre-existing measured two-port reference mismatch is preserved. No newly introduced test fails. CI uses its independently pinned upstream environment."
+  "scope": "Full local environment including the real BGL artifact, rerun after merging main (PR 10 fixed the former two-port monopole-reference mismatch): all tests pass. CI uses its independently pinned upstream environment."
 }

@@ -1,5 +1,5 @@
 {
-  "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+  "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
   "provenance": {
     "configuration": {
       "responses": {
@@ -85,7 +85,7 @@
       "src/lusee_faraday/engine.py": "02573e5da1d919ba08dce2199b7419fc7e6daa5483f1b26a474ccebc0ca9ba31",
       "src/lusee_faraday/instrument.py": "9ee06656728dc952128f998d09592064441cc52210412b6a634ac7c6fc84acac",
       "src/lusee_faraday/polarimeter.py": "5cbb90dc311aa6c849499d2e7a8a52e9bcaef9c3bec666bfec8419a1f3a7582e",
-      "src/lusee_faraday/response.py": "92eeae1a28c7a97af198c8fa1b78d1a36acf014f71b2ee73cbfe4db413fe64ad",
+      "src/lusee_faraday/response.py": "0b631d60db77e15698b66936fbb782e855c6f74a01b2e3caca214c2bcbacae14",
       "src/lusee_faraday/sky.py": "0cfd4424ffc49b26035c5c40c1900d42c511d560ab23b9b1e25b3a6a75ab650f"
     },
     "dependencies": {
@@ -148,10 +148,10 @@
       "arrays": [
         {
           "frequency_mhz": 29.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/asbuilt_30_29.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/asbuilt_30_29.npz",
           "sha256": "ffea4f6c607ee2970e6388fc1f8a9692a6f48c5e1afec4bcb4aaf2dd6775bb8f",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "ffea4f6c607ee2970e6388fc1f8a9692a6f48c5e1afec4bcb4aaf2dd6775bb8f",
             "passed": true,
             "maximum_beam_error_over_i": 1.236731394594057e-06,
@@ -160,10 +160,10 @@
         },
         {
           "frequency_mhz": 29.5,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/asbuilt_30_29.5.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/asbuilt_30_29.5.npz",
           "sha256": "bfaa1066d6645c197b7c8c404ba0abb9f8e5fb517ec26195251ac3b0477af8e6",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "bfaa1066d6645c197b7c8c404ba0abb9f8e5fb517ec26195251ac3b0477af8e6",
             "passed": true,
             "maximum_beam_error_over_i": 1.357273581508462e-06,
@@ -172,10 +172,10 @@
         },
         {
           "frequency_mhz": 30.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/asbuilt_30_30.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/asbuilt_30_30.npz",
           "sha256": "9cb5f824c2fcca75d7097300f09785f9d8912a22fddbb8c267914190cd5fbf74",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "9cb5f824c2fcca75d7097300f09785f9d8912a22fddbb8c267914190cd5fbf74",
             "passed": true,
             "maximum_beam_error_over_i": 1.609419071632849e-06,
@@ -184,10 +184,10 @@
         },
         {
           "frequency_mhz": 30.5,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/asbuilt_30_30.5.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/asbuilt_30_30.5.npz",
           "sha256": "e74c2448cbb901ab946a7417810fd364b5024e14a03533f656bb437d7d30d7c4",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "e74c2448cbb901ab946a7417810fd364b5024e14a03533f656bb437d7d30d7c4",
             "passed": true,
             "maximum_beam_error_over_i": 1.4960978299037202e-06,
@@ -196,10 +196,10 @@
         },
         {
           "frequency_mhz": 31.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/asbuilt_30_31.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/asbuilt_30_31.npz",
           "sha256": "261fe8db38ade84d27663d3b2e6b0e4e63f07dd185ba255228b1841c6e3dfcb9",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "261fe8db38ade84d27663d3b2e6b0e4e63f07dd185ba255228b1841c6e3dfcb9",
             "passed": true,
             "maximum_beam_error_over_i": 1.5661830005061988e-06,
@@ -246,10 +246,10 @@
       "arrays": [
         {
           "frequency_mhz": 49.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/asbuilt_50_49.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/asbuilt_50_49.npz",
           "sha256": "daf8f2eff4c011714132c536d88ab2b47cbbeaa07cf99e153fe77c1932c70441",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "daf8f2eff4c011714132c536d88ab2b47cbbeaa07cf99e153fe77c1932c70441",
             "passed": true,
             "maximum_beam_error_over_i": 2.75256504897959e-06,
@@ -258,10 +258,10 @@
         },
         {
           "frequency_mhz": 49.5,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/asbuilt_50_49.5.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/asbuilt_50_49.5.npz",
           "sha256": "dc7ae8f5946c3dde22a48df4abb5465c379a3df5b3f2d0d0860273e7144140b2",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "dc7ae8f5946c3dde22a48df4abb5465c379a3df5b3f2d0d0860273e7144140b2",
             "passed": true,
             "maximum_beam_error_over_i": 3.4181551122790766e-06,
@@ -270,10 +270,10 @@
         },
         {
           "frequency_mhz": 50.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/asbuilt_50_50.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/asbuilt_50_50.npz",
           "sha256": "7ac5e5f7f80d406e590b2d8b1c0f1499096170e34629cc963c88fd8e7e20275f",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "7ac5e5f7f80d406e590b2d8b1c0f1499096170e34629cc963c88fd8e7e20275f",
             "passed": true,
             "maximum_beam_error_over_i": 4.598625022910949e-06,
@@ -282,10 +282,10 @@
         },
         {
           "frequency_mhz": 50.5,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/asbuilt_50_50.5.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/asbuilt_50_50.5.npz",
           "sha256": "373798d38a8763511612073a052799f7c8ae5d6b35fcd7aa0e9332e64f01d09c",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "373798d38a8763511612073a052799f7c8ae5d6b35fcd7aa0e9332e64f01d09c",
             "passed": true,
             "maximum_beam_error_over_i": 5.109539273199345e-06,
@@ -294,10 +294,10 @@
         },
         {
           "frequency_mhz": 51.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/asbuilt_50_51.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/asbuilt_50_51.npz",
           "sha256": "405ebc430c4118f682ae1b5d8a19c518e481e613d8127b2b21013745acadd49e",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "405ebc430c4118f682ae1b5d8a19c518e481e613d8127b2b21013745acadd49e",
             "passed": true,
             "maximum_beam_error_over_i": 5.464299319664714e-06,
@@ -344,10 +344,10 @@
       "arrays": [
         {
           "frequency_mhz": 29.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/c4sym_30_29.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/c4sym_30_29.npz",
           "sha256": "4404c6e8ab4114629575c4723967df067eb6e3cf821bbc88eaf628cf731e89a0",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "4404c6e8ab4114629575c4723967df067eb6e3cf821bbc88eaf628cf731e89a0",
             "passed": true,
             "maximum_beam_error_over_i": 9.028805956757418e-07,
@@ -356,10 +356,10 @@
         },
         {
           "frequency_mhz": 29.5,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/c4sym_30_29.5.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/c4sym_30_29.5.npz",
           "sha256": "576b8b441040881414946882240a4c7ca99c6141566271f8030fa6d7b80f7383",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "576b8b441040881414946882240a4c7ca99c6141566271f8030fa6d7b80f7383",
             "passed": true,
             "maximum_beam_error_over_i": 9.262161866895696e-07,
@@ -368,10 +368,10 @@
         },
         {
           "frequency_mhz": 30.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/c4sym_30_30.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/c4sym_30_30.npz",
           "sha256": "3bddf7d9cce63477241a9d4d81064440b8066c7523f9776ecc23486ba9042119",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "3bddf7d9cce63477241a9d4d81064440b8066c7523f9776ecc23486ba9042119",
             "passed": true,
             "maximum_beam_error_over_i": 9.634526946497434e-07,
@@ -380,10 +380,10 @@
         },
         {
           "frequency_mhz": 30.5,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/c4sym_30_30.5.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/c4sym_30_30.5.npz",
           "sha256": "1e0d1102aee98848062cf38019ade924fe17a7668f17a409f793a2e653ec02dc",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "1e0d1102aee98848062cf38019ade924fe17a7668f17a409f793a2e653ec02dc",
             "passed": true,
             "maximum_beam_error_over_i": 1.0237268741554533e-06,
@@ -392,10 +392,10 @@
         },
         {
           "frequency_mhz": 31.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/c4sym_30_31.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/c4sym_30_31.npz",
           "sha256": "f66b796f8093f6ade2fa0e1d3e54b30c852a772b3f5a66489fea05a4f1eee2d7",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "f66b796f8093f6ade2fa0e1d3e54b30c852a772b3f5a66489fea05a4f1eee2d7",
             "passed": true,
             "maximum_beam_error_over_i": 1.152904753514476e-06,
@@ -442,10 +442,10 @@
       "arrays": [
         {
           "frequency_mhz": 49.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/c4sym_50_49.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/c4sym_50_49.npz",
           "sha256": "9eb4d83d45a2d0b202ab073f17a226f7c2219bda933d99df30a1aeb23aa9d3cf",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "9eb4d83d45a2d0b202ab073f17a226f7c2219bda933d99df30a1aeb23aa9d3cf",
             "passed": true,
             "maximum_beam_error_over_i": 3.820102943234305e-06,
@@ -454,10 +454,10 @@
         },
         {
           "frequency_mhz": 49.5,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/c4sym_50_49.5.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/c4sym_50_49.5.npz",
           "sha256": "c20d708e0f71fd69ada7c8aee7ed6a8b5adbc80eaa69eaf56cf7fc62e44b960b",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "c20d708e0f71fd69ada7c8aee7ed6a8b5adbc80eaa69eaf56cf7fc62e44b960b",
             "passed": true,
             "maximum_beam_error_over_i": 4.024019154179866e-06,
@@ -466,10 +466,10 @@
         },
         {
           "frequency_mhz": 50.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/c4sym_50_50.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/c4sym_50_50.npz",
           "sha256": "f5b96cde8bab61b0b2ecce90ed3ef2fa81047a54e308e5c6ea22c4a6af40fb8f",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "f5b96cde8bab61b0b2ecce90ed3ef2fa81047a54e308e5c6ea22c4a6af40fb8f",
             "passed": true,
             "maximum_beam_error_over_i": 4.49865503427407e-06,
@@ -478,10 +478,10 @@
         },
         {
           "frequency_mhz": 50.5,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/c4sym_50_50.5.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/c4sym_50_50.5.npz",
           "sha256": "01efe3d153909362bf47b9cfb57dd9e9aea43e431cd7f48dcb8047b0c56a0bed",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "01efe3d153909362bf47b9cfb57dd9e9aea43e431cd7f48dcb8047b0c56a0bed",
             "passed": true,
             "maximum_beam_error_over_i": 4.814899550429436e-06,
@@ -490,10 +490,10 @@
         },
         {
           "frequency_mhz": 51.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/c4sym_50_51.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/c4sym_50_51.npz",
           "sha256": "17e66b01d22cf7ee6ce2b737efbbf60a3118b4b0aeb78f2a432cc87f5ce6d5ee",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "17e66b01d22cf7ee6ce2b737efbbf60a3118b4b0aeb78f2a432cc87f5ce6d5ee",
             "passed": true,
             "maximum_beam_error_over_i": 5.16604445979657e-06,
@@ -540,10 +540,10 @@
       "arrays": [
         {
           "frequency_mhz": 29.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/diagza_30_29.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/diagza_30_29.npz",
           "sha256": "f8962dbc3741bffc4730317730fb4ef32862429dc3ea094fa84d2a58fe0a86ee",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "f8962dbc3741bffc4730317730fb4ef32862429dc3ea094fa84d2a58fe0a86ee",
             "passed": true,
             "maximum_beam_error_over_i": 1.2597870504329976e-06,
@@ -552,10 +552,10 @@
         },
         {
           "frequency_mhz": 29.5,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/diagza_30_29.5.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/diagza_30_29.5.npz",
           "sha256": "a4e6be398032ff6f033ae5b66ff1baeae1787cdce2882f6bf9df5e6cbec3b80b",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "a4e6be398032ff6f033ae5b66ff1baeae1787cdce2882f6bf9df5e6cbec3b80b",
             "passed": true,
             "maximum_beam_error_over_i": 1.3669655507750836e-06,
@@ -564,10 +564,10 @@
         },
         {
           "frequency_mhz": 30.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/diagza_30_30.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/diagza_30_30.npz",
           "sha256": "9920cc802d17384484bb47374e23d18b0ba5c4f3b3866757ad328a0495690416",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "9920cc802d17384484bb47374e23d18b0ba5c4f3b3866757ad328a0495690416",
             "passed": true,
             "maximum_beam_error_over_i": 1.7368329180098917e-06,
@@ -576,10 +576,10 @@
         },
         {
           "frequency_mhz": 30.5,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/diagza_30_30.5.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/diagza_30_30.5.npz",
           "sha256": "a33d07f395e059a650b0f046bc185c970e4d0241b550be2e1b977d870367477c",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "a33d07f395e059a650b0f046bc185c970e4d0241b550be2e1b977d870367477c",
             "passed": true,
             "maximum_beam_error_over_i": 1.8348583070849435e-06,
@@ -588,10 +588,10 @@
         },
         {
           "frequency_mhz": 31.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/diagza_30_31.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/diagza_30_31.npz",
           "sha256": "929d61476545df16cfe056311042fb202139c63b5ecebf02013e5718f73a6ed5",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "929d61476545df16cfe056311042fb202139c63b5ecebf02013e5718f73a6ed5",
             "passed": true,
             "maximum_beam_error_over_i": 1.9549960963471316e-06,
@@ -638,10 +638,10 @@
       "arrays": [
         {
           "frequency_mhz": 49.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/diagza_50_49.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/diagza_50_49.npz",
           "sha256": "dd901bbc20db162e4e896536c07e9b5040b5fc521b361e634b883c4b87bbf8e8",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "dd901bbc20db162e4e896536c07e9b5040b5fc521b361e634b883c4b87bbf8e8",
             "passed": true,
             "maximum_beam_error_over_i": 2.744255302235014e-06,
@@ -650,10 +650,10 @@
         },
         {
           "frequency_mhz": 49.5,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/diagza_50_49.5.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/diagza_50_49.5.npz",
           "sha256": "2d91cc9f73de397ce9b5adc85f8a238a716122d5befe9bf7a4d243b5adbd7c2a",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "2d91cc9f73de397ce9b5adc85f8a238a716122d5befe9bf7a4d243b5adbd7c2a",
             "passed": true,
             "maximum_beam_error_over_i": 3.4152674933584883e-06,
@@ -662,10 +662,10 @@
         },
         {
           "frequency_mhz": 50.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/diagza_50_50.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/diagza_50_50.npz",
           "sha256": "7034764f2c5ecbc97100c9b80394d726a56689e1896b0161842b55fdb2d7d538",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "7034764f2c5ecbc97100c9b80394d726a56689e1896b0161842b55fdb2d7d538",
             "passed": true,
             "maximum_beam_error_over_i": 4.576932986211081e-06,
@@ -674,10 +674,10 @@
         },
         {
           "frequency_mhz": 50.5,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/diagza_50_50.5.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/diagza_50_50.5.npz",
           "sha256": "70790fa50744a8e3394fed2b3ac3e7f099785a126f2b7ceb4c943363f160ece3",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "70790fa50744a8e3394fed2b3ac3e7f099785a126f2b7ceb4c943363f160ece3",
             "passed": true,
             "maximum_beam_error_over_i": 5.0905917405254324e-06,
@@ -686,10 +686,10 @@
         },
         {
           "frequency_mhz": 51.0,
-          "path": "generated_data/cache/chromatic_leakage/615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea/diagza_50_51.npz",
+          "path": "generated_data/cache/chromatic_leakage/60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889/diagza_50_51.npz",
           "sha256": "f2bceaa8d3a818d1135a8ae3b7cd82d23d36c6333f34f650d52014dc08d74f0f",
           "diagnostics": {
-            "fingerprint": "615733d4ef12abd00cd90cbe92db85638ee150b6f34f5e1e5abbd546c3aef9ea",
+            "fingerprint": "60ede28217d48939bc5964eaeda7b18f05daf11a59d67ba408cf5d6fe2f14889",
             "sha256": "f2bceaa8d3a818d1135a8ae3b7cd82d23d36c6333f34f650d52014dc08d74f0f",
             "passed": true,
             "maximum_beam_error_over_i": 5.4470672144564624e-06,

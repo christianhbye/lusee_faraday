@@ -1,10 +1,10 @@
 {
-  "fingerprint": "3354eb69c7d4896d5f1b1d4eaf27cab395596c42db48d325cc1885187bc8b503",
+  "fingerprint": "ada997413c1c2ce53cfb4f9308710a3c2adbc73e17ef8862cf70bcaaf0a324a8",
   "provenance": {
     "configuration": {
-      "local_record_sha256": "85f4ad1bdd05c55775697daac60752db5b6b4d50038f3ae10dbdc51b1a327785",
-      "system_record_sha256": "094938d1e7b25209979286b98e27ffa6de974a1621b5d529489e2afa3db1149b",
-      "joint_record_sha256": "5bd4d205f60fe470b7b11f9736d5606ce4f1b785d7b6444afaa818745a81d4c5",
+      "local_record_sha256": "77a9112733dd831408de3c0cf0c0b157b7a59d74fec597369742ec5f204f76dc",
+      "system_record_sha256": "87377c699179c96fe4d6069f33a0f3195254bc4c86d82a0599d7ac08b54ff7bd",
+      "joint_record_sha256": "67ffaaf496e6c945787053cb1d2ae63fa8ecd3917bd64cecf4d8022542379e1e",
       "local_configuration": {
         "horizon_config": "configs/paper/horizon.json",
         "separability_config": "configs/paper/separability.json",
@@ -96,8 +96,8 @@
             }
           ]
         },
-        "reference_fingerprint": "1074f3faed716cdfb932dbf000ea1a2aaff986629f778e5a19291b89592a4745",
-        "system_record_sha256": "094938d1e7b25209979286b98e27ffa6de974a1621b5d529489e2afa3db1149b",
+        "reference_fingerprint": "83ac69119ac9ba9ef569233e30d9fd08f4541cc1a8db2d7cc2b655c28161579f",
+        "system_record_sha256": "87377c699179c96fe4d6069f33a0f3195254bc4c86d82a0599d7ac08b54ff7bd",
         "exposure_record_sha256": "f7faa524f15c6a92744144c5cae7c02662c641d37a6d3f6fe8da7a1f88970161"
       }
     },
@@ -134,7 +134,7 @@
   "results": [
     {
       "center_mhz": 30.0,
-      "path": "generated_data/cache/science_predictions/3354eb69c7d4896d5f1b1d4eaf27cab395596c42db48d325cc1885187bc8b503/30.npz",
+      "path": "generated_data/cache/science_predictions/ada997413c1c2ce53cfb4f9308710a3c2adbc73e17ef8862cf70bcaaf0a324a8/30.npz",
       "sha256": "a224500e06e026cd7326245a992b3ea84d38a5a74d2a4d96554e3f455ad90692",
       "passed": true,
       "operator_relative_error": 4.52766467987434e-15,
@@ -521,7 +521,7 @@
     },
     {
       "center_mhz": 50.0,
-      "path": "generated_data/cache/science_predictions/3354eb69c7d4896d5f1b1d4eaf27cab395596c42db48d325cc1885187bc8b503/50.npz",
+      "path": "generated_data/cache/science_predictions/ada997413c1c2ce53cfb4f9308710a3c2adbc73e17ef8862cf70bcaaf0a324a8/50.npz",
       "sha256": "d39f48c4368711cc0749b17919aef6009fa6d7853ccc20ea99bad9df8173f7c7",
       "passed": true,
       "operator_relative_error": 3.0235036144632567e-15,
