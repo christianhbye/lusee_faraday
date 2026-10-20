@@ -289,16 +289,15 @@ def plot(out):
         leak[it, :, 1] + unrot[it, :, 1],
         color="0.5",
         lw=1.6,
-        ls="--",
         label="leakage + WMAP polarization, no Faraday rotation",
     )
     ax.plot(
         fz,
         leak[it, :, 1] + zoom[it, :, 1],
         color=colors[it],
-        lw=1.2,
-        label="leakage + WMAP polarization, Faraday rotated "
-        "(indistinguishable from leakage alone)",
+        lw=1.6,
+        ls="--",
+        label="leakage + WMAP polarization, Faraday rotated",
     )
     ax.set_ylabel("total pseudo-Stokes Q [K]")
     ax.set_title(
