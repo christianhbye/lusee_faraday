@@ -139,12 +139,32 @@ def main():
     print(f"down-weighted {np.sum(~good) * 3} aliased bins of {fz.size}")
     tau = np.fft.rfftfreq(fz.size, d=step_hz) * 1e6  # microseconds
 
+    # Remove a constant and slope per parent channel, fitted on the
+    # unaliased bins (the common smooth estimator of the paper pipeline),
+    # before transforming: a bright smooth leakage would otherwise spread
+    # over all delays once any bin is down-weighted.
+    def smooth_removed(x):
+        out = x.copy()
+        for j in range(3):
+            lo, hi = j * 64, (j + 1) * 64
+            segment = fz[lo:hi]
+            use = taper[lo:hi] > 0.99
+            coeff = np.polyfit(segment[use] - segment.mean(), x[lo:hi][use], 1)
+            out[lo:hi] = x[lo:hi] - np.polyval(coeff, segment - segment.mean())
+        return out
+
     def delay_power(x):
-        return np.abs(np.fft.rfft(x * win)) ** 2 / fz.size
+        return np.abs(np.fft.rfft(smooth_removed(x) * win)) ** 2 / fz.size
 
     fig, ax = plt.subplots(figsize=(8.5, 5))
     for x, label, color, ls in (
-        (total_q, "total Q: leakage + Faraday (linear map)", "k", "-"),
+        (
+            total_q,
+            "total Q (leakage + Faraday), constant and slope removed "
+            "per parent",
+            "k",
+            "-",
+        ),
         (far_q, "Faraday Q alone, linear map realization", "C0", "-"),
         (draw_q, r"Faraday Q, one $\alpha$=5/3 ensemble draw", "C2", "--"),
         (
@@ -163,8 +183,8 @@ def main():
         r"$\approx$ 90 $\mu$s at 30 MHz, 20 $\mu$s at 50 MHz)"
     )
     ax.set_ylabel(
-        "delay power [K$^2$], Blackman-Harris window,\n"
-        "aliased edge bins down-weighted"
+        "delay power [K$^2$] after per-parent constant+slope removal,\n"
+        "Blackman-Harris window, aliased edge bins down-weighted"
     )
     ax.set_title(
         f"Delay spectrum of the zoom bins of three parent channels at "
