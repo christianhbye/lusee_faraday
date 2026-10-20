@@ -498,16 +498,22 @@ def plot_ladder_panels(axes, fz, zoom, parents, off, sel, order):
 
 
 F_SCAN = (1.0, 0.6, 0.3)
-F_LOCAL = (1.0, 0.3, 0.002, 0.0002)  # column to local medium
+F_LOCAL = (  # (fraction of the column, profile): column to local medium
+    (1.0, "screen"),
+    (0.3, "screen"),
+    (0.002, "screen"),
+    (0.002, "slab"),
+    (0.0002, "screen"),
+)
 
 
-def _load_f(f, sel, order):
+def _load_f(f, sel, order, profile="screen"):
     """Zoom-bin pseudo-Stokes (K) of the three terms for a screen at f."""
-    global RM_SCALE
-    keep = RM_SCALE
-    RM_SCALE = f
+    global RM_SCALE, PROFILE
+    keep = (RM_SCALE, PROFILE)
+    RM_SCALE, PROFILE = f, profile
     path = out_dir() / "spectra.npz"
-    RM_SCALE = keep
+    RM_SCALE, PROFILE = keep
     if not path.exists():
         return None
     d = np.load(path)
@@ -523,18 +529,30 @@ def _load_f(f, sel, order):
     )
 
 
-F_STYLES = (("k", "-"), ("C0", "--"), ("C1", ":"), ("C4", "-."))
+def _case_label(f, profile):
+    where = "screen at" if profile == "screen" else "mixed out to"
+    return f"{where} f = {f:g} of the column"
+
+
+F_STYLES = (
+    ("k", "-"),
+    ("C0", "--"),
+    ("C1", ":"),
+    ("C2", "-."),
+    ("C4", (0, (3, 1, 1, 1, 1, 1))),
+)
 
 
 def plot_fscan_panels(axes, fz, parents, off, sel, order, f_values=F_SCAN):
-    """One sidereal phase: the linear-interpolation sky for screens at the
-    given fractions f of the column (RM map scaled by f)."""
+    """One sidereal phase: the linear-interpolation sky for the given
+    (fraction, profile) cases; plain floats mean screens."""
     it = CONTEXT_PHASE
+    cases = [c if isinstance(c, tuple) else (c, "screen") for c in f_values]
     for s, (ax, name) in enumerate(zip(axes, ("Q", "U")), start=1):
-        for f, (color, ls) in zip(f_values, F_STYLES):
-            terms = _load_f(f, sel, order)
+        for (f, profile), (color, ls) in zip(cases, F_STYLES):
+            terms = _load_f(f, sel, order, profile)
             if terms is None:
-                print(f"no cache for f={f:g}; skipped")
+                print(f"no cache for f={f:g} {profile}; skipped")
                 continue
             ax.plot(
                 fz,
@@ -542,7 +560,7 @@ def plot_fscan_panels(axes, fz, parents, off, sel, order, f_values=F_SCAN):
                 color=color,
                 ls=ls,
                 lw=1.5,
-                label=f"linear interpolation, screen at f = {f:g}",
+                label=f"linear interpolation, {_case_label(f, profile)}",
             )
         ax.ticklabel_format(axis="x", useOffset=False)
         ax.set_ylabel(f"Faraday {name} alone [K]")
@@ -569,8 +587,8 @@ def plot_local_top(ax, fz, sel, order):
         lw=2.4,
         label="leakage + WMAP polarization, no rotation",
     )
-    for f, (color, ls) in zip(F_LOCAL, F_STYLES):
-        terms = _load_f(f, sel, order)
+    for (f, profile), (color, ls) in zip(F_LOCAL, F_STYLES):
+        terms = _load_f(f, sel, order, profile)
         if terms is None:
             continue
         ax.plot(
@@ -579,7 +597,7 @@ def plot_local_top(ax, fz, sel, order):
             color=color,
             ls=ls,
             lw=1.4,
-            label=f"rotated, screen at f = {f:g} of the column",
+            label=f"rotated, {_case_label(f, profile)}",
         )
     ax.ticklabel_format(axis="x", useOffset=False)
     ax.set_ylabel("total pseudo-Stokes Q [K]")
