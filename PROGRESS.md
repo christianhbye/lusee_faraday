@@ -1,5 +1,13 @@
 # Progress — four-port Faraday analysis (INSTRUCTIONS-LPY.md)
 
+## Session handoff — 2026-10-19
+
+`docs/handoff-2026-10-19.md` summarizes the day: the paper arc, the column
+screen through the real instrument, the decision table, the Stokes I leak,
+the analytic f-axis, the column-to-local map runs (coherent rotation below
+~0.007 rad/m² of depth) and the slide figures 4d, 06–14.
+
+
 ## Decision table, delay spectrum, f-axis at the column anchor — 2026-10-19 (later)
 
 `scripts/column_decision.py` puts every column-screen scenario against the

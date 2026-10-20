@@ -4,9 +4,13 @@ Reads the slides_subpixel_spectra caches computed at native channels across
 10-50 MHz for screens at small fractions f of the column (the local medium)
 and plots the central parent channel's pseudo-Stokes Q and U of the Faraday
 polarized term against frequency and lambda^2, at one sidereal phase, next
-to the unrotated polarization and the leakage. Below a few hundredths of a
-rad/m^2 of depth the beam-averaged angle rotates coherently as 2 lambda^2
-Phi, so Q and U swing across the band instead of rippling within a channel.
+to the unrotated polarization. With a local depth of a few thousandths of
+a rad/m^2 the polarized term is no longer destroyed; it is reshaped across
+the band by of order itself, oscillating in lambda^2 where 2 lambda^2 Phi
+exceeds a radian (below ~20 MHz for 0.005 rad/m^2). The four-port pseudo-
+Stokes do not rotate as a pair the way the sky's Q and U do, so this is not
+the textbook sinusoid; it is a broadband, sidereal-dependent change rather
+than a kilohertz ripple.
 """
 
 import common  # noqa: F401
@@ -89,14 +93,6 @@ def main():
                 lw=2,
                 label="WMAP polarization, no rotation",
             )
-            ax.plot(
-                cs,
-                [r["leak"][it, s] for r in ref if r is not None],
-                color="k",
-                lw=1,
-                ls="-.",
-                label="I-only leakage",
-            )
         for (f, k), (color, ls) in zip(cases, styles):
             rows = [load(c, f, const=k) for c in centers]
             ok = [r is not None for r in rows]
@@ -132,6 +128,8 @@ def main():
             )
         ax.set_ylabel(f"parent-channel pseudo-Stokes {name} [K]")
         ax.grid(alpha=0.3)
+        m = max(np.max(np.abs(line.get_ydata())) for line in ax.get_lines())
+        ax.set_ylim(-1.08 * m, 1.08 * m)
     axes[0].legend(fontsize=8, loc="best")
     axes[1].set_xlabel(
         "frequency [MHz]  (native 25 kHz parent channels every 2 MHz)"
@@ -144,8 +142,10 @@ def main():
             break
     fig.suptitle(
         (
-            "Local Faraday depth: the beam-averaged polarization angle "
-            f"rotates coherently across the band (sidereal phase {phase:.2f})"
+            "Emission in front of the Galactic column: a uniform local "
+            "Faraday depth reshapes the polarized term across the band\n"
+            f"(sidereal phase {phase:.2f}; the I-only leakage, 100 to "
+            "20000 K here, is not drawn)"
             if phase is not None
             else "Local Faraday depth across the band"
         ),
