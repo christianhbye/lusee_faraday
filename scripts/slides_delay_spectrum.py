@@ -115,8 +115,28 @@ def main():
     rng = np.random.default_rng(3)
     noise_q = sigma_n * rng.standard_normal(fz.size)
     step_hz = chan.ZOOM_STEP_HZ
-    win = blackmanharris(fz.size)
+    # Global window, with the aliased edge zoom bins of each parent
+    # down-weighted (a real analysis would flag them): a cosine taper to
+    # zero over the bins whose folded response exceeds 5 %.
+    fine_off = np.arange(-100e3, 100e3, chan.FINE_STEP_HZ)
+    wz = chan.zoom_weights(fine_off)
+    folded = np.sum(np.abs(wz[np.abs(fine_off) > 12.5e3]), axis=0) / np.sum(
+        np.abs(wz), axis=0
+    )
+    good = folded <= 0.05
+    taper_one = np.ones(64)
+    bad_idx = np.where(~good)[0]
+    for k in bad_idx:
+        taper_one[k] = 0.0
+    # smooth the mask edges over three bins in frequency order
+    o1 = np.argsort(off)
+    t_sorted = taper_one[o1]
+    kernel = np.array([0.25, 0.5, 0.25])
+    t_sorted = np.convolve(np.pad(t_sorted, 1, mode="edge"), kernel, "valid")
+    taper = np.concatenate([t_sorted] * 3)  # same mask for the 3 parents
+    win = blackmanharris(fz.size) * taper
     win /= np.sqrt(np.mean(win**2))
+    print(f"down-weighted {np.sum(~good) * 3} aliased bins of {fz.size}")
     tau = np.fft.rfftfreq(fz.size, d=step_hz) * 1e6  # microseconds
 
     def delay_power(x):
@@ -142,7 +162,10 @@ def main():
         r"delay $\tau$ [$\mu$s]  (1 / frequency-coherence of the ripple "
         r"$\approx$ 90 $\mu$s at 30 MHz, 20 $\mu$s at 50 MHz)"
     )
-    ax.set_ylabel("delay power [K$^2$], Blackman-Harris window")
+    ax.set_ylabel(
+        "delay power [K$^2$], Blackman-Harris window,\n"
+        "aliased edge bins down-weighted"
+    )
     ax.set_title(
         f"Delay spectrum of the zoom bins of three parent channels at "
         f"{center:g} MHz, sidereal phase {d['lst_hours'][it] / 24:.2f}",
